@@ -1,0 +1,12 @@
+[project]
+name = "processor-base"
+version = "0.0.1.dev"
+dependencies = [
+  "proto-plus",
+  "google-cloud-storage",
+  "google-cloud-bigquery-storage",
+  "google-cloud-bigquery",
+  "google-crc32c",
+  "pydantic",
+  "pydantic-settings",
+]

@@ -1,0 +1,5 @@
+# https://www.seattlechildrens.org/healthcare-professionals/community-providers/pathways/
+
+1. AGE Pathways: As per the AGE care pathways and inclusion/exclusion criteria,
+    a. Is Acute Gastroenteritis compatible with bloody diarrhea symptoms?
+    b. What kind of tests are not recommended?

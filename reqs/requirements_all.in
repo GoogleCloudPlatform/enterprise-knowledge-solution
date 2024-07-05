@@ -1,0 +1,12 @@
+# Import the libraries as editable
+-e components/processing/libs/processor-base
+-e components/processing/libs/processor-msg
+-e components/processing/libs/processor-xlsx
+-e components/webui
+
+# Additional development tools (relative to current file)
+-r ../components/dpu-workflow/requirements.in
+
+# Additional development and bootstrap tools
+-r requirements_dev.in
+-r requirements_bootstrap.in

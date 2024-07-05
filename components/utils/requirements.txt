@@ -1,0 +1,7 @@
+
+pandas==2.2.2
+openpyxl==3.1.0
+jsonlines==4.0.0
+markdown==3.6
+google-cloud-aiplatform==1.51.0
+pdfkit==1.0.0

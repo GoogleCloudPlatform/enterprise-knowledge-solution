@@ -1,0 +1,5 @@
+types-protobuf
+pyright
+pylint
+invoke
+pre-commit

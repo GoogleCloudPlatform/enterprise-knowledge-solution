@@ -1,0 +1,4 @@
+# Additional dependencies for testing  
+apache-airflow-providers-google
+apache-airflow
+
