@@ -40,10 +40,6 @@ section_open  "SDK login"
     gcloud auth login --update-adc
 section_close
 
-# section_open "Setting Google Application Default Credentials"
-#     set_application_default_credentials "${SOURCE_ROOT}"
-# section_close
-
 section_open "Enable all the required APIs"
     enable_all_apis
 section_close
