@@ -38,7 +38,7 @@ if not 'preamble' in st.session_state:
 with st.container():
 
     def update_preamble():
-        logger.info(f'preamble update: {st.session_state.source_id}')
+        logger.info(f'preamble update: {st.session_state.preamble_new}')
         st.session_state.preamble = st.session_state.preamble_new
     
     preamble_new = st.text_area(
