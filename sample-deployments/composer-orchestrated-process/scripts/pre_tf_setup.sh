@@ -37,11 +37,7 @@ section_open  "Setting the Google Cloud project to: ${PROJECT_ID}"
 section_close
 
 section_open  "SDK login"
-    gcloud auth login
-section_close
-
-section_open "Setting Google Application Default Credentials"
-    set_application_default_credentials "${SOURCE_ROOT}"
+    gcloud auth login --update-adc
 section_close
 
 section_open "Enable all the required APIs"
