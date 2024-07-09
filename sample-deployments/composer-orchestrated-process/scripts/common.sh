@@ -132,7 +132,7 @@ set_policy_rule(){
       ]
     }
   }"
-  gcloud org-policies set-policy <(echo $_policy_str)
+  gcloud org-policies set-policy < {$_policy_str}
   unset _policy_name
   unset _rule_pattern
   unset _project_id
