@@ -90,8 +90,23 @@ st.markdown(
     """### Given a query, DPU will generate an answer with citations to the documents."""
 )
 
+if not 'preamble' in st.session_state:
+    st.session_state['preamble'] = PREAMBLE
+
 # Render the question
 with st.container():
+
+    def update_preamble():
+        logger.info(f'preamble update: {st.session_state.preamble_new}')
+        st.session_state.preamble = st.session_state.preamble_new
+    
+    preamble_new = st.text_area(
+        ":blue[Change the :orange[***search context***] below:]",
+        value=st.session_state["preamble"],
+        placeholder="Search Context",
+        key="preamble_new",
+        on_change=update_preamble,
+    )
 
     def question_change():
         result = generate_answer(st.session_state.question, preamble=st.session_state['preamble'])

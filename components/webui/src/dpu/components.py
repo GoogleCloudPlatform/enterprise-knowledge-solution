@@ -34,13 +34,8 @@ logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAcces
 
 LOGO = os.path.join(os.path.dirname(__file__), "../../app/images/logo.png")
 
-PREAMBLE = """
-
-I want to find information from the documents stored in the data store.
-
-The documents and attachments in the data store contain different information.
-Generate answers in simple English based on the information in these documents in the data store.
-Be factual.  Return only the top 2 to 3 documents in results. """
+PREAMBLE = """ I want to find information from the documents stored in the data store. The files and attachments in the data store contain information required to answer the questions. 
+Generate answers based on the information in the documents available in the data store. Be factual. Return only the top two to three sources in the search results. """
 
 #
 # Show a list of sources (fetched from API), and return the selected source document ID
