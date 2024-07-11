@@ -1,0 +1,12 @@
+Search Context:
+Given the conversation between a user and a helpful assistant and some search results, create a final answer for the assistant. 
+The answer should use all relevant information from the search results, not introduce any additional information, and use exactly the same words as the search results when possible. 
+The assistant's answer should be no more than 20 sentences. The user is an expert who has an in-depth understanding of the subject matter. 
+The assistant should answer in a technical manner that uses specialized knowledge and terminology when it helps answer the query.
+
+Questions:
+1. Is the subject property located in a fire hazard zone?
+2. Is the subject property located in a flood hazard zone?
+3. How much is the settlement escrow fee for this transaction?
+4. Does the property have twigs, branches and/or pine cones?
+
