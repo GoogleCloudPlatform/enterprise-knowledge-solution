@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import streamlit as st  # type: ignore
-from dpu.components import show_agent_document, choose_source_id, LOGO
+from dpu.components import show_agent_document, choose_source_id, LOGO, PREAMBLE
 from dpu.api import generate_answer
 
 logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
@@ -45,14 +45,6 @@ SAMPLE_QUERIES = """
     Create a table to list 2021 and 2022 Revenue of Ryde Group Ltd. and Intelligent Group Limited.
 ```
 """
-
-PREAMBLE = """
-
-I want to find information from the documents stored in the data store.
-
-The documents and attachments in the data store contain different information.
-Generate answers in simple English based on the information in these documents in the data store.  
-Be factual.  Return only the top 2 to 3 documents in results. """
 
 #
 # Page Layout
@@ -86,6 +78,8 @@ if not 'sources' in st.session_state:
     st.session_state['sources'] = []
 if not 'chosen_row' in st.session_state:
     st.session_state['chosen_row'] = None
+if not 'preamble' in st.session_state:
+    st.session_state['preamble'] = PREAMBLE
 
 #
 # Form
@@ -96,11 +90,26 @@ st.markdown(
     """### Given a query, DPU will generate an answer with citations to the documents."""
 )
 
+if not 'preamble' in st.session_state:
+    st.session_state['preamble'] = PREAMBLE
+
 # Render the question
 with st.container():
 
+    def update_preamble():
+        logger.info(f'preamble update: {st.session_state.preamble_new}')
+        st.session_state.preamble = st.session_state.preamble_new
+    
+    preamble_new = st.text_area(
+        ":blue[Change the :orange[***search context***] below:]",
+        value=st.session_state["preamble"],
+        placeholder="Search Context",
+        key="preamble_new",
+        on_change=update_preamble,
+    )
+
     def question_change():
-        result = generate_answer(st.session_state.question, preamble=PREAMBLE)
+        result = generate_answer(st.session_state.question, preamble=st.session_state['preamble'])
         st.session_state.answer = result["answer"]
         st.session_state.sources = result["sources"]
 
