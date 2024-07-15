@@ -61,6 +61,7 @@ resource "google_iap_brand" "project_brand" {
   project           = data.google_project.project.number
   support_email     = var.iap_admin_account
   application_title = var.application_title
+  depends_on        = [module.project_services]
 }
 
 # OAuth Client
@@ -230,7 +231,7 @@ resource "google_app_engine_flexible_app_version" "deployed_version" {
   version_id = "v1"
   # version_id = "v${formatdate("YYYYMMDDHHMMSS", timestamp())}"
   project = module.project_services.project_id
-  service = "default"
+  service = var.app_engine_service_name
   runtime = "custom"
 
   deployment {

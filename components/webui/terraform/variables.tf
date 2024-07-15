@@ -70,4 +70,7 @@ variable "gcs_object_store" {
   description = "GCS bucket for objects viewed through webui"
 }
 
-
+variable "app_engine_service_name" {
+  type        = string
+  description = "The App Engine service name for the webui"
+}
