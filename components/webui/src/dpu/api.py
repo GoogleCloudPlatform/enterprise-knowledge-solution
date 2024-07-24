@@ -13,11 +13,9 @@
 # limitations under the License.
 
 from __future__ import annotations
-import base64
-import re
 
 from google.protobuf.json_format import MessageToDict  # type: ignore
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Any
 from google.api_core.gapic_v1.client_info import ClientInfo # type: ignore
 from google.api_core.client_options import ClientOptions  # type: ignore
 from google.cloud import discoveryengine_v1 as discoveryengine
@@ -25,7 +23,6 @@ from google.cloud.discoveryengine_v1.types import Document # type: ignore
 from google.protobuf.struct_pb2 import Struct  # type: ignore # pylint: disable=no-name-in-module
 
 from google.cloud import storage  # type: ignore[attr-defined, import-untyped]
-from typing import Tuple
 import os
 import streamlit as st # type: ignore
 import json
@@ -275,69 +272,10 @@ def get_storage_client():
     )
 
 
-# @st.cache_resource(ttl=3600, show_spinner="Downloading object...")
-# def fetch_gcs_object(bucket: str, path: str) -> Tuple[bytes, str]:
-#     logger.info(f'Downloading object gs://{bucket}/{path}')
-#     obj = get_storage_client().bucket(bucket).get_blob(path)
-#     return (obj.download_as_bytes(), obj.content_type)
-
 @st.cache_resource(ttl=3600, show_spinner="Downloading object...")
-def get_obj_md_from_gcs(uri: str) -> bytes:
-    """Given gs:// uri, download file"""
-    client = storage.Client()
-    matches = re.search(r'gs://(.*?)/(.*)', uri)
-    bucket_name, object_name = matches.group(1), matches.group(2)
-    blob = client.bucket(bucket_name).get_blob(object_name)
-    # logging.info(f"blob: {blob}")
+def fetch_gcs_blob(bucket: str, path: str) -> storage.Blob:
+    logger.info(f'Downloading object gs://{bucket}/{path}')
+    blob = get_storage_client().bucket(bucket).get_blob(path)
+    if not blob:
+        raise Exception("Object gs://{bucket}/{path} not found")
     return blob
-
-mime_types = {
-    "MIME_TYPE_PDF": "application/pdf",
-    "MIME_TYPE_JSON": "application/json", 
-    "MIME_TYPE_HTM": "text/html", 
-    "MIME_TYPE_TXT": "text/plain", 
-    "MIME_TYPE_PPT": "pplication/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "MIME_TYPE_DOC": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-}
-
-def get_mime_type(file_name: str):
-  mime_type = None
-  if file_name:
-    if file_name.endswith(".pdf"):
-      mime_type = mime_types["MIME_TYPE_PDF"]
-    if file_name.endswith(".html"):
-      mime_type = mime_types["MIME_TYPE_HTM"]
-    if file_name.endswith(".txt"):
-      mime_type = mime_types["MIME_TYPE_TXT"]
-    if file_name.endswith(".json") or file_name.endswith(".jsonl"):
-      mime_type = mime_types["MIME_TYPE_JSON"]
-    if file_name.endswith(".pptx") or file_name.endswith(".ppt"):
-      mime_type = mime_types["MIME_TYPE_PPT"]
-    if file_name.endswith(".docx") or file_name.endswith(".doc"):
-      mime_type = mime_types["MIME_TYPE_DOC"]
-  
-  return mime_type
-
-def show_document(uri: str) -> str:
-    link = "https://storage.cloud.google.com/"+uri.lstrip("gs://")
-    mime_type = get_mime_type(uri)
-    doc_iframe = f'<iframe src="{link}" width="100%" height="800" type="{mime_type}" style="align: center"></iframe>'
-    return doc_iframe
-
-def display_file_from_gcs(uri: str):  
-    blob = get_obj_md_from_gcs(uri)
-    file_size = blob.size  # Get the total file size  
-    # logger.info(f"uri: {uri}, file_size: {file_size/(1024)} KB")
-    max_size = 1.5 * 1024 * 1024 # 1.5MB - Streamlit does not support rendering of files bigger than 1.5MB
-    
-    if file_size > max_size:
-      logger.warning(f"blob: {blob} - Streamlit cannot render files larger than 1.5MB. Defaulting to a direct link to GCS. This may require updates to IAM permissions.")
-      st.markdown("The App cannot render files larger than 1.5MB.")
-      #link = "https://storage.cloud.google.com/"+uri.lstrip("gs://")
-      # st.markdown(show_document(uri), unsafe_allow_html=True) 
-    else:
-      mime_type = get_mime_type(uri)
-      # logger.info(f"uri: {uri}, mime_type: {mime_type}")
-      file = blob.download_as_bytes()
-      base64_file = base64.b64encode(file).decode('utf-8')
-      st.markdown(f'<iframe src="data:{mime_type};base64,{base64_file}" width="100%" height="1000" type="{mime_type}"></iframe>', unsafe_allow_html=True)
