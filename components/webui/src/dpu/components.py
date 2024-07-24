@@ -14,13 +14,13 @@
 
 import re
 import base64
-import pandas as pd # type: ignore
+import pandas as pd  # type: ignore
 import os.path
 import pathlib
-from dpu.api import fetch_agent_doc, PROJECT_ID, display_file_from_gcs, get_obj_md_from_gcs
-import streamlit as st # type: ignore
+from dpu.api import fetch_agent_doc, fetch_gcs_blob, PROJECT_ID
+import streamlit as st  # type: ignore
 
-from st_aggrid import ( # type: ignore
+from st_aggrid import (  # type: ignore
     GridOptionsBuilder,
     AgGrid,
     ColumnsAutoSizeMode,
@@ -34,11 +34,19 @@ logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAcces
 
 LOGO = os.path.join(os.path.dirname(__file__), "../../app/images/logo.png")
 
-PREAMBLE = """ I want to find information from the documents stored in the data store. The files and attachments in the data store contain information required to answer the questions. 
-Generate answers based on the information in the documents available in the data store. Be factual. Return only the top two to three sources in the search results. """
+PREAMBLE = (
+    "I want to find information from the documents stored in the data store. "
+    "The files and attachments in the data store contain information required "
+    "to answer the questions.\n"
+    "\n"
+    "Generate answers based on the information in the documents available "
+    "in the data store. Be factual. "
+    "Return only the top two to three sources in the search results. ")
+
 
 #
-# Show a list of sources (fetched from API), and return the selected source document ID
+# Show a list of sources (fetched from API), and return the
+# selected source document ID
 #
 def choose_source_id(sources):
     st.write(":blue[Sources: ]")
@@ -76,7 +84,11 @@ def choose_source_id(sources):
     return None
 
 
-def show_gcs_object(uri: str, item_metadata: dict):
+def show_gcs_object(
+        uri: str,
+        item_metadata: dict,
+        use_direct_link: bool = True,
+        show_download_link: bool = True):
 
     logger.info(f'Rendering object {uri}.')
 
@@ -88,10 +100,11 @@ def show_gcs_object(uri: str, item_metadata: dict):
     bucket = gcs_match.group(1)
     path = gcs_match.group(2)
 
+    # Extract the title of the file
     title = pathlib.Path(path).name
 
     # Fetch the raw data and content_type
-    blob = get_obj_md_from_gcs(uri)
+    blob = fetch_gcs_blob(bucket, path)
     data = blob.download_as_bytes()
     content_type = blob.content_type
 
@@ -107,12 +120,27 @@ def show_gcs_object(uri: str, item_metadata: dict):
     if content_type in mime_types:
         tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
         with tab_iframe:
+
+            if use_direct_link:
+                link = ('https://console.cloud.google.com/storage/browser/_details/'
+                        f'{bucket}/{path};tab=live_object?'
+                        f'project={PROJECT_ID}')
+            else:
+                link = f'https://storage.cloud.google.com/{uri.lstrip("gs://")}'
+            st.link_button("Open", link)
+
+            if show_download_link:
+                st.download_button(
+                    'Download',
+                    data,
+                    file_name=path,
+                    mime=content_type,
+                    help='Download document')
+    
             if content_type == 'application/octet-stream':
                 st.markdown('Not available for application/octet-stream')
             else:
-                link = "https://storage.cloud.google.com/"+uri.lstrip("gs://")
-                st.link_button("Open", link)
-                display_file_from_gcs(uri)
+                render_embedded(data, content_type)
         with tab_markdown:
             # Render the markdown (at least the first bit of it)
             if content_type == 'text/plain':
@@ -139,7 +167,7 @@ def choose_related_document(related_docs: list, initial_value: int):
         df['name'] = df['path'].apply(lambda p: pathlib.Path(p).name)
         common_prefix = os.path.commonprefix(
             df['path'].apply(lambda p: pathlib.Path(p).parent).to_list())
-        df['full_name' ] = df['path'].apply(lambda p: p[len(common_prefix):])
+        df['full_name'] = df['path'].apply(lambda p: p[len(common_prefix):])
 
         st.write(':blue[Related Documents: ]')
 
@@ -218,3 +246,19 @@ def show_agent_document(root_doc_id: str):
     show_gcs_object(uri, item_metadata)
 
     logger.info('Done rendering gcs object. Nothing more to do!')
+
+
+def render_embedded(data: bytes, mime_type: str):
+    # 1.5MB - Streamlit does not support rendering of files bigger than 1.5MB
+    max_size = 1.5 * 1024 * 1024
+
+    if len(data) > max_size:
+        logger.warning("Streamlit cannot render files larger than 1.5MB. "
+                       "Defaulting to a direct link to GCS. "
+                       "This may require updates to IAM permissions.")
+        st.markdown("The App cannot render files larger than 1.5MB.")
+    else:
+        base64_file = base64.b64encode(data).decode('utf-8')
+        st.markdown(f'<iframe src="data:{mime_type};base64,{base64_file}" '
+                    'width="100%" height="1000" type="{mime_type}"></iframe>',
+                    unsafe_allow_html=True)
