@@ -86,7 +86,7 @@ terraform apply
 
 ## Usage Guide
 This guide provides step-by-step instructions on how to use the `Document Process and Understanding with Composer` deployed on Google Cloud.
-After successful [deployment](./sample-deployments/DEPLOYMENT.md), you can test the entire DPU workflow.
+After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire DPU workflow.
 
 ### Upload Documents
 1. Get the Input Bucket Name:
