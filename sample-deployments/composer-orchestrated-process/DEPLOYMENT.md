@@ -37,7 +37,7 @@ To deploy this example you need:
     ```sh
     terraform init
     ```
-1. Initialize the following Terraform variables:
+1. Initialize the following Terraform variables in your terraform.tfvars file (Create a new file if it does not exist):
 
     ```hcl
     project_id                  = # Your Google Cloud project ID.
