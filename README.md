@@ -33,7 +33,7 @@ To deploy this example you need:
     * `compute.requireShieldedVm`
     * `iam.allowedPolicyMemberDomains`
 
-    These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](../../components/webui/README.md#deploy-locally) section.
+    These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](./components/webui/README.md#deploy-locally) section.
 
 ### Deploying the Sample
 1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
@@ -86,7 +86,7 @@ terraform apply
 
 ## Usage Guide
 This guide provides step-by-step instructions on how to use the `Document Process and Understanding with Composer` deployed on Google Cloud.
-After successful [deployment](DEPLOYMENT.md), you can test the entire DPU workflow.
+After successful [deployment](./sample-deployments/DEPLOYMENT.md), you can test the entire DPU workflow.
 
 ### Upload Documents
 1. Get the Input Bucket Name:
@@ -149,4 +149,4 @@ Once the workflow completes successfully, all documents will be imported into th
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
 
-For more information on the Web-UI component, please refer to its [README](../../components/webui/README.md).
+For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
