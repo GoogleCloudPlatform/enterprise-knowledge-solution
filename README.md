@@ -153,5 +153,18 @@ Once the workflow completes successfully, all documents will be imported into th
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
 
+### Delete a document from DPU
+1. Identify the document you want to delete:
+    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U. 
+    * Make sure the file in the URI exists in the Google Cloud Storage bucket
+    * Please note that this script will not delete the GCS Folder that contains the file
+    * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
+    * Please note that this script will not delete the BQ Table that contains the document meta-data
+
+1. Execute the bash script to delete a document:  
+
+    ```sh
+    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> [-p <PROJECT_ID>]
+    ```    
 
 For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
