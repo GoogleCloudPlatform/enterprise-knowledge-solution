@@ -87,7 +87,7 @@ def choose_source_id(sources):
 def show_gcs_object(
         uri: str,
         item_metadata: dict,
-        use_direct_link: bool = True,
+        use_direct_link: bool = False,
         show_download_link: bool = True):
 
     logger.info(f'Rendering object {uri}.')
@@ -118,9 +118,8 @@ def show_gcs_object(
         'text/plain'
     ]
     if content_type in mime_types:
-        tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
-        with tab_iframe:
-
+        col1, col2 = st.columns([15,185])
+        with col1:
             if use_direct_link:
                 link = ('https://console.cloud.google.com/storage/browser/_details/'
                         f'{bucket}/{path};tab=live_object?'
@@ -128,7 +127,7 @@ def show_gcs_object(
             else:
                 link = f'https://storage.cloud.google.com/{uri.lstrip("gs://")}'
             st.link_button("Open", link)
-
+        with col2:
             if show_download_link:
                 st.download_button(
                     'Download',
@@ -136,7 +135,8 @@ def show_gcs_object(
                     file_name=path,
                     mime=content_type,
                     help='Download document')
-    
+        tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
+        with tab_iframe:
             if content_type == 'application/octet-stream':
                 st.markdown('Not available for application/octet-stream')
             else:
@@ -144,7 +144,8 @@ def show_gcs_object(
         with tab_markdown:
             # Render the markdown (at least the first bit of it)
             if content_type == 'text/plain':
-                st.markdown(str(data[:1024], 'utf-8'))
+                st.markdown(':red[The following frame displays the partial content of the file. To view the full content of the file, you can open or download the file by clicking the buttons above.]')
+                st.markdown(str(data[:4096], 'utf-8'))
             else:
                 st.markdown('Only available for text/plain')
 
