@@ -246,9 +246,9 @@ with DAG(
                 "required": ["file-suffix", "processor"],
             },
         ),
-        "pdf_classifier_project_id": "530485722905",
-        "pdf_classifier_location": "us",
-        "pdf_classifier_processor_id": "bc865763b28748ab",
+        "pdf_classifier_project_id": "",
+        "pdf_classifier_location": "",
+        "pdf_classifier_processor_id": "",
     },
 ) as dag:
     GCS_Files = GCSListObjectsOperator(
