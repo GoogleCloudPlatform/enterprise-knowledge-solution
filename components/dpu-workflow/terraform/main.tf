@@ -132,7 +132,7 @@ resource "google_composer_environment" "composer_env" {
 
 locals {
   workflow_orchestrator_dag_file = "docs_processing_orchestrator.py"
-  pdf_classifier_file = "pdf_classifier.py"
+  pdf_classifier_file            = "pdf_classifier.py"
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
