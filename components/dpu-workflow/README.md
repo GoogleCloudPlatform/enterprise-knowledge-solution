@@ -28,7 +28,7 @@ Following resource are provsioned and created when the module are applied throug
 | composer_env_variables | Key value pair of env variable to be set in the Cloud Composer environment, that required by the workflow orchestrator DAG. For details on which variables are set set the [sample deployment](../../sample-deployments/composer-orchestrated-process/main.tf) |
 | composer_additional_pypi_packages | (Optional) Additional PyPi package to install on the Cloud Composer environment, default: `google-cloud-discoveryengine = ">=0.11.11"` |
 | composer_environment_size | (Optional) Cloud Composer environment size, default: `ENVIRONMENT_SIZE_SMALL` |
-| composer_sa_roles | (Optional) Service account roles  enabled on the workflow run account, default: `roles/composer.worker, roles/iam.serviceAccountUser, roles/bigquery.dataEditor, roles/run.developer, roles/discoveryengine.editor`|
+| composer_sa_roles | (Optional) Service account roles  enabled on the workflow run account, default: `roles/composer.worker, roles/iam.serviceAccountUser, roles/bigquery.dataEditor, roles/run.developer, roles/discoveryengine.editor, roles/documentai.apiUser`|
 
 ## Output
 | Name | Description |

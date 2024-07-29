@@ -14,11 +14,10 @@
 
 # pylint: disable=import-error
 
-
 from airflow import DAG
 from airflow.models.param import Param
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
-from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator, GCSDeleteObjectsOperator
 from airflow.providers.google.cloud.operators.bigquery import (
     BigQueryCreateEmptyTableOperator,
 )
@@ -26,10 +25,12 @@ from airflow.providers.google.cloud.operators.cloud_run import (
     CloudRunExecuteJobOperator,
 )
 from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator
 
 from google.api_core.client_options import ClientOptions
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import discoveryengine
+from google.cloud import storage
 
 from datetime import (
     datetime,
@@ -39,6 +40,11 @@ from collections import defaultdict
 import os
 import random
 import string
+
+import sys
+sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
+
+import pdf_classifier
 
 default_args = {
     "owner": "airflow",
@@ -50,7 +56,6 @@ default_args = {
 }
 
 USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
-
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
@@ -174,6 +179,44 @@ def generete_output_table_name(**context):
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
+def generate_pdf_forms_folder(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    pdf_forms_folder = f"{process_folder}/pdf-forms"
+    context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
+
+def generate_pdf_forms_list(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    pdf_forms_folder = context["ti"].xcom_pull(key="pdf_forms_folder")
+    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+
+    project_id = context["params"]["pdf_classifier_project_id"]
+    location = context["params"]["pdf_classifier_location"]
+    processor_id = context["params"]["pdf_classifier_processor_id"]
+
+    pdf_forms_list=[]
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(process_bucket)
+
+    if project_id.strip() == "" or location.strip() == "" or processor_id.strip() == "":
+        return pdf_forms_list
+
+    blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
+    for blob in blobs:
+        if pdf_classifier.is_form(project_id=project_id, 
+                    location=location, 
+                    processor_id=processor_id,
+                    file_storage_bucket=process_bucket, 
+                    file_path=blob.name, 
+                    mime_type="application/pdf"):
+            pdf_form = {
+                "source_object": f"{blob.name}",
+                "destination_bucket": process_bucket,
+                "destination_object": f"{process_folder}/pdf-forms/"
+            }
+            pdf_forms_list.append(pdf_form)
+
+    return pdf_forms_list
+
 
 with DAG(
     "run_docs_processing",
@@ -181,6 +224,7 @@ with DAG(
     schedule_interval=None,
     params={
         "input_bucket": os.environ.get("DPU_INPUT_BUCKET"),
+        "process_bucket": os.environ.get("DPU_PROCESS_BUCKET"),
         "input_folder": "",
         "supported_files": Param(
             [
@@ -202,6 +246,9 @@ with DAG(
                 "required": ["file-suffix", "processor"],
             },
         ),
+        "pdf_classifier_project_id": "530485722905",
+        "pdf_classifier_location": "us",
+        "pdf_classifier_processor_id": "bc865763b28748ab",
     },
 ) as dag:
     GCS_Files = GCSListObjectsOperator(
@@ -261,6 +308,18 @@ with DAG(
         move_object=True,
     ).expand_kwargs(generate_files_move_parameters.output)
 
+    generate_pdf_forms_l = PythonOperator(
+        task_id="generate_pdf_forms_list",
+        python_callable=generate_pdf_forms_list,
+        provide_context=True,
+    )
+
+    move_forms = GCSToGCSOperator.partial(
+        task_id="move_forms",
+        source_bucket="{{ params.process_bucket }}",
+        move_object=True,
+    ).expand_kwargs(generate_pdf_forms_l.output)
+
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generete_output_table_name,
@@ -317,6 +376,8 @@ with DAG(
         create_process_folder
         >> generate_files_move_parameters
         >> move_to_processing
+        >> generate_pdf_forms_l
+        >> move_forms
         >> create_output_table_name
         >> create_output_table
         >> create_process_job_params
