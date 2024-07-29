@@ -62,7 +62,7 @@ To deploy this example you need:
     ```sh
     terraform init
     ```
-1. Initialize the following Terraform variables:
+1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
 
     ```hcl
     project_id                  = # Your Google Cloud project ID.
@@ -71,6 +71,7 @@ To deploy this example you need:
     iap_admin_account           = # Account used for manage Oath brand and IAP
     iap_access_domains          = # List of domains granted for IAP access to the web-ui (e.g., ["domain:google.com","domain:example.com"])
     deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
+    webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
     ```
 1. Review the proposed changes, and apply them:
 
