@@ -14,37 +14,27 @@
 
 # pylint: disable=import-error
 
-from airflow import DAG # type: ignore
-from airflow.models.param import Param # type: ignore
-from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator # type: ignore
-from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator, GCSDeleteObjectsOperator # type: ignore
-from airflow.providers.google.cloud.operators.bigquery import ( # type: ignore
-    BigQueryCreateEmptyTableOperator,
-)
-from airflow.providers.google.cloud.operators.cloud_run import ( # type: ignore
-    CloudRunExecuteJobOperator,
-)
-from airflow.operators.python import PythonOperator, BranchPythonOperator # type: ignore
-from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator # type: ignore
-
-from google.api_core.client_options import ClientOptions # type: ignore
-from google.api_core.gapic_v1.client_info import ClientInfo # type: ignore
-from google.cloud import discoveryengine
-from google.cloud import storage
-
-from datetime import (
-    datetime,
-    timedelta
-)
+from datetime import datetime, timedelta
 from collections import defaultdict
 import os
 import random
 import string
-
 import sys
-sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
 import pdf_classifier
+from airflow import DAG  # type: ignore
+from airflow.models.param import Param  # type: ignore
+from airflow.operators.python import (BranchPythonOperator,  # type: ignore
+                                      PythonOperator)
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
+from airflow.providers.google.cloud.operators.cloud_run import CloudRunExecuteJobOperator  # type: ignore
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator  # type: ignore
+from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator  # type: ignore
+from google.api_core.client_options import ClientOptions  # type: ignore
+from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
+from google.cloud import discoveryengine, storage
+
+sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
 default_args = {
     "owner": "airflow",
@@ -93,11 +83,12 @@ def generate_mv_params(**context):
     input_folder_with_prefix = f"{input_folder}/" if input_folder else ""
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     parameter_obj_list = []
-    for type in files_to_process.keys():
+    
+    for typ in files_to_process.keys():
         parameter_obj = {
-            "source_object": f"{input_folder_with_prefix}*.{type}",
+            "source_object": f"{input_folder_with_prefix}*.{typ}",
             "destination_bucket": process_bucket,
-            "destination_object": f"{process_folder}/{type}/",
+            "destination_object": f"{process_folder}/{typ}/",
         }
         parameter_obj_list.append(parameter_obj)
     return parameter_obj_list
@@ -203,11 +194,11 @@ def generate_pdf_forms_list(**context):
     blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
     for blob in blobs:
         if process_bucket is not None:
-            if pdf_classifier.is_form(project_id=project_id, 
-                        location=location, 
+            if pdf_classifier.is_form(project_id=project_id,
+                        location=location,
                         processor_id=processor_id,
-                        file_storage_bucket=process_bucket, 
-                        file_path=blob.name, 
+                        file_storage_bucket=process_bucket,
+                        file_path=blob.name,
                         mime_type="application/pdf"):
                 pdf_form = {
                     "source_object": f"{blob.name}",

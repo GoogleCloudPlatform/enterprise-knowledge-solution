@@ -15,7 +15,7 @@
 
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions
+from google.api_core.client_options import ClientOptions # type: ignore
 from google.cloud import documentai  # type: ignore
 from google.cloud import storage
 

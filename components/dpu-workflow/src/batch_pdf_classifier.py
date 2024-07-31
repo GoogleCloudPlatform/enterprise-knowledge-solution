@@ -11,9 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-
+"""Module for classifying PDF documents in batch"""
 import re
 from typing import Optional
 
@@ -36,8 +35,9 @@ def batch_process_documents(
     field_mask: Optional[str] = None, # e.g. "entities"
     timeout: int = 400,
 ) -> dict:
+    """Function for processing PDF documents in batch"""
     # You must set the `api_endpoint` if you use a location other than "us".
-    opts = ClientOptions(api_endpoint=f"us-documentai.googleapis.com")
+    opts = ClientOptions(api_endpoint= "us-documentai.googleapis.com")
 
     client = documentai.DocumentProcessorServiceClient(client_options=opts)
 
@@ -64,7 +64,8 @@ def batch_process_documents(
 
     if processor_version_id:
         # The full resource name of the processor version, e.g.:
-        # projects/{project_id}/locations/{location}/processors/{processor_id}/processorVersions/{processor_version_id}
+        # projects/{project_id}/locations/{location}/processors/
+        # {processor_id}/processorVersions/{processor_version_id}
         name = client.processor_version_path(
             project_id, location, processor_id, processor_version_id
         )
@@ -146,7 +147,7 @@ def batch_process_documents(
 
             # assuming the original file was a PDF!!
             expression = r'([^/]+)$'
-            file_name = str(re.search(expression, blob.name))
+            file_name = re.search(expression, blob.name)
             output_file_name = file_name.group(1)
             orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
