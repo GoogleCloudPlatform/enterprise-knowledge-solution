@@ -15,9 +15,9 @@
 
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions # type: ignore
-from google.cloud import documentai  # type: ignore
-from google.cloud import storage
+from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
 def is_form(
     project_id: str,

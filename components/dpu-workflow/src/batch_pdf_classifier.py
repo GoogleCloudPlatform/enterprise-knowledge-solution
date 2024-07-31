@@ -16,11 +16,11 @@
 import re
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions # type: ignore
-from google.api_core.exceptions import InternalServerError # type: ignore
-from google.api_core.exceptions import RetryError # type: ignore
-from google.cloud import documentai  # type: ignore
-from google.cloud import storage
+from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.exceptions import InternalServerError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.exceptions import RetryError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
 
 def batch_process_documents(
