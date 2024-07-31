@@ -145,7 +145,8 @@ def batch_process_documents(
             # https://cloud.google.com/python/docs/reference/documentai/latest/google.cloud.documentai_v1.types.Document
 
             # assuming the original file was a PDF!!
-            file_name = re.search(r'([^/]+)$', blob.name)
+            expression = r'([^/]+)$'
+            file_name = str(re.search(expression, blob.name))
             output_file_name = file_name.group(1)
             orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
