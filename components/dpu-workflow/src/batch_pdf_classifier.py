@@ -146,14 +146,16 @@ def batch_process_documents(
 
             # assuming the original file was a PDF!!
             if blob is not None:
-                output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
-                orig_file_name = output_file_name.replace(".json", ".pdf", 1)
+                if blob.name is not None:
+                    output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
+                    orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
-            for entity in document.entities:
-                if entity.type == 'Form' and float(entity.confidence) > 0.7:
-                    classification_dict[orig_file_name] = True
-                elif entity.type == 'Form':
-                    classification_dict[orig_file_name] = False
+            if orig_file_name is not None:
+                for entity in document.entities:
+                    if entity.type == 'Form' and float(entity.confidence) > 0.7:
+                        classification_dict[orig_file_name] = True
+                    elif entity.type == 'Form':
+                        classification_dict[orig_file_name] = False
 
     # the dictionary is by file name (not full URI) as keys
     return classification_dict
