@@ -148,7 +148,7 @@ def batch_process_documents(
             # assuming the original file was a PDF!!
             expression = r'([^/]+)$'
             file_name = re.search(expression, blob.name)
-            output_file_name = file_name.group(1)
+            output_file_name = file_name.group(1) #pyright: ignore[reportOptionalMemberAccess]
             orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
             for entity in document.entities:
