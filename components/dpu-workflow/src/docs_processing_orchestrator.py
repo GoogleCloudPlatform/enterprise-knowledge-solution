@@ -14,21 +14,21 @@
 
 # pylint: disable=import-error
 
-from airflow import DAG
-from airflow.models.param import Param
-from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
-from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator, GCSDeleteObjectsOperator
-from airflow.providers.google.cloud.operators.bigquery import (
+from airflow import DAG # type: ignore
+from airflow.models.param import Param # type: ignore
+from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator # type: ignore
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator, GCSDeleteObjectsOperator # type: ignore
+from airflow.providers.google.cloud.operators.bigquery import ( # type: ignore
     BigQueryCreateEmptyTableOperator,
 )
-from airflow.providers.google.cloud.operators.cloud_run import (
+from airflow.providers.google.cloud.operators.cloud_run import ( # type: ignore
     CloudRunExecuteJobOperator,
 )
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator
+from airflow.operators.python import PythonOperator, BranchPythonOperator # type: ignore
+from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator # type: ignore
 
-from google.api_core.client_options import ClientOptions
-from google.api_core.gapic_v1.client_info import ClientInfo
+from google.api_core.client_options import ClientOptions # type: ignore
+from google.api_core.gapic_v1.client_info import ClientInfo # type: ignore
 from google.cloud import discoveryengine
 from google.cloud import storage
 

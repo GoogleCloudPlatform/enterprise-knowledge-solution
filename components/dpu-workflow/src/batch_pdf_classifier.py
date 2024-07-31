@@ -17,9 +17,9 @@
 import re
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions
-from google.api_core.exceptions import InternalServerError
-from google.api_core.exceptions import RetryError
+from google.api_core.client_options import ClientOptions # type: ignore
+from google.api_core.exceptions import InternalServerError # type: ignore
+from google.api_core.exceptions import RetryError # type: ignore
 from google.cloud import documentai  # type: ignore
 from google.cloud import storage
 
@@ -145,17 +145,15 @@ def batch_process_documents(
             # https://cloud.google.com/python/docs/reference/documentai/latest/google.cloud.documentai_v1.types.Document
 
             # assuming the original file was a PDF!!
-            if blob is not None:
-                if blob.name is not None:
-                    output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
-                    orig_file_name = output_file_name.replace(".json", ".pdf", 1)
+            file_name = re.search(r'([^/]+)$', blob.name)
+            output_file_name = file_name.group(1)
+            orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
-            if orig_file_name is not None:
-                for entity in document.entities:
-                    if entity.type == 'Form' and float(entity.confidence) > 0.7:
-                        classification_dict[orig_file_name] = True
-                    elif entity.type == 'Form':
-                        classification_dict[orig_file_name] = False
+            for entity in document.entities:
+                if entity.type == 'Form' and float(entity.confidence) > 0.7:
+                    classification_dict[orig_file_name] = True
+                elif entity.type == 'Form':
+                    classification_dict[orig_file_name] = False
 
     # the dictionary is by file name (not full URI) as keys
     return classification_dict
