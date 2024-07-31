@@ -145,8 +145,9 @@ def batch_process_documents(
             # https://cloud.google.com/python/docs/reference/documentai/latest/google.cloud.documentai_v1.types.Document
 
             # assuming the original file was a PDF!!
-            output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
-            orig_file_name = output_file_name.replace(".json", ".pdf", 1)
+            if blob is not None:
+                output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
+                orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
             for entity in document.entities:
                 if entity.type == 'Form' and float(entity.confidence) > 0.7:

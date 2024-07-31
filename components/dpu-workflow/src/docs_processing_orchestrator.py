@@ -186,7 +186,7 @@ def generate_pdf_forms_folder(**context):
 
 def generate_pdf_forms_list(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = context["ti"].xcom_pull(key="pdf_forms_folder")
+    # pdf_forms_folder = context["ti"].xcom_pull(key="pdf_forms_folder")
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
 
     project_id = context["params"]["pdf_classifier_project_id"]
@@ -202,18 +202,19 @@ def generate_pdf_forms_list(**context):
 
     blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
     for blob in blobs:
-        if pdf_classifier.is_form(project_id=project_id, 
-                    location=location, 
-                    processor_id=processor_id,
-                    file_storage_bucket=process_bucket, 
-                    file_path=blob.name, 
-                    mime_type="application/pdf"):
-            pdf_form = {
-                "source_object": f"{blob.name}",
-                "destination_bucket": process_bucket,
-                "destination_object": f"{process_folder}/pdf-forms/"
-            }
-            pdf_forms_list.append(pdf_form)
+        if process_bucket is not None:
+            if pdf_classifier.is_form(project_id=project_id, 
+                        location=location, 
+                        processor_id=processor_id,
+                        file_storage_bucket=process_bucket, 
+                        file_path=blob.name, 
+                        mime_type="application/pdf"):
+                pdf_form = {
+                    "source_object": f"{blob.name}",
+                    "destination_bucket": process_bucket,
+                    "destination_object": f"{process_folder}/pdf-forms/"
+                }
+                pdf_forms_list.append(pdf_form)
 
     return pdf_forms_list
 
