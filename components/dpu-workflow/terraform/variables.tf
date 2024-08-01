@@ -77,6 +77,7 @@ variable "composer_sa_roles" {
     "roles/iam.serviceAccountUser",
     "roles/bigquery.dataEditor",
     "roles/run.developer",
-    "roles/discoveryengine.editor"
+    "roles/discoveryengine.editor",
+    "roles/documentai.apiUser"
   ]
 }

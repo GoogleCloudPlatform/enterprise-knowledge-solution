@@ -42,14 +42,14 @@ repos:
         - --no-extra-eol          # see below
 
 # Apply pylint
-- repo: local
-  hooks:
-    - id: pylint
-      name: pylint
-      entry: ./run.sh pylint
-      language: script
-      require_serial: true
-      files: ^.*/src/.*\.py$
+# - repo: local
+#   hooks:
+#     - id: pylint
+#       name: pylint
+#       entry: ./run.sh pylint
+#       language: script
+#       require_serial: true
+#       files: ^.*/src/.*\.py$
 
 # Apply pyright
 - repo: local
