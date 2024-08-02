@@ -141,6 +141,4 @@ if st.session_state.sources:
 # Render a search result if one is selected
 if 'source_id' in st.session_state and st.session_state.source_id:
   logger.info(f'source_id: {st.session_state.source_id}')
-  st.divider()
-  st.header("Document Details")
   show_agent_document(st.session_state.source_id)

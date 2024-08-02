@@ -17,10 +17,7 @@
 from airflow import DAG
 from airflow.models.param import Param
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
-from airflow.providers.google.cloud.operators.gcs import (
-    GCSListObjectsOperator,
-    GCSDeleteObjectsOperator,
-)
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator
 from airflow.providers.google.cloud.operators.bigquery import (
     BigQueryCreateEmptyTableOperator,
 )
@@ -28,21 +25,21 @@ from airflow.providers.google.cloud.operators.cloud_run import (
     CloudRunExecuteJobOperator,
 )
 from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator
 
 from google.api_core.client_options import ClientOptions
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import discoveryengine
-from google.cloud import storage
 
 from datetime import (
     datetime,
-    timedelta,
+    timedelta
 )
 from collections import defaultdict
 import os
 import random
 import string
+
+sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
 import sys
 
@@ -60,7 +57,6 @@ default_args = {
 }
 
 USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
-
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
@@ -98,11 +94,12 @@ def generate_mv_params(**context):
     input_folder_with_prefix = f"{input_folder}/" if input_folder else ""
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     parameter_obj_list = []
-    for type in files_to_process.keys():
+    
+    for typ in files_to_process.keys():
         parameter_obj = {
-            "source_object":      f"{input_folder_with_prefix}*.{type}",
+            "source_object": f"{input_folder_with_prefix}*.{typ}",
             "destination_bucket": process_bucket,
-            "destination_object": f"{process_folder}/{type}/",
+            "destination_object": f"{process_folder}/{typ}/",
         }
         parameter_obj_list.append(parameter_obj)
     return parameter_obj_list
@@ -186,6 +183,45 @@ def generete_output_table_name(**context):
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
+def generate_pdf_forms_folder(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    pdf_forms_folder = f"{process_folder}/pdf-forms"
+    context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
+
+def generate_pdf_forms_list(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    # pdf_forms_folder = context["ti"].xcom_pull(key="pdf_forms_folder")
+    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+
+    project_id = context["params"]["pdf_classifier_project_id"]
+    location = context["params"]["pdf_classifier_location"]
+    processor_id = context["params"]["pdf_classifier_processor_id"]
+
+    pdf_forms_list=[]
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(process_bucket)
+
+    if project_id.strip() == "" or location.strip() == "" or processor_id.strip() == "":
+        return pdf_forms_list
+
+    blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
+    for blob in blobs:
+        if process_bucket is not None:
+            if pdf_classifier.is_form(project_id=project_id,
+                        location=location,
+                        processor_id=processor_id,
+                        file_storage_bucket=process_bucket,
+                        file_path=blob.name,
+                        mime_type="application/pdf"):
+                pdf_form = {
+                    "source_object": f"{blob.name}",
+                    "destination_bucket": process_bucket,
+                    "destination_object": f"{process_folder}/pdf-forms/"
+                }
+                pdf_forms_list.append(pdf_form)
+
+    return pdf_forms_list
+
 
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -236,37 +272,37 @@ def generate_pdf_forms_list(**context):
 
 
 with DAG(
-        "run_docs_processing",
-        default_args=default_args,
-        schedule_interval=None,
-        params={
-            "input_bucket":                os.environ.get("DPU_INPUT_BUCKET"),
-            "process_bucket":              os.environ.get("DPU_PROCESS_BUCKET"),
-            "input_folder":                "",
-            "supported_files":             Param(
-                [
-                    {"file-suffix": "pdf", "processor": "agent-builder"},
-                    {"file-suffix": "txt", "processor": "agent-builder"},
-                    {"file-suffix": "html", "processor": "agent-builder"},
-                    {"file-suffix": "msg", "processor": "dpu-doc-processor"},
-                    {"file-suffix": "zip", "processor": "dpu-doc-processor"},
-                    {"file-suffix": "xlsx", "processor": "dpu-doc-processor"},
-                    {"file-suffix": "xlsm", "processor": "dpu-doc-processor"},
-                ],
-                type="array",
-                items={
-                    "type":       "object",
-                    "properties": {
-                        "file-suffix": {"type": "string"},
-                        "processor":   {"type": "string"},
-                    },
-                    "required":   ["file-suffix", "processor"],
+    "run_docs_processing",
+    default_args=default_args,
+    schedule_interval=None,
+    params={
+        "input_bucket": os.environ.get("DPU_INPUT_BUCKET"),
+        "process_bucket": os.environ.get("DPU_PROCESS_BUCKET"),
+        "input_folder": "",
+        "supported_files": Param(
+            [
+                {"file-suffix": "pdf", "processor": "agent-builder"},
+                {"file-suffix": "txt", "processor": "agent-builder"},
+                {"file-suffix": "html", "processor": "agent-builder"},
+                {"file-suffix": "msg", "processor": "dpu-doc-processor"},
+                {"file-suffix": "zip", "processor": "dpu-doc-processor"},
+                {"file-suffix": "xlsx", "processor": "dpu-doc-processor"},
+                {"file-suffix": "xlsm", "processor": "dpu-doc-processor"},
+            ],
+            type="array",
+            items={
+                "type": "object",
+                "properties": {
+                    "file-suffix": {"type": "string"},
+                    "processor": {"type": "string"},
                 },
-            ),
-            "pdf_classifier_project_id":   "",
-            "pdf_classifier_location":     "",
-            "pdf_classifier_processor_id": "",
-        },
+                "required": ["file-suffix", "processor"],
+            },
+        ),
+        "pdf_classifier_project_id": "",
+        "pdf_classifier_location": "",
+        "pdf_classifier_processor_id": "",
+    },
 ) as dag:
     GCS_Files = GCSListObjectsOperator(
         task_id="list_all_input_files",
@@ -394,14 +430,14 @@ with DAG(
             >> [create_process_folder, skip_bucket_creation]
     )  # pyright: ignore[reportOperatorIssue]
     (
-            create_process_folder
-            >> generate_files_move_parameters
-            >> move_to_processing
-            >> generate_pdf_forms_l
-            >> move_forms
-            >> create_output_table_name
-            >> create_output_table
-            >> create_process_job_params
-            >> execute_doc_processors
-            >> import_docs_to_data_store
+        create_process_folder
+        >> generate_files_move_parameters
+        >> move_to_processing
+        >> generate_pdf_forms_l
+        >> move_forms
+        >> create_output_table_name
+        >> create_output_table
+        >> create_process_job_params
+        >> execute_doc_processors
+        >> import_docs_to_data_store
     )

@@ -1,10 +1,10 @@
-# Copyright 2020 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,11 +13,12 @@
 # limitations under the License.
 #
 
+"""Module for classifying PDF document one at a time."""
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions
-from google.cloud import documentai  # type: ignore
-from google.cloud import storage
+from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
 def is_form(
     project_id: str,
@@ -29,6 +30,7 @@ def is_form(
     field_mask: Optional[str] = "entities",
     processor_version_id: Optional[str] = None,
 ) -> bool:
+    """Function to check if PDF file contains forms."""
     # You must set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
 
@@ -36,7 +38,8 @@ def is_form(
 
     if processor_version_id:
         # The full resource name of the processor version, e.g.:
-        # `projects/{project_id}/locations/{location}/processors/{processor_id}/processorVersions/{processor_version_id}`
+        # `projects/{project_id}/locations/{location}/processors/{processor_id}/
+        # processorVersions/{processor_version_id}`
         name = client.processor_version_path(
             project_id, location, processor_id, processor_version_id
         )
@@ -55,7 +58,8 @@ def is_form(
     # Load binary data
     raw_document = documentai.RawDocument(content=file_contents, mime_type=mime_type)
 
-    # For more information: https://cloud.google.com/document-ai/docs/reference/rest/v1/ProcessOptions
+    # For more information: https://cloud.google.com/document-ai/
+    # docs/reference/rest/v1/ProcessOptions
     # Optional: Additional configurations for processing.
     process_options = documentai.ProcessOptions(
         # limit the number of pages processed to detect a form

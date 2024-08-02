@@ -15,22 +15,19 @@
 from __future__ import annotations
 
 from google.protobuf.json_format import MessageToDict  # type: ignore
-from typing import Dict, Optional, Tuple, Any
-from google.api_core.gapic_v1.client_info import ClientInfo
+from typing import Dict, Optional, Any
+from google.api_core.gapic_v1.client_info import ClientInfo # type: ignore
 from google.api_core.client_options import ClientOptions  # type: ignore
 from google.cloud import discoveryengine_v1 as discoveryengine
-from google.cloud.discoveryengine_v1.types import Document
-from google.protobuf.struct_pb2 import Struct  # pylint: disable=no-name-in-module
+from google.cloud.discoveryengine_v1.types import Document # type: ignore
+from google.protobuf.struct_pb2 import Struct  # type: ignore # pylint: disable=no-name-in-module
 
 from google.cloud import storage  # type: ignore[attr-defined, import-untyped]
-from typing import Tuple
 import os
-import streamlit as st
+import streamlit as st # type: ignore
 import json
 
-
 logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAccessIssue]
-
 
 #####
 # 
@@ -276,8 +273,9 @@ def get_storage_client():
 
 
 @st.cache_resource(ttl=3600, show_spinner="Downloading object...")
-def fetch_gcs_object(bucket: str, path: str) -> Tuple[bytes, str]:
+def fetch_gcs_blob(bucket: str, path: str) -> storage.Blob:
     logger.info(f'Downloading object gs://{bucket}/{path}')
-    obj = get_storage_client().bucket(bucket).blob(path)
-
-    return (obj.download_as_bytes(), obj.content_type)
+    blob = get_storage_client().bucket(bucket).get_blob(path)
+    if not blob:
+        raise Exception("Object gs://{bucket}/{path} not found")
+    return blob

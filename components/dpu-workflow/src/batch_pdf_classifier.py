@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+"""Module for classifying PDF documents in batch"""
 import re
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions
-from google.api_core.exceptions import InternalServerError
-from google.api_core.exceptions import RetryError
-from google.cloud import documentai  # type: ignore
-from google.cloud import storage
+from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.exceptions import InternalServerError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.exceptions import RetryError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
 
 def batch_process_documents(
@@ -35,8 +35,9 @@ def batch_process_documents(
     field_mask: Optional[str] = None, # e.g. "entities"
     timeout: int = 400,
 ) -> dict:
+    """Function for processing PDF documents in batch"""
     # You must set the `api_endpoint` if you use a location other than "us".
-    opts = ClientOptions(api_endpoint=f"us-documentai.googleapis.com")
+    opts = ClientOptions(api_endpoint= "us-documentai.googleapis.com")
 
     client = documentai.DocumentProcessorServiceClient(client_options=opts)
 
@@ -63,7 +64,8 @@ def batch_process_documents(
 
     if processor_version_id:
         # The full resource name of the processor version, e.g.:
-        # projects/{project_id}/locations/{location}/processors/{processor_id}/processorVersions/{processor_version_id}
+        # projects/{project_id}/locations/{location}/processors/
+        # {processor_id}/processorVersions/{processor_version_id}
         name = client.processor_version_path(
             project_id, location, processor_id, processor_version_id
         )
@@ -146,7 +148,9 @@ def batch_process_documents(
             # https://cloud.google.com/python/docs/reference/documentai/latest/google.cloud.documentai_v1.types.Document
 
             # assuming the original file was a PDF!!
-            output_file_name = re.search(r'([^/]+)$', blob.name).group(1)
+            expression = r'([^/]+)$'
+            file_name = re.search(expression, blob.name)
+            output_file_name = file_name.group(1) #pyright: ignore[reportOptionalMemberAccess]
             orig_file_name = output_file_name.replace(".json", ".pdf", 1)
 
             for entity in document.entities:
