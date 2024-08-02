@@ -91,7 +91,9 @@ def batch_process_documents(
     except (RetryError, InternalServerError) as e:
         print(e.message)
 
-    # NOTE: Can also use callbacks for asynchronous processing
+    # NOTE: Can also use callbacks for asynchronous processing - but not
+    # recommended for Airflow, as the main thread will report finish, so task
+    # will end, and callback will never be called.
     #
     # def my_callback(future):
     #   result = future.result()
