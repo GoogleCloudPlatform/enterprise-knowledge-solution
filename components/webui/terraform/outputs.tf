@@ -14,5 +14,5 @@
 
 output "web_ui_uri" {
   description = "App Engine URI"
-  value       = google_app_engine_application.app.default_hostname
+  value       = ((var.app_engine_service_name == null) || (var.app_engine_service_name == "default")) ? google_app_engine_application.app.default_hostname : "${var.app_engine_service_name}-dot-${google_app_engine_application.app.default_hostname}"
 }
