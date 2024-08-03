@@ -62,7 +62,7 @@ To deploy this example you need:
     ```sh
     terraform init
     ```
-1. Initialize the following Terraform variables:
+1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
 
     ```hcl
     project_id                  = # Your Google Cloud project ID.
@@ -71,6 +71,7 @@ To deploy this example you need:
     iap_admin_account           = # Account used for manage Oath brand and IAP
     iap_access_domains          = # List of domains granted for IAP access to the web-ui (e.g., ["domain:google.com","domain:example.com"])
     deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
+    webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
     ```
 1. Review the proposed changes, and apply them:
 
@@ -153,5 +154,18 @@ Once the workflow completes successfully, all documents will be imported into th
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
 
+### Delete a document from DPU
+1. Identify the document you want to delete:
+    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U. 
+    * Make sure the file in the URI exists in the Google Cloud Storage bucket
+    * Please note that this script will not delete the GCS Folder that contains the file
+    * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
+    * Please note that this script will not delete the BQ Table that contains the document meta-data
+
+1. Execute the bash script to delete a document:  
+
+    ```sh
+    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> [-p <PROJECT_ID>]
+    ```    
 
 For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
