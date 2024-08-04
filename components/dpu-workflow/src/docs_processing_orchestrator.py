@@ -14,46 +14,35 @@
 
 # pylint: disable=import-error
 
-from airflow import DAG
-from airflow.models.param import Param
-from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
-from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator
-from airflow.providers.google.cloud.operators.bigquery import (
-    BigQueryCreateEmptyTableOperator,
-)
-from airflow.providers.google.cloud.operators.cloud_run import (
-    CloudRunExecuteJobOperator,
-)
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-
-from google.api_core.client_options import ClientOptions
-from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud import discoveryengine
-
-from datetime import (
-    datetime,
-    timedelta
-)
+from datetime import datetime, timedelta
 from collections import defaultdict
 import os
 import random
 import string
+import sys
+
+import pdf_classifier
+from airflow import DAG  # type: ignore
+from airflow.models.param import Param  # type: ignore
+from airflow.operators.python import (BranchPythonOperator,  # type: ignore
+                                      PythonOperator)
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
+from airflow.providers.google.cloud.operators.cloud_run import CloudRunExecuteJobOperator  # type: ignore
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator  # type: ignore
+from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator  # type: ignore
+from google.api_core.client_options import ClientOptions  # type: ignore
+from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
+from google.cloud import discoveryengine, storage
 
 sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-import pdf_classifier
-
 default_args = {
-    "owner":            "airflow",
-    "depends_on_past":  False,
-    "start_date":       datetime(2024, 5, 12),  # Adjust as needed
+    "owner": "airflow",
+    "depends_on_past": False,
+    "start_date": datetime(2024, 5, 12),  # Adjust as needed
     "email_on_failure": False,
-    "email_on_retry":   False,
-    "retries":          0,
+    "email_on_retry": False,
+    "retries": 0,
 }
 
 USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
@@ -118,14 +107,12 @@ def data_store_import_docs(**context):
     )
 
     client = discoveryengine.DocumentServiceClient(
-        client_options=client_options,
-        client_info=ClientInfo(user_agent=USER_AGENT)
+        client_options=client_options, client_info=ClientInfo(user_agent=USER_AGENT)
     )
     parent = client.branch_path(
         project=bq_table["project_id"],
-        location=data_store_region,  # pyright: ignore[reportArgumentType]
-        data_store=os.environ.get("DPU_DATA_STORE_ID"),
-        # pyright: ignore[reportArgumentType]
+        location=data_store_region,   # pyright: ignore[reportArgumentType]
+        data_store=os.environ.get("DPU_DATA_STORE_ID"),   # pyright: ignore[reportArgumentType]
         branch="default_branch",
     )
     request = discoveryengine.ImportDocumentsRequest(
@@ -160,8 +147,8 @@ def generate_process_job_params(**context):
             "overrides": {
                 "container_overrides": [
                     {
-                        "name":       f"{doc_processor_job_name}",
-                        "args":       [
+                        "name": f"{doc_processor_job_name}",
+                        "args": [
                             f"gs://{mv_obj['destination_bucket']}/{mv_obj['destination_object']}",
                             f"gs://{gcs_reject_bucket}/{mv_obj['destination_object']}",
                             "--write_json=False",
@@ -170,8 +157,8 @@ def generate_process_job_params(**context):
                         "clear_args": False,
                     }
                 ],
-                "task_count":          1,
-                "timeout":             "300s",
+                "task_count": 1,
+                "timeout": "300s",
             }
         }
         process_job_params.append(job_param)
@@ -222,55 +209,6 @@ def generate_pdf_forms_list(**context):
 
     return pdf_forms_list
 
-
-def generate_pdf_forms_folder(**context):
-    process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = f"{process_folder}/pdf-forms"
-    context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
-
-
-def generate_pdf_forms_list(**context):
-    process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = context["ti"].xcom_pull(key="pdf_forms_folder")
-    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
-
-    project_id = context["params"]["pdf_classifier_project_id"]
-    location = context["params"]["pdf_classifier_location"]
-    processor_id = context["params"]["pdf_classifier_processor_id"]
-
-    pdf_forms_list = []
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(process_bucket)
-
-    if (project_id is None
-            or project_id.strip() == ""
-            or location is None
-            or location.strip() == ""
-            or processor_id is None
-            or processor_id.strip() == ""):
-        print(f"Required parameters for forms classifier were not provided. "
-              f"Returning empty list. "
-              f"{project_id=} {location=} {processor_id=}")
-        return pdf_forms_list
-
-    blobs = bucket.list_blobs(prefix=process_folder + "/pdf/")
-    for blob in blobs:
-        if pdf_classifier.is_form(project_id=project_id,
-                                  location=location,
-                                  processor_id=processor_id,
-                                  file_storage_bucket=process_bucket,
-                                  file_path=blob.name,
-                                  mime_type="application/pdf"):
-            pdf_form = {
-                "source_object":      f"{blob.name}",
-                "destination_bucket": process_bucket,
-                "destination_object": f"{process_folder}/pdf-forms/"
-            }
-            pdf_forms_list.append(pdf_form)
-
-    return pdf_forms_list
-
-
 with DAG(
     "run_docs_processing",
     default_args=default_args,
@@ -318,12 +256,12 @@ with DAG(
                 "{{ params.supported_files }}",
                 type="array",
                 items={
-                    "type":       "object",
+                    "type": "object",
                     "properties": {
                         "file-suffix": {"type": "string"},
-                        "processor":   {"type": "string"},
+                        "processor": {"type": "string"},
                     },
-                    "required":   ["file-suffix", "processor"],
+                    "required": ["file-suffix", "processor"],
                 },
             )
         },
@@ -381,19 +319,15 @@ with DAG(
 
     create_output_table = create_bigquery_table = BigQueryCreateEmptyTableOperator(
         task_id="create_output_table",
-        dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),
-        # pyright: ignore[reportArgumentType]
+        dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),  # pyright: ignore[reportArgumentType]
         table_id="{{ ti.xcom_pull(task_ids='create_output_table_name', key='output_table_name') }}",
         schema_fields=[
             {"name": "id", "mode": "REQUIRED", "type": "STRING", "fields": []},
+            {"name": "jsonData", "mode": "NULLABLE", "type": "STRING", "fields": []},
             {
-                "name":   "jsonData", "mode": "NULLABLE", "type": "STRING",
-                "fields": []
-            },
-            {
-                "name":   "content",
-                "type":   "RECORD",
-                "mode":   "NULLABLE",
+                "name": "content",
+                "type": "RECORD",
+                "mode": "NULLABLE",
                 "fields": [
                     {"name": "mimeType", "type": "STRING", "mode": "NULLABLE"},
                     {"name": "uri", "type": "STRING", "mode": "NULLABLE"},
@@ -424,11 +358,11 @@ with DAG(
     )
 
     (
-            GCS_Files
-            >> process_supported_types
-            >> has_files
-            >> [create_process_folder, skip_bucket_creation]
-    )  # pyright: ignore[reportOperatorIssue]
+        GCS_Files
+        >> process_supported_types
+        >> has_files
+        >> [create_process_folder, skip_bucket_creation]
+    )   # pyright: ignore[reportOperatorIssue]
     (
         create_process_folder
         >> generate_files_move_parameters
@@ -441,3 +375,4 @@ with DAG(
         >> execute_doc_processors
         >> import_docs_to_data_store
     )
+    
