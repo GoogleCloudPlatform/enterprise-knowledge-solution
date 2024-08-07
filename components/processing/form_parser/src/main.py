@@ -31,22 +31,15 @@ TASK_ATTEMPT = os.getenv("CLOUD_RUN_TASK_ATTEMPT", 0)
 PROJECT_ID = os.getenv("PROJECT_ID")
 LOCATION = os.getenv("LOCATION") # Example: - "us"
 PROCESSOR_ID = os.getenv("PROCESSOR_ID") # Example: - ac27785bf4bee278
-# processor_version_id = "PROCESSOR_VERSION_ID" # Optional. Example: pretrained-ocr-v1.0-2020-09-23
 GCS_OUTPUT_PREFIX = os.getenv("GCS_OUTPUT_PREFIX") # Must end with a trailing slash `/`. Format: gs://bucket/directory/subdirectory/
-# processor_version_id = "YOUR_PROCESSOR_VERSION_ID" # Optional. Example: pretrained-ocr-v1.0-2020-09-23
-
 GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-processor/input-forms/" # Format: gs://bucket/directory/
-# field_mask = "text,entities,pages.pageNumber"  # Optional. The fields to return in the Document object.
 
 
 def batch_process_documents(
-    project_id: str,
-    location: str,
-    processor_id: str,
-    gcs_output_uri: str,
-    processor_version_id: Optional[str] = None,
-    gcs_input_uri: Optional[str] = None,
-    input_mime_type: Optional[str] = None,
+    project_id: str = None,
+    location: str = None,
+    processor_id: str = None,
+    gcs_output_uri: str = None,
     gcs_input_prefix: Optional[str] = None,
     field_mask: Optional[str] = None,
     timeout: int = 400,
