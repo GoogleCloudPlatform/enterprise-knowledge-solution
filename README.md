@@ -51,6 +51,7 @@ To deploy this example you need:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
+    export REGION="<your Google Cloud region>"
     ```
 1. Run the following script to setup your environment and your cloud project for running terraform:
 

@@ -26,7 +26,7 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   template {
     template {
       containers {
-        image = "us-central1-docker.pkg.dev/prj-14-376417/dpu-form-parser-repo/dpu-form-processor@sha256:9c07c155a1d5c384f308b4b97e81fe76d45aa2fb20199152351f300725d4ebfe"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/dpu-form-parser-repo/dpu-form-processor:latest"
         env {
           name = "PROJECT_ID"
           value = var.project_id
@@ -41,11 +41,11 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
         }
         env {
           name = "GCS_OUTPUT_PREFIX"
-          value = "gs://${var.gcs_output_prefix}/"
+          value = "gs://${var.gcs_output_prefix}/pdf-forms/output"
         }
         env {
           name = "GCS_INPUT_PREFIX"
-          value = "gs://${var.gcs_input_prefix}/pdf-forms/"
+          value = "gs://${var.gcs_input_prefix}/pdf-forms/input"
         }
       }
     }

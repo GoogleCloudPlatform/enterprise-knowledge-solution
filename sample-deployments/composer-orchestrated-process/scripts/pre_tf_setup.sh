@@ -50,3 +50,7 @@ section_open "Check and try to set required org-policies on project: ${PROJECT_I
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
 section_close
 
+section_open "Build and push container image to Artifact Registry for Form Processor"
+    ../../components/processing/form_parser/build/build_container_image.sh
+section_close
+
