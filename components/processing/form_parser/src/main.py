@@ -36,11 +36,11 @@ GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-proce
 
 
 def batch_process_documents(
-    project_id: str = None,
-    location: str = None,
-    processor_id: str = None,
-    gcs_output_uri: str = None,
-    gcs_input_prefix: Optional[str] = None,
+    project_id: str,
+    location: str,
+    processor_id: str,
+    gcs_output_uri: str,
+    gcs_input_prefix: str,
     field_mask: Optional[str] = None,
     timeout: int = 400,
 ) -> None:
@@ -144,12 +144,15 @@ def batch_process_documents(
 # Start script
 if __name__ == "__main__":
   logging.info(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
-  batch_process_documents(project_id=PROJECT_ID,
+  if not PROJECT_ID or not LOCATION or not PROCESSOR_ID or not GCS_OUTPUT_PREFIX or not GCS_INPUT_PREFIX:
+    logging.error("Environment variables missing")
+  else:
+    batch_process_documents(project_id=PROJECT_ID,
                           location=LOCATION,
                           processor_id=PROCESSOR_ID,
                           gcs_output_uri=GCS_OUTPUT_PREFIX,
                           gcs_input_prefix=GCS_INPUT_PREFIX)
-  name = os.environ.get("NAME", "World")
+    name = os.environ.get("NAME", "World")
   logging.info(f"Completed Task #{TASK_INDEX}.")
 
 
