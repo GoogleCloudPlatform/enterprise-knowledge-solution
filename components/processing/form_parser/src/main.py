@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+<<<<<<< HEAD
 from typing import Optional
 
 from google.api_core.client_options import ClientOptions
@@ -20,6 +21,17 @@ from google.api_core.exceptions import InternalServerError, GoogleAPICallError
 from google.api_core.exceptions import RetryError
 from google.cloud import storage
 from load_data_in_bigquery import *
+=======
+import re
+import logging
+from typing import Optional
+
+from google.api_core.client_options import ClientOptions
+from google.api_core.exceptions import InternalServerError
+from google.api_core.exceptions import RetryError
+from google.cloud import documentai  
+from google.cloud import storage
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
 
 
 # Retrieve Job-defined env vars
@@ -27,6 +39,7 @@ TASK_INDEX = os.getenv("CLOUD_RUN_TASK_INDEX", 0)
 TASK_ATTEMPT = os.getenv("CLOUD_RUN_TASK_ATTEMPT", 0)
 # Retrieve User-defined env vars
 PROJECT_ID = os.getenv("PROJECT_ID")
+<<<<<<< HEAD
 LOCATION = os.getenv("LOCATION")  # Example: - "us"
 PROCESSOR_ID = os.getenv("PROCESSOR_ID")  # Example: - ac27785bf4bee278
 GCS_OUTPUT_PREFIX = os.getenv(
@@ -39,6 +52,17 @@ BQ_TABLE_ID = os.getenv(
     "BQ_TABLE_ID"
 )  # Specify your table ID in the format 'your-project.your_dataset.your_table'
 
+=======
+LOCATION = os.getenv("LOCATION") # Example: - "us"
+PROCESSOR_ID = os.getenv("PROCESSOR_ID") # Example: - ac27785bf4bee278
+GCS_OUTPUT_PREFIX = os.getenv("GCS_OUTPUT_PREFIX") # Must end with a trailing slash `/`. Format: gs://bucket/directory/subdirectory/
+GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-processor/input-forms/" # Format: gs://bucket/directory/
+<<<<<<< HEAD
+BQ_TABLE_ID = os.getenv("BQ_TABLE_ID") # Specify your table ID in the format 'your-project.your_dataset.your_table'
+=======
+
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
+>>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))
 
 def batch_process_documents(
     project_id: str,
@@ -56,6 +80,7 @@ def batch_process_documents(
         location: location of the form Document AI form processor,
         processor_id: Processor Id of Document AI form processor,
         gcs_output_uri: GCS directory to store the out json files,
+<<<<<<< HEAD
         gcs_input_prefix: GCS directory to store input files to be processed
     """
 <<<<<<< HEAD
@@ -72,6 +97,15 @@ def batch_process_documents(
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
   client = documentai.DocumentProcessorServiceClient(client_options=opts)
   
+=======
+        gcs_input_prefix: GCS directory to store input files to be processed 
+    """
+  # Set the `api_endpoint` if you use a location other than "us".
+  opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
+
+  client = documentai.DocumentProcessorServiceClient(client_options=opts)
+
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
   # Specify a GCS URI Prefix to process an entire directory
   gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
   input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)
@@ -95,6 +129,7 @@ def batch_process_documents(
         document_output_config=output_config,
     )
 
+<<<<<<< HEAD
     try:
         # BatchProcess returns a Long Running Operation (LRO)
         operation = client.batch_process_documents(request)
@@ -108,6 +143,36 @@ def batch_process_documents(
     except (RetryError, InternalServerError, GoogleAPICallError) as e:
         logging.error(f"An error occurred during batch processing: {e}")
         return
+=======
+<<<<<<< HEAD
+  try:
+    # BatchProcess returns a Long Running Operation (LRO)
+    operation = client.batch_process_documents(request)
+
+    # Continually polls the operation until it is complete.
+    # This could take some time for larger files
+    # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
+    logging.info(f"Waiting for operation {operation.operation.name} to complete...")
+    operation.result(timeout=timeout)
+  # Catch exception when operation doesn't finish before timeout
+  except (RetryError, InternalServerError, GoogleAPICallError) as e:
+      logging.error(f"An error occurred during batch processing: {e}")
+      return
+=======
+  # BatchProcess returns a Long Running Operation (LRO)
+  operation = client.batch_process_documents(request)
+
+  # Continually polls the operation until it is complete.
+  # This could take some time for larger files
+  # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
+  try:
+    logging.info(f"Waiting for operation {operation.operation.name} to complete...")
+    operation.result(timeout=timeout)
+  # Catch exception when operation doesn't finish before timeout
+  except (RetryError, InternalServerError) as e:
+    logging.error(e.message)
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
+>>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))
 
     # Once the operation is complete,
     # get output document information from operation metadata
@@ -118,6 +183,7 @@ def batch_process_documents(
 
     storage_client = storage.Client()
 
+<<<<<<< HEAD
     logging.info("Output files:")
 
     rows_to_insert = []
@@ -132,6 +198,25 @@ def batch_process_documents(
                 process.output_gcs_destination,
             )
             continue
+=======
+  logging.info("Output files:")
+<<<<<<< HEAD
+
+  rows_to_insert = []
+=======
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
+  # One process per Input Document
+  for process in list(metadata.individual_process_statuses):
+    # output_gcs_destination format: gs://BUCKET/PREFIX/OPERATION_NUMBER/INPUT_FILE_NUMBER/
+    # The Cloud Storage API requires the bucket name and URI prefix separately
+    matches = re.match(r"gs://(.*?)/(.*)", process.output_gcs_destination)
+    if not matches:
+      logging.error(
+        "Could not parse output GCS destination:",
+        process.output_gcs_destination,
+      )
+      continue
+>>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))
 
         output_bucket, output_prefix = matches.groups()
 
@@ -147,12 +232,20 @@ def batch_process_documents(
                 )
                 continue
 
+<<<<<<< HEAD
             # Read the text recognition output from the processor and create a BQ table row
             row_to_insert = build_output_metadata(
                 blob, storage_client, gcs_input_prefix, gcs_output_uri
             )
             # Append the row to the list
             rows_to_insert.append(row_to_insert)
+=======
+<<<<<<< HEAD
+      # Read the text recognition output from the processor and create a BQ table row
+      row_to_insert = build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri)
+      # Append the row to the list
+      rows_to_insert.append(row_to_insert)
+>>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))
 
     # Load list of all the rows generated in the loop in BigQuery
     print(f"Total rows: {len(rows_to_insert)}")
@@ -163,9 +256,22 @@ def batch_process_documents(
     print(f"GCS_INPUT_PREFIX: {GCS_INPUT_PREFIX}")
     print(f"GCS_OUTPUT_PREFIX: {GCS_OUTPUT_PREFIX}")
 
+=======
+      # Download JSON File as bytes object and convert to Document Object
+      logging.info(f"Fetching {blob.name}")
+      document = documentai.Document.from_json(
+        blob.download_as_bytes(), ignore_unknown_fields=True
+      )
+
+      # Read the text recognition output from the processor @TODO update log level to debug
+      print("The document contains the following text:")
+      print(document.text)
+     
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
 
 # Start script
 if __name__ == "__main__":
+<<<<<<< HEAD
     logging.info(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
     if (
         not PROJECT_ID
@@ -185,3 +291,28 @@ if __name__ == "__main__":
         )
         name = os.environ.get("NAME", "World")
     logging.info(f"Completed Task #{TASK_INDEX}.")
+=======
+  logging.info(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
+  if not PROJECT_ID or not LOCATION or not PROCESSOR_ID or not GCS_OUTPUT_PREFIX or not GCS_INPUT_PREFIX:
+    logging.error("Environment variables missing")
+  else:
+    batch_process_documents(project_id=PROJECT_ID,
+<<<<<<< HEAD
+                            location=LOCATION,
+                            processor_id=PROCESSOR_ID,
+                            gcs_output_uri=GCS_OUTPUT_PREFIX,
+                            gcs_input_prefix=GCS_INPUT_PREFIX)
+    name = os.environ.get("NAME", "World")
+  logging.info(f"Completed Task #{TASK_INDEX}.")
+=======
+                          location=LOCATION,
+                          processor_id=PROCESSOR_ID,
+                          gcs_output_uri=GCS_OUTPUT_PREFIX,
+                          gcs_input_prefix=GCS_INPUT_PREFIX)
+    name = os.environ.get("NAME", "World")
+  logging.info(f"Completed Task #{TASK_INDEX}.")
+
+
+
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
+>>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))

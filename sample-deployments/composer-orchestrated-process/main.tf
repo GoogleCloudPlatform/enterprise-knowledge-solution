@@ -86,7 +86,11 @@ module "form_parser_processor" {
   source            = "../../components/processing/form_parser/deployment"
   project_id        = var.project_id
   region            = var.region
+<<<<<<< HEAD
   location          = var.docai_location
+=======
+  location          = var.vertex_ai_data_store_region
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
   gcs_input_prefix  = module.common_infra.gcs_process_bucket_name
   gcs_output_prefix = module.common_infra.gcs_process_bucket_name
 }

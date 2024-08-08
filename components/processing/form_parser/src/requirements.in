@@ -17,4 +17,7 @@ pandas
 fsspec
 gcsfs
 google-cloud-documentai
+<<<<<<< HEAD
 google-cloud-bigquery
+=======
+>>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
