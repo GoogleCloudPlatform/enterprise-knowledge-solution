@@ -21,12 +21,15 @@ from datetime import datetime, timedelta
 from airflow import DAG  # type: ignore
 from airflow.models.param import Param  # type: ignore
 <<<<<<< HEAD
+<<<<<<< HEAD
 from airflow.operators.python import (
     BranchPythonOperator,  # type: ignore
     PythonOperator,
 )
 =======
 >>>>>>> 443f60a (Rearrange dag flow (#27))
+=======
+>>>>>>> f692f0d (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
 from airflow.operators.dummy import DummyOperator  # type: ignore
 from airflow.operators.python import (
     BranchPythonOperator,  # type: ignore
@@ -41,6 +44,17 @@ from airflow.providers.google.cloud.operators.gcs import \
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import \
     GCSToGCSOperator  # type: ignore
 from airflow.utils.trigger_rule import TriggerRule  # type: ignore
+=======
+from airflow.operators.python import (BranchPythonOperator,  # type: ignore
+                                      PythonOperator)
+from airflow.operators.dummy import DummyOperator  # type: ignore
+from airflow.utils.trigger_rule import TriggerRule  # type: ignore
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
+from airflow.providers.google.cloud.operators.cloud_run import CloudRunExecuteJobOperator  # type: ignore
+from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator  # type: ignore
+from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator  # type: ignore
+from google.api_core.client_options import ClientOptions  # type: ignore
+>>>>>>> 2026ad0 (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
 from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
 from google.cloud import storage
 
@@ -360,16 +374,32 @@ with DAG(
     ).expand_kwargs(generate_pdf_forms_l.output)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     move_files_done = DummyOperator(
         task_id="move_files_done", trigger_rule=TriggerRule.ALL_SUCCESS
     )
 =======
 >>>>>>> 443f60a (Rearrange dag flow (#27))
+=======
+=======
+    move_files_done = DummyOperator(
+        task_id='move_files_done',
+        trigger_rule=TriggerRule.ALL_DONE
+    )
+>>>>>>> 2026ad0 (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
+>>>>>>> f692f0d (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
 
     forms_pdf_moved_or_skipped = DummyOperator(
         task_id="forms_pdf_moved_or_skipped", trigger_rule=TriggerRule.ALL_DONE
     )
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2026ad0 (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
+>>>>>>> f692f0d (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generate_output_table_name,
@@ -488,6 +518,24 @@ with DAG(
         # In the case we continue working, moving documents to processing
         # folder, and creating an output table where metadata will be saved
         create_process_folder
+<<<<<<< HEAD
+=======
+        >> generate_files_move_parameters
+        >> move_to_processing
+    )
+    (
+        move_to_processing
+        >> generate_pdf_forms_l
+        >> move_forms
+        >> forms_pdf_moved_or_skipped
+    )
+    (
+        move_to_processing
+        >> move_files_done
+    )
+    (
+        [move_files_done, forms_pdf_moved_or_skipped]
+>>>>>>> 2026ad0 (down stream tasks only depends on the supported files are moved but will wait for pdf form processor to finish (#13))
         >> create_output_table_name
         >> create_output_table
         >> generate_files_move_parameters
