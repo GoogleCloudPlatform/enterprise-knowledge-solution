@@ -27,9 +27,26 @@ DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
 DIVIDER+="\n"
 
 # DECLARE VARIABLES
+<<<<<<< HEAD
 mapfile -t apis_array < project_apis.txt
 mapfile -t roles_array < project_roles.txt
 
+=======
+<<<<<<< HEAD
+declare -a apis_array=("cloudresourcemanager.googleapis.com"
+                "serviceusage.googleapis.com"
+                "iam.googleapis.com"
+                "compute.googleapis.com"
+                "orgpolicy.googleapis.com"
+                "artifactregistry.googleapis.com"
+                "cloudbuild.googleapis.com"
+                )
+=======
+mapfile -t roles_array < project_apis.txt
+mapfile -t roles_array < project_roles.txt
+
+>>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
 # DISPLAY HELPERS
 
@@ -152,7 +169,12 @@ enable_api(){
 enable_all_apis () {
     for i in "${apis_array[@]}"
     do
+<<<<<<< HEAD
       enable_api "$i"
+=======
+      echo $i
+        enable_api "$i"
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
     done
 }
 
@@ -163,17 +185,28 @@ enable_role(){
     unset __role
 }
 
+<<<<<<< HEAD
 # enable all roles in the roles array for service account used to deploy terraform resources
 enable_deployer_roles () {
+=======
+# enable all roles in the array
+enable_all_roles () {
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
     local __principal=serviceAccount:$1
     ## now loop through the above array
     for i in "${roles_array[@]}"
     do
+<<<<<<< HEAD
         enable_role "$i" "serviceAccount:$__principal"
+=======
+        echo $i
+        enable_role "$i" "serviceAccount:dpu-deployer@efe-dpu-08052024.iam.gserviceaccount.com"
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
     done
     unset __principal
 }
 
+<<<<<<< HEAD
 # enable a specific set of roles for the default Compute SA implicitly used by Cloud Build.
 # Behavior has changed since 2024 so that legacy Cloud Build SA no longer has permissions by default: https://cloud.google.com/build/docs/cloud-build-service-account-updates
 enable_builder_roles () {
@@ -187,3 +220,5 @@ enable_builder_roles () {
     unset __principal
     unset __PROJECTNUM
 }
+=======
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)

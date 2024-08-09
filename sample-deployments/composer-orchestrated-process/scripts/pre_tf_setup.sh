@@ -33,11 +33,20 @@ section_open "Check and set PROJECT_ID"
     gcloud config set project "${PROJECT_ID}"
 section_close
 
+<<<<<<< HEAD
+=======
+#section_open  "SDK login for the user "
+#    gcloud auth login
+#    gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
+#section_close
+
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 section_open "Enable the required APIs "
     enable_all_apis
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
+<<<<<<< HEAD
     enable_deployer_roles  "${SERVICE_ACCOUNT_ID}"
 section_close
 
@@ -50,6 +59,19 @@ section_open "Check and try to set required org-policies on project: ${PROJECT_I
     check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
     check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
+=======
+    enable_all_roles  "${SERVICE_ACCOUNT_ID}"
+section_close
+
+#section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
+#    check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
+#    check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
+#    check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
+#section_close
+
+section_open  "Set Application Default Credentials to be used by Terraform"
+    gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 section_close
 
 section_open  "Set Application Default Credentials to be used by Terraform"

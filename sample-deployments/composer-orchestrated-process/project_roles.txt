@@ -1,17 +1,29 @@
+<<<<<<< HEAD
 roles/artifactregistry.admin
+=======
+roles/artifactregistry.createOnPushWriter
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 roles/bigquery.dataOwner
 roles/composer.admin
 roles/compute.networkAdmin
 roles/compute.securityAdmin
 roles/container.clusterAdmin
+<<<<<<< HEAD
 roles/discoveryengine.admin
 roles/documentai.admin
+=======
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
+<<<<<<< HEAD
 roles/resourcemanager.projectIamAdmin
 roles/run.developer
+=======
+roles/logging.logWriter
+roles/resourcemanager.projectIamAdmin
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin
 roles/storage.admin

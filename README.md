@@ -28,6 +28,20 @@ The solution comprises the following key components:
 This section provides a step-by-step instructions on how to deploy the `Enterprise Knowledge Solution` on Google Cloud using Terraform.
 
 ### Prerequisites
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+To deploy this solution, you need:
+- A [Google Cloud project](https://cloud.google.com/docs/overview#projects) with billing enabled.
+=======
+To deploy this example you need:
+>>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+- An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
+- An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
+    * `compute.vmExternalIpAccess`
+    * `compute.requireShieldedVm`
+    * `iam.allowedPolicyMemberDomains`
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
 1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
@@ -41,12 +55,27 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 - You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
 
 ### Deploying the Sample
+<<<<<<< HEAD
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
    Alternatively, to deploy this repository using a local terminal:
     1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
     1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
     1. [install the git CLI](https://github.com/git-guides/install-git)
+=======
+1. To deploy this repository using an online terminal with software preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+
+   To deploy this repository using a local terminal:
+    1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
+    1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
+    1. [install the git CLI](https://github.com/git-guides/install-git)
+    1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
+
+1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+
+1. Make sure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
+
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
 1. Clone this repository
 
@@ -60,6 +89,7 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     ```
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
+<<<<<<< HEAD
 1. Identify the service account you will use to deploy resources in this repo.
    Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
 
@@ -68,10 +98,13 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
      --description="The service account used to deploy Enterprise Knowledge Search resources"
    ```
 
+=======
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 1. Set the following environment variables:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
+<<<<<<< HEAD
 <<<<<<< HEAD
     export REGION="<Google Cloud Region for deploying the resources>"
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
@@ -82,6 +115,7 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 =======
     export REGION="<your Google Cloud region>"
 >>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
+<<<<<<< HEAD
 >>>>>>> 833b7f5 (DocAI Form Parser microservice (#12))
     ```
 
@@ -96,6 +130,19 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
         - `compute.requireShieldedVm`
         - `iam.allowedPolicyMemberDomains`
     - Build a custom container image used for form parsing
+=======
+=======
+    export REGION="<your Google Cloud region for the deployment>"
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
+>>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+    ```
+
+1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:
+    - Enable the required APIs defined in `project_apis.txt`.
+    - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
+    - Authenticate the [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Validate common org policies that might interfere with your deployment
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
     ```sh
     scripts/pre_tf_setup.sh
@@ -219,12 +266,29 @@ Once the workflow completes successfully, all documents will be imported into th
     * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
     * Please note that this script will not delete the BQ Table that contains the document meta-data
 
+<<<<<<< HEAD
 1. Execute the bash script to delete a single document:
 
     ```sh
     scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> -l <LOCATION> [-p <PROJECT_ID>]
     ```
 1. Execute the bash script to delete a batch of documents:
+=======
+<<<<<<< HEAD
+1. Execute the bash script to delete a single document:  
+
+    ```sh
+    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> -l <LOCATION> [-p <PROJECT_ID>]
+    ```    
+1. Execute the bash script to delete a batch of documents:  
+=======
+1. Execute the bash script to delete a document:
+
+    ```sh
+    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> [-p <PROJECT_ID>]
+    ```
+>>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
     ```sh
     scripts/delete_doc.sh -b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]

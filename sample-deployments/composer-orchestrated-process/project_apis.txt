@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 artifactregistry.googleapis.com
 cloudasset.googleapis.com
 cloudbuild.googleapis.com
@@ -7,3 +8,11 @@ documentai.googleapis.com
 iam.googleapis.com
 orgpolicy.googleapis.com
 serviceusage.googleapis.com
+=======
+cloudresourcemanager.googleapis.com
+serviceusage.googleapis.com
+iam.googleapis.com
+compute.googleapis.com
+orgpolicy.googleapis.com
+cloudbuild.googleapis.com
+>>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
