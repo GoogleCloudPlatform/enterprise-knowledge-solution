@@ -122,11 +122,16 @@ check_api_enabled(){
 check_and_set_policy_rule(){
   local _policy_name=$1 _rule_pattern=$2 _rule_set_pattern=$3 _project_id=$4
   echo "policy: ${_policy_name}"
+<<<<<<< HEAD
   if ! gcloud asset analyze-org-policies --constraint=constraints/$_policy_name \
     --scope=organizations/$(gcloud projects get-ancestors $4 | grep organization | cut -f1 -d' ') \
     --filter=consolidated_policy.attached_resource="//cloudresourcemanager.googleapis.com/projects/${_project_id}" \
     --format="get(consolidatedPolicy.rules)" \
     | grep -i "${_rule_pattern}"; then
+=======
+  ## TODO: this only checks if a policy is set at the project, and ignores inherited policies. Use policy analyzer instead to check for effective policy enforcement https://cloud.google.com/policy-intelligence/docs/analyze-organization-policies#analyze_assets
+  if ! gcloud org-policies describe $_policy_name --project="${PROJECT_ID}" | grep -i "${_rule_pattern}" ; then
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     if ! set_policy_rule "${_policy_name}" "${_rule_set_pattern}" "${_project_id}" ; then
       echo "Org policy: '${_policy_name}' with rule: '${_rule_pattern}' cannot be set but is required. Contact your org-admin to set the policy before continue with deployment"
       exit 1
@@ -170,11 +175,15 @@ enable_all_apis () {
     for i in "${apis_array[@]}"
     do
 <<<<<<< HEAD
+<<<<<<< HEAD
       enable_api "$i"
 =======
       echo $i
         enable_api "$i"
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+      enable_api "$i"
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     done
 }
 
@@ -186,27 +195,39 @@ enable_role(){
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # enable all roles in the roles array for service account used to deploy terraform resources
 enable_deployer_roles () {
 =======
 # enable all roles in the array
 enable_all_roles () {
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+# enable all roles in the roles array for service account used to deploy terraform resources
+enable_deployer_roles () {
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     local __principal=serviceAccount:$1
     ## now loop through the above array
     for i in "${roles_array[@]}"
     do
+<<<<<<< HEAD
 <<<<<<< HEAD
         enable_role "$i" "serviceAccount:$__principal"
 =======
         echo $i
         enable_role "$i" "serviceAccount:dpu-deployer@efe-dpu-08052024.iam.gserviceaccount.com"
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+        enable_role "$i" "serviceAccount:$__principal"
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     done
     unset __principal
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
 # enable a specific set of roles for the default Compute SA implicitly used by Cloud Build.
 # Behavior has changed since 2024 so that legacy Cloud Build SA no longer has permissions by default: https://cloud.google.com/build/docs/cloud-build-service-account-updates
 enable_builder_roles () {
@@ -220,5 +241,8 @@ enable_builder_roles () {
     unset __principal
     unset __PROJECTNUM
 }
+<<<<<<< HEAD
 =======
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)

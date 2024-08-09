@@ -29,7 +29,10 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 
 ### Prerequisites
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
 <<<<<<< HEAD
 To deploy this solution, you need:
 - A [Google Cloud project](https://cloud.google.com/docs/overview#projects) with billing enabled.
@@ -38,6 +41,18 @@ To deploy this example you need:
 >>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 - An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
 - An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
+=======
+
+1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
+
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
+    - Service Account Admin
+    - Project IAM Admin
+    - Service Usage Admin
+    - Organization Policy Viewer
+
+1. Validate whether the following Organization Policies are enforced on this project, which can conflict with deploying the web-UI interface.
+>>>>>>> 5760ebf (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     * `compute.vmExternalIpAccess`
     * `compute.requireShieldedVm`
     * `iam.allowedPolicyMemberDomains`
@@ -71,12 +86,15 @@ To deploy this example you need:
     1. [install the git CLI](https://github.com/git-guides/install-git)
     1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
 
+<<<<<<< HEAD
 1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
 
 1. Make sure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 
+=======
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
 1. Clone this repository
 
     ```sh

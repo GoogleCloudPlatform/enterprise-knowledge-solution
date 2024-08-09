@@ -18,10 +18,13 @@ roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
 <<<<<<< HEAD
+<<<<<<< HEAD
 roles/resourcemanager.projectIamAdmin
 roles/run.developer
 =======
 roles/logging.logWriter
+=======
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
 roles/resourcemanager.projectIamAdmin
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
 roles/servicedirectory.admin

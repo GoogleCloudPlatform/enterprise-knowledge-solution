@@ -15,6 +15,11 @@
 #!/bin/bash
 # Bash script
 
+<<<<<<< HEAD
+=======
+##TODO: has an underlying dependency on legacy Cloud Build SA, so most new environments will fall back to Compute default SA. I added roles to Compute Sdefault SA to avoid permissions errors, but it would be better to explicitly specify a builder SA and not rely on default Compute SA
+
+>>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
 if ! gcloud artifacts repositories describe dpu-form-parser-repo --location=$REGION; then
     echo "repo not found"
     gcloud artifacts repositories create dpu-form-parser-repo --repository-format=docker --location=$REGION --description="repo build with cmd" --async
