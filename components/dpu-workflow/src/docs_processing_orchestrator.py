@@ -26,8 +26,8 @@ from airflow import DAG  # type: ignore
 from airflow.models.param import Param  # type: ignore
 from airflow.operators.python import (BranchPythonOperator,  # type: ignore
                                       PythonOperator)
-from airflow.operators.dummy import DummyOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.operators.dummy import DummyOperator  # type: ignore
+from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
 from airflow.providers.google.cloud.operators.cloud_run import CloudRunExecuteJobOperator  # type: ignore
 from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator  # type: ignore
