@@ -8,7 +8,6 @@ roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
-roles/logging.logWriter
 roles/resourcemanager.projectIamAdmin
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin

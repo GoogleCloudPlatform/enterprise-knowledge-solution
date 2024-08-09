@@ -25,13 +25,19 @@ The solution comprises the following key components:
 This guide provides step-by-step instructions on how to deploy the `Document Process and Understanding with Composer` sample on Google Cloud using Terraform.
 
 ### Prerequisites
-To deploy this example you need:
-- An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
-- An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
+
+1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
+
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
+    - Service Account Admin
+    - Project IAM Admin
+    - Service Usage Admin
+    - Organization Policy Viewer
+
+1. Validate whether the following Organization Policies are enforced on this project, which can conflict with deploying the web-UI interface.
     * `compute.vmExternalIpAccess`
     * `compute.requireShieldedVm`
     * `iam.allowedPolicyMemberDomains`
-
 
     These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](./components/webui/README.md#deploy-locally) section.
 
@@ -44,11 +50,6 @@ To deploy this example you need:
     1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
     1. [install the git CLI](https://github.com/git-guides/install-git)
     1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
-
-1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
-
-1. Make sure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
-
 
 1. Clone this repository
 
