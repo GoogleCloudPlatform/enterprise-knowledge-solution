@@ -176,13 +176,13 @@ def generate_form_process_job_params(**context):
     # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
     bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
-    
+
     # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     process_folder = context["ti"].xcom_pull(key="process_folder")
     gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/input/"
     gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/output/"
-    
+
     context["ti"].xcom_push(key="output_table_id", value=bq_table_id)
     context["ti"].xcom_push(key="gcs_input_prefix", value=gcs_input_prefix)
     context["ti"].xcom_push(key="gcs_output_prefix", value=gcs_output_prefix)
@@ -420,7 +420,7 @@ with DAG(
                         {"name": "BQ_TABLE_ID", "value": "{{ ti.xcom_pull(key='output_table_id') }}"},
                         {"name": "GCS_INPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_input_prefix') }}"},
                         {"name": "GCS_OUTPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_output_prefix') }}"},
-                    ]        
+                    ]
                 }
             ],
                 "task_count": 1,
@@ -438,19 +438,8 @@ with DAG(
         create_process_folder
         >> generate_files_move_parameters
         >> move_to_processing
-    )
-    (
-        move_to_processing
         >> generate_pdf_forms_l
         >> move_forms
-        >> forms_pdf_moved_or_skipped
-    )
-    (
-        move_to_processing
-        >> move_files_done
-    )
-    (
-        [move_files_done, forms_pdf_moved_or_skipped]
         >> create_output_table_name
         >> create_output_table
     )
