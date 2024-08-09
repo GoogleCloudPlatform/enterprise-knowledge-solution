@@ -27,12 +27,9 @@ DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
 DIVIDER+="\n"
 
 # DECLARE VARIABLES
-declare -a apis_array=("cloudresourcemanager.googleapis.com"
-                "serviceusage.googleapis.com"
-                "iam.googleapis.com"
-                "compute.googleapis.com"
-                "orgpolicy.googleapis.com"
-                )
+mapfile -t roles_array < project_apis.txt
+mapfile -t roles_array < project_roles.txt
+
 
 # DISPLAY HELPERS
 
@@ -85,7 +82,7 @@ check_environment_variable() {
 }
 
 # shell script function to check if api is enabled
-check_apis_enabled(){
+check_api_enabled(){
     local __api_endpoint=$1
     COUNTER=0
     MAX_TRIES=100
@@ -140,10 +137,10 @@ set_policy_rule(){
 }
 
 # shell script function to enable api
-enable_apis(){
+enable_api(){
     local __api_endpoint=$1
     gcloud services enable $__api_endpoint
-    check_apis_enabled $__api_endpoint
+    check_api_enabled $__api_endpoint
     unset __api_endpoint
 }
 
@@ -152,7 +149,27 @@ enable_all_apis () {
     ## now loop through the above array
     for i in "${apis_array[@]}"
     do
-        enable_apis "$i"
+      echo $i
+        enable_api "$i"
     done
+}
+
+# shell script function to enable IAM roles
+enable_role(){
+    local __role=$1
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$__principal
+    unset __role
+}
+
+# enable all roles in the array
+enable_all_roles () {
+    local __principal=serviceAccount:$1
+    ## now loop through the above array
+    for i in "${roles_array[@]}"
+    do
+        echo $i
+        enable_role "$i" "serviceAccount:dpu-deployer@efe-dpu-08052024.iam.gserviceaccount.com"
+    done
+    unset __principal
 }
 

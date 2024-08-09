@@ -26,7 +26,6 @@ This guide provides step-by-step instructions on how to deploy the `Document Pro
 
 ### Prerequisites
 To deploy this example you need:
-- A [Google Cloud project](https://cloud.google.com/docs/overview#projects) with billing enabled.
 - An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
 - An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
     * `compute.vmExternalIpAccess`
@@ -38,8 +37,24 @@ To deploy this example you need:
 
 
 ### Deploying the Sample
-1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
+1. To deploy this repository using an online terminal with software preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+
+   To deploy this repository using a local terminal:
+    1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
+    1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
+    1. [install the git CLI](https://github.com/git-guides/install-git)
+    1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
+
+1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+
+1. Make sure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
+
+
 1. Clone this repository
+
+    ```sh
+    git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
+    ```
 1. Navigate to the Sample Directory:
 
     ```sh
@@ -47,13 +62,19 @@ To deploy this example you need:
     ```
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
-1. Set environment variable: `PROJECT_ID`
+1. Set the following environment variables:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
-    export REGION="<your Google Cloud region>"
+    export REGION="<your Google Cloud region for the deployment>"
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
     ```
-1. Run the following script to setup your environment and your cloud project for running terraform:
+
+1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:
+    - Enable the required APIs defined in `project_apis.txt`.
+    - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
+    - Authenticate the [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Validate common org policies that might interfere with your deployment
 
     ```sh
     scripts/pre_tf_setup.sh
@@ -157,16 +178,16 @@ Once the workflow completes successfully, all documents will be imported into th
 
 ### Delete a document from DPU
 1. Identify the document you want to delete:
-    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U. 
+    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U.
     * Make sure the file in the URI exists in the Google Cloud Storage bucket
     * Please note that this script will not delete the GCS Folder that contains the file
     * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
     * Please note that this script will not delete the BQ Table that contains the document meta-data
 
-1. Execute the bash script to delete a document:  
+1. Execute the bash script to delete a document:
 
     ```sh
     scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> [-p <PROJECT_ID>]
-    ```    
+    ```
 
 For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
