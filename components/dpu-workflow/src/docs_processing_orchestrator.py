@@ -26,6 +26,8 @@ from airflow import DAG  # type: ignore
 from airflow.models.param import Param  # type: ignore
 from airflow.operators.python import (BranchPythonOperator,  # type: ignore
                                       PythonOperator)
+from airflow.operators.dummy import DummyOperator  # type: ignore
+from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
 from airflow.providers.google.cloud.operators.cloud_run import CloudRunExecuteJobOperator  # type: ignore
 from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator  # type: ignore
@@ -312,6 +314,16 @@ with DAG(
         move_object=True,
     ).expand_kwargs(generate_pdf_forms_l.output)
 
+    move_files_done = DummyOperator(
+        task_id='move_files_done',
+        trigger_rule=TriggerRule.ALL_DONE
+    )
+
+    forms_pdf_moved_or_skipped = DummyOperator(
+        task_id='forms_pdf_moved_or_skipped',
+        trigger_rule=TriggerRule.ALL_DONE
+    )
+
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generete_output_table_name,
@@ -368,8 +380,19 @@ with DAG(
         create_process_folder
         >> generate_files_move_parameters
         >> move_to_processing
+    )
+    (
+        move_to_processing
         >> generate_pdf_forms_l
         >> move_forms
+        >> forms_pdf_moved_or_skipped
+    )
+    (
+        move_to_processing
+        >> move_files_done
+    )
+    (
+        [move_files_done, forms_pdf_moved_or_skipped]
         >> create_output_table_name
         >> create_output_table
         >> create_process_job_params
