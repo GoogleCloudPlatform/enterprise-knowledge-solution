@@ -1262,9 +1262,9 @@ smmap==5.0.1 \
     # via
     #   -c reqs/constraints.txt
     #   gitdb
-streamlit==1.36.0 \
-    --hash=sha256:3399a33ea5faa26c05dd433d142eefe68ade67e9189a9e1d47a1731ae30a1c42 \
-    --hash=sha256:a12af9f0eb61ab5832f438336257b1ec20eb29d8e0e0c6b40a79116ba939bc9c
+streamlit==1.37.0 \
+    --hash=sha256:463ef728ba21e74e05122e3704e8af644a7bdbb5822e281b8daf4a0a48761879 \
+    --hash=sha256:d17e2d32b075a270a97f134ab5d22bbb98b4e474fa261ff49dc4a2b380386c84
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
