@@ -13,15 +13,13 @@
 # limitations under the License.
 
 import os
-import re
-import logging
 from typing import Optional
 
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import InternalServerError
 from google.api_core.exceptions import RetryError
-from google.cloud import documentai  
 from google.cloud import storage
+from load_data_in_bigquery import *
 
 
 # Retrieve Job-defined env vars
@@ -33,7 +31,7 @@ LOCATION = os.getenv("LOCATION") # Example: - "us"
 PROCESSOR_ID = os.getenv("PROCESSOR_ID") # Example: - ac27785bf4bee278
 GCS_OUTPUT_PREFIX = os.getenv("GCS_OUTPUT_PREFIX") # Must end with a trailing slash `/`. Format: gs://bucket/directory/subdirectory/
 GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-processor/input-forms/" # Format: gs://bucket/directory/
-
+BQ_TABLE_ID = os.getenv("BQ_TABLE_ID") # Specify your table ID in the format 'your-project.your_dataset.your_table'
 
 def batch_process_documents(
     project_id: str,
@@ -52,7 +50,7 @@ def batch_process_documents(
         location: location of the form Document AI form processor,
         processor_id: Processor Id of Document AI form processor,
         gcs_output_uri: GCS directory to store the out json files,
-        gcs_input_prefix: GCS directory to store input files to be processed 
+        gcs_input_prefix: GCS directory to store input files to be processed
     """
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
@@ -104,6 +102,8 @@ def batch_process_documents(
   storage_client = storage.Client()
 
   logging.info("Output files:")
+
+  rows_to_insert = []
   # One process per Input Document
   for process in list(metadata.individual_process_statuses):
     # output_gcs_destination format: gs://BUCKET/PREFIX/OPERATION_NUMBER/INPUT_FILE_NUMBER/
@@ -136,10 +136,17 @@ def batch_process_documents(
         blob.download_as_bytes(), ignore_unknown_fields=True
       )
 
-      # Read the text recognition output from the processor @TODO update log level to debug
-      print("The document contains the following text:")
-      print(document.text)
-     
+      # Read the text recognition output from the processor and create a BQ table row
+      row_to_insert = build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri)
+      # Append the row to the list
+      rows_to_insert.append(row_to_insert)
+
+  # Load list of all the rows generated in the loop in BigQuery
+  print(f"Total rows: {len(rows_to_insert)}")
+  print(rows_to_insert)
+  logging.info(f"Total rows: {len(rows_to_insert)} rows to insert: {rows_to_insert}")
+  load_rows_into_bigquery(rows_to_insert, BQ_TABLE_ID)
+
 
 # Start script
 if __name__ == "__main__":
@@ -148,10 +155,10 @@ if __name__ == "__main__":
     logging.error("Environment variables missing")
   else:
     batch_process_documents(project_id=PROJECT_ID,
-                          location=LOCATION,
-                          processor_id=PROCESSOR_ID,
-                          gcs_output_uri=GCS_OUTPUT_PREFIX,
-                          gcs_input_prefix=GCS_INPUT_PREFIX)
+                            location=LOCATION,
+                            processor_id=PROCESSOR_ID,
+                            gcs_output_uri=GCS_OUTPUT_PREFIX,
+                            gcs_input_prefix=GCS_INPUT_PREFIX)
     name = os.environ.get("NAME", "World")
   logging.info(f"Completed Task #{TASK_INDEX}.")
 
