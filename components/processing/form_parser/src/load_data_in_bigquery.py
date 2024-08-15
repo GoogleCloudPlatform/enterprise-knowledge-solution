@@ -82,6 +82,8 @@ def build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri
         gcs_input_prefix: GCS bucket prefix for PDF with forms
         gcs_output_uri: GCS bucket prefix that is used to store processed objects
     """
+  
+  # Download JSON File as bytes object and convert to Document Object
   logging.info(f"Fetching {blob.name}")
   document = documentai.Document.from_json(
     blob.download_as_bytes(), ignore_unknown_fields=True
@@ -92,12 +94,11 @@ def build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri
   print(document.text)
 
   # Create a .txt file from .json file
-  bucket_name = "dpu-process-prj-14-376417"
+  bucket_name = get_bucket_name(gcs_output_uri)
   txt_filename = blob.name.replace(".json", ".txt")
   bucket = storage_client.bucket(bucket_name)
   new_blob = bucket.blob(txt_filename)
   new_blob.upload_from_string(document.text)
-  bucket_name = get_bucket_name(gcs_output_uri)
   txt_file_path = f"gs://{bucket_name}/{txt_filename}"
   print(f"Text file {txt_file_path} created successfully")
   logging.info(f"Text file {txt_file_path} created successfully")

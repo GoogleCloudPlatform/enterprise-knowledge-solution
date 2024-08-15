@@ -129,13 +129,7 @@ def batch_process_documents(
           f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
         )
         continue
-
-      # Download JSON File as bytes object and convert to Document Object
-      logging.info(f"Fetching {blob.name}")
-      document = documentai.Document.from_json(
-        blob.download_as_bytes(), ignore_unknown_fields=True
-      )
-
+      
       # Read the text recognition output from the processor and create a BQ table row
       row_to_insert = build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri)
       # Append the row to the list
