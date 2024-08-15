@@ -221,6 +221,8 @@ class GCSPath:
             )
             return
 
+        os.makedirs(Path(self.path).parent, exist_ok=True)
+
         with open(self.path, mode="wb") as w:
             w.write(b)
 

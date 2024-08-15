@@ -29,6 +29,16 @@ MAX_BODY_SIZE = 1024
 logger = logging.getLogger(__name__)
 
 
+ENABLE_MARKDOWN = False
+ENABLE_PDF = True
+
+
+def configure(markdown: bool, pdf: bool):
+    global ENABLE_MARKDOWN, ENABLE_PDF
+    ENABLE_MARKDOWN = markdown
+    ENABLE_PDF = pdf
+
+
 def msg_to_dict(msg: MessageBase) -> Dict:
     body = msg.body
     return dict(
@@ -71,9 +81,19 @@ def msg_processor(
         )
 
         # Extract message content
-        msg_path = pathlib.Path(output, f"{nmsg.defaultFolderName}.txt")  # pylint: disable=no-member
-        with open(msg_path, "wb") as f:
-            f.write(nmsg.getSaveBody())  # pylint: disable=no-member
+        if ENABLE_MARKDOWN:
+            msg_path = pathlib.Path(output, f"{nmsg.defaultFolderName}.txt")  # pylint: disable=no-member
+            with open(msg_path, "wb") as f:
+                f.write(nmsg.getSaveBody())  # pylint: disable=no-member
+
+        # Extract PDF message content
+        if ENABLE_PDF:
+            pdf_path = pathlib.Path(output, f"{nmsg.defaultFolderName}.pdf")  # pylint: disable=no-member
+            with open(pdf_path, "wb") as f:
+                try:
+                    f.write(nmsg.getSavePdfBody())  # pylint: disable=no-member
+                except Exception as e:
+                    logging.warning(f"Failed generating PDF {str(e)}")
 
         # Capture meta data
         return msg_to_dict(nmsg)

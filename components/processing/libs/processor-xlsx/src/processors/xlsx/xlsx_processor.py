@@ -17,6 +17,7 @@ import pyexcel
 import logging
 from typing import Dict
 from markdowngenerator import MarkdownGenerator
+from fpdf import FPDF
 
 from processors.base.gcsio import GCSPath
 
@@ -35,6 +36,16 @@ def cleanse_string(c):
     return c
 
 
+ENABLE_MARKDOWN = False
+ENABLE_PDF = True
+
+
+def configure(markdown: bool, pdf: bool):
+    global ENABLE_MARKDOWN, ENABLE_PDF
+    ENABLE_MARKDOWN = markdown
+    ENABLE_PDF = pdf
+
+
 def xlsx_processor(source: GCSPath, output_dir: GCSPath) -> Dict:
 
     # Load the book
@@ -51,28 +62,48 @@ def xlsx_processor(source: GCSPath, output_dir: GCSPath) -> Dict:
             # Assume the first row is the header for the data
             sheet.name_columns_by_row(0)
 
-            # Markdown output
-            with (
-                GCSPath(output_dir, name + ".txt").write_as_file() as f,
-                MarkdownGenerator(filename=f) as m
-            ):
-                m.addHeader(1, name)
+            if ENABLE_PDF:
 
-                # Prepare data
-                data = []
-                first_row = True
-                for row in sheet.to_array():
-                    if first_row:
-                        first_row = False
-                        continue
-                    data.append([
-                        cleanse_string(v) for v in row
-                    ])
+                # Output PDF with table
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Times", size=8)
+                pdf.write_html(f"<h1>{name}</h1>")
+                with pdf.table() as table:
+                    for row in sheet.to_array():
+                        new_row = table.row()
+                        for item in row:
+                            new_row.cell(str(item))
 
-                # Generate the table
-                m.addTable(
-                    header_names=sheet.colnames,
-                    alignment="left",
-                    row_elements=data)
+                # Save as PDF
+                output_pdf = GCSPath(output_dir, name + ".pdf")
+                logging.info(f"Writing out to {str(output_pdf)}")
+                output_pdf.write_bytes(pdf.output())
+
+            if ENABLE_MARKDOWN:
+
+                # Markdown output
+                with (
+                    GCSPath(output_dir, name + ".txt").write_as_file() as f,
+                    MarkdownGenerator(filename=f) as m
+                ):
+                    m.addHeader(1, name)
+
+                    # Prepare data
+                    data = []
+                    first_row = True
+                    for row in sheet.to_array():
+                        if first_row:
+                            first_row = False
+                            continue
+                        data.append([
+                            cleanse_string(v) for v in row
+                        ])
+
+                    # Generate the table
+                    m.addTable(
+                        header_names=sheet.colnames,
+                        alignment="left",
+                        row_elements=data)
 
     return dict()
