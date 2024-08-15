@@ -162,10 +162,14 @@ Once the workflow completes successfully, all documents will be imported into th
     * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
     * Please note that this script will not delete the BQ Table that contains the document meta-data
 
-1. Execute the bash script to delete a document:  
+1. Execute the bash script to delete a single document:  
 
     ```sh
-    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> [-p <PROJECT_ID>]
+    scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> -l <LOCATION> [-p <PROJECT_ID>]
     ```    
+1. Execute the bash script to delete a batch of documents:  
 
+    ```sh
+    scripts/delete_doc.sh -b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]
+    ``` 
 For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
