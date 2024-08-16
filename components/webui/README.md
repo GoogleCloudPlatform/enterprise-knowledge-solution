@@ -1,4 +1,4 @@
-# Reference Implementation of Web-UI to access DPU
+# Reference Implementation of Web UI to access EKS
 
 The Web-UI is a Web App to interface with Vertex AI Agent Builder using REST APIs
 

@@ -17,3 +17,4 @@ pandas
 fsspec
 gcsfs
 google-cloud-documentai
+google-cloud-bigquery

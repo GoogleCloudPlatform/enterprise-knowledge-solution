@@ -38,6 +38,6 @@ output "agent_app_uri" {
 }
 
 output "web_ui_uri" {
-  description = "DPU Web UI URI"
+  description = "EKS Web UI URI"
   value       = var.deploy_ui ? "https://${module.dpu_ui[0].web_ui_uri}/" : ""
 }
