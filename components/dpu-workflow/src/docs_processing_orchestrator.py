@@ -47,7 +47,7 @@ default_args = {
     "retries": 0,
 }
 
-USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
+USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
