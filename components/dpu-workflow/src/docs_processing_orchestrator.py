@@ -78,6 +78,10 @@ def generate_process_folder(**context):
     context["ti"].xcom_push(key="process_folder", value=process_folder)
 
 
+def generate_form_parser_params(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+
+
 def generate_mv_params(**context):
     files_to_process = context["ti"].xcom_pull(key="types_to_process")
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -174,7 +178,7 @@ def generete_output_table_name(**context):
 
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = f"{process_folder}/pdf-forms"
+    pdf_forms_folder = f"{process_folder}/pdf-forms/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
 
 def generate_pdf_forms_list(**context):
@@ -190,7 +194,12 @@ def generate_pdf_forms_list(**context):
     storage_client = storage.Client()
     bucket = storage_client.bucket(process_bucket)
 
-    if project_id.strip() == "" or location.strip() == "" or processor_id.strip() == "":
+    if (processor_id is None or
+            project_id.strip() == "" or
+            location is None or
+            location.strip() == "" or
+            processor_id is None or
+            processor_id.strip() == ""):
         return pdf_forms_list
 
     blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
@@ -203,9 +212,9 @@ def generate_pdf_forms_list(**context):
                         file_path=blob.name,
                         mime_type="application/pdf"):
                 pdf_form = {
-                    "source_object": f"{blob.name}",
+                    "source_object": blob.name,
                     "destination_bucket": process_bucket,
-                    "destination_object": f"{process_folder}/pdf-forms/"
+                    "destination_object": f"{process_folder}/pdf-forms/input/"
                 }
                 pdf_forms_list.append(pdf_form)
 
@@ -324,6 +333,7 @@ with DAG(
         trigger_rule=TriggerRule.ALL_DONE
     )
 
+
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generete_output_table_name,
@@ -370,6 +380,33 @@ with DAG(
         provide_context=True,
     )
 
+    create_form_process_job_params = PythonOperator(
+        task_id="create_form_process_job_params",
+        python_callable=generate_form_parser_params,
+        provide_context=True,
+    )
+
+    execute_forms_parser = CloudRunExecuteJobOperator(
+        project_id=os.environ.get("GCP_PROJECT"),
+        region=os.environ.get("DPU_REGION"),
+        task_id="execute_forms_parser",
+        job_name=os.environ.get("FORMS_PARSER_JOB_NAME"),
+        deferrable=False,
+        overrides={
+            "container_overrides": [
+                {
+                    "env": [
+                        {"name": "BQ_TABLE_ID", "value": "prj-14-376417.docs_store.docs_processing_16_08_2024_93tr3tm1"},
+                        {"name": "GCS_INPUT_PREFIX", "value": "gs://dpu-process-prj-14-376417/pdf-forms/input/"},
+                        {"name": "GCS_OUTPUT_PREFIX", "value": "gs://dpu-process-prj-14-376417/pdf-forms/output/"},
+                    ]        
+                }
+            ],
+            "task_count": 1,
+            "timeout": "300s"
+        }
+    ).expand_kwargs(create_form_process_job_params.output)
+
     (
         GCS_Files
         >> process_supported_types
@@ -397,5 +434,6 @@ with DAG(
         >> create_output_table
         >> create_process_job_params
         >> execute_doc_processors
+        >> execute_forms_parser
         >> import_docs_to_data_store
     )

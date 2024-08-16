@@ -146,6 +146,9 @@ def batch_process_documents(
   print(rows_to_insert)
   logging.info(f"Total rows: {len(rows_to_insert)} rows to insert: {rows_to_insert}")
   load_rows_into_bigquery(rows_to_insert, BQ_TABLE_ID)
+  print(f"BQ_TABLE_ID: {BQ_TABLE_ID}")
+  print(f"GCS_INPUT_PREFIX: {GCS_INPUT_PREFIX}")
+  print(f"GCS_OUTPUT_PREFIX: {GCS_OUTPUT_PREFIX}")
 
 
 # Start script
