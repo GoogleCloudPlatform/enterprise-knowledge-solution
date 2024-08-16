@@ -1,5 +1,5 @@
 # Document Processing and Understanding
-This repository is the source code for the Document Processing and Understanding (DPU) solution on Google Cloud. The solution is composed of modular components that collectively enable the creation of end-to-end workflow for document processing, management and analysis:
+This repository contains the source code to implement the Enterprise Knowledge Solution (EKS) on Google Cloud Platform (GCP). The solution is composed of modular components that collectively enable the creation of end-to-end workflow for document processing, management and analysis:
 
 * **Document Ingestion:** Upload and import a variety of document types.
 * **Document Processing:** Validate, extract information, and transform document content.
@@ -14,9 +14,9 @@ The solution comprises the following key components:
 | Component | Description |
 | -------------------------- | - |
 | [Document Processing](components/processing/README.md) | Python tools and deployments for executing document processing tasks (extraction, transformation, enrichment). |
-| [Common Infrastructure](components/common-infra/README.md) | Provides the shared infrastructure foundation for the DPU solution (networking, storage, datasets etc.). |
+| [Common Infrastructure](components/common-infra/README.md) | Provides the shared infrastructure foundation for the EKS (networking, storage, datasets etc.). |
 | [Workflow Orchestrator](components/dpu-workflow/README.md) | Orchestrates the end-to-end document processing workflow using Cloud Composer. |
-| [Web UI](components/webui/README.md) | Offers a user interface for interacting with the DPU solution (search, summarization, document views etc). |
+| [Web UI](components/webui/README.md) | Offers a user interface for interacting with the EKS (search, summarization, document views etc). |
 
 ## Solution Architecture
 ![Solution Architecture](assets/deployment-architecture.png "Solution Architecture")
@@ -92,7 +92,7 @@ terraform apply
 ## Usage Guide
 This guide provides step-by-step instructions on how to use the `Document Process and Understanding with Composer` deployed on Google Cloud.
 
-After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire DPU workflow.
+After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire EKS workflow.
 
 
 ### Upload Documents
@@ -144,19 +144,19 @@ Once the workflow completes successfully, all documents will be imported into th
     * On the console page, you'll find an input bar. Enter your questions or queries related to the documents you've uploaded.
     * The app will provide summarized answers based on the content of your documents, along with references to the specific source documents.
 
-### Search and Explore from DPU Web-UI
-1. Get the DPU Web-UI URI:
+### Search and Explore from EKS Web-UI
+1. Get the EKS Web-UI URI:
     ```sh
     terraform output web_ui_uri
     ```
-1.  Access the DPU Web-UI:
+1.  Access the EKS Web-UI:
     * Open your web browser and navigate to the URI obtained in the previous step.
     * First time y will need to authenticate with your Google Cloud credentials
 1. Search and Explore:
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
 
-### Delete a document from DPU
+### Delete a document from EKS
 1. Identify the document you want to delete:
     * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U. 
     * Make sure the file in the URI exists in the Google Cloud Storage bucket

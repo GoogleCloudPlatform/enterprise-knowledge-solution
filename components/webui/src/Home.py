@@ -20,7 +20,7 @@ logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAcces
 
 
 st.set_page_config(
-    page_title="DPU Web-UI",
+    page_title="EKS Web UI",
     page_icon=LOGO,
     layout="wide",
 )
@@ -30,16 +30,15 @@ with cols[0]:
     st.write("")
     st.image(LOGO, "", 64)
 with cols[1]:
-    st.header(":green[DPU Web-UI]")
+    st.title(":green[Enterprise Knowledge Solution (EKS) Web UI]")
 
 st.markdown("""   """)
 st.markdown("""
     ### About
     This app demonstrates the search and summarization capabilities of the
-    Document Processing and Understanding (DPU) solution.
+    Enterprise Knowledge Solution (EKS).
 
-    The app integrates with the Vertex AI Agent Builder component
-    of the DPU solution.
+    The app integrates with the Vertex AI Agent Builder using APIs.
 """)
 
 if st.button("Start Search"):

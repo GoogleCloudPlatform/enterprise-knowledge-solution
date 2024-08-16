@@ -63,7 +63,7 @@ with image_col:
     st.write("")
     st.image(LOGO, "", 64)
 with text_col:
-    st.title(":green[Search and summarize Documents]")
+    st.title(":green[Search and Summarize Documents]")
 st.divider()
 
 
@@ -87,7 +87,7 @@ if not 'preamble' in st.session_state:
 
 
 st.markdown(
-    """### Given a query, DPU will generate an answer with citations to the documents."""
+    """### Given a query, EKS will generate an answer with citations to the documents."""
 )
 
 if not 'preamble' in st.session_state:
