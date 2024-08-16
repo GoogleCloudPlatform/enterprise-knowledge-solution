@@ -78,6 +78,10 @@ def generate_process_folder(**context):
     context["ti"].xcom_push(key="process_folder", value=process_folder)
 
 
+def generate_form_parser_params(**context):
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+
+
 def generate_mv_params(**context):
     files_to_process = context["ti"].xcom_pull(key="types_to_process")
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -345,7 +349,6 @@ with DAG(
         trigger_rule=TriggerRule.ALL_DONE
     )
 
-
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generete_output_table_name,
@@ -455,5 +458,3 @@ with DAG(
         >> execute_forms_parser
         >> import_forms_to_data_store
     )
-
-
