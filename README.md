@@ -1,4 +1,5 @@
-# Document Processing and Understanding
+# Enterprise Knowledge Solution (EKS)
+
 This repository contains the source code to implement the Enterprise Knowledge Solution (EKS) on Google Cloud Platform (GCP). The solution is composed of modular components that collectively enable the creation of end-to-end workflow for document processing, management and analysis:
 
 * **Document Ingestion:** Upload and import a variety of document types.
@@ -20,6 +21,8 @@ The solution comprises the following key components:
 
 ## Solution Architecture
 ![Solution Architecture](assets/deployment-architecture.png "Solution Architecture")
+    The above diagram dipicts a [Dataflow](DATAFLOW.md) of how the documents uploaded into Google Cloud Storage bucket is processed and prepared for search and summarization.
+
 
 ## Deployment Guide
 This guide provides step-by-step instructions on how to deploy the `Document Process and Understanding with Composer` sample on Google Cloud using Terraform.
@@ -65,16 +68,24 @@ To deploy this example you need:
     ```
 1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
 
-    ```hcl
-    project_id                  = # Your Google Cloud project ID.
-    region                      = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").
-    vertex_ai_data_store_region = # The region for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). Choose a region the is align with you overal region of choice to avoid cross regional traffic.
-    docai_location              = # Sets the location for Document AI service
-    iap_admin_account           = # Account used for manage Oath brand and IAP
-    iap_access_domains          = # List of domains granted for IAP access to the web-ui (e.g., ["domain:google.com","domain:example.com"])
-    deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
-    webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
-    ```
+        project_id                = # Your Google Cloud project ID.
+
+        region                      = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").
+
+        vertex_ai_data_store_region = # The region for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). Choose a region the is align with you overal region of choice to avoid cross regional traffic.
+
+        docai_location              = # Sets the location for Document AI service
+
+        iap_admin_account           = # Account used for manage Oath brand and IAP
+
+        iap_access_domains          = # List of domains granted for IAP access to the 
+
+        web-ui (e.g., ["domain:google.com","domain:example.com"])
+
+        deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
+
+        webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
+
 1. Review the proposed changes, and apply them:
 
     ```sh
@@ -82,7 +93,7 @@ To deploy this example you need:
     ```
     The provisioning process may take about 30 minutes to complete.
 
-### Updates
+### Update your environment with new code/new version
 If you update the source code or pull the latest changes from the repository, re-run the following command to apply the changes to your deployed environment:
 
 ```sh
@@ -90,7 +101,7 @@ terraform apply
 ```
 
 ## Usage Guide
-This guide provides step-by-step instructions on how to use the `Document Process and Understanding with Composer` deployed on Google Cloud.
+    This guide provides step-by-step instructions on how to use the `Document Process and Understanding with Composer` deployed on Google Cloud.
 
 After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire EKS workflow.
 
