@@ -21,7 +21,7 @@ provider "google" {
 locals {
   cloud_run_job_name = "doc-processor"
   dpu_label = {
-    goog-packaged-solution : "dpu-solution"
+    goog-packaged-solution : "eks-solution"
   }
 }
 
