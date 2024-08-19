@@ -47,7 +47,7 @@ default_args = {
     "retries": 0,
 }
 
-USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
+USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
@@ -80,6 +80,25 @@ def generate_process_folder(**context):
 
 def generate_form_parser_params(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    job_params = [{
+            "overrides": {
+                "container_overrides": [
+                {
+                    "env": [
+                        {"name": "BQ_TABLE_ID", "value": "prj-14-376417.docs_store.docs_processing_16_08_2024_93tr3tm1"},
+                        {"name": "GCS_INPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/input/"},
+                        {"name": "GCS_OUTPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/output/"},
+                    ]        
+                }
+            ],
+                "task_count": 1,
+                "timeout": "300s",
+            }
+        }]
+    
+    return job_params
 
 
 def generate_mv_params(**context):
@@ -176,21 +195,6 @@ def generete_output_table_name(**context):
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
-def generate_form_process_job_params(**context):
-    # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
-    bq_table = context["ti"].xcom_pull(key="bigquery_table")
-    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
-
-    # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
-    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
-    process_folder = context["ti"].xcom_pull(key="process_folder")
-    gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/input/"
-    gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/output/"
-
-    context["ti"].xcom_push(key="output_table_id", value=bq_table_id)
-    context["ti"].xcom_push(key="gcs_input_prefix", value=gcs_input_prefix)
-    context["ti"].xcom_push(key="gcs_output_prefix", value=gcs_output_prefix)
-
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
     pdf_forms_folder = f"{process_folder}/pdf-forms/input/"
@@ -247,7 +251,6 @@ with DAG(
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "agent-builder"},
-                {"file-suffix": "docx", "processor": "agent-builder"},
                 {"file-suffix": "txt", "processor": "agent-builder"},
                 {"file-suffix": "html", "processor": "agent-builder"},
                 {"file-suffix": "msg", "processor": "dpu-doc-processor"},
@@ -341,13 +344,14 @@ with DAG(
 
     move_files_done = DummyOperator(
         task_id='move_files_done',
-        trigger_rule=TriggerRule.ALL_SUCCESS
+        trigger_rule=TriggerRule.ALL_DONE
     )
 
     forms_pdf_moved_or_skipped = DummyOperator(
         task_id='forms_pdf_moved_or_skipped',
         trigger_rule=TriggerRule.ALL_DONE
     )
+
 
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
@@ -395,41 +399,19 @@ with DAG(
         provide_context=True,
     )
 
-    import_forms_to_data_store = PythonOperator(
-        task_id="import_forms_to_data_store",
-        python_callable=data_store_import_docs,
-        execution_timeout=timedelta(seconds=3600),
-        provide_context=True,
-    )
-
     create_form_process_job_params = PythonOperator(
         task_id="create_form_process_job_params",
-        python_callable=generate_form_process_job_params,
+        python_callable=generate_form_parser_params,
         provide_context=True,
     )
 
-    execute_forms_parser = CloudRunExecuteJobOperator(
-        # Calling os.environ[] instead of using the .get method to verify we
-        # have set environment variables, not allowing None values.
-        project_id=os.environ["GCP_PROJECT"],
-        region=os.environ["DPU_REGION"],
+    execute_forms_parser = CloudRunExecuteJobOperator.partial(
+        project_id=os.environ.get("GCP_PROJECT"),
+        region=os.environ.get("DPU_REGION"),
         task_id="execute_forms_parser",
-        job_name=os.environ["FORMS_PARSER_JOB_NAME"],
-        deferrable=False,
-        overrides= {
-                "container_overrides": [
-                {
-                    "env": [
-                        {"name": "BQ_TABLE_ID", "value": "{{ ti.xcom_pull(key='output_table_id') }}"},
-                        {"name": "GCS_INPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_input_prefix') }}"},
-                        {"name": "GCS_OUTPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_output_prefix') }}"},
-                    ]
-                }
-            ],
-                "task_count": 1,
-                "timeout": "300s",
-            }
-    )
+        job_name=os.environ.get("FORMS_PARSER_JOB_NAME"),
+        deferrable=False
+    ).expand_kwargs(create_form_process_job_params.output)
 
     (
         GCS_Files
@@ -441,20 +423,24 @@ with DAG(
         create_process_folder
         >> generate_files_move_parameters
         >> move_to_processing
-        >> generate_pdf_forms_l
-        >> move_forms
-        >> create_output_table_name
-        >> create_output_table
     )
     (
-        create_output_table
+        move_to_processing
+        >> generate_pdf_forms_l
+        >> move_forms
+        >> forms_pdf_moved_or_skipped
+    )
+    (
+        move_to_processing
+        >> move_files_done
+    )
+    (
+        [move_files_done, forms_pdf_moved_or_skipped]
+        >> create_output_table_name
+        >> create_output_table
         >> create_process_job_params
         >> execute_doc_processors
-        >> import_docs_to_data_store
-     )
-    (
-        [create_output_table, move_forms]
         >> create_form_process_job_params
         >> execute_forms_parser
-        >> import_forms_to_data_store
+        >> import_docs_to_data_store
     )
