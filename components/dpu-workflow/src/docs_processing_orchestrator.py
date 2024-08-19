@@ -80,6 +80,25 @@ def generate_process_folder(**context):
 
 def generate_form_parser_params(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    job_params = [{
+            "overrides": {
+                "container_overrides": [
+                {
+                    "env": [
+                        {"name": "BQ_TABLE_ID", "value": "prj-14-376417.docs_store.docs_processing_16_08_2024_93tr3tm1"},
+                        {"name": "GCS_INPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/input/"},
+                        {"name": "GCS_OUTPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/output/"},
+                    ]        
+                }
+            ],
+                "task_count": 1,
+                "timeout": "300s",
+            }
+        }]
+    
+    return job_params
 
 
 def generate_mv_params(**context):
@@ -386,25 +405,12 @@ with DAG(
         provide_context=True,
     )
 
-    execute_forms_parser = CloudRunExecuteJobOperator(
+    execute_forms_parser = CloudRunExecuteJobOperator.partial(
         project_id=os.environ.get("GCP_PROJECT"),
         region=os.environ.get("DPU_REGION"),
         task_id="execute_forms_parser",
         job_name=os.environ.get("FORMS_PARSER_JOB_NAME"),
-        deferrable=False,
-        overrides={
-            "container_overrides": [
-                {
-                    "env": [
-                        {"name": "BQ_TABLE_ID", "value": "prj-14-376417.docs_store.docs_processing_16_08_2024_93tr3tm1"},
-                        {"name": "GCS_INPUT_PREFIX", "value": "gs://dpu-process-prj-14-376417/pdf-forms/input/"},
-                        {"name": "GCS_OUTPUT_PREFIX", "value": "gs://dpu-process-prj-14-376417/pdf-forms/output/"},
-                    ]        
-                }
-            ],
-            "task_count": 1,
-            "timeout": "300s"
-        }
+        deferrable=False
     ).expand_kwargs(create_form_process_job_params.output)
 
     (
@@ -434,6 +440,7 @@ with DAG(
         >> create_output_table
         >> create_process_job_params
         >> execute_doc_processors
+        >> create_form_process_job_params
         >> execute_forms_parser
         >> import_docs_to_data_store
     )

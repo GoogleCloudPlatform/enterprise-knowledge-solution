@@ -56,10 +56,10 @@ def build_bq_metadata_row(original_file_path, text_file_path):
   row =  {
     "id": id,
     "jsonData": json.dumps({"objs": [{
-      "uri": original_file_path,
+      "uri": text_file_path,
       "objid":id,
       "status":"Indexed",
-      "mimetype": "application/pdf"},{
+      "mimetype": "text/plain"},{
       "uri": original_file_path,
       "objid":"",
       "status":"",
