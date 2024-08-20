@@ -54,8 +54,9 @@ def batch_process_documents(
     """
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
+
   client = documentai.DocumentProcessorServiceClient(client_options=opts)
-  
+
   # Specify a GCS URI Prefix to process an entire directory
   gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
   input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)
@@ -128,12 +129,6 @@ def batch_process_documents(
           f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
         )
         continue
-
-      # Download JSON File as bytes object and convert to Document Object
-      logging.info(f"Fetching {blob.name}")
-      document = documentai.Document.from_json(
-        blob.download_as_bytes(), ignore_unknown_fields=True
-      )
 
       # Read the text recognition output from the processor and create a BQ table row
       row_to_insert = build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri)

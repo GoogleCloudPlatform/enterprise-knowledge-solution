@@ -74,7 +74,7 @@ class BigQueryWriter:
         ref = TableReference.from_string(table)
         self.client = bigquery_storage_v1.BigQueryWriteClient(
             client_info=ClientInfo(
-                user_agent="cloud-solutions/dpu-doc-processors-v1",
+                user_agent="cloud-solutions/eks-doc-processors-v1",
             )
         )
         self.path = self.client.write_stream_path(

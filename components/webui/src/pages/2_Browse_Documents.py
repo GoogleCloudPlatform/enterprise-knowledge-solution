@@ -23,7 +23,7 @@ import pathlib
 logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
 
 st.set_page_config(
-    page_title="Document Processing & Understanding",
+    page_title="Browse Documents",
     page_icon=LOGO,
     layout="wide",
 )
@@ -33,7 +33,7 @@ with cols[0]:
     st.write("")
     st.image(LOGO, "", 64)
 with cols[1]:
-    st.title(":green[Documents available for search]")
+    st.title(":green[Document Corpus]")
 st.divider()
 st.markdown("""Full Document corpus accessible to the Search App.""")
 
