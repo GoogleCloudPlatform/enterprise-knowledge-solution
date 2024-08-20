@@ -54,9 +54,8 @@ def batch_process_documents(
     """
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
-
   client = documentai.DocumentProcessorServiceClient(client_options=opts)
-
+  
   # Specify a GCS URI Prefix to process an entire directory
   gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
   input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)

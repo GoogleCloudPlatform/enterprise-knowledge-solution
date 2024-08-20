@@ -78,29 +78,6 @@ def generate_process_folder(**context):
     context["ti"].xcom_push(key="process_folder", value=process_folder)
 
 
-def generate_form_parser_params(**context):
-    process_folder = context["ti"].xcom_pull(key="process_folder")
-    bq_table = context["ti"].xcom_pull(key="bigquery_table")
-    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
-    job_params = [{
-            "overrides": {
-                "container_overrides": [
-                {
-                    "env": [
-                        {"name": "BQ_TABLE_ID", "value": "prj-14-376417.docs_store.docs_processing_16_08_2024_93tr3tm1"},
-                        {"name": "GCS_INPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/input/"},
-                        {"name": "GCS_OUTPUT_PREFIX", "value": f"gs://{process_folder}/pdf-forms/output/"},
-                    ]        
-                }
-            ],
-                "task_count": 1,
-                "timeout": "300s",
-            }
-        }]
-    
-    return job_params
-
-
 def generate_mv_params(**context):
     files_to_process = context["ti"].xcom_pull(key="types_to_process")
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -194,6 +171,21 @@ def generete_output_table_name(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
+
+def generate_form_process_job_params(**context):
+    # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    
+    # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
+    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/input/"
+    gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/output/"
+    
+    context["ti"].xcom_push(key="output_table_id", value=bq_table_id)
+    context["ti"].xcom_push(key="gcs_input_prefix", value=gcs_input_prefix)
+    context["ti"].xcom_push(key="gcs_output_prefix", value=gcs_output_prefix)
 
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -401,17 +393,30 @@ with DAG(
 
     create_form_process_job_params = PythonOperator(
         task_id="create_form_process_job_params",
-        python_callable=generate_form_parser_params,
+        python_callable=generate_form_process_job_params,
         provide_context=True,
     )
 
-    execute_forms_parser = CloudRunExecuteJobOperator.partial(
+    execute_forms_parser = CloudRunExecuteJobOperator(
         project_id=os.environ.get("GCP_PROJECT"),
         region=os.environ.get("DPU_REGION"),
         task_id="execute_forms_parser",
         job_name=os.environ.get("FORMS_PARSER_JOB_NAME"),
-        deferrable=False
-    ).expand_kwargs(create_form_process_job_params.output)
+        deferrable=False,
+        overrides= {
+                "container_overrides": [
+                {
+                    "env": [
+                        {"name": "BQ_TABLE_ID", "value": "{{ ti.xcom_pull(key='output_table_id') }}"},
+                        {"name": "GCS_INPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_input_prefix') }}"},
+                        {"name": "GCS_OUTPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_output_prefix') }}"},
+                    ]        
+                }
+            ],
+                "task_count": 1,
+                "timeout": "300s",
+            }
+    )
 
     (
         GCS_Files
@@ -444,3 +449,5 @@ with DAG(
         >> execute_forms_parser
         >> import_docs_to_data_store
     )
+
+
