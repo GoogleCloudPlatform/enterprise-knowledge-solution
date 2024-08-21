@@ -56,10 +56,10 @@ def build_bq_metadata_row(original_file_path, text_file_path):
   row =  {
     "id": id,
     "jsonData": json.dumps({"objs": [{
-      "uri": original_file_path,
+      "uri": text_file_path,
       "objid":id,
       "status":"Indexed",
-      "mimetype": "application/pdf"},{
+      "mimetype": "text/plain"},{
       "uri": original_file_path,
       "objid":"",
       "status":"",
@@ -82,7 +82,7 @@ def build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri
         gcs_input_prefix: GCS bucket prefix for PDF with forms
         gcs_output_uri: GCS bucket prefix that is used to store processed objects
     """
-  
+
   # Download JSON File as bytes object and convert to Document Object
   logging.info(f"Fetching {blob.name}")
   document = documentai.Document.from_json(
@@ -130,6 +130,4 @@ def get_bucket_name(gcs_output_uri):
   else:
     print("No bucket name found in the given string.")
     logging.info("No bucket name found in the given string.")
-
-
 

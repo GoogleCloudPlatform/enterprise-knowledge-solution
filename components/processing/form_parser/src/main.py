@@ -16,7 +16,7 @@ import os
 from typing import Optional
 
 from google.api_core.client_options import ClientOptions
-from google.api_core.exceptions import InternalServerError
+from google.api_core.exceptions import InternalServerError, GoogleAPICallError
 from google.api_core.exceptions import RetryError
 from google.cloud import storage
 from load_data_in_bigquery import *
@@ -79,18 +79,19 @@ def batch_process_documents(
     document_output_config=output_config,
   )
 
-  # BatchProcess returns a Long Running Operation (LRO)
-  operation = client.batch_process_documents(request)
-
-  # Continually polls the operation until it is complete.
-  # This could take some time for larger files
-  # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
   try:
+    # BatchProcess returns a Long Running Operation (LRO)
+    operation = client.batch_process_documents(request)
+
+    # Continually polls the operation until it is complete.
+    # This could take some time for larger files
+    # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
     logging.info(f"Waiting for operation {operation.operation.name} to complete...")
     operation.result(timeout=timeout)
   # Catch exception when operation doesn't finish before timeout
-  except (RetryError, InternalServerError) as e:
-    logging.error(e.message)
+  except (RetryError, InternalServerError, GoogleAPICallError) as e:
+      logging.error(f"An error occurred during batch processing: {e}")
+      return
 
   # Once the operation is complete,
   # get output document information from operation metadata
@@ -129,7 +130,7 @@ def batch_process_documents(
           f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
         )
         continue
-      
+
       # Read the text recognition output from the processor and create a BQ table row
       row_to_insert = build_output_metadata(blob, storage_client, gcs_input_prefix, gcs_output_uri)
       # Append the row to the list
@@ -140,6 +141,9 @@ def batch_process_documents(
   print(rows_to_insert)
   logging.info(f"Total rows: {len(rows_to_insert)} rows to insert: {rows_to_insert}")
   load_rows_into_bigquery(rows_to_insert, BQ_TABLE_ID)
+  print(f"BQ_TABLE_ID: {BQ_TABLE_ID}")
+  print(f"GCS_INPUT_PREFIX: {GCS_INPUT_PREFIX}")
+  print(f"GCS_OUTPUT_PREFIX: {GCS_OUTPUT_PREFIX}")
 
 
 # Start script
@@ -155,6 +159,3 @@ if __name__ == "__main__":
                             gcs_input_prefix=GCS_INPUT_PREFIX)
     name = os.environ.get("NAME", "World")
   logging.info(f"Completed Task #{TASK_INDEX}.")
-
-
-

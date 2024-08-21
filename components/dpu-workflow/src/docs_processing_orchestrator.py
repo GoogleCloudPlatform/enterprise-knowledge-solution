@@ -172,9 +172,24 @@ def generete_output_table_name(**context):
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
+def generate_form_process_job_params(**context):
+    # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    
+    # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
+    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/input/"
+    gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/output/"
+    
+    context["ti"].xcom_push(key="output_table_id", value=bq_table_id)
+    context["ti"].xcom_push(key="gcs_input_prefix", value=gcs_input_prefix)
+    context["ti"].xcom_push(key="gcs_output_prefix", value=gcs_output_prefix)
+
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = f"{process_folder}/pdf-forms"
+    pdf_forms_folder = f"{process_folder}/pdf-forms/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
 
 def generate_pdf_forms_list(**context):
@@ -190,7 +205,12 @@ def generate_pdf_forms_list(**context):
     storage_client = storage.Client()
     bucket = storage_client.bucket(process_bucket)
 
-    if project_id.strip() == "" or location.strip() == "" or processor_id.strip() == "":
+    if (processor_id is None or
+            project_id.strip() == "" or
+            location is None or
+            location.strip() == "" or
+            processor_id is None or
+            processor_id.strip() == ""):
         return pdf_forms_list
 
     blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
@@ -203,9 +223,9 @@ def generate_pdf_forms_list(**context):
                         file_path=blob.name,
                         mime_type="application/pdf"):
                 pdf_form = {
-                    "source_object": f"{blob.name}",
+                    "source_object": blob.name,
                     "destination_bucket": process_bucket,
-                    "destination_object": f"{process_folder}/pdf-forms/"
+                    "destination_object": f"{process_folder}/pdf-forms/input/"
                 }
                 pdf_forms_list.append(pdf_form)
 
@@ -324,6 +344,7 @@ with DAG(
         trigger_rule=TriggerRule.ALL_DONE
     )
 
+
     create_output_table_name = PythonOperator(
         task_id="create_output_table_name",
         python_callable=generete_output_table_name,
@@ -370,6 +391,35 @@ with DAG(
         provide_context=True,
     )
 
+    create_form_process_job_params = PythonOperator(
+        task_id="create_form_process_job_params",
+        python_callable=generate_form_process_job_params,
+        provide_context=True,
+    )
+
+    execute_forms_parser = CloudRunExecuteJobOperator(
+        # Calling os.environ[] instead of using the .get method to verify we
+        # have set environment variables, not allowing None values.
+        project_id=os.environ["GCP_PROJECT"],
+        region=os.environ["DPU_REGION"],
+        task_id="execute_forms_parser",
+        job_name=os.environ["FORMS_PARSER_JOB_NAME"],
+        deferrable=False,
+        overrides= {
+                "container_overrides": [
+                {
+                    "env": [
+                        {"name": "BQ_TABLE_ID", "value": "{{ ti.xcom_pull(key='output_table_id') }}"},
+                        {"name": "GCS_INPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_input_prefix') }}"},
+                        {"name": "GCS_OUTPUT_PREFIX", "value": "{{ ti.xcom_pull(key='gcs_output_prefix') }}"},
+                    ]        
+                }
+            ],
+                "task_count": 1,
+                "timeout": "300s",
+            }
+    )
+
     (
         GCS_Files
         >> process_supported_types
@@ -397,5 +447,9 @@ with DAG(
         >> create_output_table
         >> create_process_job_params
         >> execute_doc_processors
+        >> create_form_process_job_params
+        >> execute_forms_parser
         >> import_docs_to_data_store
     )
+
+
