@@ -391,6 +391,13 @@ with DAG(
         provide_context=True,
     )
 
+    import_forms_to_data_store = PythonOperator(
+        task_id="import_forms_to_data_store",
+        python_callable=data_store_import_docs,
+        execution_timeout=timedelta(seconds=3600),
+        provide_context=True,
+    )
+
     create_form_process_job_params = PythonOperator(
         task_id="create_form_process_job_params",
         python_callable=generate_form_process_job_params,
@@ -445,11 +452,18 @@ with DAG(
         [move_files_done, forms_pdf_moved_or_skipped]
         >> create_output_table_name
         >> create_output_table
+    )
+    (
+        create_output_table
         >> create_process_job_params
         >> execute_doc_processors
+        >> import_docs_to_data_store
+     )
+    (
+        create_output_table
         >> create_form_process_job_params
         >> execute_forms_parser
-        >> import_docs_to_data_store
+        >> import_forms_to_data_store
     )
 
 
