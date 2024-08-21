@@ -398,10 +398,12 @@ with DAG(
     )
 
     execute_forms_parser = CloudRunExecuteJobOperator(
-        project_id=os.environ.get("GCP_PROJECT"),
-        region=os.environ.get("DPU_REGION"),
+        # Calling os.environ[] instead of using the .get method to verify we
+        # have set environment variables, not allowing None values.
+        project_id=os.environ["GCP_PROJECT"],
+        region=os.environ["DPU_REGION"],
         task_id="execute_forms_parser",
-        job_name=os.environ.get("FORMS_PARSER_JOB_NAME"),
+        job_name=os.environ["FORMS_PARSER_JOB_NAME"],
         deferrable=False,
         overrides= {
                 "container_overrides": [
