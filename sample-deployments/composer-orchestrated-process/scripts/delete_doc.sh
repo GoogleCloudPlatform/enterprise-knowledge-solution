@@ -167,10 +167,10 @@ elif [ "$MODE" = "batch" ]; then
     echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
   done <<< "$RESULTS"
 
-  bq rm --project_id="$PROJECT_ID" --headless=true -t "$BQ_TABLE"
+  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
 
   # Delete the GCS folder associated with the batch ID
-  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/${BATCH_ID}"
+  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID}"
   gsutil rm -r "$GCS_FOLDER"
 
   echo "Batch deletion for ID '$BATCH_ID' completed."
