@@ -336,7 +336,7 @@ with DAG(
 
     move_files_done = DummyOperator(
         task_id='move_files_done',
-        trigger_rule=TriggerRule.ALL_DONE
+        trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     forms_pdf_moved_or_skipped = DummyOperator(
