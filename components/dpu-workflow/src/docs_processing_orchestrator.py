@@ -243,6 +243,7 @@ with DAG(
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "agent-builder"},
+                {"file-suffix": "docx", "processor": "agent-builder"},
                 {"file-suffix": "txt", "processor": "agent-builder"},
                 {"file-suffix": "html", "processor": "agent-builder"},
                 {"file-suffix": "msg", "processor": "dpu-doc-processor"},
@@ -336,7 +337,7 @@ with DAG(
 
     move_files_done = DummyOperator(
         task_id='move_files_done',
-        trigger_rule=TriggerRule.ALL_DONE
+        trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     forms_pdf_moved_or_skipped = DummyOperator(
@@ -460,7 +461,7 @@ with DAG(
         >> import_docs_to_data_store
      )
     (
-        create_output_table
+        [create_output_table, move_forms]
         >> create_form_process_job_params
         >> execute_forms_parser
         >> import_forms_to_data_store
