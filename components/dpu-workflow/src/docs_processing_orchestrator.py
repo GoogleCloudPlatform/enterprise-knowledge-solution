@@ -460,7 +460,7 @@ with DAG(
         >> import_docs_to_data_store
      )
     (
-        create_output_table
+        [create_output_table, move_forms]
         >> create_form_process_job_params
         >> execute_forms_parser
         >> import_forms_to_data_store
