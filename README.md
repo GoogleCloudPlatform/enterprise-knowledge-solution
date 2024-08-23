@@ -25,10 +25,10 @@ The solution comprises the following key components:
 
 
 ## Deployment Guide
-This guide provides step-by-step instructions on how to deploy the `Document Process and Understanding with Composer` sample on Google Cloud using Terraform.
+This section provides a step-by-step instructions on how to deploy the `Enterprise Knowledge Solution` on Google Cloud using Terraform.
 
 ### Prerequisites
-To deploy this example you need:
+To deploy this solution, you need:
 - A [Google Cloud project](https://cloud.google.com/docs/overview#projects) with billing enabled.
 - An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
 - An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
@@ -36,9 +36,13 @@ To deploy this example you need:
     * `compute.requireShieldedVm`
     * `iam.allowedPolicyMemberDomains`
 
-
     These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](./components/webui/README.md#deploy-locally) section.
 
+- You need a [Document AI Custom Document Classifier]() in your GCP Project. You can create a [Custom Document Classifier in the Google Cloud Console](https://cloud.google.com/document-ai/docs/custom-classifier).
+
+- You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
+
+- We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
 
 ### Deploying the Sample
 1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
@@ -54,7 +58,9 @@ To deploy this example you need:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
-    export REGION="<your Google Cloud region>"
+    export REGION="<Google Cloud Region for deploying the resources>"
+    export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
+    export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
     ```
 1. Run the following script to setup your environment and your cloud project for running terraform:
 
@@ -68,7 +74,7 @@ To deploy this example you need:
     ```
 1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
 
-        project_id                = # Your Google Cloud project ID.
+        project_id                  = # Your Google Cloud project ID.
 
         region                      = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").
 
@@ -78,9 +84,7 @@ To deploy this example you need:
 
         iap_admin_account           = # Account used for manage Oath brand and IAP
 
-        iap_access_domains          = # List of domains granted for IAP access to the 
-
-        web-ui (e.g., ["domain:google.com","domain:example.com"])
+        iap_access_domains          = # List of domains granted for IAP access to the web-ui (e.g., ["domain:google.com","domain:example.com"])
 
         deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
 
@@ -119,9 +123,10 @@ After successful [deployment](./sample-deployments/composer-orchestrated-process
 
 1. Upload Your Documents:
     * Click the "Upload Files" button or drag and drop your files into the bucket. Supported file types:
-      - MSF Outlook (msg)
-      - MSF Excel(xlsx, xlsm)
-      - PDF
+      - MS Outlook (msg)
+      - MS Excel(xlsx, xlsm)
+      - PDF with text only content
+      - PDF with forms
       - HTML
       - TXT
       - ZIP (zip) containing any of above supported file types
@@ -133,11 +138,15 @@ After successful [deployment](./sample-deployments/composer-orchestrated-process
     This command will display the web interface URI of the Cloud Composer Airflow environment.
 1.  Access the Airflow UI:
     * Open your web browser and navigate to the URI obtained in the previous step.
-    * First time y will need to authenticate with your Google Cloud credentials.
+    * First time you will need to authenticate with your Google Cloud credentials.
 1. Trigger the Workflow:
     * In the Airflow UI, locate the DAG (Directed Acyclic Graph) named: `run_docs_processing`, which represents the document processing workflow.
     * Click the "Trigger DAG" button to access the trigger page. Here, you can view the input parameters for the workflow.
     * Leave the default parameters as they are and click the "Trigger" button to initiate the workflow.
+    * Set the following paramerts per your environment:
+        * pdf_classifier_project_id
+        * pdf_classifier_location
+        * pdf_classifier_processor_id
 1. Monitor Execution Progress:
     * Navigate to the DAG details view using the URL:
     `<composer_uri>/dags/run_docs_processing`  (replace `<composer_uri>` with the URI you obtained earlier).

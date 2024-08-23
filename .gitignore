@@ -26,3 +26,5 @@ sample-deployments/composer-orchestrated-process/dp.notes
 **/.credentials/**
 sample-deployments/composer-orchestrated-process/terraform.tfvars.dp
 sample-deployments/composer-orchestrated-process/terraform.tfvars.go_demos
+sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh
+.gitignore
