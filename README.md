@@ -105,7 +105,7 @@ terraform apply
 ```
 
 ## Usage Guide
-    This guide provides step-by-step instructions on how to use the `Enterprise Knowledge Solution` on Google Cloud.
+    This guide provides step-by-step instructions on how to use the `Enterprise Knowledge Solution (EKS)` on Google Cloud.
 
 After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire EKS workflow.
 
