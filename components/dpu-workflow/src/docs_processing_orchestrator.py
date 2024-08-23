@@ -243,6 +243,7 @@ with DAG(
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "agent-builder"},
+                {"file-suffix": "docx", "processor": "agent-builder"},
                 {"file-suffix": "txt", "processor": "agent-builder"},
                 {"file-suffix": "html", "processor": "agent-builder"},
                 {"file-suffix": "msg", "processor": "dpu-doc-processor"},

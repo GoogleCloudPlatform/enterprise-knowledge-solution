@@ -97,7 +97,7 @@ def process_recursive(
     }
     results = [result]
 
-    if source.suffix in (".txt", ".html", ".pdf"):
+    if source.suffix in (".txt", ".html", ".pdf", ".docx"):
 
         # current file size limit of 100MB in Data Store
         if reject_oversized_file(source, reject_dir, 100):
