@@ -125,7 +125,13 @@ if [ "$MODE" = "single" ]; then
 
   # EXECUTE THE FOLLOWING gsutil COMMAND to Delete the document and meta-data from Google Cloud Storage Bucket
   gsutil rm -r "$DOC_URI"
-  gsutil rm -r "$DOC_URI".json
+  # Conditional logic for DocAI form parser output
+  if [[ $DOC_URI == *"pdf-forms"* && $DOC_URI == *.txt ]]; then
+    JSON_URI="${DOC_URI%.txt}.json"
+    gsutil rm -r "$JSON_URI"
+  else
+    gsutil rm -r "$DOC_URI".json
+  fi
 
   # EXECUTE THE FOLLOWING gsutil COMMAND to Delete the folder containing the document and meta-data from Google Cloud Storage Bucket
   # DOC_FOLDER=$(cut -d'/' -f1-4 <<< "$DOC_URI")
@@ -159,7 +165,13 @@ elif [ "$MODE" = "batch" ]; then
       "${DELETE_URI}"
 
     gsutil rm -r "$DOC_URI"
-    gsutil rm -r "$DOC_URI".json
+    # Conditional logic for DocAI form parser output
+    if [[ $DOC_URI == *"pdf-forms"* && $DOC_URI == *.txt ]]; then
+      JSON_URI="${DOC_URI%.txt}.json"
+      gsutil rm -r "$JSON_URI"
+    else
+      gsutil rm -r "$DOC_URI".json
+    fi
 
     bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
     "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
@@ -167,10 +179,10 @@ elif [ "$MODE" = "batch" ]; then
     echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
   done <<< "$RESULTS"
 
-  bq rm --project_id="$PROJECT_ID" --headless=true -t "$BQ_TABLE"
+  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
 
   # Delete the GCS folder associated with the batch ID
-  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/${BATCH_ID}"
+  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID}"
   gsutil rm -r "$GCS_FOLDER"
 
   echo "Batch deletion for ID '$BATCH_ID' completed."
