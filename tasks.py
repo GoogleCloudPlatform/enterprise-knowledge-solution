@@ -76,7 +76,12 @@ def lock(c, upgrade=False, upgrade_package="", quiet=True):
     c.run(f'cat "{REQS_ALL}" | grep -v "^-e " > "{CONSTRAINTS}"')
 
     # Gather all requirements
-    reqs_in = glob.glob(os.path.join(BASE_DIR, "**", "pyproject.toml"), recursive=True)
+    reqs_in = list(glob.glob(
+        os.path.join(BASE_DIR, "**", "pyproject.toml"),
+        recursive=True))
+    reqs_in += list(glob.glob(
+        os.path.join(BASE_DIR, "**", "requirements.in"),
+        recursive=True))
 
     # Re-generate the requirements.txt for specific deployments
     # (honouring consolidated requirements)

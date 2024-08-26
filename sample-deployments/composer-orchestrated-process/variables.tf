@@ -47,3 +47,10 @@ variable "webui_service_name" {
   description = "Specify the WebUI App Engine service name, use the default value when doing initial deployment. Change the default value after the initial deployment and re-apply terraform"
   default     = "default"
 }
+
+variable "docai_location" {
+  description = "Google Cloud region where compute services are located."
+  type        = string
+  default     = "us"
+}
+

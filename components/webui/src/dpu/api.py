@@ -58,7 +58,7 @@ def search_service_client() -> discoveryengine.SearchServiceClient:
                 else None
         ),
         client_info=ClientInfo(
-          user_agent="cloud-solutions/dpu-webui-v1",
+          user_agent="cloud-solutions/eks-webui-v1",
         )
         )
 
@@ -211,7 +211,7 @@ def document_service_client() -> discoveryengine.DocumentServiceClient:
                 else None
         ),
         client_info=ClientInfo(
-          user_agent="cloud-solutions/dpu-webui",
+          user_agent="cloud-solutions/eks-webui",
         ))
 
 
@@ -267,7 +267,7 @@ def fetch_agent_doc(doc_id: str) -> Optional[dict]:
 def get_storage_client():
     return storage.Client(
         client_info=ClientInfo(
-            user_agent="cloud-solutions/dpu-webui",
+            user_agent="cloud-solutions/eks-webui",
         )
     )
 

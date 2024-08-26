@@ -74,7 +74,7 @@ class GCSPath:
         if cls.client is None:
             cls.client = storage.Client(
                 client_info=ClientInfo(
-                    user_agent="cloud-solutions/dpu-doc-processors-v1",
+                    user_agent="cloud-solutions/eks-doc-processors-v1",
                 )
             )
         return cls.client.bucket(bucket)  # pyright: ignore

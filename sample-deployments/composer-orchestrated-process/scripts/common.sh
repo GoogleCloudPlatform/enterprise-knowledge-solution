@@ -32,6 +32,8 @@ declare -a apis_array=("cloudresourcemanager.googleapis.com"
                 "iam.googleapis.com"
                 "compute.googleapis.com"
                 "orgpolicy.googleapis.com"
+                "artifactregistry.googleapis.com"
+                "cloudbuild.googleapis.com"
                 )
 
 # DISPLAY HELPERS
