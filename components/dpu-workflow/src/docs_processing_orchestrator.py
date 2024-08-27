@@ -249,10 +249,10 @@ with DAG(
         move_object=True,
     ).expand_kwargs(generate_pdf_forms_l.output)
 
-    move_files_done = DummyOperator(
-        task_id='move_files_done',
-        trigger_rule=TriggerRule.ALL_DONE
-    )
+    # move_files_done = DummyOperator(
+    #     task_id='move_files_done',
+    #     trigger_rule=TriggerRule.ALL_DONE
+    # )
 
     forms_pdf_moved_or_skipped = DummyOperator(
         task_id='forms_pdf_moved_or_skipped',
@@ -334,42 +334,46 @@ with DAG(
     )
 
     (
+        # initial common actions - ends with a decision whether to continue
+        # to basic processing, or stop working
         GCS_Files
         >> process_supported_types
         >> has_files
         >> [create_process_folder, skip_bucket_creation]
     )   # pyright: ignore[reportOperatorIssue]
     (
+        # In the case we continue working, moving documents to processing
+        # folder, and creating an output table where metadata will be saved
         create_process_folder
+        >> create_output_table_name
+        >> create_output_table
         >> generate_files_move_parameters
         >> move_to_processing
-    )
-    (
-        move_to_processing
+
+        # We then want to see if there are any forms, since those will be
+        # handled differently.
         >> generate_pdf_forms_l
         >> move_forms
         >> forms_pdf_moved_or_skipped
     )
+
     (
-        move_to_processing
-        >> move_files_done
-    )
-    (
-        [move_files_done, forms_pdf_moved_or_skipped]
-        >> create_output_table_name
-        >> create_output_table
-    )
-    (
-        create_output_table
-        >> create_process_job_params
-        >> execute_doc_processors
-        >> import_docs_to_data_store
-     )
-    (
-        create_output_table
+        # Continue to process forms, depending on move_forms executed
+        # successfully. This doesn't have to wait for general processing.
+        move_forms
         >> create_form_process_job_params
         >> execute_forms_parser
         >> import_forms_to_data_store
     )
+
+    (
+        # General document processing has to wait for the forms to
+        # move/skipped, since we don't want to process the forms using this job.
+        forms_pdf_moved_or_skipped
+        >> create_process_job_params
+        >> execute_doc_processors
+        >> import_docs_to_data_store
+     )
+
 
 
