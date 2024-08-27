@@ -249,10 +249,6 @@ with DAG(
         move_object=True,
     ).expand_kwargs(generate_pdf_forms_l.output)
 
-    # move_files_done = DummyOperator(
-    #     task_id='move_files_done',
-    #     trigger_rule=TriggerRule.ALL_DONE
-    # )
 
     forms_pdf_moved_or_skipped = DummyOperator(
         task_id='forms_pdf_moved_or_skipped',
