@@ -22,8 +22,11 @@ locals {
     "${path.module}/build/main.py",
     "${path.module}/build/requirements.in",
   ]
-  cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : fileexists(f) ? filesha512(f) : sha512("file-not-found")]))
-  service_account_name     = var.cloud_run_job_name
+  lib_source_directory_path = "${path.module}/../../libs"
+  lib_source_fileset        = [for f in fileset(local.lib_source_directory_path, "**/*.py") : "${local.lib_source_directory_path}/${f}"]
+  all_dependent_fileset     = setunion(local.cloud_build_fileset, local.lib_source_fileset)
+  cloud_build_content_hash  = sha512(join("", [for f in local.all_dependent_fileset : fileexists(f) ? filesha512(f) : sha512("file-not-found")]))
+  service_account_name      = var.cloud_run_job_name
 }
 
 # Enable APIs
