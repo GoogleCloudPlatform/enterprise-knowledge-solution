@@ -1,0 +1,6 @@
+[project]
+name = "cloud-run-doc-classifier"
+version = "0.0.1.dev"
+dependencies = [
+  "processor-msg @ ${PROJECT_ROOT}/components/doc-classifier/src/main",
+]
