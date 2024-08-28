@@ -58,6 +58,7 @@ def batch_process_documents(
         gcs_output_uri: GCS directory to store the out json files,
         gcs_input_prefix: GCS directory to store input files to be processed
     """
+<<<<<<< HEAD
     # Set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
 
@@ -66,6 +67,15 @@ def batch_process_documents(
     # Specify a GCS URI Prefix to process an entire directory
     gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
     input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)
+=======
+  # Set the `api_endpoint` if you use a location other than "us".
+  opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
+  client = documentai.DocumentProcessorServiceClient(client_options=opts)
+  
+  # Specify a GCS URI Prefix to process an entire directory
+  gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
+  input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)
+>>>>>>> 443f60a (Rearrange dag flow (#27))
 
     # Cloud Storage URI for the Output Directory
     gcs_output_config = documentai.DocumentOutputConfig.GcsOutputConfig(

@@ -20,6 +20,7 @@ from google.api_core.client_options import ClientOptions # type: ignore # pylint
 from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
+
 def is_form(
     project_id: str,
     location: str,
@@ -87,3 +88,35 @@ def is_form(
             return True
 
     return False
+
+def get_forms_list(processor_id, project_id, location, process_bucket,
+                   process_folder):
+    pdf_forms_list=[]
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(process_bucket)
+
+    if (processor_id is None or
+            project_id.strip() == "" or
+            location is None or
+            location.strip() == "" or
+            processor_id is None or
+            processor_id.strip() == ""):
+        return pdf_forms_list
+
+    blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
+    for blob in blobs:
+        if process_bucket is not None:
+            if is_form(project_id=project_id,
+                       location=location,
+                       processor_id=processor_id,
+                       file_storage_bucket=process_bucket,
+                       file_path=blob.name,
+                       mime_type="application/pdf"):
+                pdf_form = {
+                    "source_object": blob.name,
+                    "destination_bucket": process_bucket,
+                    "destination_object": f"{process_folder}/pdf-forms/input/"
+                }
+                pdf_forms_list.append(pdf_form)
+
+    return pdf_forms_list
