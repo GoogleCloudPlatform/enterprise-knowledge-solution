@@ -38,6 +38,8 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     - Service Account Token Creator
     - Service Usage Admin
 
+- You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
+
 ### Deploying the Sample
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
