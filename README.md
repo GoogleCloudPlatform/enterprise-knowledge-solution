@@ -46,10 +46,11 @@ To deploy this example you need:
 1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
 1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
-    - Service Account Admin
+    - Organization Policy Admin
     - Project IAM Admin
+    - Service Account Admin
+    - Service Account Token Creator
     - Service Usage Admin
-    - Organization Policy Viewer
 
 1. Validate whether the following Organization Policies are enforced on this project, which can conflict with deploying the web-UI interface.
 >>>>>>> 5760ebf (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
@@ -71,6 +72,7 @@ To deploy this example you need:
 
 ### Deploying the Sample
 <<<<<<< HEAD
+<<<<<<< HEAD
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
    Alternatively, to deploy this repository using a local terminal:
@@ -79,12 +81,14 @@ To deploy this example you need:
     1. [install the git CLI](https://github.com/git-guides/install-git)
 =======
 1. To deploy this repository using an online terminal with software preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+=======
+1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+>>>>>>> 5e6b8ab (Improve the "deploying the sample" guidance under README)
 
-   To deploy this repository using a local terminal:
+   Alternatively, to deploy this repository using a local terminal:
     1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
     1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
     1. [install the git CLI](https://github.com/git-guides/install-git)
-    1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
 
 <<<<<<< HEAD
 1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
@@ -108,6 +112,9 @@ To deploy this example you need:
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 5e6b8ab (Improve the "deploying the sample" guidance under README)
 1. Identify the service account you will use to deploy resources in this repo.
    Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
 
@@ -116,8 +123,11 @@ To deploy this example you need:
      --description="The service account used to deploy Enterprise Knowledge Search resources"
    ```
 
+<<<<<<< HEAD
 =======
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+>>>>>>> 5e6b8ab (Improve the "deploying the sample" guidance under README)
 1. Set the following environment variables:
 
     ```sh
@@ -161,12 +171,18 @@ To deploy this example you need:
 >>>>>>> f289fe8 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
     ```
 
-1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:
+1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
+    - Validate software dependencies
     - Enable the required APIs defined in `project_apis.txt`.
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
-    - Authenticate the [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Enables the required IAM roles used for underlying Cloud Build processes
+    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
     - Validate common org policies that might interfere with your deployment
+<<<<<<< HEAD
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+    - Build a custom container image used for form parsing
+>>>>>>> 5e6b8ab (Improve the "deploying the sample" guidance under README)
 
     ```sh
     scripts/pre_tf_setup.sh

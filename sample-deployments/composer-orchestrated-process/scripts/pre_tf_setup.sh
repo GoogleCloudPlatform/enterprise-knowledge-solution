@@ -93,7 +93,13 @@ section_open  "Set Application Default Credentials to be used by Terraform"
     gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
 section_close
 
-##TODO: build is done in global region, does not respect the specified region
 section_open "Build and push container image to Artifact Registry for Form Processor"
     ../../components/processing/form_parser/build/build_container_image.sh
 section_close
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> 5cb91ac (Improve the "deploying the sample" guidance under README)
+>>>>>>> 5e6b8ab (Improve the "deploying the sample" guidance under README)
