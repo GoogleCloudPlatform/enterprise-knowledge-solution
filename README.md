@@ -31,25 +31,12 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 
 1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
-1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
     - Organization Policy Admin
     - Project IAM Admin
     - Service Account Admin
     - Service Account Token Creator
     - Service Usage Admin
-
-1. Validate whether the following Organization Policies are enforced on this project, which can conflict with deploying the web-UI interface.
-    * `compute.vmExternalIpAccess`
-    * `compute.requireShieldedVm`
-    * `iam.allowedPolicyMemberDomains`
-
-    These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](./components/webui/README.md#deploy-locally) section.
-
-- You need a [Document AI Custom Document Classifier]() in your GCP Project. You can create a [Custom Document Classifier in the Google Cloud Console](https://cloud.google.com/document-ai/docs/custom-classifier).
-
-- You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
-
-- We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
 
 ### Deploying the Sample
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
@@ -95,7 +82,10 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
     - Enables the required IAM roles used for underlying Cloud Build processes
     - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
-    - Validate common org policies that might interfere with your deployment
+    - Validate common org policies that might interfere with deploying the Web-UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web-UI component during by setting the Terraform variable `deploy_ui` to `false`.
+        - `compute.vmExternalIpAccess`
+        - `compute.requireShieldedVm`
+        - `iam.allowedPolicyMemberDomains`
     - Build a custom container image used for form parsing
 
     ```sh
@@ -231,3 +221,9 @@ Once the workflow completes successfully, all documents will be imported into th
     scripts/delete_doc.sh -b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]
     ```
 For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
+
+### Customizing the document classifier
+
+To classify documents, you must [create a custom document classifier in the Google Cloud console](https://cloud.google.com/document-ai/docs/custom-classifier).
+ - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
+ - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
