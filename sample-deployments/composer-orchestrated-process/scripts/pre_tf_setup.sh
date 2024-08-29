@@ -36,11 +36,6 @@ section_open  "Setting the Google Cloud project to: ${PROJECT_ID}"
     gcloud config set project "${PROJECT_ID}"
 section_close
 
-#section_open  "SDK login for the user "
-#    gcloud auth login
-#    gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
-#section_close
-
 section_open "Enable the required APIs "
     enable_all_apis
 section_close
@@ -53,12 +48,12 @@ section_open "Explicitly declare underlying permissions for Cloud Build processe
     enable_builder_roles
 section_close
 
-##TODO:need to use policy analyzer to check effective policy. Can't assume the user always wants to remove the constraint.
-#section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
+
+section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
     check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
     check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
-#section_close
+section_close
 
 section_open  "Set Application Default Credentials to be used by Terraform"
     gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}

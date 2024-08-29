@@ -78,6 +78,7 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     export REGION="<Google Cloud Region for deploying the resources>"
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
     export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
     ```
 
 1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:
