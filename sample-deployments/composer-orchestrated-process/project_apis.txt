@@ -1,6 +1,8 @@
-cloudresourcemanager.googleapis.com
-serviceusage.googleapis.com
-iam.googleapis.com
-compute.googleapis.com
-orgpolicy.googleapis.com
+artifactregistry.googleapis.com
 cloudbuild.googleapis.com
+cloudresourcemanager.googleapis.com
+compute.googleapis.com
+documentai.googleapis.com
+iam.googleapis.com
+orgpolicy.googleapis.com
+serviceusage.googleapis.com
