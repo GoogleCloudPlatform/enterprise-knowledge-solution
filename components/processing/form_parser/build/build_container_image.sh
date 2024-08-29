@@ -23,4 +23,4 @@ else
 fi
 
 gcloud auth configure-docker $REGION-docker.pkg.dev
-gcloud builds submit ../../components/processing/form_parser/src --pack image=$REGION-docker.pkg.dev/$PROJECT_ID/dpu-form-parser-repo/dpu-form-processor:latest --project $PROJECT_ID
+gcloud builds submit ../../components/processing/form_parser/src --pack image=$REGION-docker.pkg.dev/$PROJECT_ID/dpu-form-parser-repo/dpu-form-processor:latest --project $PROJECT_ID --region=$REGION
