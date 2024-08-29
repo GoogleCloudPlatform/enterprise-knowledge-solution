@@ -32,10 +32,11 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 1. You have already completed [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensured that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
 1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account, your user identity must have [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
-    - Service Account Admin
+    - Organization Policy Admin
     - Project IAM Admin
+    - Service Account Admin
+    - Service Account Token Creator
     - Service Usage Admin
-    - Organization Policy Viewer
 
 1. Validate whether the following Organization Policies are enforced on this project, which can conflict with deploying the web-UI interface.
     * `compute.vmExternalIpAccess`
@@ -51,13 +52,12 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
 - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
 
 ### Deploying the Sample
-1. To deploy this repository using an online terminal with software preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
-   To deploy this repository using a local terminal:
+   Alternatively, to deploy this repository using a local terminal:
     1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
     1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
     1. [install the git CLI](https://github.com/git-guides/install-git)
-    1. [set up application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
 
 1. Clone this repository
 
@@ -71,6 +71,14 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     ```
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
+1. Identify the service account you will use to deploy resources in this repo.
+   Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
+
+   ```sh
+   gcloud iam service-accounts create deployer \
+     --description="The service account used to deploy Enterprise Knowledge Search resources"
+   ```
+
 1. Set the following environment variables:
 
     ```sh
@@ -81,21 +89,26 @@ This section provides a step-by-step instructions on how to deploy the `Enterpri
     export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
     ```
 
-1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:
+1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
+    - Validate software dependencies
     - Enable the required APIs defined in `project_apis.txt`.
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
-    - Authenticate the [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Enables the required IAM roles used for underlying Cloud Build processes
+    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
     - Validate common org policies that might interfere with your deployment
+    - Build a custom container image used for form parsing
 
     ```sh
     scripts/pre_tf_setup.sh
     ```
+
 1. Initialize Terraform:
 
     ```sh
     terraform init
     ```
-1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
+
+1. Create a terraform.tfvars file with the following variables:
 
         project_id                  = # Your Google Cloud project ID.
 

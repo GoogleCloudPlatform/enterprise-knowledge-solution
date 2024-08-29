@@ -28,11 +28,8 @@ section_open "Check if the necessary dependencies are available: gcloud, terrafo
     check_exec_version "terraform"
 section_close
 
-section_open "Check if the necessary variables are set: PROJECT_ID"
+section_open "Check and set PROJECT_ID"
     check_environment_variable "PROJECT_ID" "the Google Cloud project that Terraform will provision the resources in"
-section_close
-
-section_open  "Setting the Google Cloud project to: ${PROJECT_ID}"
     gcloud config set project "${PROJECT_ID}"
 section_close
 
@@ -59,12 +56,6 @@ section_open  "Set Application Default Credentials to be used by Terraform"
     gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
 section_close
 
-##TODO: build is done in global region, does not respect the specified region
 section_open "Build and push container image to Artifact Registry for Form Processor"
     ../../components/processing/form_parser/build/build_container_image.sh
 section_close
-
-section_open "Build and push container image to Artifact Registry for Form Processor"
-    ../../components/processing/form_parser/build/build_container_image.sh
-section_close
-
