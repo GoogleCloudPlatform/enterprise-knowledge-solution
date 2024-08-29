@@ -69,3 +69,7 @@ section_open "Build and push container image to Artifact Registry for Form Proce
     ../../components/processing/form_parser/build/build_container_image.sh
 section_close
 
+section_open "Build and push container image to Artifact Registry for Form Processor"
+    ../../components/processing/form_parser/build/build_container_image.sh
+section_close
+

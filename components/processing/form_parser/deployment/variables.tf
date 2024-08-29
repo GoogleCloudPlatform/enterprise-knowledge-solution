@@ -35,6 +35,18 @@ variable "docai_form_processor_name" {
   default     = "dpu-docai-form-processor-2"
 }
 
+variable "dpu_run_service_account" {
+  description = "Value of the Service Account Id for Cloud Run Job running DocAI Form Parser"
+  type        = string
+  default     = "dpu-form-parser-sa"
+}
+
+variable "dpu_run_service_account_display_name" {
+  description = "Value of the Service Account name for Cloud Run Job running DocAI Form Parser"
+  type        = string
+  default     = "service account name for Cloud Run Job running DocAI Form Parser"
+}
+
 variable "cloud_run_job_name" {
   description = "Google Cloud region where compute services are located."
   type        = string

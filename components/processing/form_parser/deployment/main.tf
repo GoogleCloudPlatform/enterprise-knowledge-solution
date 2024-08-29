@@ -19,12 +19,36 @@ resource "google_document_ai_processor" "docai-form-processor" {
   type         = "FORM_PARSER_PROCESSOR"
 }
 
+resource "google_service_account" "dpu_run_service_account" {
+  account_id   = var.dpu_run_service_account
+  display_name = var.dpu_run_service_account_display_name
+}
+
+resource "google_project_iam_member" "bigquery_data_editor" {
+  project = var.project_id
+  role    = "roles/bigquery.dataEditor"
+  member  = "serviceAccount:${google_service_account.dpu_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "documentai_editor" {
+  project = var.project_id
+  role    = "roles/documentai.editor"
+  member  = "serviceAccount:${google_service_account.dpu_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.dpu_run_service_account.email}"
+}
+
 resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.cloud_run_job_name
   location = var.region
 
   template {
     template {
+      service_account = google_service_account.dpu_run_service_account.email
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/dpu-form-parser-repo/dpu-form-processor:latest"
         env {
@@ -40,12 +64,18 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
           value = google_document_ai_processor.docai-form-processor.name
         }
         env {
-          name  = "GCS_OUTPUT_PREFIX"
+          name = "GCS_OUTPUT_PREFIX"
+          # Pass value from composer
           value = "gs://${var.gcs_output_prefix}/pdf-forms/output"
         }
         env {
           name  = "GCS_INPUT_PREFIX"
           value = "gs://${var.gcs_input_prefix}/pdf-forms/input"
+        }
+        env {
+          name = "BQ_TABLE_ID"
+          # Pass value from composer @todo remove this table once composer is integrated
+          value = "prj-14-376417.docs_store.sample-2"
         }
       }
     }

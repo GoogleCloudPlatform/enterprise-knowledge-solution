@@ -21,7 +21,7 @@ provider "google" {
 locals {
   cloud_run_job_name = "doc-processor"
   dpu_label = {
-    goog-packaged-solution : "dpu-solution"
+    goog-packaged-solution : "eks-solution"
   }
 }
 
@@ -86,7 +86,7 @@ module "form_parser_processor" {
   source            = "../../components/processing/form_parser/deployment"
   project_id        = var.project_id
   region            = var.region
-  location          = var.vertex_ai_data_store_region
+  location          = var.docai_location
   gcs_input_prefix  = module.common_infra.gcs_process_bucket_name
   gcs_output_prefix = module.common_infra.gcs_process_bucket_name
 }
@@ -106,6 +106,7 @@ module "dpu_workflow" {
     DPU_DATA_STORE_REGION  = var.vertex_ai_data_store_region
     DOC_PROCESSOR_JOB_NAME = module.processor.cloud_run_job_name
     DPU_DATA_STORE_ID      = google_discovery_engine_data_store.dpu_ds.data_store_id
+    FORMS_PARSER_JOB_NAME  = module.form_parser_processor.cloud_run_job_name
   }
 }
 

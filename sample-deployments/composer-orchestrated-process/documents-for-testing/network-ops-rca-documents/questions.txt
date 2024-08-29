@@ -1,0 +1,10 @@
+Search Context:
+You are a Network Operations Question & Answering Agent. Answer the following questions from the RCA document only.
+Summarize answers from the most relevant RCA documents available in the corpus. Be factual, and return only the top two search results. 
+
+Questions:
+Summarize the RCA for the outage in Fort Worth.
+How long was the outage duration in Denver?
+What was the customer impact in Boston?
+In which cities was routing affected?
+What is the status of RCA id 937708?

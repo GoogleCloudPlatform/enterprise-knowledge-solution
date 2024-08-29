@@ -24,8 +24,10 @@ import sys
 import pdf_classifier
 from airflow import DAG  # type: ignore
 from airflow.models.param import Param  # type: ignore
-from airflow.operators.python import (BranchPythonOperator,  # type: ignore
-                                      PythonOperator)
+from airflow.operators.python import (
+    BranchPythonOperator,  # type: ignore
+    PythonOperator,
+)
 from airflow.operators.dummy import DummyOperator  # type: ignore
 from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator  # type: ignore
@@ -36,7 +38,7 @@ from google.api_core.client_options import ClientOptions  # type: ignore
 from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
 from google.cloud import discoveryengine, storage
 
-sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 default_args = {
     "owner": "airflow",
@@ -47,7 +49,8 @@ default_args = {
     "retries": 0,
 }
 
-USER_AGENT = "cloud-solutions/dpu-agent-builder-v1"
+USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
+
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
@@ -85,7 +88,7 @@ def generate_mv_params(**context):
     input_folder_with_prefix = f"{input_folder}/" if input_folder else ""
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     parameter_obj_list = []
-    
+
     for typ in files_to_process.keys():
         parameter_obj = {
             "source_object": f"{input_folder_with_prefix}*.{typ}",
@@ -113,8 +116,10 @@ def data_store_import_docs(**context):
     )
     parent = client.branch_path(
         project=bq_table["project_id"],
-        location=data_store_region,   # pyright: ignore[reportArgumentType]
-        data_store=os.environ.get("DPU_DATA_STORE_ID"),   # pyright: ignore[reportArgumentType]
+        location=data_store_region,  # pyright: ignore[reportArgumentType]
+        data_store=os.environ.get(
+            "DPU_DATA_STORE_ID"
+        ),  # pyright: ignore[reportArgumentType]
         branch="default_branch",
     )
     request = discoveryengine.ImportDocumentsRequest(
@@ -172,10 +177,30 @@ def generete_output_table_name(**context):
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
+
+def generate_form_process_job_params(**context):
+    # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    bq_table_id = (
+        f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    )
+
+    # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
+    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    process_folder = context["ti"].xcom_pull(key="process_folder")
+    gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/input/"
+    gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-forms/output/"
+
+    context["ti"].xcom_push(key="output_table_id", value=bq_table_id)
+    context["ti"].xcom_push(key="gcs_input_prefix", value=gcs_input_prefix)
+    context["ti"].xcom_push(key="gcs_output_prefix", value=gcs_output_prefix)
+
+
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = f"{process_folder}/pdf-forms"
+    pdf_forms_folder = f"{process_folder}/pdf-forms/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
+
 
 def generate_pdf_forms_list(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -186,26 +211,35 @@ def generate_pdf_forms_list(**context):
     location = context["params"]["pdf_classifier_location"]
     processor_id = context["params"]["pdf_classifier_processor_id"]
 
-    pdf_forms_list=[]
+    pdf_forms_list = []
     storage_client = storage.Client()
     bucket = storage_client.bucket(process_bucket)
 
-    if project_id.strip() == "" or location.strip() == "" or processor_id.strip() == "":
+    if (
+        processor_id is None
+        or project_id.strip() == ""
+        or location is None
+        or location.strip() == ""
+        or processor_id is None
+        or processor_id.strip() == ""
+    ):
         return pdf_forms_list
 
-    blobs = bucket.list_blobs(prefix=process_folder+"/pdf/")
+    blobs = bucket.list_blobs(prefix=process_folder + "/pdf/")
     for blob in blobs:
         if process_bucket is not None:
-            if pdf_classifier.is_form(project_id=project_id,
-                        location=location,
-                        processor_id=processor_id,
-                        file_storage_bucket=process_bucket,
-                        file_path=blob.name,
-                        mime_type="application/pdf"):
+            if pdf_classifier.is_form(
+                project_id=project_id,
+                location=location,
+                processor_id=processor_id,
+                file_storage_bucket=process_bucket,
+                file_path=blob.name,
+                mime_type="application/pdf",
+            ):
                 pdf_form = {
-                    "source_object": f"{blob.name}",
+                    "source_object": blob.name,
                     "destination_bucket": process_bucket,
-                    "destination_object": f"{process_folder}/pdf-forms/"
+                    "destination_object": f"{process_folder}/pdf-forms/input/",
                 }
                 pdf_forms_list.append(pdf_form)
 
@@ -223,6 +257,7 @@ with DAG(
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "agent-builder"},
+                {"file-suffix": "docx", "processor": "agent-builder"},
                 {"file-suffix": "txt", "processor": "agent-builder"},
                 {"file-suffix": "html", "processor": "agent-builder"},
                 {"file-suffix": "msg", "processor": "dpu-doc-processor"},
@@ -315,13 +350,11 @@ with DAG(
     ).expand_kwargs(generate_pdf_forms_l.output)
 
     move_files_done = DummyOperator(
-        task_id='move_files_done',
-        trigger_rule=TriggerRule.ALL_DONE
+        task_id="move_files_done", trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     forms_pdf_moved_or_skipped = DummyOperator(
-        task_id='forms_pdf_moved_or_skipped',
-        trigger_rule=TriggerRule.ALL_DONE
+        task_id="forms_pdf_moved_or_skipped", trigger_rule=TriggerRule.ALL_DONE
     )
 
     create_output_table_name = PythonOperator(
@@ -332,7 +365,9 @@ with DAG(
 
     create_output_table = create_bigquery_table = BigQueryCreateEmptyTableOperator(
         task_id="create_output_table",
-        dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),  # pyright: ignore[reportArgumentType]
+        dataset_id=os.environ.get(
+            "DPU_OUTPUT_DATASET"
+        ),  # pyright: ignore[reportArgumentType]
         table_id="{{ ti.xcom_pull(task_ids='create_output_table_name', key='output_table_name') }}",
         schema_fields=[
             {"name": "id", "mode": "REQUIRED", "type": "STRING", "fields": []},
@@ -370,32 +405,79 @@ with DAG(
         provide_context=True,
     )
 
+    import_forms_to_data_store = PythonOperator(
+        task_id="import_forms_to_data_store",
+        python_callable=data_store_import_docs,
+        execution_timeout=timedelta(seconds=3600),
+        provide_context=True,
+    )
+
+    create_form_process_job_params = PythonOperator(
+        task_id="create_form_process_job_params",
+        python_callable=generate_form_process_job_params,
+        provide_context=True,
+    )
+
+    execute_forms_parser = CloudRunExecuteJobOperator(
+        # Calling os.environ[] instead of using the .get method to verify we
+        # have set environment variables, not allowing None values.
+        project_id=os.environ["GCP_PROJECT"],
+        region=os.environ["DPU_REGION"],
+        task_id="execute_forms_parser",
+        job_name=os.environ["FORMS_PARSER_JOB_NAME"],
+        deferrable=False,
+        overrides={
+            "container_overrides": [
+                {
+                    "env": [
+                        {
+                            "name": "BQ_TABLE_ID",
+                            "value": "{{ ti.xcom_pull(key='output_table_id') }}",
+                        },
+                        {
+                            "name": "GCS_INPUT_PREFIX",
+                            "value": "{{ ti.xcom_pull(key='gcs_input_prefix') }}",
+                        },
+                        {
+                            "name": "GCS_OUTPUT_PREFIX",
+                            "value": "{{ ti.xcom_pull(key='gcs_output_prefix') }}",
+                        },
+                    ]
+                }
+            ],
+            "task_count": 1,
+            "timeout": "300s",
+        },
+    )
+
     (
         GCS_Files
         >> process_supported_types
         >> has_files
         >> [create_process_folder, skip_bucket_creation]
-    )   # pyright: ignore[reportOperatorIssue]
-    (
-        create_process_folder
-        >> generate_files_move_parameters
-        >> move_to_processing
-    )
+    )  # pyright: ignore[reportOperatorIssue]
+    (create_process_folder >> generate_files_move_parameters >> move_to_processing)
     (
         move_to_processing
         >> generate_pdf_forms_l
         >> move_forms
         >> forms_pdf_moved_or_skipped
     )
-    (
-        move_to_processing
-        >> move_files_done
-    )
+    (move_to_processing >> move_files_done)
     (
         [move_files_done, forms_pdf_moved_or_skipped]
         >> create_output_table_name
         >> create_output_table
+    )
+    (
+        create_output_table
         >> create_process_job_params
         >> execute_doc_processors
         >> import_docs_to_data_store
+    )
+    (
+        [create_output_table, move_forms]
+        >> create_form_process_job_params
+        >> execute_forms_parser
+        >> import_forms_to_data_store
     )
