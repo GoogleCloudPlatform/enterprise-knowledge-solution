@@ -34,6 +34,7 @@ section_open "Check and set PROJECT_ID"
 section_close
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #section_open  "SDK login for the user "
 #    gcloud auth login
@@ -41,6 +42,8 @@ section_close
 #section_close
 
 >>>>>>> 7773aba (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+>>>>>>> ee09c45 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
 section_open "Enable the required APIs "
     enable_all_apis
 section_close
@@ -57,6 +60,7 @@ section_close
 
 
 section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
+<<<<<<< HEAD
     check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
     check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
@@ -73,10 +77,12 @@ section_close
 
 ##TODO:need to use policy analyzer to check effective policy. Can't assume the user always wants to remove the constraint.
 #section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
+=======
+>>>>>>> ee09c45 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
     check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
     check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
-#section_close
+section_close
 
 section_open  "Set Application Default Credentials to be used by Terraform"
     gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}

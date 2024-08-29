@@ -128,8 +128,11 @@ To deploy this example you need:
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
     export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
 <<<<<<< HEAD
+<<<<<<< HEAD
     export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
 =======
+=======
+>>>>>>> ee09c45 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
 =======
     export REGION="<your Google Cloud region>"
 >>>>>>> ab2d8cd (DocAI Form Parser microservice (#12))
@@ -153,6 +156,9 @@ To deploy this example you need:
     export REGION="<your Google Cloud region for the deployment>"
     export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
 >>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
+=======
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
+>>>>>>> f289fe8 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
     ```
 
 1. Run the following script to setup your environment and your cloud project for running terraform. This configures the following:

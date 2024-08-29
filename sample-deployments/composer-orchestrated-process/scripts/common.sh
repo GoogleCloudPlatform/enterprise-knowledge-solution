@@ -28,11 +28,6 @@ DIVIDER+="\n"
 
 # DECLARE VARIABLES
 <<<<<<< HEAD
-mapfile -t apis_array < project_apis.txt
-mapfile -t roles_array < project_roles.txt
-
-=======
-<<<<<<< HEAD
 declare -a apis_array=("cloudresourcemanager.googleapis.com"
                 "serviceusage.googleapis.com"
                 "iam.googleapis.com"
@@ -43,6 +38,9 @@ declare -a apis_array=("cloudresourcemanager.googleapis.com"
                 )
 =======
 mapfile -t roles_array < project_apis.txt
+=======
+mapfile -t apis_array < project_apis.txt
+>>>>>>> f289fe8 (Improve setup script to to check for effective org policies inherited to this project, not just the setting of an org policy directly at this project)
 mapfile -t roles_array < project_roles.txt
 
 >>>>>>> 95796fc (initial commit. Add minimum set of IAM roles to the setup script. Further testing required to simplify friciton of bootstrapping the SA, dealing with org policies. and behavior where AR is still trying to use the default compute sa)
@@ -122,16 +120,8 @@ check_api_enabled(){
 check_and_set_policy_rule(){
   local _policy_name=$1 _rule_pattern=$2 _rule_set_pattern=$3 _project_id=$4
   echo "policy: ${_policy_name}"
-<<<<<<< HEAD
-  if ! gcloud asset analyze-org-policies --constraint=constraints/$_policy_name \
-    --scope=organizations/$(gcloud projects get-ancestors $4 | grep organization | cut -f1 -d' ') \
-    --filter=consolidated_policy.attached_resource="//cloudresourcemanager.googleapis.com/projects/${_project_id}" \
-    --format="get(consolidatedPolicy.rules)" \
-    | grep -i "${_rule_pattern}"; then
-=======
   ## TODO: this only checks if a policy is set at the project, and ignores inherited policies. Use policy analyzer instead to check for effective policy enforcement https://cloud.google.com/policy-intelligence/docs/analyze-organization-policies#analyze_assets
   if ! gcloud org-policies describe $_policy_name --project="${PROJECT_ID}" | grep -i "${_rule_pattern}" ; then
->>>>>>> db5b804 (Fixed permission issues to create Images in AR that relied on legacy (deprecated) Cloud Build SA)
     if ! set_policy_rule "${_policy_name}" "${_rule_set_pattern}" "${_project_id}" ; then
       echo "Org policy: '${_policy_name}' with rule: '${_rule_pattern}' cannot be set but is required. Contact your org-admin to set the policy before continue with deployment"
       exit 1
