@@ -1,4 +1,4 @@
-roles/artifactregistry.repoAdmin
+roles/artifactregistry.admin
 roles/bigquery.dataOwner
 roles/composer.admin
 roles/compute.networkAdmin
@@ -11,6 +11,7 @@ roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
 roles/resourcemanager.projectIamAdmin
+roles/run.developer
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin
 roles/storage.admin
