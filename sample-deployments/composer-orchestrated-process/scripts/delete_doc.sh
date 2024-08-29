@@ -153,37 +153,34 @@ elif [ "$MODE" = "batch" ]; then
   QUERY="SELECT id, content.uri FROM \`$BQ_TABLE\`;"
   RESULTS=$(bq query --use_legacy_sql=false --format=sparse --project_id="$PROJECT_ID" "$QUERY" | awk 'NR>2')
   # Iterate through results and delete documents from Datastore and GCS
-  while read -r line; do
-    DOC_ID=$(echo "$line" | awk '{print $1}')
-    DOC_URI=$(echo "$line" | awk '{$1 = ""; sub(/^ /, "", $0); print $0}')
+  # Check if any results were returned
+  if [ -z "$RESULTS" ]; then
+      echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
+  else
+    while read -r line; do
+      DOC_ID=$(echo "$line" | awk '{print $1}')
+      DOC_URI=$(echo "$line" | awk '{$1 = ""; sub(/^ /, "", $0); print $0}')
 
-    DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
+      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
 
-    curl -X DELETE \
-      -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
-      -H "x-goog-user-project: $PROJECT_ID" \
-      "${DELETE_URI}"
+      curl -X DELETE \
+        -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+        -H "x-goog-user-project: $PROJECT_ID" \
+        "${DELETE_URI}"
 
-    gsutil rm -r "$DOC_URI"
-    # Conditional logic for DocAI form parser output
-    if [[ $DOC_URI == *"pdf-forms"* && $DOC_URI == *.txt ]]; then
-      JSON_URI="${DOC_URI%.txt}.json"
-      gsutil rm -r "$JSON_URI"
-    else
-      gsutil rm -r "$DOC_URI".json
-    fi
+      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+      "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
 
-    bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-    "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
-
-    echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-  done <<< "$RESULTS"
-
-  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
+      echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
+    done <<< "$RESULTS"
+  fi
 
   # Delete the GCS folder associated with the batch ID
-  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID}"
+  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID//_/-}"
+  echo "Delete the batch GCS-folder: ${GCS_FOLDER}"
   gsutil rm -r "$GCS_FOLDER"
+
+  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
 
   echo "Batch deletion for ID '$BATCH_ID' completed."
 fi
