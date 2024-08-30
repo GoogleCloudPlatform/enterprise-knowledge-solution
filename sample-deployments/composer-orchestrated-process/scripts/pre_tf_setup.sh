@@ -28,20 +28,21 @@ section_open "Check if the necessary dependencies are available: gcloud, terrafo
     check_exec_version "terraform"
 section_close
 
-section_open "Check if the necessary variables are set: PROJECT_ID"
+section_open "Check and set PROJECT_ID"
     check_environment_variable "PROJECT_ID" "the Google Cloud project that Terraform will provision the resources in"
-section_close
-
-section_open  "Setting the Google Cloud project to: ${PROJECT_ID}"
     gcloud config set project "${PROJECT_ID}"
 section_close
 
-section_open  "SDK login"
-    gcloud auth login --update-adc
+section_open "Enable the required APIs for bootstrap scripts"
+    enable_bootstrap_apis
 section_close
 
-section_open "Enable all the required APIs"
-    enable_all_apis
+section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
+    enable_deployer_roles  "${SERVICE_ACCOUNT_ID}"
+section_close
+
+section_open "Explicitly declare underlying permissions for Cloud Build processes"
+    enable_builder_roles
 section_close
 
 section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
@@ -50,7 +51,10 @@ section_open "Check and try to set required org-policies on project: ${PROJECT_I
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
 section_close
 
+section_open  "Set Application Default Credentials to be used by Terraform"
+    gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
+section_close
+
 section_open "Build and push container image to Artifact Registry for Form Processor"
     ../../components/processing/form_parser/build/build_container_image.sh
 section_close
-
