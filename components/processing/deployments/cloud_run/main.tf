@@ -42,6 +42,7 @@ module "project_services" {
     "documentai.googleapis.com",
     "run.googleapis.com",
     "compute.googleapis.com",
+    "containerscanning.googleapis.com"
   ]
 
   # Provide more access to the cloudbuild service account
