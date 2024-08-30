@@ -13,18 +13,21 @@
 # limitations under the License.
 
 ---
-updates:
-  - directory: "/"
-    package-ecosystem: "github-actions"
-    schedule:
-      interval: "daily"
-  - directory: "/"
-    package-ecosystem: "terraform"
-    schedule:
-      interval: "daily"
-  - directory: "/"
-    package-ecosystem: "pip"
-    schedule:
-      interval: "daily"
 version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directoriy: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "terraform"
+    directory: "/components"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/components"
+    schedule:
+      interval: "weekly"
+
 ...
