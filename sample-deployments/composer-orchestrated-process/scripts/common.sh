@@ -56,19 +56,18 @@ create_oauth_consent_config(){
     create_custom_role_iap
     local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
     enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"
-    output=$(gcloud iap oauth-brands list --format="get(name)")
-    if [ $output ] ; then
-        echo "OAuth Consent Screen (brand) $output has already been created"
+    local __iap_brand=$(gcloud iap oauth-brands list --format="get(name)")
+    if [[ $__iap_brand ]] ; then
+        echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
     else
         gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
         --support_email=$IAP_ADMIN_ACCOUNT
     fi
-
-
 }
 
 create_custom_role_iap(){
-    if (gcloud iam roles list --project=$PROJECT_ID | grep customIAPAdmin ); then
+    local __customIapAdmin=$(gcloud iam roles list --project=$PROJECT_ID | grep customIAPAdmin)
+    if [[ $__customIapAdmin ]] ; then
         echo "Custom role projects/$PROJECT_ID/roles/customIAPAdmin has already been created"
     else
         yes | gcloud iam roles create customIAPAdmin --project="${PROJECT_ID}"  \

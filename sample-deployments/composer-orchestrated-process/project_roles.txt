@@ -1,3 +1,4 @@
+projects/${PROJECT_ID}/roles/customIAPAdmin
 roles/artifactregistry.admin
 roles/bigquery.dataOwner
 roles/composer.admin
