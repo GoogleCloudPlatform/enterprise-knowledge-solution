@@ -112,7 +112,6 @@ module "dpu_workflow" {
 
 module "dpu_ui" {
   source                      = "../../components/webui/terraform"
-  count                       = var.deploy_ui ? 1 : 0
   project_id                  = var.project_id
   region                      = var.region
   application_title           = "DPU Web UI"
