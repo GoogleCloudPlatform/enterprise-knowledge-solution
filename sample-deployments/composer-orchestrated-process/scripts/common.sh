@@ -26,10 +26,6 @@ NC='\033[0m' # No Color
 DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
 DIVIDER+="\n"
 
-# DECLARE VARIABLES
-mapfile -t apis_array < project_apis.txt
-mapfile -t roles_array < project_roles.txt
-
 # DISPLAY HELPERS
 
 section_open() {
@@ -55,6 +51,30 @@ check_exec_dependency() {
 
   unset EXECUTABLE_NAME
 }
+
+create_client_auth_config(){
+    create_custom_role
+
+    output=$(gcloud iap oauth-brands list --format="get(name)")
+    if [ $output ] ; then
+        echo "OAuth Consent Screen (brand) $output has already been created"
+    else
+        gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
+     --support_email=$IAP_ADMIN_ACCOUNT
+    fi
+
+
+}
+
+create_custom_role(){
+    if (gcloud iam roles list --project=$PROJECT_ID | grep customClientAuthConfigAdmin ); then
+        echo "Custom role projects/$PROJECT_ID/roles/customClientAuthConfigAdmin has already been created"
+    else
+        yes | gcloud iam roles create customClientAuthConfigAdmin --project="${PROJECT_ID}"  \
+        --file=custom-client-auth-config-admin.yaml
+    fi
+}
+
 
 check_exec_version() {
   EXECUTABLE_NAME="${1}"
@@ -146,11 +166,13 @@ enable_api(){
 
 # enable all apis in the array
 enable_bootstrap_apis () {
+    readarray -t apis_array < project_apis.txt
     for i in "${apis_array[@]}"
     do
       enable_api "$i"
     done
 }
+
 
 # shell script function to enable IAM roles
 enable_role(){
@@ -162,6 +184,7 @@ enable_role(){
 # enable all roles in the roles array for service account used to deploy terraform resources
 enable_deployer_roles () {
     local __principal=serviceAccount:$1
+    readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
         echo $i

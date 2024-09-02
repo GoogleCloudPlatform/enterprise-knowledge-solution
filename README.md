@@ -37,6 +37,7 @@ To deploy this solution, perform the follow steps:
 1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
     - Organization Policy Admin
     - Project IAM Admin
+    - Role Admin
     - Service Account Admin
     - Service Account Token Creator
     - Service Usage Admin
