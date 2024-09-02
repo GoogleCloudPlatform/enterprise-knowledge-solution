@@ -53,25 +53,26 @@ check_exec_dependency() {
 }
 
 create_client_auth_config(){
-    create_custom_role
-
+    create_custom_role_iap
+    local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"
     output=$(gcloud iap oauth-brands list --format="get(name)")
     if [ $output ] ; then
         echo "OAuth Consent Screen (brand) $output has already been created"
     else
         gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
-     --support_email=$IAP_ADMIN_ACCOUNT
+        --support_email=$IAP_ADMIN_ACCOUNT
     fi
 
 
 }
 
-create_custom_role(){
-    if (gcloud iam roles list --project=$PROJECT_ID | grep customClientAuthConfigAdmin ); then
-        echo "Custom role projects/$PROJECT_ID/roles/customClientAuthConfigAdmin has already been created"
+create_custom_role_iap(){
+    if (gcloud iam roles list --project=$PROJECT_ID | grep customIAPAdmin ); then
+        echo "Custom role projects/$PROJECT_ID/roles/customIAPAdmin has already been created"
     else
-        yes | gcloud iam roles create customClientAuthConfigAdmin --project="${PROJECT_ID}"  \
-        --file=custom-client-auth-config-admin.yaml
+        yes | gcloud iam roles create customIAPAdmin --project="${PROJECT_ID}"  \
+        --file=custom_iap_brand_admin.yaml
     fi
 }
 
@@ -176,19 +177,19 @@ enable_bootstrap_apis () {
 
 # shell script function to enable IAM roles
 enable_role(){
-    local __role=$1
-    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$__principal
+    local __role=$1 __principal=$2
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$2
     unset __role
+    unset __principal
 }
 
 # enable all roles in the roles array for service account used to deploy terraform resources
 enable_deployer_roles () {
-    local __principal=serviceAccount:$1
+    local __principal="serviceAccount:$1"
     readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
-        echo $i
-        enable_role "$i" "serviceAccount:$__principal"
+        enable_role "$i" "$__principal"
     done
     unset __principal
 }
@@ -196,11 +197,11 @@ enable_deployer_roles () {
 # enable a specific set of roles for the default Compute SA implicitly used by Cloud Build. https://cloud.google.com/build/docs/cloud-build-service-account-updates
 enable_builder_roles () {
     local __PROJECTNUM=$(gcloud projects describe $PROJECT_ID --format="get(projectNumber)")
-    local __principal=serviceAccount:"$__PROJECTNUM-compute@developer.gserviceaccount.com"
+    local __principal="serviceAccount:$__PROJECTNUM-compute@developer.gserviceaccount.com"
     ## necessary permissions for building AR
     for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"
     do
-        enable_role "$i" "serviceAccount:$__principal"
+        enable_role "$i" "$__principal"
     done
     unset __principal
     unset __PROJECTNUM

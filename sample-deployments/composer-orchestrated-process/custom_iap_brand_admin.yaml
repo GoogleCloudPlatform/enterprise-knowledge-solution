@@ -1,5 +1,5 @@
-title: "Custom Client Auth Config Admin"
-description: "Custom role for configuring the OAuth consent screen required by IAP"
+title: "Custom IAP brand Admin"
+description: "Custom role for configuring the OAuth consent screen (brand) required by IAP"
 stage: "BETA"
 includedPermissions:
  - clientauthconfig.brands.list

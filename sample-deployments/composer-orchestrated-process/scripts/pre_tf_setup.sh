@@ -43,7 +43,7 @@ section_open "create custom role for Client Auth Config"
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
-    enable_deployer_roles  "${SERVICE_ACCOUNT_ID}"
+    enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
 section_close
 
 section_open "Explicitly declare underlying permissions for Cloud Build processes"
