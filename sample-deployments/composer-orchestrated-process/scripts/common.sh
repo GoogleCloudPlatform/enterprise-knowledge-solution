@@ -52,7 +52,7 @@ check_exec_dependency() {
   unset EXECUTABLE_NAME
 }
 
-create_client_auth_config(){
+create_oauth_consent_config(){
     create_custom_role_iap
     local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
     enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"

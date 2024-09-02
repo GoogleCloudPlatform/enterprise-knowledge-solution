@@ -23,11 +23,7 @@ variable "region" {
 }
 
 variable "application_title" {
-  description = "Document Processing and Understanding App"
-}
-variable "iap_admin_account" {
-  description = "Account used for manage Oath brand and IAP"
-  type        = string
+  description = "Enterprise Knowledge Search app"
 }
 
 variable "artifact_repo" {

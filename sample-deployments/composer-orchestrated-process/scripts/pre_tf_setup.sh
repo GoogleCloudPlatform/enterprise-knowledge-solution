@@ -38,12 +38,12 @@ section_open "Enable the required APIs for bootstrap scripts"
    enable_bootstrap_apis
 section_close
 
-section_open "create custom role for Client Auth Config"
-    create_client_auth_config
-section_close
-
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
     enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
+section_close
+
+section_open "Setup OAuth consent screen (brand) required for IAP"
+    create_oauth_consent_config
 section_close
 
 section_open "Explicitly declare underlying permissions for Cloud Build processes"
