@@ -33,7 +33,12 @@ variable "artifact_repo_name" {
   default     = ""
 }
 
-variable "cloud_run_job_name" {
+variable "cloud_build_service_account_email" {
+  description = "IAM service account email used for cloud build."
+  type        = string
+}
+
+variable "classifier_cloud_run_job_name" {
   description = "Doc classifier job name"
   type        = string
   default     = "doc-classifier"

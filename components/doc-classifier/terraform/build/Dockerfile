@@ -23,9 +23,9 @@ COPY --chown=app requirements.txt $HOME
 RUN python3 -m uv pip install --require-hashes -r $HOME/requirements.txt
 
 # Copy and install the libraries to the image
-COPY --from=src --chown=app / /components/doc-classifier/src/
+COPY --from=libs --chown=app / /components/doc-classifier/libs/
 RUN python3 -m uv pip install \
-  -e components/doc-classifier/src
+  -e components/doc-classifier/libs
 
 # Switch to default user
 WORKDIR $HOME

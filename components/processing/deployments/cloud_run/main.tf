@@ -23,7 +23,7 @@ locals {
     "${path.module}/build/requirements.in",
   ]
   cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : fileexists(f) ? filesha512(f) : sha512("file-not-found")]))
-  service_account_name     = var.cloud_run_job_name
+  service_account_name     = var.processing_cloud_run_job_name
 }
 
 # Enable APIs
@@ -64,22 +64,6 @@ module "project_services" {
   ]
 }
 
-module "cloud_build_account" {
-  source     = "terraform-google-modules/service-accounts/google"
-  version    = "~> 4.2"
-  project_id = var.project_id
-  names      = ["cloud-build"]
-  project_roles = [
-    "${var.project_id}=>roles/logging.logWriter",
-    "${var.project_id}=>roles/storage.objectViewer",
-    "${var.project_id}=>roles/artifactregistry.writer",
-    "${var.project_id}=>roles/run.developer",
-    "${var.project_id}=>roles/iam.serviceAccountUser",
-  ]
-  display_name = "Cloud Build Service Account"
-  description  = "specific custom service account for Cloud Build"
-}
-
 module "doc_processor_account" {
   source     = "terraform-google-modules/service-accounts/google"
   version    = "~> 4.2"
@@ -94,17 +78,6 @@ module "doc_processor_account" {
   description  = "Account used to run the document processing jobs"
 }
 
-# Propagation time for change of access policy typically takes 2 minutes
-# according to https://cloud.google.com/iam/docs/access-change-propagation
-# this wait make sure the policy changes are propagated before proceeding
-# with the build
-resource "time_sleep" "wait_for_policy_propagation" {
-  create_duration = "120s"
-  depends_on = [
-    module.cloud_build_account
-  ]
-}
-
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account
 resource "local_file" "cloudbuild_cloud_run" {
   filename = "${path.module}/build/cloudbuild.yaml"
@@ -113,9 +86,9 @@ resource "local_file" "cloudbuild_cloud_run" {
     registry_url          = local.registry_url,
     region                = var.region,
     service_account       = module.doc_processor_account.email
-    job_name              = var.cloud_run_job_name
-    cloud_run_job_name    = var.cloud_run_job_name,
-    build_service_account = module.cloud_build_account.email
+    job_name              = var.processing_cloud_run_job_name
+    processing_cloud_run_job_name    = var.processing_cloud_run_job_name
+    build_service_account = var.cloud_build_service_account_email
   })
 }
 
@@ -125,14 +98,10 @@ module "gcloud" {
   version = "~> 3.4"
 
   create_cmd_entrypoint = "gcloud"
-  create_cmd_body       = "builds submit --region ${var.region} --project ${var.project_id} --config \"${local_file.cloudbuild_cloud_run.filename}\" \"${path.module}/../../../../\""
+  create_cmd_body       = "builds submit --region ${var.region} --project ${var.project_id} --config \"${local_file.cloudbuild_cloud_run.filename}\" \"${path.module}/../../../..\""
   enabled               = true
 
   create_cmd_triggers = {
     source_contents_hash = local.cloud_build_content_hash
   }
-
-  module_depends_on = [
-    time_sleep.wait_for_policy_propagation
-  ]
 }
