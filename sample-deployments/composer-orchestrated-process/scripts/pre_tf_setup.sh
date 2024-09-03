@@ -31,6 +31,7 @@ section_close
 section_open "Check and set mandatory environment variables"
     check_environment_variable "PROJECT_ID" "the Google Cloud project that Terraform will provision the resources in"
     check_environment_variable "SERVICE_ACCOUNT_ID" "the service account that will be used to deploy resources"
+    gcloud config unset billing/quota_project
     gcloud config set project "${PROJECT_ID}"
 section_close
 
