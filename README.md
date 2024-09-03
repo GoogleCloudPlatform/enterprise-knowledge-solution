@@ -63,13 +63,6 @@ To deploy this solution, perform the follow steps:
 
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
-1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
-
-   ```sh
-   gcloud iam service-accounts create deployer \
-     --description="The service account used to deploy Enterprise Knowledge Search resources"
-   ```
-
 1. Set the following environment variables:
 
     ```sh
@@ -77,8 +70,22 @@ To deploy this solution, perform the follow steps:
     export REGION="<Google Cloud Region for deploying the resources>"
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
     export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
-    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
-    export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen.
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. Use an existing terraform service account, or create a new service account for this deployment."
+    export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
+    ```
+
+1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
+
+   ```sh
+   gcloud iam service-accounts create deployer \
+     --description="The service account used to deploy Enterprise Knowledge Search resources" \
+     --project=$PROJECT_ID
+   ```
+
+1. Set the environment variable SERVICE_ACCOUNT_ID based on the outcome of the previous step.
+
+    ```sh
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. "
     ```
 
 1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:

@@ -159,7 +159,7 @@ set_policy_rule(){
 # shell script function to enable api
 enable_api(){
     local __api_endpoint=$1
-    gcloud services enable $__api_endpoint
+    gcloud services enable $__api_endpoint --project=$PROJECT_ID
     check_api_enabled $__api_endpoint
     unset __api_endpoint
 }
