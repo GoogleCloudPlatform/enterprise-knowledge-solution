@@ -20,7 +20,7 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "terraform"
-    directory: "/componets"
+    directory: "/components"
     schedule:
       interval: "weekly"
 
