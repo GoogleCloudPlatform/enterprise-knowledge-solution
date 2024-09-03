@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "cloud_run_job_name" {
+output "classifier_cloud_run_job_name" {
   description = "Cloud Run doc classifier job name"
-  value       = var.cloud_run_job_name
+  value       = var.classifier_cloud_run_job_name
 }
 
-output "doc_classifier_service_account" {
+output "classifier_service_account" {
   description = "Document classifier service account"
   value       = module.doc_classifier_account.email
 }

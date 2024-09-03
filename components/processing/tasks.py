@@ -52,7 +52,7 @@ def cloud_run_local_deploy(c):
         f"{os.getenv('REPOSITORY_REGION')}-docker.pkg.dev/"
         f"{os.getenv('PROJECT_ID')}/{os.getenv('ARTIFACT_REPO_NAME')}"
     )
-    job_name = os.getenv("CLOUD_RUN_JOB_NAME")
+    job_name = os.getenv("PROCESSING_CLOUD_RUN_JOB_NAME")
     image = f"{repo}/{job_name}:latest"
 
     with c.cd(BASE_DIR):

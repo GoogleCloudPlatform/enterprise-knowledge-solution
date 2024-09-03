@@ -53,7 +53,7 @@ steps:
           'run',
           'jobs',
           '--region', '$_REGION',
-          'deploy', '${cloud_run_job_name}',
+          'deploy', '${processing_cloud_run_job_name}',
           '--image=$_IMAGE_TAG',
           '--task-timeout=60m',
           '--service-account', '$_SERVICE_ACCOUNT' ]
