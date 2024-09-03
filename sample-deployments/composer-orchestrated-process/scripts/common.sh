@@ -177,6 +177,7 @@ enable_bootstrap_apis () {
 # shell script function to enable IAM roles
 enable_role(){
     local __role=$1 __principal=$2
+    echo "granting IAM Role $__role to $__principal"
     gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$2
     unset __role
     unset __principal
@@ -188,7 +189,7 @@ enable_deployer_roles () {
     readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
-        enable_role "$i" "$__principal"
+        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal"
     done
     unset __principal
 }
