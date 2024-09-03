@@ -27,19 +27,9 @@ variable "vertex_ai_data_store_region" {
   type        = string
 }
 
-variable "iap_admin_account" {
-  description = "Account used for manage Oath brand and IAP"
-  type        = string
-}
-
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
   type        = list(string)
-}
-
-variable "deploy_ui" {
-  description = "Toggler for the Web-UI module"
-  type        = bool
 }
 
 variable "webui_service_name" {

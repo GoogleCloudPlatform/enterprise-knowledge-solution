@@ -28,17 +28,23 @@ section_open "Check if the necessary dependencies are available: gcloud, terrafo
     check_exec_version "terraform"
 section_close
 
-section_open "Check and set PROJECT_ID"
+section_open "Check and set mandatory environment variables"
     check_environment_variable "PROJECT_ID" "the Google Cloud project that Terraform will provision the resources in"
+    check_environment_variable "SERVICE_ACCOUNT_ID" "the service account that will be used to deploy resources"
+    gcloud config unset billing/quota_project
     gcloud config set project "${PROJECT_ID}"
 section_close
 
 section_open "Enable the required APIs for bootstrap scripts"
-    enable_bootstrap_apis
+   enable_bootstrap_apis
+section_close
+
+section_open "Setup OAuth consent screen (brand) required for IAP"
+    create_oauth_consent_config
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
-    enable_deployer_roles  "${SERVICE_ACCOUNT_ID}"
+    enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
 section_close
 
 section_open "Explicitly declare underlying permissions for Cloud Build processes"

@@ -37,6 +37,7 @@ To deploy this solution, perform the follow steps:
 1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
     - Organization Policy Admin
     - Project IAM Admin
+    - Role Admin
     - Service Account Admin
     - Service Account Token Creator
     - Service Usage Admin
@@ -62,13 +63,6 @@ To deploy this solution, perform the follow steps:
 
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
-1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
-
-   ```sh
-   gcloud iam service-accounts create deployer \
-     --description="The service account used to deploy Enterprise Knowledge Search resources"
-   ```
-
 1. Set the following environment variables:
 
     ```sh
@@ -76,13 +70,29 @@ To deploy this solution, perform the follow steps:
     export REGION="<Google Cloud Region for deploying the resources>"
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
     export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
-    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources"
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. Use an existing terraform service account, or create a new service account for this deployment."
+    export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
+    ```
+
+1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
+
+   ```sh
+   gcloud iam service-accounts create deployer \
+     --description="The service account used to deploy Enterprise Knowledge Search resources" \
+     --project=$PROJECT_ID
+   ```
+
+1. Set the environment variable SERVICE_ACCOUNT_ID based on the outcome of the previous step.
+
+    ```sh
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. "
     ```
 
 1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
     - Validate software dependencies
     - Enable the required APIs defined in `project_apis.txt`.
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
+    - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
     - Enables the required IAM roles used for underlying Cloud Build processes
     - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
     - Validate common org policies that might interfere with deploying the Web UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web UI component during by setting the Terraform variable `deploy_ui` to `false`.
@@ -111,13 +121,7 @@ To deploy this solution, perform the follow steps:
 
         docai_location              = # Sets the location for Document AI service
 
-        iap_admin_account           = # Account used for manage Oath brand and IAP
-
         iap_access_domains          = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])
-
-        deploy_ui                   = # Toggler for the Web UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
-
-        webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
 
 1. Review the proposed changes, and apply them:
 

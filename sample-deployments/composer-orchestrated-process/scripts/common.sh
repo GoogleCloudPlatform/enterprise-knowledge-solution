@@ -26,10 +26,6 @@ NC='\033[0m' # No Color
 DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
 DIVIDER+="\n"
 
-# DECLARE VARIABLES
-mapfile -t apis_array < project_apis.txt
-mapfile -t roles_array < project_roles.txt
-
 # DISPLAY HELPERS
 
 section_open() {
@@ -55,6 +51,30 @@ check_exec_dependency() {
 
   unset EXECUTABLE_NAME
 }
+
+create_oauth_consent_config(){
+    create_custom_role_iap
+    local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"
+    local __iap_brand=$(gcloud iap oauth-brands list --format="get(name)")
+    if [[ $__iap_brand ]] ; then
+        echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
+    else
+        gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
+        --support_email=$IAP_ADMIN_ACCOUNT
+    fi
+}
+
+create_custom_role_iap(){
+    local __customIapAdmin=$(gcloud iam roles list --project=$PROJECT_ID | grep customIAPAdmin)
+    if [[ $__customIapAdmin ]] ; then
+        echo "Custom role projects/$PROJECT_ID/roles/customIAPAdmin has already been created"
+    else
+        yes | gcloud iam roles create customIAPAdmin --project="${PROJECT_ID}"  \
+        --file=custom_iap_brand_admin.yaml
+    fi
+}
+
 
 check_exec_version() {
   EXECUTABLE_NAME="${1}"
@@ -139,33 +159,37 @@ set_policy_rule(){
 # shell script function to enable api
 enable_api(){
     local __api_endpoint=$1
-    gcloud services enable $__api_endpoint
+    gcloud services enable $__api_endpoint --project=$PROJECT_ID
     check_api_enabled $__api_endpoint
     unset __api_endpoint
 }
 
 # enable all apis in the array
 enable_bootstrap_apis () {
+    readarray -t apis_array < project_apis.txt
     for i in "${apis_array[@]}"
     do
       enable_api "$i"
     done
 }
 
+
 # shell script function to enable IAM roles
 enable_role(){
-    local __role=$1
-    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$__principal
+    local __role=$1 __principal=$2
+    echo "granting IAM Role $__role to $__principal"
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$2
     unset __role
+    unset __principal
 }
 
 # enable all roles in the roles array for service account used to deploy terraform resources
 enable_deployer_roles () {
-    local __principal=serviceAccount:$1
+    local __principal="serviceAccount:$1"
+    readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
-        echo $i
-        enable_role "$i" "serviceAccount:$__principal"
+        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal"
     done
     unset __principal
 }
@@ -173,11 +197,11 @@ enable_deployer_roles () {
 # enable a specific set of roles for the default Compute SA implicitly used by Cloud Build. https://cloud.google.com/build/docs/cloud-build-service-account-updates
 enable_builder_roles () {
     local __PROJECTNUM=$(gcloud projects describe $PROJECT_ID --format="get(projectNumber)")
-    local __principal=serviceAccount:"$__PROJECTNUM-compute@developer.gserviceaccount.com"
+    local __principal="serviceAccount:$__PROJECTNUM-compute@developer.gserviceaccount.com"
     ## necessary permissions for building AR
     for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"
     do
-        enable_role "$i" "serviceAccount:$__principal"
+        enable_role "$i" "$__principal"
     done
     unset __principal
     unset __PROJECTNUM
