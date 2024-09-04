@@ -940,9 +940,9 @@ pycparser==2.22 \
     # via
     #   -c reqs/constraints.txt
     #   cffi
-pydantic==2.7.4 \
-    --hash=sha256:0c84efd9548d545f63ac0060c1e4d39bb9b14db8b3c0652338aecc07b5adec52 \
-    --hash=sha256:ee8538d41ccb9c0a9ad3e0e5f07bf15ed8015b481ced539a1759d8cc89ae90d0
+pydantic==2.8.2 \
+    --hash=sha256:6f62c13d067b0755ad1c21a34bdd06c0c12625a22b0fc09c6b149816604f7c2a \
+    --hash=sha256:73ee9fddd406dc318b885c7a2eab8a6472b68b8fb5ba8150949fc3db939f23c8
     # via
     #   -c reqs/constraints.txt
     #   google-cloud-aiplatform
