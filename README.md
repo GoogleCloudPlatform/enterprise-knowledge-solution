@@ -44,6 +44,8 @@ To deploy this solution, you need:
 
 - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
 
+- You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
+
 ### Deploying the Sample
 1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
 1. Clone this repository
