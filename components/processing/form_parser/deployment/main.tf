@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+locals {
+  dpu_label = {
+    goog-packaged-solution : "eks-solution"
+  }
+}
 
 resource "google_document_ai_processor" "docai-form-processor" {
   location     = var.location
@@ -47,6 +52,7 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   location = var.region
 
   template {
+    labels = local.dpu_label
     template {
       service_account = google_service_account.dpu_run_service_account.email
       containers {
