@@ -29,7 +29,7 @@ def load_rows_into_bigquery(rows_to_insert, table_id):
         rows_to_insert: list of rows with each row as json string,
         table_id: bigquery table id
     """
-  USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
+  USER_AGENT = "cloud-solutions/eks-docai"
 
   # Construct a BigQuery client object.
   client = bigquery.Client(client_info=ClientInfo(user_agent=USER_AGENT))

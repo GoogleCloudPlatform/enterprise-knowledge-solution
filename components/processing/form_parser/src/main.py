@@ -53,7 +53,7 @@ def batch_process_documents(
         gcs_output_uri: GCS directory to store the out json files,
         gcs_input_prefix: GCS directory to store input files to be processed
     """
-  USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
+  USER_AGENT = "cloud-solutions/eks-docai"
 
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
