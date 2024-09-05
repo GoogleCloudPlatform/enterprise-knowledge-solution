@@ -19,13 +19,13 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "terraform"
-    directories:
-      - "/components"
-      - "/reqs"
+    directory: "/components"
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
-    directory: "/components"
+    directories:
+      - "/"
+      - "/reqs"
     schedule:
       interval: "daily"
 version: 2
