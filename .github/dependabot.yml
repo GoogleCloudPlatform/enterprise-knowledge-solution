@@ -19,7 +19,14 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "terraform"
-    directory: "/components"
+    directories:
+      - "/components"
+      - "/components/webui/src"
+      - "/components/processing/form_parser/src"
+      - "/components/processing/libs/processor-msg/src"
+      - "/components/processing/libs/processor-base/src"
+      - "/components/processing/libs/processor-xlsx/src"
+      - "/components/dpu-workflow/src"
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
