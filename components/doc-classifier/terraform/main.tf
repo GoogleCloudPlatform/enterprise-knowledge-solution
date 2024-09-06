@@ -71,7 +71,9 @@ module "doc_classifier_account" {
   project_id = var.project_id
   prefix     = "dpu"
   names      = [local.service_account_name]
-  project_roles = []
+  project_roles = [
+    "${var.project_id}=>roles/documentai.apiUser",
+  ]
   display_name = "Doc Classifier Account"
   description  = "Account used to run the document classifier jobs"
 }

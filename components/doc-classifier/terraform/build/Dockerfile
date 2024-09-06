@@ -31,4 +31,4 @@ RUN python3 -m uv pip install \
 WORKDIR $HOME
 USER app
 
-ENTRYPOINT [ "main" ]
+ENTRYPOINT [ "python3", "/components/doc-classifier/libs/src/main.py" ]
