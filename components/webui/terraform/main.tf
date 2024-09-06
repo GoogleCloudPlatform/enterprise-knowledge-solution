@@ -57,18 +57,17 @@ data "google_project" "project" {
  */
 
 # Brand (which web users will see)
-# resource "google_iap_brand" "project_brand" {
-#   project           = data.google_project.project.number
-#   support_email     = var.iap_admin_account
-#   application_title = var.application_title
-#   depends_on        = [module.project_services]
-# }
+resource "google_iap_brand" "project_brand" {
+  project           = data.google_project.project.number
+  support_email     = var.iap_admin_account
+  application_title = var.application_title
+  depends_on        = [module.project_services]
+}
 
 # OAuth Client
 resource "google_iap_client" "project_client" {
   display_name = "DUP Client"
-#   brand        = google_iap_brand.project_brand.name
-  brand        = "projects/${data.google_project.project.number}/brands/${data.google_project.project.number}"
+  brand        = google_iap_brand.project_brand.name
 }
 
 /*
