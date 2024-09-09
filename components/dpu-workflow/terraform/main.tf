@@ -131,8 +131,9 @@ resource "google_composer_environment" "composer_env" {
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
-  for_each = fileset(path.module, "../src/**/*.py")
+  for_each = fileset("${path.module}/../src", "**/*.py")
   name   = "dags/${each.value}"
   bucket = google_composer_environment.composer_env.storage_config.0.bucket
-  source = "${path.module}/${each.value}"
+  source = "${path.module}/../src/${each.value}"
+  detect_md5hash = "true"
 }
