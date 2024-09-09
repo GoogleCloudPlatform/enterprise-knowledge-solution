@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 # pylint: disable=import-error
 
 import os
 import sys
+import logging
 from datetime import datetime, timedelta
 
 from airflow import DAG  # type: ignore
@@ -37,7 +37,7 @@ from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
 from airflow.exceptions import AirflowSkipException
 
-from utils import pdf_classifier, file_utils, datastore_utils, cloud_run_utils
+from utils import file_utils, datastore_utils, cloud_run_utils
 
 sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
@@ -50,6 +50,11 @@ default_args = {
     "retries": 0,
 }
 
+# This is the list of expected potential labels coming back from the classifier
+# any label that is not in this list, would be treated as a "general" pdf and
+# would be processed accordingly.
+# Also note, that labels will be matched case-insensitive and disregarding
+# trailing and leading whitespaces.
 KNOWN_LABELS_FOR_CLASSIFIER = [
     "form"
 ]

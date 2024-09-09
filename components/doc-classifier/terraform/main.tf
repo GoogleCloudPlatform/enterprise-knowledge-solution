@@ -86,7 +86,6 @@ resource "local_file" "cloudbuild_cloud_run" {
     registry_url          = local.registry_url,
     region                = var.region,
     service_account       = module.doc_classifier_account.email
-    job_name              = var.classifier_cloud_run_job_name
     classifier_cloud_run_job_name    = var.classifier_cloud_run_job_name,
     build_service_account = var.cloud_build_service_account_email
   })
