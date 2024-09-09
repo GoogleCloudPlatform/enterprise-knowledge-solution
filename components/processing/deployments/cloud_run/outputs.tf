@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "cloud_run_job_name" {
+output "processing_cloud_run_job_name" {
   description = "Cloud Run doc processor job name"
-  value       = var.cloud_run_job_name
+  value       = var.processing_cloud_run_job_name
 }
 
 output "doc_processor_service_account" {

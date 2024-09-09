@@ -16,6 +16,11 @@ output "artifact_repo" {
   value       = google_artifact_registry_repository.docker-repo
 }
 
+output "cloud_build_service_account" {
+  description = "IAM service account to run builds on top of Cloud Build"
+  value       = module.cloud_build_account
+}
+
 output "project_id" {
   description = "Google Cloud project user by the module."
   value       = module.project_services.project_id

@@ -13,22 +13,12 @@
 # limitations under the License.
 
 variable "project_id" {
-  description = "Google Cloud project where infracture resource such as BigQuery dataset and Artifact repository are deployed"
+  description = "Google Cloud project where infrastructure resource are deployed"
   type        = string
 }
 
 variable "region" {
   description = "Google Cloud region where compute services are located."
-  type        = string
-}
-
-variable "bq_region" {
-  description = "Google Cloud region where BigQuery data is stored."
-  type        = string
-}
-
-variable "gcs_region" {
-  description = "Google Cloud region where GCS data is stored."
   type        = string
 }
 
@@ -46,11 +36,10 @@ variable "artifact_repo_name" {
 variable "cloud_build_service_account_email" {
   description = "IAM service account email used for cloud build."
   type        = string
-  default     = ""
 }
 
-variable "processing_cloud_run_job_name" {
-  description = "Doc processor job name"
+variable "classifier_cloud_run_job_name" {
+  description = "Doc classifier job name"
   type        = string
-  default     = "doc-processor"
+  default     = "doc-classifier"
 }

@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "form_parser_cloud_run_job_name" {
-  description = "Cloud Run form parser job name"
-  value       = var.form_parser_cloud_run_job_name
-}
+(
+  cd "$(dirname $0)/build"
+  docker buildx build --build-context libs=../../src --build-context reqs=../../reqs .
+)
 
-output "form_parser_service_account" {
-  description = "Service Account used for handling form parsing jobs."
-  value = google_service_account.dpu_run_service_account.email
-}

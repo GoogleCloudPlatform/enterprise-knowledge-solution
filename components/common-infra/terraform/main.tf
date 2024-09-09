@@ -38,3 +38,31 @@ resource "google_artifact_registry_repository" "docker-repo" {
   description   = "Docker containers"
   labels        = local.dpu_label
 }
+
+module "cloud_build_account" {
+  source     = "terraform-google-modules/service-accounts/google"
+  version    = "~> 4.2"
+  project_id = var.project_id
+  names      = ["cloud-build"]
+  project_roles = [
+    "${var.project_id}=>roles/logging.logWriter",
+    "${var.project_id}=>roles/storage.objectViewer",
+    "${var.project_id}=>roles/artifactregistry.writer",
+    "${var.project_id}=>roles/run.developer",
+    "${var.project_id}=>roles/iam.serviceAccountUser",
+  ]
+  display_name = "Cloud Build Service Account"
+  description  = "specific custom service account for Cloud Build"
+}
+
+
+# Propagation time for change of access policy typically takes 2 minutes
+# according to https://cloud.google.com/iam/docs/access-change-propagation
+# this wait make sure the policy changes are propagated before proceeding
+# with the build
+resource "time_sleep" "wait_for_policy_propagation" {
+  create_duration = "120s"
+  depends_on = [
+    module.cloud_build_account
+  ]
+}
