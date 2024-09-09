@@ -101,6 +101,7 @@ def generate_classify_job_params_fn(**context):
         raise AirflowSkipException()
     process_folder = context["ti"].xcom_pull(key="process_folder")
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
 
     return cloud_run_utils.get_doc_classifier_job_overrides(
         classifier_project_id=classifier_params["project_id"],
@@ -110,9 +111,9 @@ def generate_classify_job_params_fn(**context):
         process_bucket=process_bucket,
     )
 
-
-  def parse_doc_classifier_output(**context):
+def parse_doc_classifier_output(**context):
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
     process_folder = context["ti"].xcom_pull(key="process_folder")
     parsed_output = cloud_run_utils.read_classifier_job_output(
         process_bucket, process_folder, KNOWN_LABELS_FOR_CLASSIFIER)
@@ -130,8 +131,7 @@ def data_store_import_docs(**context):
     )
     return operation_name
 
-
-  def generate_process_job_params(**context):
+def generate_process_job_params(**context):
     mv_params = context["ti"].xcom_pull(
         key="return_value", task_ids="generate_files_move_parameters"
     )
