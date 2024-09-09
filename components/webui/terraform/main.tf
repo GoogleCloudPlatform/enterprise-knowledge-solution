@@ -56,18 +56,10 @@ data "google_project" "project" {
  * IAP Configuration
  */
 
-# Brand (which web users will see)
-resource "google_iap_brand" "project_brand" {
-  project           = data.google_project.project.number
-  support_email     = var.iap_admin_account
-  application_title = var.application_title
-  depends_on        = [module.project_services]
-}
-
 # OAuth Client
 resource "google_iap_client" "project_client" {
-  display_name = "DUP Client"
-  brand        = google_iap_brand.project_brand.name
+  display_name = "Enterprise Knowledge Search client"
+  brand        = "projects/${data.google_project.project.number}/brands/${data.google_project.project.number}"
 }
 
 /*

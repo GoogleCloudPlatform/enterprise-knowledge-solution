@@ -39,6 +39,7 @@ from airflow.exceptions import AirflowSkipException
 
 from utils import file_utils, datastore_utils, cloud_run_utils
 
+
 sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
 
 default_args = {
@@ -109,7 +110,8 @@ def generate_classify_job_params_fn(**context):
         process_bucket=process_bucket,
     )
 
-def parse_doc_classifier_output(**context):
+
+  def parse_doc_classifier_output(**context):
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     process_folder = context["ti"].xcom_pull(key="process_folder")
     parsed_output = cloud_run_utils.read_classifier_job_output(
@@ -128,7 +130,8 @@ def data_store_import_docs(**context):
     )
     return operation_name
 
-def generate_process_job_params(**context):
+
+  def generate_process_job_params(**context):
     mv_params = context["ti"].xcom_pull(
         key="return_value", task_ids="generate_files_move_parameters"
     )
@@ -169,6 +172,7 @@ def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
     pdf_forms_folder = f"{process_folder}/pdf-form/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
+
 
 with DAG(
     "run_docs_processing",
@@ -401,6 +405,7 @@ with DAG(
             >> create_form_process_job_params
             >> execute_forms_parser
             >> import_forms_to_data_store
+
     )
 
     (

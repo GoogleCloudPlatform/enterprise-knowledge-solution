@@ -1,0 +1,10 @@
+artifactregistry.googleapis.com
+cloudasset.googleapis.com
+cloudbuild.googleapis.com
+cloudresourcemanager.googleapis.com
+compute.googleapis.com
+documentai.googleapis.com
+iam.googleapis.com
+iap.googleapis.com
+orgpolicy.googleapis.com
+serviceusage.googleapis.com

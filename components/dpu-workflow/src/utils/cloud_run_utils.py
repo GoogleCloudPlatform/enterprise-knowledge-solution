@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import logging
 import os
 from enum import Enum
@@ -66,6 +67,7 @@ def forms_parser_job_params(bq_table, process_bucket, process_folder):
     gcs_input_prefix = __build_gcs_path__(process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT)
     gcs_output_prefix = __build_gcs_path__(process_bucket, process_folder,
                                          FolderNames.PDF_FORMS_OUTPUT)
+
     return {
         "overrides": {
             "container_overrides": [

@@ -25,56 +25,93 @@ The solution comprises the following key components:
 
 
 ## Deployment Guide
+
 This section provides a step-by-step instructions on how to deploy the `Enterprise Knowledge Solution` on Google Cloud using Terraform.
 
-### Prerequisites
-To deploy this solution, you need:
-- A [Google Cloud project](https://cloud.google.com/docs/overview#projects) with billing enabled.
-- An account with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles#resource-manager-roles) on the project. This grants the necessary permissions to create and manage resources.
-- An account with the [Organization Policy Admin](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-policies) role assigned within the organization, which is required to modify the following organization policies:
-    * `compute.vmExternalIpAccess`
-    * `compute.requireShieldedVm`
-    * `iam.allowedPolicyMemberDomains`
+### Deploying the sample
 
-    These modifications enable public IP access for the Web-UI interface while securing it through Identity Aware Proxy (IAP). If policy adjustments are not possible, you can opt to exclude the Web-UI component during deployment by setting the Terraform variable `deploy_ui` to `false`. Alternatively, you can deploy the Web-UI locally by referring to the instructions in the [Deploy Locally](./components/webui/README.md#deploy-locally) section.
+To deploy this solution, perform the follow steps:
 
-- You need a [Document AI Custom Document Classifier]() in your GCP Project. You can create a [Custom Document Classifier in the Google Cloud Console](https://cloud.google.com/document-ai/docs/custom-classifier).
+1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
-- You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
+    - Organization Policy Admin
+    - Project IAM Admin
+    - Role Admin
+    - Service Account Admin
+    - Service Account Token Creator
+    - Service Usage Admin
 
-- We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
+1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
-- You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
+   Alternatively, to deploy this repository using a local terminal:
+    1. [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
+    1. [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
+    1. [install the git CLI](https://github.com/git-guides/install-git)
 
-### Deploying the Sample
-1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
-1. Clone this repository
+1. In Cloud Shell or your preferred terminal, clone this repository:
+
+    ```sh
+    git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
+    ```
+
 1. Navigate to the Sample Directory:
 
     ```sh
     cd <YOUR_REPOSITORY>/sample-deployments/composer-orchestrated-process
     ```
+
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
-1. Set environment variable: `PROJECT_ID`
+1. Set the following environment variables:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
     export REGION="<Google Cloud Region for deploying the resources>"
     export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
     export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. Use an existing terraform service account, or create a new service account for this deployment."
+    export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
     ```
-1. Run the following script to setup your environment and your cloud project for running terraform:
+
+1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
+
+   ```sh
+   gcloud iam service-accounts create deployer \
+     --description="The service account used to deploy Enterprise Knowledge Search resources" \
+     --project=$PROJECT_ID
+   ```
+
+1. Set the environment variable SERVICE_ACCOUNT_ID based on the outcome of the previous step.
+
+    ```sh
+    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. "
+    ```
+
+1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
+    - Validate software dependencies
+    - Enable the required APIs defined in `project_apis.txt`.
+    - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
+    - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
+    - Enables the required IAM roles used for underlying Cloud Build processes
+    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Validate common org policies that might interfere with deploying the Web UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web UI component during by setting the Terraform variable `deploy_ui` to `false`.
+        - `compute.vmExternalIpAccess`
+        - `compute.requireShieldedVm`
+        - `iam.allowedPolicyMemberDomains`
+    - Build a custom container image used for form parsing
 
     ```sh
     scripts/pre_tf_setup.sh
     ```
+
 1. Initialize Terraform:
 
     ```sh
     terraform init
     ```
-1. Create a terraform.tfvars file if it does not exist. Initialize the following Terraform variables in terraform.tfvars file:
+
+1. Create a terraform.tfvars file with the following variables:
 
         project_id                  = # Your Google Cloud project ID.
 
@@ -84,13 +121,7 @@ To deploy this solution, you need:
 
         docai_location              = # Sets the location for Document AI service
 
-        iap_admin_account           = # Account used for manage Oath brand and IAP
-
-        iap_access_domains          = # List of domains granted for IAP access to the web-ui (e.g., ["domain:google.com","domain:example.com"])
-
-        deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
-
-        webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
+        iap_access_domains          = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])
 
 1. Review the proposed changes, and apply them:
 
@@ -100,6 +131,7 @@ To deploy this solution, you need:
     The provisioning process may take about 30 minutes to complete.
 
 ### Update your environment with new code/new version
+
 If you update the source code or pull the latest changes from the repository, re-run the following command to apply the changes to your deployed environment:
 
 ```sh
@@ -107,12 +139,12 @@ terraform apply
 ```
 
 ## Usage Guide
-    This guide provides step-by-step instructions on how to use the `Enterprise Knowledge Solution (EKS)` on Google Cloud.
 
-After successful [deployment](./sample-deployments/composer-orchestrated-process/DEPLOYMENT.md), you can test the entire EKS workflow.
+After successfully completing the steps in thge previous section Deployment Guide, you can test the entire EKS workflow.
 
 
 ### Upload Documents
+
 1. Get the Input Bucket Name:
     ```sh
     terraform output gcs_input_bucket_name
@@ -132,15 +164,19 @@ After successful [deployment](./sample-deployments/composer-orchestrated-process
       - HTML
       - TXT
       - ZIP (zip) containing any of above supported file types
+
 ### Run the document processing Workflow
+
 1. Get the Cloud Composer Airflow URI:
     ```sh
     terraform output composer_uri
     ```
     This command will display the web interface URI of the Cloud Composer Airflow environment.
+
 1.  Access the Airflow UI:
     * Open your web browser and navigate to the URI obtained in the previous step.
     * First time you will need to authenticate with your Google Cloud credentials.
+
 1. Trigger the Workflow:
     * In the Airflow UI, locate the DAG (Directed Acyclic Graph) named: `run_docs_processing`, which represents the document processing workflow.
     * Click the "Trigger DAG" button to access the trigger page. Here, you can view the input parameters for the workflow.
@@ -149,51 +185,70 @@ After successful [deployment](./sample-deployments/composer-orchestrated-process
         * pdf_classifier_project_id
         * pdf_classifier_location
         * pdf_classifier_processor_id
+
 1. Monitor Execution Progress:
     * Navigate to the DAG details view using the URL:
     `<composer_uri>/dags/run_docs_processing`  (replace `<composer_uri>` with the URI you obtained earlier).
     * This page displays the progress of each task in the workflow, along with logs and other details.
 
 ### Search and Explore the processed documents
-Once the workflow completes successfully, all documents will be imported into the Vertex AI Agent Builder Data Store named Document Processing & Understanding`.
+
+Once the workflow completes successfully, all documents will be imported into the Vertex AI Agent Builder Data Store named `Document Processing & Understanding`.
+
 1. Get the Agent Build App URI:
     ```sh
     terraform output agent_app_uri
     ```
+
 1.  Access the Agent Build App console:
     * Open your web browser and navigate to the URI obtained in the previous step.
+
 1. Search and Explore:
     * On the console page, you'll find an input bar. Enter your questions or queries related to the documents you've uploaded.
     * The app will provide summarized answers based on the content of your documents, along with references to the specific source documents.
 
-### Search and Explore from EKS Web-UI
-1. Get the EKS Web-UI URI:
+### Search and Explore from EKS Web UI
+
+1. Get the EKS Web UI URI:
     ```sh
     terraform output web_ui_uri
     ```
-1.  Access the EKS Web-UI:
+
+1.  Access the EKS Web UI:
     * Open your web browser and navigate to the URI obtained in the previous step.
     * First time y will need to authenticate with your Google Cloud credentials
+
 1. Search and Explore:
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
 
+For more information on the Web UI component, please refer to its [README](./components/webui/README.md).
+
 ### Delete a document from EKS
+
 1. Identify the document you want to delete:
-    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U. 
+    * Open Agent Builder Datastore and note down the ID and URI of the document that you want to delete from DP&U.
     * Make sure the file in the URI exists in the Google Cloud Storage bucket
     * Please note that this script will not delete the GCS Folder that contains the file
     * Based on the URI, identify and note down the name of the BQ Table that contains the document meta-data
     * Please note that this script will not delete the BQ Table that contains the document meta-data
 
-1. Execute the bash script to delete a single document:  
+1. Execute the bash script to delete a single document:
 
     ```sh
     scripts/delete_doc.sh -d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> -l <LOCATION> [-p <PROJECT_ID>]
-    ```    
-1. Execute the bash script to delete a batch of documents:  
+    ```
+
+1. Execute the bash script to delete a batch of documents:
 
     ```sh
     scripts/delete_doc.sh -b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]
-    ``` 
-For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
+    ```
+
+### Customizing the document classifier
+
+To classify documents, you must [create a custom document classifier in the Google Cloud console](https://cloud.google.com/document-ai/docs/custom-classifier).
+
+ - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
+
+ - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.

@@ -128,11 +128,9 @@ module "dpu_workflow" {
 
 module "dpu_ui" {
   source                      = "../../components/webui/terraform"
-  count                       = var.deploy_ui ? 1 : 0
   project_id                  = var.project_id
   region                      = var.region
   application_title           = "DPU Web UI"
-  iap_admin_account           = var.iap_admin_account
   artifact_repo               = module.common_infra.artifact_repo
   iap_access_domains          = var.iap_access_domains
   vertex_ai_data_store_region = var.vertex_ai_data_store_region
