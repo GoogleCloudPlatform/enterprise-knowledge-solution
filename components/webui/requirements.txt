@@ -326,9 +326,9 @@ google-cloud-core==2.4.1 \
     #   google-cloud-bigquery
     #   google-cloud-firestore
     #   google-cloud-storage
-google-cloud-discoveryengine==0.11.13 \
-    --hash=sha256:4d4957758d0708d8230c9187aa34a924267c3fe2e9499bd65c688369e6bc7476 \
-    --hash=sha256:7e442d5595a50dc9d2303b204ed507a041686e3d23b4dda855ddd87ae5c3e7de
+google-cloud-discoveryengine==0.12.2 \
+    --hash=sha256:138e790af9fb5ea39a6e3cb5d0368a2a3e8b842561423e19b5840a7443955ec3 \
+    --hash=sha256:a90949895bf0f6cea39187b70a4dd8e5d6a1b07b6b3877e48d22c27e1a4efd16
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
@@ -1262,9 +1262,9 @@ smmap==5.0.1 \
     # via
     #   -c reqs/constraints.txt
     #   gitdb
-streamlit==1.36.0 \
-    --hash=sha256:3399a33ea5faa26c05dd433d142eefe68ade67e9189a9e1d47a1731ae30a1c42 \
-    --hash=sha256:a12af9f0eb61ab5832f438336257b1ec20eb29d8e0e0c6b40a79116ba939bc9c
+streamlit==1.38.0 \
+    --hash=sha256:0653ecfe86fef0f1608e3e082aef7eb335d8713f6f31e9c3b19486d1c67d7c41 \
+    --hash=sha256:c4bf36b3ef871499ed4594574834583113f93f077dd3035d516d295786f2ad63
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)

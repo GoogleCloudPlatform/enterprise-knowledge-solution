@@ -75,7 +75,7 @@ st.divider()
 if not 'answer' in st.session_state:
     st.session_state['answer'] = ''
 if not 'sources' in st.session_state:
-    st.session_state['sources'] = []
+    st.session_state['sources'] = []   
 if not 'chosen_row' in st.session_state:
     st.session_state['chosen_row'] = None
 if not 'preamble' in st.session_state:
@@ -93,6 +93,12 @@ st.markdown(
 if not 'preamble' in st.session_state:
     st.session_state['preamble'] = PREAMBLE
 
+my_js = """ const textArea = document.querySelector('.textarea-test')
+    textArea.addEventListener('input',(e)=>{
+    textArea.style.height = "auto"
+    textArea.style.height = '${textArea.scrollHeight}px';
+    }) """
+
 # Render the question
 with st.container():
 
@@ -106,6 +112,7 @@ with st.container():
         placeholder="Search Context",
         key="preamble_new",
         on_change=update_preamble,
+        height=140
     )
 
     def question_change():
@@ -120,25 +127,26 @@ with st.container():
             value="",
             placeholder="Question",
             key="question",
-            on_change=question_change,
+            on_change=question_change
         )
     with example_col:
         st.write("")
         with st.popover("Examples"):
             st.markdown(SAMPLE_QUERIES)
 
-# Render answer if there's an answer
+# Render answer if there's a summary returned in the response
 if st.session_state.answer:
     st.text_area(
         ":blue[Summary Response: ]",
         value=st.session_state.answer,
+        height=140
     )
 
-# Render list of sources used if there are sources
+# Render list of other documents
 if st.session_state.sources:
-    st.session_state['source_id'] = choose_source_id(st.session_state.sources)
+    st.session_state['source_id'] = choose_source_id(st.session_state.sources, "Search Results")
 
-# Render a search result if one is selected
-if 'source_id' in st.session_state and st.session_state.source_id:
+# Render the selected document or reference
+if 'source_id' in st.session_state and st.session_state.source_id: 
   logger.info(f'source_id: {st.session_state.source_id}')
   show_agent_document(st.session_state.source_id)

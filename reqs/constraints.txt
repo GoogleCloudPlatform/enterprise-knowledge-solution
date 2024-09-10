@@ -437,7 +437,7 @@ google-cloud-dataproc==5.10.0
     # via apache-airflow-providers-google
 google-cloud-dataproc-metastore==1.15.3
     # via apache-airflow-providers-google
-google-cloud-discoveryengine==0.11.13
+google-cloud-discoveryengine==0.12.2
     # via processor-web-ui
 google-cloud-dlp==3.18.0
     # via apache-airflow-providers-google
@@ -1076,7 +1076,7 @@ sqlparse==0.5.0
     # via
     #   apache-airflow-providers-common-sql
     #   google-cloud-spanner
-streamlit==1.36.0
+streamlit==1.38.0
     # via
     #   processor-web-ui
     #   streamlit-aggrid
