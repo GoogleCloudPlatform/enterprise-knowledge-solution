@@ -26,6 +26,7 @@ from st_aggrid import (  # type: ignore
     ColumnsAutoSizeMode,
     DataReturnMode,
     AgGridTheme,
+    JsCode,
 )  # type: ignore
 
 
@@ -48,8 +49,11 @@ PREAMBLE = (
 # Show a list of sources (fetched from API), and return the
 # selected source document ID
 #
-def choose_source_id(sources):
-    st.write(":blue[Sources: ]")
+def choose_source_id(sources, label):
+    # print(f'label: {label}')
+    # print(f'sources: {sources}')
+
+    st.write(f":blue[{label}: ]")
     # Render list of sources
     gb = GridOptionsBuilder()
     gb.configure_selection(
@@ -58,22 +62,35 @@ def choose_source_id(sources):
     gb.configure_default_column(
         resizable=True,
     )
-    gb.configure_auto_height(True)
+    gb.configure_column("index", header_name="#", flex=0, width=35)
     gb.configure_column("id", header_name="ID", flex=0)
-    gb.configure_column("title", header_name="Title", flex=0)
+    gb.configure_column("title", header_name="Title", flex=0, width=130)
     gb.configure_column("uri", header_name="GCS", flex=1)
-    MIN_HEIGHT = 5
-    MAX_HEIGHT = 800
-    ROW_HEIGHT = 40
+    gb.configure_auto_height("true")
+    # MIN_HEIGHT = 5
+    # MAX_HEIGHT = 800
+    # ROW_HEIGHT = 60
+    jscode =JsCode("""
+            function(params) {
+                if (params.data.isCitation) {
+                    return {
+                        'color': 'rgb(52, 168, 82)',
+                    }
+                }
+            };
+            """)
+    gridOpts=gb.build()
+    gridOpts['getRowStyle'] = jscode
     df = pd.DataFrame(sources)
     res = AgGrid(
         df,
         theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
-        gridOptions=gb.build(),
+        gridOptions=gridOpts,
+        allow_unsafe_jscode=True,
         columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
         data_return_mode=DataReturnMode.AS_INPUT,
         enable_enterprise_modules=False,
-        height=min(MIN_HEIGHT + len(df) * ROW_HEIGHT, MAX_HEIGHT)
+        # height=min(MIN_HEIGHT + len(df) * ROW_HEIGHT, MAX_HEIGHT)
     )
 
     # Pull out selected row or initial row into selected search result
@@ -118,7 +135,7 @@ def show_gcs_object(
         'text/plain'
     ]
     if content_type in mime_types:
-        col1, col2 = st.columns([15,185])
+        col1, col2 = st.columns([20,185])
         with col1:
             if use_direct_link:
                 link = ('https://console.cloud.google.com/storage/browser/_details/'
@@ -171,7 +188,6 @@ def choose_related_document(related_docs: list, initial_value: int):
         df['full_name'] = df['path'].apply(lambda p: p[len(common_prefix):])
 
         st.write(':blue[Related Documents: ]')
-
         gb = GridOptionsBuilder()
         gb.configure_selection(
             selection_mode='single',
@@ -180,10 +196,15 @@ def choose_related_document(related_docs: list, initial_value: int):
         gb.configure_default_column(
             resizable=True,
         )
+        
         gb.configure_column("name", header_name="Name", flex=1)
         gb.configure_column("mimetype", header_name="Type", flex=0)
         gb.configure_column("status", header_name="Status", flex=0)
         gb.configure_column("full_name", header_name="File", flex=1)
+        gb.configure_auto_height("true")
+        # MIN_HEIGHT = 5
+        # MAX_HEIGHT = 800
+        # ROW_HEIGHT = 60
         res = AgGrid(
             df,
             theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
@@ -191,6 +212,7 @@ def choose_related_document(related_docs: list, initial_value: int):
             columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
             data_return_mode=DataReturnMode.AS_INPUT,
             enable_enterprise_modules=False,
+            # height=min(MIN_HEIGHT + len(df) * ROW_HEIGHT, MAX_HEIGHT)
         )
 
         # Find the chosen row (may be initial if not chosen yet)
@@ -261,5 +283,5 @@ def render_embedded(data: bytes, mime_type: str):
     else:
         base64_file = base64.b64encode(data).decode('utf-8')
         st.markdown(f'<iframe src="data:{mime_type};base64,{base64_file}" '
-                    'width="100%" height="1000" type="{mime_type}"></iframe>',
+                    'width="100%" height="400" type="{mime_type}"></iframe>',
                     unsafe_allow_html=True)

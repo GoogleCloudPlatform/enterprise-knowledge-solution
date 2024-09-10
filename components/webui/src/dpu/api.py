@@ -28,6 +28,7 @@ import streamlit as st # type: ignore
 import json
 
 logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAccessIssue]
+USER_AGENT = "cloud-solutions/eks-webui-v1"
 
 #####
 # 
@@ -57,9 +58,7 @@ def search_service_client() -> discoveryengine.SearchServiceClient:
                 if LOCATION != "global"
                 else None
         ),
-        client_info=ClientInfo(
-          user_agent="cloud-solutions/eks-webui-v1",
-        )
+        client_info=ClientInfo(user_agent=USER_AGENT)
         )
 
 
@@ -119,14 +118,14 @@ def generate_answer(
     request = discoveryengine.SearchRequest(
         serving_config=serving_config,
         query=search_query,
-        page_size=3,
+        page_size=5,
         content_search_spec=content_search_spec,
         query_expansion_spec=discoveryengine.SearchRequest.QueryExpansionSpec(
             condition=discoveryengine.SearchRequest.QueryExpansionSpec.Condition.AUTO,
         ),
         spell_correction_spec=discoveryengine.SearchRequest.SpellCorrectionSpec(
             mode=discoveryengine.SearchRequest.SpellCorrectionSpec.Mode.AUTO
-        ),
+        )
     )
 
     response = client.search(request)
@@ -134,13 +133,31 @@ def generate_answer(
     result = {}
     result["answer"] = response.summary.summary_text
     result["sources"] = []
+    result["citations"] = []
+    
+    idx_set = set()
+    id_set = set()
+    for c in response.summary.summary_with_metadata.citation_metadata.citations:
+        for s in c.sources:
+            ref_index = s.reference_index
+            if ref_index not in idx_set:
+                idx_set.add(ref_index)
+                doc = response.results[ref_index].document
+                id_set.add(doc.id)
+    index = 1
     for r in response.results:
+        id = r.document.id
         res = _document_to_dict(r.document)
         if res:
+            if(id in id_set):
+                res["isCitation"] = True
+            else:
+                res["isCitation"] = False    
+            res["index"] = index
+            index += 1
             result["sources"].append(res)
 
     return result
-
 
 #####
 # 
@@ -148,7 +165,6 @@ def generate_answer(
 #
 # Convert documents (whether search or fetched or listed) into a generic object
 #
-
 
 st.cache_resource
 def _document_to_dict(doc: Document) -> Optional[dict]:
@@ -210,9 +226,8 @@ def document_service_client() -> discoveryengine.DocumentServiceClient:
                 if LOCATION != "global"
                 else None
         ),
-        client_info=ClientInfo(
-          user_agent="cloud-solutions/eks-webui",
-        ))
+        client_info=ClientInfo(user_agent=USER_AGENT)
+        )
 
 
 @st.cache_resource(ttl=3600)
@@ -266,9 +281,7 @@ def fetch_agent_doc(doc_id: str) -> Optional[dict]:
 @st.cache_resource(show_spinner=False)
 def get_storage_client():
     return storage.Client(
-        client_info=ClientInfo(
-            user_agent="cloud-solutions/eks-webui",
-        )
+        client_info=ClientInfo(user_agent=USER_AGENT)
     )
 
 
