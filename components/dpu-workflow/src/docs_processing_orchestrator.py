@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 # pylint: disable=import-error
 
 import os
@@ -127,7 +128,7 @@ def data_store_import_docs(**context):
     operation_name = datastore_utils.import_docs_to_datastore(
         bq_table,
         data_store_region,
-        os.environ.get("DPU_DATA_STORE_ID")
+        os.environ.get("DPU_DATA_STORE_ID"),
     )
     return operation_name
 
@@ -185,6 +186,7 @@ with DAG(
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "agent-builder"},
+                {"file-suffix": "docx", "processor": "agent-builder"},
                 {"file-suffix": "txt", "processor": "agent-builder"},
                 {"file-suffix": "html", "processor": "agent-builder"},
                 {"file-suffix": "msg", "processor": "dpu-doc-processor"},
