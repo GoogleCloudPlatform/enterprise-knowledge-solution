@@ -1,0 +1,69 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Copyright 2024 Google LLC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     https://www.apache.org/licenses/LICENSE-1.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+
+# Pull previous version
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: [ '-c', 'docker pull $_IMAGE_TAG || exit 0' ]
+
+# Build RAG container (multipurpose)
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'buildx', 'build',
+                   '-f', 'components/processing/terraform/build/Dockerfile',
+                   '--build-context', 'libs=components/processing/libs',
+                   '--build-context', 'reqs=reqs',
+                   '--cache-from=$_IMAGE_TAG',
+                   '-t', '$_IMAGE_TAG',
+                   'components/processing/terraform/build' ]
+
+# Push container
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', '$_IMAGE_TAG' ]
+
+# Push Job container
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ '--project', '${project_id}',
+          'run',
+          'jobs',
+          '--region', '$_REGION',
+          'deploy', '${processing_cloud_run_job_name}',
+          '--image=$_IMAGE_TAG',
+          '--task-timeout=60m',
+          '--service-account', '$_SERVICE_ACCOUNT' ]
+
+serviceAccount: 'projects/${project_id}/serviceAccounts/${build_service_account}'
+substitutions:
+  _IMAGE_TAG: '${registry_url}/docprocessor:latest'
+  _REGION: '${region}'
+  _SERVICE_ACCOUNT: '${service_account}'
+
+options:
+  dynamicSubstitutions: true
+  logging: CLOUD_LOGGING_ONLY

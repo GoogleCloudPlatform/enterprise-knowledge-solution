@@ -35,7 +35,7 @@ def cloud_run_remote_build(c):
             "gcloud builds submit "
             f"--region {os.getenv('REGION')} "
             f"--project {os.getenv('PROJECT_ID')} "
-            "--config \"components/processing/deployments/cloud_run/build/cloudbuild.yaml\" .",
+            "--config \"components/processing/terraform/build/cloudbuild.yaml\" .",
             pty=True,
         )
 
@@ -62,7 +62,7 @@ def cloud_run_local_deploy(c):
             f"--build-context libs=libs "
             f"--build-context reqs={ROOT_DIR}/reqs "
             f"-t {image} "
-            f"deployments/cloud_run/build",
+            f"terraform/build",
             pty=True,
         )
         c.run(
