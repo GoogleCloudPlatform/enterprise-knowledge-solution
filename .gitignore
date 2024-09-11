@@ -28,4 +28,5 @@ sample-deployments/composer-orchestrated-process/terraform.tfvars.dp
 sample-deployments/composer-orchestrated-process/terraform.tfvars.go_demos
 sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh
 .gitignore
+components/doc-classifier/terraform/build/cloudbuild.yaml
 sample-deployments/composer-orchestrated-process/scripts/find_document.sh

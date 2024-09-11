@@ -43,7 +43,7 @@ resource "google_project_iam_member" "storage_admin" {
 }
 
 resource "google_cloud_run_v2_job" "docai-form-processor-job" {
-  name     = var.cloud_run_job_name
+  name     = var.form_parser_cloud_run_job_name
   location = var.region
 
   template {
