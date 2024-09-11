@@ -66,7 +66,7 @@ def choose_source_id(sources, label):
     gb.configure_column("id", header_name="ID", flex=0)
     gb.configure_column("title", header_name="Title", flex=0, width=130)
     gb.configure_column("uri", header_name="GCS", flex=1)
-    gb.configure_auto_height("true")
+    gb.configure_auto_height(True)
     # MIN_HEIGHT = 5
     # MAX_HEIGHT = 800
     # ROW_HEIGHT = 60
@@ -201,7 +201,7 @@ def choose_related_document(related_docs: list, initial_value: int):
         gb.configure_column("mimetype", header_name="Type", flex=0)
         gb.configure_column("status", header_name="Status", flex=0)
         gb.configure_column("full_name", header_name="File", flex=1)
-        gb.configure_auto_height("true")
+        gb.configure_auto_height(True)
         # MIN_HEIGHT = 5
         # MAX_HEIGHT = 800
         # ROW_HEIGHT = 60
