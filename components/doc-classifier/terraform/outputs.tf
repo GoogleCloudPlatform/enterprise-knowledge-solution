@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "form_parser_cloud_run_job_name" {
-  description = "Cloud Run form parser job name"
-  value       = var.form_parser_cloud_run_job_name
+output "classifier_cloud_run_job_name" {
+  description = "Cloud Run doc classifier job name"
+  value       = var.classifier_cloud_run_job_name
 }
 
-output "form_parser_service_account" {
-  description = "Service Account used for handling form parsing jobs."
-  value = google_service_account.dpu_run_service_account.email
+output "classifier_service_account" {
+  description = "Document classifier service account"
+  value       = module.doc_classifier_account.email
 }

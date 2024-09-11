@@ -13,6 +13,7 @@ source-roots = [
    "components/processing/libs/processor-base/src",
    "components/processing/libs/processor-msg/src",
    "components/processing/libs/processor-xlsx/src",
+   "components/forms-classifier/src",
    "components/webui/src",
 ]
 
@@ -33,6 +34,7 @@ include=[
     "components/processing/libs/processor-base/src",
     "components/processing/libs/processor-msg/src",
     "components/processing/libs/processor-xlsx/src",
+    "components/forms-classifier/src",
     "components/webui/src",
 ]
 
@@ -42,6 +44,7 @@ executionEnvironments = [
     "components/processing/libs/processor-xlsx/src",
     "components/processing/libs/processor-base/src",
     "components/processing/libs/processor-msgx/src",
+    "components/forms-classifier/src",
     "components/webui/src",
   ] }
 ]
