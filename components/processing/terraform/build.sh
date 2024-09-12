@@ -16,6 +16,6 @@
 
 (
   cd "$(dirname $0)/build"
-  docker buildx build --build-context libs=../../../libs --build-context reqs=../../../reqs .
+  docker buildx build --build-context libs=../../libs --build-context reqs=../../../../reqs .
 )
 
