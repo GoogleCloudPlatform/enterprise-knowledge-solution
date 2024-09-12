@@ -54,8 +54,7 @@ check_exec_dependency() {
 
 create_oauth_consent_config(){
     create_custom_role_iap
-    local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"
+    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$CURRENT_USER" "projects/$PROJECT_ID"
     local __iap_brand=$(gcloud iap oauth-brands list --format="get(name)")
     if [[ $__iap_brand ]] ; then
         echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
@@ -100,8 +99,12 @@ check_environment_variable() {
   unset _VARIABLE_VALUE
 }
 
-create_service_account() {
-  local __deployer_sa=$(gcloud iam service-accounts list --format="value(email)" | grep "deployer@$PROJECT_ID.iam.gserviceaccount.com")
+create_service_account_and_enable_impersonation() {
+  if !  [ ! -z ${SERVICE_ACCOUNT_ID:-} ] ; then
+    export SERVICE_ACCOUNT_ID="deployer@$PROJECT_ID.iam.gserviceaccount.com"
+    echo "using default name 'deployer' for SERVICE_ACCOUNT_ID"
+  fi
+  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format="get(email)")
     if [[ $__deployer_sa ]] ; then
       echo "$__deployer_sa has already been created"
     else
@@ -110,11 +113,8 @@ create_service_account() {
         --display-name="EKS deployer service account" \
         --project=$PROJECT_ID
     fi
-
-}
-
-enable_service_account_impersonation() {
-  enable_role "roles/iam.serviceAccountUser" user:$(gcloud auth list --filter=status:ACTIVE --format="value(account)") deployer@$PROJECT_ID.iam.gserviceaccount.com
+  enable_role "roles/iam.serviceAccountTokenCreator" "user:$CURRENT_USER" "$SERVICE_ACCOUNT_ID"
+  unset __deployer_sa
 }
 
 # shell script function to check if api is enabled
