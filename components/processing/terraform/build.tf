@@ -17,8 +17,7 @@ locals {
     "${path.module}/build/cloudbuild.yaml.template",
     "${path.module}/build/cloudbuild.yaml",
     "${path.module}/build/Dockerfile",
-    "${path.module}/build/main.py",
-    "${path.module}/build/requirements.in",
+    "${path.module}/build/requirements.txt",
   ]
   lib_source_directory_path = "${path.module}/../libs"
   lib_source_fileset        = [for f in fileset(local.lib_source_directory_path, "**/*.py") : "${local.lib_source_directory_path}/${f}"]
