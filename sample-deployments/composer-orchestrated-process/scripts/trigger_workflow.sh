@@ -118,7 +118,6 @@ fi
 [[ -z "$DOC_AI_PROCESSOR_ID" ]] && echo "DOC_AI_PROCESSOR_ID is required." && exit 1
 
 
-
 section_open "Trigger DAG"
     trigger_dag
 section_close
