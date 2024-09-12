@@ -100,11 +100,11 @@ check_environment_variable() {
 }
 
 create_service_account_and_enable_impersonation() {
-  if !  [ ! -z ${SERVICE_ACCOUNT_ID:-} ] ; then
+  if  [ -z ${SERVICE_ACCOUNT_ID:-} ] ; then
     export SERVICE_ACCOUNT_ID="deployer@$PROJECT_ID.iam.gserviceaccount.com"
     echo "using default name 'deployer' for SERVICE_ACCOUNT_ID"
   fi
-  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format="get(email)")
+  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format=value(email))
     if [[ $__deployer_sa ]] ; then
       echo "$__deployer_sa has already been created"
     else
@@ -195,7 +195,7 @@ enable_bootstrap_apis () {
 enable_role(){
     local __role=$1 __principal=$2 __resource=$3
     echo "granting IAM Role $__role to $__principal at resource $__resource "
-    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$__role --member=$__principal
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$__role --member=$__principal 1> /dev/null
     unset __role
     unset __principal
 }

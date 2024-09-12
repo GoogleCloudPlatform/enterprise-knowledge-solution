@@ -62,7 +62,7 @@ section_open "Check and try to set required org-policies on project: ${PROJECT_I
 section_close
 
 section_open  "Set Application Default Credentials to be used by Terraform"
-    gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
+    yes | gcloud auth application-default login --impersonate-service-account=${SERVICE_ACCOUNT_ID}
 section_close
 
 section_open "Build and push container image to Artifact Registry for Form Processor"
