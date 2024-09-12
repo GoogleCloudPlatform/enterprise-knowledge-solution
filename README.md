@@ -70,8 +70,6 @@ To deploy this solution, perform the follow steps:
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
     export REGION="<Google Cloud Region for deploying the resources>"
-    export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
-    export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
     export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
     ```
 
