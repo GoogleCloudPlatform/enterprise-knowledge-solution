@@ -34,13 +34,16 @@ To deploy this solution, perform the follow steps:
 
 1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
-1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
-    - Organization Policy Admin
-    - Project IAM Admin
-    - Role Admin
-    - Service Account Admin
-    - Service Account Token Creator
-    - Service Usage Admin
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview). on your project:
+    - Roles required at the organization:
+      - Organization Policy Admin
+      - Cloud Asset Viewer
+    - Roles required on your project:
+      - Project IAM Admin
+      - Role Admin
+      - Service Account Admin
+      - Service Account Token Creator
+      - Service Usage Admin
 
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
