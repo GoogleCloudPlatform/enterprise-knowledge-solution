@@ -54,8 +54,7 @@ check_exec_dependency() {
 
 create_oauth_consent_config(){
     create_custom_role_iap
-    local __principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$__principal"
+    enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$CURRENT_USER" "projects/$PROJECT_ID"
     local __iap_brand=$(gcloud iap oauth-brands list --format="get(name)")
     if [[ $__iap_brand ]] ; then
         echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
@@ -98,6 +97,24 @@ check_environment_variable() {
   unset _VARIABLE_NAME
   unset _ERROR_MESSAGE
   unset _VARIABLE_VALUE
+}
+
+create_service_account_and_enable_impersonation() {
+  if  [ -z ${SERVICE_ACCOUNT_ID:-} ] ; then
+    export SERVICE_ACCOUNT_ID="deployer@$PROJECT_ID.iam.gserviceaccount.com"
+    echo "using default name 'deployer' for SERVICE_ACCOUNT_ID"
+  fi
+  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format=value(email))
+    if [[ $__deployer_sa ]] ; then
+      echo "$__deployer_sa has already been created"
+    else
+      gcloud iam service-accounts create deployer \
+        --description="The service account used to deploy Enterprise Knowledge Solution resources" \
+        --display-name="EKS deployer service account" \
+        --project=$PROJECT_ID
+    fi
+  enable_role "roles/iam.serviceAccountTokenCreator" "user:$CURRENT_USER" "$SERVICE_ACCOUNT_ID"
+  unset __deployer_sa
 }
 
 # shell script function to check if api is enabled
@@ -176,9 +193,9 @@ enable_bootstrap_apis () {
 
 # shell script function to enable IAM roles
 enable_role(){
-    local __role=$1 __principal=$2
-    echo "granting IAM Role $__role to $__principal"
-    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$2
+    local __role=$1 __principal=$2 __resource=$3
+    echo "granting IAM Role $__role to $__principal at resource $__resource "
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$__role --member=$__principal 1> /dev/null
     unset __role
     unset __principal
 }
@@ -189,7 +206,7 @@ enable_deployer_roles () {
     readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
-        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal"
+        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
     done
     unset __principal
 }
@@ -201,7 +218,7 @@ enable_builder_roles () {
     ## necessary permissions for building AR
     for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"
     do
-        enable_role "$i" "$__principal"
+        enable_role "$i" "$__principal" "projects/$PROJECT_ID"
     done
     unset __principal
     unset __PROJECTNUM
