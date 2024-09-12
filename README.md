@@ -34,13 +34,15 @@ To deploy this solution, perform the follow steps:
 
 1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
-1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other pre-deployment checks, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
-    - Organization Policy Admin
-    - Project IAM Admin
-    - Role Admin
-    - Service Account Admin
-    - Service Account Token Creator
-    - Service Usage Admin
+1. This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview):
+    - Roles required at the organization:
+      - Organization Policy Admin
+      - Cloud Asset Viewer
+    - Roles required on your project:
+      - Project IAM Admin
+      - Role Admin
+      - Service Account Admin
+      - Service Usage Admin
 
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
@@ -68,25 +70,14 @@ To deploy this solution, perform the follow steps:
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
     export REGION="<Google Cloud Region for deploying the resources>"
-    export DOC_AI_REGION="<Doc AI region where your Custom Document Classifier is deployed.>"
-    export DOC_AI_PROCESSOR_ID="<ID for the Custom Document Classifier>"
-    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. Use an existing terraform service account, or create a new service account for this deployment."
     export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
     ```
 
-1. Define the service account you will use to deploy resources in this repo. Either confirm the identity of the service account used in your existing terraform pipeline to deploy infrastructure, or [create a service account](https://cloud.google.com/iam/docs/service-accounts-create) by running the following command:
+    1. (Optional) By default, this repo automatically creates and uses a service account "deployer@$PROJECT_ID.iam.gserviceaccount.com" to deploy terraform resources. The necessary IAM roles and authentication are automatically configured in the setup script for ease of dpeloyment. If you have a service account in your existing terraform pipeline that you want to use instead, additionally set the optional environment variables:
 
-   ```sh
-   gcloud iam service-accounts create deployer \
-     --description="The service account used to deploy Enterprise Knowledge Search resources" \
-     --project=$PROJECT_ID
-   ```
-
-1. Set the environment variable SERVICE_ACCOUNT_ID based on the outcome of the previous step.
-
-    ```sh
-    export SERVICE_ACCOUNT_ID="your service account identity that will be used to deploy resources. "
-    ```
+        ```sh
+        export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform. The setup script will add the IAM roles necessary to deploy resources in Terraform."
+        ```
 
 1. Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
     - Validate software dependencies
@@ -94,7 +85,7 @@ To deploy this solution, perform the follow steps:
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
     - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
     - Enables the required IAM roles used for underlying Cloud Build processes
-    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform
+    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform.
     - Validate common org policies that might interfere with deploying the Web UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web UI component during by setting the Terraform variable `deploy_ui` to `false`.
         - `compute.vmExternalIpAccess`
         - `compute.requireShieldedVm`
@@ -104,6 +95,8 @@ To deploy this solution, perform the follow steps:
     ```sh
     scripts/pre_tf_setup.sh
     ```
+
+    The script also creates a pop-up window "Sign in with Google" asking you to authenticate the Google Auth Library. Follow the directions to complete the Authentication flow with your user account, which will then configure Application Default Credentials using the impersonated service account credentials to be used by terraform.
 
 1. Initialize Terraform:
 
