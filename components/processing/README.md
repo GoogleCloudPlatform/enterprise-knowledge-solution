@@ -35,6 +35,5 @@ Running invoke.sh will do the following -
 
 
 ### Deployments
-There are Python-based deployments, such as in [deployments/cloud_function/main.py](deployments/cloud_function/main.py) which leverage one or more libraries. There is an associates requirements.in and requirements.txt for these libraries (using -r) capturing the full non-library dependencies. It is assumed that all of the relevant libraries will be staged in the deployment.
-The instructions for Cloud Function deployment is available in the [README.md](deployments/cloud_function/README.md) and for Cloud Run is available in the [README.md](terraform/README.md).
+The instructions for Cloud Run is available in the [README.md](terraform/README.md).
  * `./invoke.sh processing.cloud-run-remote-build` will build and deploy the processing (outlook etc) to Cloud Run using Cloud Build.
