@@ -85,18 +85,18 @@ To deploy this solution, perform the follow steps:
     - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
     - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
     - Enables the required IAM roles used for underlying Cloud Build processes
+    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform.
     - Validate common org policies that might interfere with deploying the Web UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web UI component during by setting the Terraform variable `deploy_ui` to `false`.
         - `compute.vmExternalIpAccess`
         - `compute.requireShieldedVm`
         - `iam.allowedPolicyMemberDomains`
     - Build a custom container image used for form parsing
-    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform. This creates a pop-up window for you to re-verify your user credentials with the Google Authentication flow, whi.
 
     ```sh
     scripts/pre_tf_setup.sh
     ```
 
-    The script also creates a pop-up "Siwn in with Google" asking you to authenticate Google Auth Library. Follow the directions to complete the Authentication flow with your user account, which will then configure Application Default Credentials using the impersonated service account credentials.
+    The script also creates a pop-up window "Sign in with Google" asking you to authenticate the Google Auth Library. Follow the directions to complete the Authentication flow with your user account, which will then configure Application Default Credentials using the impersonated service account credentials to be used by terraform.
 
 1. Initialize Terraform:
 
