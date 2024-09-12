@@ -100,6 +100,23 @@ check_environment_variable() {
   unset _VARIABLE_VALUE
 }
 
+create_service_account() {
+  local __deployer_sa=$(gcloud iam service-accounts list --format="value(email)" | grep "deployer@$PROJECT_ID.iam.gserviceaccount.com")
+    if [[ $__deployer_sa ]] ; then
+      echo "$__deployer_sa has already been created"
+    else
+      gcloud iam service-accounts create deployer \
+        --description="The service account used to deploy Enterprise Knowledge Solution resources" \
+        --display-name="EKS deployer service account" \
+        --project=$PROJECT_ID
+    fi
+
+}
+
+enable_service_account_impersonation() {
+  enable_role "roles/iam.serviceAccountUser" user:$(gcloud auth list --filter=status:ACTIVE --format="value(account)") deployer@$PROJECT_ID.iam.gserviceaccount.com
+}
+
 # shell script function to check if api is enabled
 check_api_enabled(){
     local __api_endpoint=$1
@@ -176,9 +193,9 @@ enable_bootstrap_apis () {
 
 # shell script function to enable IAM roles
 enable_role(){
-    local __role=$1 __principal=$2
-    echo "granting IAM Role $__role to $__principal"
-    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$1 --member=$2
+    local __role=$1 __principal=$2 __resource=$3
+    echo "granting IAM Role $__role to $__principal at resource $__resource "
+    gcloud projects add-iam-policy-binding $PROJECT_ID --role=$__role --member=$__principal
     unset __role
     unset __principal
 }
@@ -189,7 +206,7 @@ enable_deployer_roles () {
     readarray -t roles_array < project_roles.txt
     for i in "${roles_array[@]}"
     do
-        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal"
+        enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
     done
     unset __principal
 }
@@ -201,7 +218,7 @@ enable_builder_roles () {
     ## necessary permissions for building AR
     for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"
     do
-        enable_role "$i" "$__principal"
+        enable_role "$i" "$__principal" "projects/$PROJECT_ID"
     done
     unset __principal
     unset __PROJECTNUM

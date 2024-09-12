@@ -42,7 +42,6 @@ To deploy this solution, perform the follow steps:
       - Project IAM Admin
       - Role Admin
       - Service Account Admin
-      - Service Account Token Creator
       - Service Usage Admin
 
 1. To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).

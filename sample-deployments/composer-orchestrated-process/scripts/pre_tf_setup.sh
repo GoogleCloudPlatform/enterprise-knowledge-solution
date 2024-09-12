@@ -36,19 +36,24 @@ section_open "Check and set mandatory environment variables"
 section_close
 
 section_open "Enable the required APIs for bootstrap scripts"
-   enable_bootstrap_apis
+#   enable_bootstrap_apis
 section_close
 
 section_open "Setup OAuth consent screen (brand) required for IAP"
-    create_oauth_consent_config
+#    create_oauth_consent_config
+section_close
+
+section_open "Create service account used for application default credentials"
+    create_service_account
+    enable_service_account_impersonation
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:"${SERVICE_ACCOUNT_ID}""
-    enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
+ #   enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
 section_close
 
 section_open "Explicitly declare underlying permissions for Cloud Build processes"
-    enable_builder_roles
+ #   enable_builder_roles
 section_close
 
 section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
