@@ -47,7 +47,7 @@ default_args = {
     "retries": 0,
 }
 
-USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
+USER_AGENT = "cloud-solutions/eks-orchestrator-v1"
 
 def get_supported_file_types(**context):
     file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
@@ -202,7 +202,7 @@ def generate_pdf_forms_list(**context):
     processor_id = context["params"]["pdf_classifier_processor_id"]
 
     pdf_forms_list=[]
-    storage_client = storage.Client()
+    storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
     bucket = storage_client.bucket(process_bucket)
 
     if (processor_id is None or

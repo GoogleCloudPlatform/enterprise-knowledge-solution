@@ -34,6 +34,8 @@ GCS_OUTPUT_PREFIX = os.getenv("GCS_OUTPUT_PREFIX") # Must end with a trailing sl
 GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-processor/input-forms/" # Format: gs://bucket/directory/
 BQ_TABLE_ID = os.getenv("BQ_TABLE_ID") # Specify your table ID in the format 'your-project.your_dataset.your_table'
 
+USER_AGENT = "cloud-solutions/eks-docai-v1"
+
 def batch_process_documents(
     project_id: str,
     location: str,
@@ -53,7 +55,6 @@ def batch_process_documents(
         gcs_output_uri: GCS directory to store the out json files,
         gcs_input_prefix: GCS directory to store input files to be processed
     """
-  USER_AGENT = "cloud-solutions/eks-docai"
 
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
@@ -103,7 +104,7 @@ def batch_process_documents(
   if metadata.state != documentai.BatchProcessMetadata.State.SUCCEEDED:
     raise ValueError(f"Batch Process Failed: {metadata.state_message}")
 
-  storage_client = storage.Client()
+  storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
 
   logging.info("Output files:")
 
