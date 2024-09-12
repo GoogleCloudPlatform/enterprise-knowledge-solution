@@ -348,14 +348,14 @@ with (DAG(
             provide_context=True,
         )
 
-        # noinspection PyTypeChecker
         execute_doc_classifier = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"),
-            region=os.environ.get("DPU_REGION"),
+            project_id=os.environ.get("GCP_PROJECT"), # pyright: ignore[reportArgumentType]
+            region=os.environ.get("DPU_REGION"), # pyright: ignore[reportArgumentType]
             task_id="execute_doc_classifier",
-            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"),
+            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"), # pyright: ignore[reportArgumentType]
             deferrable=False,
-            overrides="{{ ti.xcom_pull(task_ids='classify_pdfs.generate_classify_job_params' , key='return_value') }}",
+            overrides="{{ ti.xcom_pull("
+                      "task_ids='classify_pdfs.generate_classify_job_params' , key='return_value') }}", # pyright: ignore[reportArgumentType]
         )
 
         parse_doc_classifier_results_and_move_files = PythonOperator(
@@ -406,7 +406,8 @@ with (DAG(
             task_id="execute_forms_parser",
             job_name=os.environ["FORMS_PARSER_JOB_NAME"],
             deferrable=False,
-            overrides="{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}"
+            overrides="{{ ti.xcom_pull("
+                      "task_ids='forms_processing.create_form_process_job_params', key='return_value') }}" # pyright: ignore[reportArgumentType]
         )
 
         import_forms_to_data_store = PythonOperator(
@@ -416,23 +417,23 @@ with (DAG(
             provide_context=True,
         )
 
-
-    (
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # initial common actions - ends with a decision whether to continue
         # to basic processing, or stop working
             list_all_input_files
             >> process_supported_types
             >> [short_circuit_move_rejected_files_if_any, has_files]
     )
-    (
+
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         short_circuit_move_rejected_files_if_any
             >> move_unsupported_files_to_rejected_bucket
     )
-    (
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
             has_files
             >> [create_process_folder, skip_bucket_creation]
-    )   # pyright: ignore[reportOperatorIssue]
-    (
+    )
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # In the case we continue working, moving documents to processing
         # folder, and creating an output table where metadata will be saved
             create_process_folder
@@ -441,7 +442,7 @@ with (DAG(
             >> create_output_table_name
             >> create_output_table
     )
-    (
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
             # We then want to see if there are any forms, since those will be
             # handled differently.
         create_output_table
@@ -450,17 +451,15 @@ with (DAG(
             >> parse_doc_classifier_results_and_move_files
             >> classified_docs_moved_or_skipped
     )
-
-    (
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # Continue to process forms, depending on move_forms executed
         # successfully. This doesn't have to wait for general processing.
             parse_doc_classifier_results_and_move_files
             >> create_form_process_job_params
             >> execute_forms_parser
             >> import_forms_to_data_store
-
     )
-    (
+    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # General document processing has to wait for the forms to
         # move/skipped, since we don't want to process the forms using this job.
         classified_docs_moved_or_skipped
