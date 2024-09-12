@@ -21,10 +21,12 @@ from datetime import datetime, timedelta
 
 from airflow import DAG  # type: ignore
 from airflow.models.param import Param  # type: ignore
+from airflow.models.xcom_arg import XComArg  # type: ignore
 from airflow.operators.dummy import DummyOperator  # type: ignore
 from airflow.operators.python import (
     BranchPythonOperator,  # type: ignore
     PythonOperator,
+    ShortCircuitOperator,
 )
 from airflow.providers.google.cloud.operators.bigquery import \
     BigQueryCreateEmptyTableOperator  # type: ignore
@@ -37,6 +39,7 @@ from airflow.providers.google.cloud.transfers.gcs_to_gcs import \
 from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
 from airflow.exceptions import AirflowSkipException
+from airflow.utils.task_group import TaskGroup
 
 from utils import file_utils, datastore_utils, cloud_run_utils
 
@@ -63,26 +66,35 @@ KNOWN_LABELS_FOR_CLASSIFIER = [
 
 
 def get_supported_file_types(**context):
-    file_list = context["ti"].xcom_pull(task_ids="list_all_input_files")
     file_type_to_processor = context["params"]["supported_files"]
-    files_by_type = file_utils.supported_files_by_type(file_list,
-                                                       file_type_to_processor)
+    files_list = context["ti"].xcom_pull(
+        task_ids='initial_load_from_input_bucket.list_all_input_files')
+
+    files_by_type, unsupported_files = file_utils.supported_files_by_type(
+        files_list, file_type_to_processor)
     context["ti"].xcom_push(key="types_to_process", value=files_by_type)
+    context["ti"].xcom_push(key="files_to_reject", value=unsupported_files)
 
 def has_files_to_process(**context):
-    files_to_process = context["ti"].xcom_pull(key="types_to_process")
+    files_to_process = context["ti"].xcom_pull(
+        task_ids='initial_load_from_input_bucket.process_supported_types',
+        key="types_to_process")
     if files_to_process:
-        return "create_process_folder"
+        return "initial_load_from_input_bucket.create_process_folder"
     else:
-        return "skip_bucket_creation"
+        return "initial_load_from_input_bucket.skip_bucket_creation"
 
 def generate_process_folder(**context):
     process_folder = file_utils.get_random_process_folder_name()
     context["ti"].xcom_push(key="process_folder", value=process_folder)
 
 def generate_mv_params(**context):
-    files_to_process = context["ti"].xcom_pull(key="types_to_process")
-    process_folder = context["ti"].xcom_pull(key="process_folder")
+    files_to_process = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.process_supported_types",
+        key="types_to_process")
+    process_folder = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.create_process_folder",
+        key="process_folder")
     input_folder = context["params"]["input_folder"]
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
 
@@ -100,7 +112,9 @@ def generate_classify_job_params_fn(**context):
                         f"provided (required `project_id`, `location` and "
                         f"`processor_id`). {classifier_params=}")
         raise AirflowSkipException()
-    process_folder = context["ti"].xcom_pull(key="process_folder")
+    process_folder = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.create_process_folder",
+        key="process_folder")
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
 
@@ -115,7 +129,9 @@ def generate_classify_job_params_fn(**context):
 def parse_doc_classifier_output(**context):
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
-    process_folder = context["ti"].xcom_pull(key="process_folder")
+    process_folder = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.create_process_folder",
+        key="process_folder")
     parsed_output = cloud_run_utils.read_classifier_job_output(
         process_bucket, process_folder, KNOWN_LABELS_FOR_CLASSIFIER)
     # context["ti"].xcom_push(key="classifier_output", value=parsed_output)
@@ -134,7 +150,8 @@ def data_store_import_docs(**context):
 
 def generate_process_job_params(**context):
     mv_params = context["ti"].xcom_pull(
-        key="return_value", task_ids="generate_files_move_parameters"
+        key="return_value",
+        task_ids="initial_load_from_input_bucket.generate_files_move_parameters"
     )
     if not mv_params:
         logging.warning("No need to run, since generate_files_move_parameters "
@@ -175,10 +192,11 @@ def generate_pdf_forms_folder(**context):
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
 
 
-with DAG(
+with (DAG(
     "run_docs_processing",
     default_args=default_args,
     schedule_interval=None,
+    render_template_as_native_obj=True,
     params={
         "input_bucket": os.environ.get("DPU_INPUT_BUCKET"),
         "process_bucket": os.environ.get("DPU_PROCESS_BUCKET"),
@@ -219,181 +237,214 @@ with DAG(
             required=["project_id", "location", "processor_id"],
         ),
     },
-) as dag:
-    GCS_Files = GCSListObjectsOperator(
-        task_id="list_all_input_files",
-        prefix="{{ params.input_folder if params.input_folder }}",
-        bucket="{{ params.input_bucket }}",
-    )
+) as dag):
+    with TaskGroup(group_id="initial_load_from_input_bucket") as initial_load_from_input_bucket:
+        list_all_input_files = GCSListObjectsOperator(
+            task_id="list_all_input_files",
+            prefix="{{ params.input_folder if params.input_folder }}",
+            bucket="{{ params.input_bucket }}",
+        )
 
-    process_supported_types = PythonOperator(
-        task_id="process_supported_types",
-        python_callable=get_supported_file_types,
-        params={
-            "supported_files": Param(
-                "{{ params.supported_files }}",
-                type="array",
-                items={
-                    "type": "object",
-                    "properties": {
-                        "file-suffix": {"type": "string"},
-                        "processor": {"type": "string"},
+        process_supported_types = PythonOperator(
+            task_id="process_supported_types",
+            python_callable=get_supported_file_types,
+            params={
+                "supported_files": Param(
+                    "{{ params.supported_files }}",
+                    type="array",
+                    items={
+                        "type": "object",
+                        "properties": {
+                            "file-suffix": {"type": "string"},
+                            "processor": {"type": "string"},
+                        },
+                        "required": ["file-suffix", "processor"],
                     },
-                    "required": ["file-suffix", "processor"],
-                },
-            )
-        },
-        provide_context=True,
-    )
-
-    has_files = BranchPythonOperator(
-        task_id="has_files_to_process",
-        python_callable=has_files_to_process,
-        provide_context=True,
-    )
-
-    create_process_folder = PythonOperator(
-        task_id="create_process_folder",
-        python_callable=generate_process_folder,
-        provide_context=True,
-    )
-
-    skip_bucket_creation = PythonOperator(
-        task_id="skip_bucket_creation",
-        python_callable=lambda: print(
-            "No supported file type found, processing ends here!"
-        ),
-    )
-
-    generate_files_move_parameters = PythonOperator(
-        task_id="generate_files_move_parameters",
-        python_callable=generate_mv_params,
-        provide_context=True,
-    )
-
-    move_to_processing = GCSToGCSOperator.partial(
-        task_id="move_file",
-        source_bucket="{{ params.input_bucket }}",
-        move_object=True,
-    ).expand_kwargs(generate_files_move_parameters.output)
-
-    generate_classify_job_params = PythonOperator(
-        task_id="generate_classify_job_params",
-        python_callable=generate_classify_job_params_fn,
-        provide_context=True,
-    )
-
-    execute_doc_classifier = CloudRunExecuteJobOperator.partial(
-        project_id=os.environ.get("GCP_PROJECT"),
-        region=os.environ.get("DPU_REGION"),
-        task_id="execute_doc_classifier",
-        job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"),
-        deferrable=False,
-    ).expand_kwargs([generate_classify_job_params.output])
-
-    parse_doc_classifier_results_and_move_files = PythonOperator(
-        task_id="parse_doc_classifier_results_and_move_files",
-        python_callable=parse_doc_classifier_output,
-        provide_context=True,
-    )
-
-    classified_docs_moved_or_skipped = DummyOperator(
-        task_id='classified_docs_moved_or_skipped',
-        trigger_rule=TriggerRule.ALL_DONE
-    )
-
-    create_output_table_name = PythonOperator(
-        task_id="create_output_table_name",
-        python_callable=generate_output_table_name,
-        provide_context=True,
-    )
-
-    create_output_table = create_bigquery_table = BigQueryCreateEmptyTableOperator(
-        task_id="create_output_table",
-        dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),  # pyright: ignore[reportArgumentType]
-        table_id="{{ ti.xcom_pull(task_ids='create_output_table_name', key='output_table_name') }}",
-        schema_fields=[
-            {"name": "id", "mode": "REQUIRED", "type": "STRING", "fields": []},
-            {"name": "jsonData", "mode": "NULLABLE", "type": "STRING", "fields": []},
-            {
-                "name": "content",
-                "type": "RECORD",
-                "mode": "NULLABLE",
-                "fields": [
-                    {"name": "mimeType", "type": "STRING", "mode": "NULLABLE"},
-                    {"name": "uri", "type": "STRING", "mode": "NULLABLE"},
-                ],
+                )
             },
-        ],
-    )
+            provide_context=True,
+        )
 
-    create_process_job_params = PythonOperator(
-        task_id="create_process_job_params",
-        python_callable=generate_process_job_params,
-        provide_context=True,
-    )
+        short_circuit_move_rejected_files_if_any = ShortCircuitOperator(
+            task_id='short_circuit_move_rejected_files_if_any',
+            python_callable=lambda **context: context["ti"].xcom_pull(
+                task_ids='initial_load_from_input_bucket.process_supported_types', key='files_to_reject'),
+            provide_context=True,
 
-    execute_doc_processors = CloudRunExecuteJobOperator.partial(
-        project_id=os.environ.get("GCP_PROJECT"),
-        region=os.environ.get("DPU_REGION"),
-        task_id="execute_doc_processors",
-        job_name=os.environ.get("DOC_PROCESSOR_JOB_NAME"),
-        deferrable=False,
-    ).expand_kwargs(create_process_job_params.output)
+        )
 
-    import_docs_to_data_store = PythonOperator(
-        task_id="import_docs_to_data_store",
-        python_callable=data_store_import_docs,
-        execution_timeout=timedelta(seconds=3600),
-        provide_context=True,
-    )
+        move_unsupported_files_to_rejected_bucket = GCSToGCSOperator(
+            task_id="move_files_to_rejected_bucket",
+            source_bucket="{{ params.input_bucket }}",
+            source_objects="{{ ti.xcom_pull(task_ids='initial_load_from_input_bucket.process_supported_types', key='files_to_reject') }}",
+            destination_bucket=os.environ.get("DPU_REJECT_BUCKET"),
+            move_object=True,
 
-    import_forms_to_data_store = PythonOperator(
-        task_id="import_forms_to_data_store",
-        python_callable=data_store_import_docs,
-        execution_timeout=timedelta(seconds=3600),
-        provide_context=True,
-    )
+        )
 
-    create_form_process_job_params = PythonOperator(
+        has_files = BranchPythonOperator(
+            task_id="has_files_to_process",
+            python_callable=has_files_to_process,
+            provide_context=True,
+        )
+
+        create_process_folder = PythonOperator(
+            task_id="create_process_folder",
+            python_callable=generate_process_folder,
+            provide_context=True,
+        )
+
+        skip_bucket_creation = PythonOperator(
+            task_id="skip_bucket_creation",
+            python_callable=lambda: print(
+                "No supported file type found, processing ends here!"
+            ),
+        )
+
+        generate_files_move_parameters = PythonOperator(
+            task_id="generate_files_move_parameters",
+            python_callable=generate_mv_params,
+            provide_context=True,
+        )
+
+        move_to_processing = GCSToGCSOperator.partial(
+            task_id="move_file",
+            source_bucket="{{ params.input_bucket }}",
+            move_object=True,
+        ).expand_kwargs(generate_files_move_parameters.output)
+
+    with TaskGroup(group_id="prep_for_processing") as prep_for_processing:
+        create_output_table_name = PythonOperator(
+            task_id="create_output_table_name",
+            python_callable=generate_output_table_name,
+            provide_context=True,
+        )
+
+        create_output_table = create_bigquery_table = BigQueryCreateEmptyTableOperator(
+            task_id="create_output_table",
+            dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),  # pyright: ignore[reportArgumentType]
+            table_id="{{ ti.xcom_pull("
+                     "task_ids='prep_for_processing.create_output_table_name', "
+                     "key='output_table_name') }}",
+            schema_fields=[
+                {"name": "id", "mode": "REQUIRED", "type": "STRING", "fields": []},
+                {"name": "jsonData", "mode": "NULLABLE", "type": "STRING", "fields": []},
+                {
+                    "name": "content",
+                    "type": "RECORD",
+                    "mode": "NULLABLE",
+                    "fields": [
+                        {"name": "mimeType", "type": "STRING", "mode": "NULLABLE"},
+                        {"name": "uri", "type": "STRING", "mode": "NULLABLE"},
+                    ],
+                },
+            ],
+        )
+
+    with TaskGroup(group_id="classify_pdfs") as classify_pdfs:
+        generate_classify_job_params = PythonOperator(
+            task_id="generate_classify_job_params",
+            python_callable=generate_classify_job_params_fn,
+            provide_context=True,
+        )
+
+        # noinspection PyTypeChecker
+        execute_doc_classifier = CloudRunExecuteJobOperator(
+            project_id=os.environ.get("GCP_PROJECT"),
+            region=os.environ.get("DPU_REGION"),
+            task_id="execute_doc_classifier",
+            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"),
+            deferrable=False,
+            overrides="{{ ti.xcom_pull(task_ids='classify_pdfs.generate_classify_job_params' , key='return_value') }}",
+        )
+
+        parse_doc_classifier_results_and_move_files = PythonOperator(
+            task_id="parse_doc_classifier_results_and_move_files",
+            python_callable=parse_doc_classifier_output,
+            provide_context=True,
+        )
+
+        classified_docs_moved_or_skipped = DummyOperator(
+            task_id='classified_docs_moved_or_skipped',
+            trigger_rule=TriggerRule.ALL_DONE
+        )
+
+    with TaskGroup(group_id="general_processing") as general_processing:
+        create_process_job_params = PythonOperator(
+            task_id="create_process_job_params",
+            python_callable=generate_process_job_params,
+            provide_context=True,
+        )
+
+        execute_doc_processors = CloudRunExecuteJobOperator.partial(
+            project_id=os.environ.get("GCP_PROJECT"),
+            region=os.environ.get("DPU_REGION"),
+            task_id="execute_doc_processors",
+            job_name=os.environ.get("DOC_PROCESSOR_JOB_NAME"),
+            deferrable=False,
+        ).expand_kwargs(create_process_job_params.output)
+
+        import_docs_to_data_store = PythonOperator(
+            task_id="import_docs_to_data_store",
+            python_callable=data_store_import_docs,
+            execution_timeout=timedelta(seconds=3600),
+            provide_context=True,
+        )
+
+    with TaskGroup(group_id="forms_processing") as forms_processing:
+        create_form_process_job_params = PythonOperator(
         task_id="create_form_process_job_params",
         python_callable=generate_form_process_job_params,
         provide_context=True,
-    )
+        )
 
-    execute_forms_parser = CloudRunExecuteJobOperator.partial(
-        # Calling os.environ[] instead of using the .get method to verify we
-        # have set environment variables, not allowing None values.
-        project_id=os.environ["GCP_PROJECT"],
-        region=os.environ["DPU_REGION"],
-        task_id="execute_forms_parser",
-        job_name=os.environ["FORMS_PARSER_JOB_NAME"],
-        deferrable=False,
-    ).expand_kwargs(
-        # Converting to a list, since expand_kwargs expects a list,
-        # even though we have only one task to execute.
-        [create_form_process_job_params.output]
-    )
+        execute_forms_parser = CloudRunExecuteJobOperator(
+            # Calling os.environ[] instead of using the .get method to verify we
+            # have set environment variables, not allowing None values.
+            project_id=os.environ["GCP_PROJECT"],
+            region=os.environ["DPU_REGION"],
+            task_id="execute_forms_parser",
+            job_name=os.environ["FORMS_PARSER_JOB_NAME"],
+            deferrable=False,
+            overrides="{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}"
+        )
+
+        import_forms_to_data_store = PythonOperator(
+            task_id="import_forms_to_data_store",
+            python_callable=data_store_import_docs,
+            execution_timeout=timedelta(seconds=3600),
+            provide_context=True,
+        )
+
 
     (
         # initial common actions - ends with a decision whether to continue
         # to basic processing, or stop working
-        GCS_Files
-        >> process_supported_types
-        >> has_files
-        >> [create_process_folder, skip_bucket_creation]
+            list_all_input_files
+            >> process_supported_types
+            >> [short_circuit_move_rejected_files_if_any, has_files]
+    )
+    (
+        short_circuit_move_rejected_files_if_any
+            >> move_unsupported_files_to_rejected_bucket
+    )
+    (
+            has_files
+            >> [create_process_folder, skip_bucket_creation]
     )   # pyright: ignore[reportOperatorIssue]
     (
         # In the case we continue working, moving documents to processing
         # folder, and creating an output table where metadata will be saved
             create_process_folder
-            >> create_output_table_name
-            >> create_output_table
             >> generate_files_move_parameters
             >> move_to_processing
-
+            >> create_output_table_name
+            >> create_output_table
+    )
+    (
             # We then want to see if there are any forms, since those will be
             # handled differently.
+        create_output_table
             >> generate_classify_job_params
             >> execute_doc_classifier
             >> parse_doc_classifier_results_and_move_files
@@ -409,7 +460,6 @@ with DAG(
             >> import_forms_to_data_store
 
     )
-
     (
         # General document processing has to wait for the forms to
         # move/skipped, since we don't want to process the forms using this job.

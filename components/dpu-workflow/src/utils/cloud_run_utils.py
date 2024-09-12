@@ -69,21 +69,20 @@ def forms_parser_job_params(bq_table, process_bucket, process_folder):
                                          FolderNames.PDF_FORMS_OUTPUT)
 
     return {
-        "overrides": {
-            "container_overrides": [
-                {
-                    "env": [
-                        {"name": "BQ_TABLE_ID", "value": bq_table_id},
-                        {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
-                        {"name": "GCS_OUTPUT_PREFIX", "value":
-                            gcs_output_prefix},
-                    ]
-                }
-            ],
-                "task_count": 1,
-                "timeout": "300s",
+        "container_overrides": [
+            {
+                "env": [
+                    {"name": "BQ_TABLE_ID", "value": bq_table_id},
+                    {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
+                    {"name": "GCS_OUTPUT_PREFIX", "value":
+                        gcs_output_prefix},
+                ]
             }
+        ],
+        "task_count": 1,
+        "timeout": "300s",
     }
+
 
 def get_doc_classifier_job_overrides(
         classifier_project_id: str,
@@ -91,28 +90,26 @@ def get_doc_classifier_job_overrides(
         classifier_processor_id: str,
         process_folder: str,
         process_bucket: str,
-        timeout_in_seconds: int = 300,
+        timeout_in_seconds: int = 3000,
 ):
     gcs_input_prefix = __build_gcs_path__(process_bucket, process_folder,
                                           FolderNames.PDF_GENERAL)
     gcs_output_uri = __build_gcs_path__(process_bucket, process_folder,
                                         FolderNames.CLASSIFICATION_RESULTS)
     return {
-        "overrides": {
-            "container_overrides": [
-                {
-                    "env": [
-                        {"name": "PROJECT_ID", "value": classifier_project_id},
-                        {"name": "LOCATION", "value": classifier_location},
-                        {"name": "PROCESSOR_ID", "value": classifier_processor_id},
-                        {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
-                        {"name": "GCS_OUTPUT_URI", "value": gcs_output_uri},
-                    ]
-                }
-            ],
-            "task_count": 1,
-            "timeout": f"{timeout_in_seconds}s",
-        }
+        "container_overrides": [
+            {
+                "env": [
+                    {"name": "PROJECT_ID", "value": classifier_project_id},
+                    {"name": "LOCATION", "value": classifier_location},
+                    {"name": "PROCESSOR_ID", "value": classifier_processor_id},
+                    {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
+                    {"name": "GCS_OUTPUT_URI", "value": gcs_output_uri},
+                ]
+            }
+        ],
+        "task_count": 1,
+        "timeout": f"{timeout_in_seconds}s",
     }
 
 def read_classifier_job_output(

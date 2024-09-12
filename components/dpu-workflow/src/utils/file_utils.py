@@ -17,18 +17,25 @@ import random
 import string
 from collections import defaultdict
 from datetime import datetime
+from typing import Dict, Tuple, List
 
 
-def supported_files_by_type(file_list, file_type_to_processor):
+
+
+def supported_files_by_type(file_list, file_type_to_processor) -> \
+    Tuple[Dict[str, List[str]], List[str]]:
     supported_file_types = set(
         item["file-suffix"].lower() for item in file_type_to_processor
     )
+    unsupported_files = []
     files_by_type = defaultdict(list)
     for input_file in file_list:
         file_type = input_file.split(".")[-1].lower()
         if file_type in supported_file_types:
             files_by_type[file_type].append(input_file)
-    return files_by_type
+        else:
+            unsupported_files.append(input_file)
+    return files_by_type, unsupported_files
 
 def get_random_process_folder_name():
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits,
