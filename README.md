@@ -24,6 +24,15 @@ The solution comprises the following key components:
     The above diagram dipicts a [Dataflow](DATAFLOW.md) of how the documents uploaded into Google Cloud Storage bucket is processed and prepared for search and summarization.
 
 
+
+### Enterprise Foundations
+
+This Solution assumes that you have already configured an enterprise-ready foundation.
+The foundation is not a technical prequisite (meaning, you can use the [deployment guide](#Deployment-Guide) without a foundation).
+However, we recommend that you build an enterprise-ready foundation before releasing production workloads with sensitive data.
+
+For more details, see [Deploying Solutions to an enterprise-ready foundation](docs/foundation.md)
+
 ## Deployment Guide
 
 This section provides a step-by-step instructions on how to deploy the `Enterprise Knowledge Solution` on Google Cloud using Terraform.
