@@ -14,30 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CLOUD_FUNC_DIR=$(realpath $(dirname $0))
-
-# Validate arguments
-if [ $# -ne 1 ]; then
-  echo "Please run $0 <package-dir>"
-  exit 1
-fi
-if [ \! -d "$1" ]; then
-  echo "$1 is not a directory"
-fi
-PACKAGE_DIR=$(realpath $1)
-
-# Clear out old package
-rm -r "${PACKAGE_DIR}"/*
-
-# Copy in files fresh
 (
-  cd "${CLOUD_FUNC_DIR}"
-  cp \
-    README.md \
-    deploy.sh \
-    main.py \
-    requirements.txt \
-    "${PACKAGE_DIR}"
-  mkdir -p "${PACKAGE_DIR}/libs"
-  cp -r ../../libs/* "${PACKAGE_DIR}/libs"
+  cd "$(dirname $0)/build"
+  docker buildx build --build-context libs=../../libs --build-context reqs=../../../../reqs .
 )
+

@@ -36,12 +36,12 @@ steps:
 # Build RAG container (multipurpose)
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'buildx', 'build',
-                   '-f', 'components/processing/deployments/cloud_run/build/Dockerfile',
+                   '-f', 'components/processing/terraform/build/Dockerfile',
                    '--build-context', 'libs=components/processing/libs',
                    '--build-context', 'reqs=reqs',
                    '--cache-from=$_IMAGE_TAG',
                    '-t', '$_IMAGE_TAG',
-                   'components/processing/deployments/cloud_run/build' ]
+                   'components/processing/terraform/build' ]
 
 # Push container
 - name: 'gcr.io/cloud-builders/docker'
