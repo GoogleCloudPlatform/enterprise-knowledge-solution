@@ -1,6 +1,6 @@
 .gitignore
 .DS_Store
-local_dev/** 
+local_dev/**
 
 # Python
 **/__pycache__/**
@@ -28,3 +28,7 @@ sample-deployments/composer-orchestrated-process/terraform.tfvars.dp
 sample-deployments/composer-orchestrated-process/terraform.tfvars.go_demos
 .gitignore
 components/doc-classifier/terraform/build/cloudbuild.yaml
+
+# Linting and formatting
+super-linter-output
+super-linter.log
