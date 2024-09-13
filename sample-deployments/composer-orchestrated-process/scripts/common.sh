@@ -104,7 +104,7 @@ create_service_account_and_enable_impersonation() {
     export SERVICE_ACCOUNT_ID="deployer@$PROJECT_ID.iam.gserviceaccount.com"
     echo "using default name 'deployer' for SERVICE_ACCOUNT_ID"
   fi
-  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format=value(email))
+  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format="value(email)")
     if [[ $__deployer_sa ]] ; then
       echo "$__deployer_sa has already been created"
     else
