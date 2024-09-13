@@ -1,5 +1,3 @@
-#!/bin/bash
-#
 # Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-(
-  cd "$(dirname $0)/build"
-  docker buildx build --build-context libs=../../src --build-context reqs=../../reqs .
-)
-
+google-cloud-documentai==2.32.0

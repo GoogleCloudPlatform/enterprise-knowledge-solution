@@ -1,6 +1,0 @@
-[project]
-name = "doc-classifier"
-version = "0.0.1.dev"
-dependencies = [
-  "google-cloud-documentai==2.31.0",
-]
