@@ -55,6 +55,7 @@ check_exec_dependency() {
 create_oauth_consent_config(){
     create_custom_role_iap
     enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$CURRENT_USER" "projects/$PROJECT_ID"
+    echo "Check if OAuth Consent Screen (brand) already exists"
     local __iap_brand=$(gcloud iap oauth-brands list --format="get(name)")
     if [[ $__iap_brand ]] ; then
         echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
@@ -104,7 +105,7 @@ create_service_account_and_enable_impersonation() {
     export SERVICE_ACCOUNT_ID="deployer@$PROJECT_ID.iam.gserviceaccount.com"
     echo "using default name 'deployer' for SERVICE_ACCOUNT_ID"
   fi
-  local __deployer_sa=$(gcloud iam service-accounts describe $SERVICE_ACCOUNT_ID --format=value(email))
+  local __deployer_sa=$(gcloud iam service-accounts list --format="value(email)" | grep $SERVICE_ACCOUNT_ID )
     if [[ $__deployer_sa ]] ; then
       echo "$__deployer_sa has already been created"
     else
