@@ -74,7 +74,7 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 module "processor" {
-  source                        = "../../components/processing/deployments/cloud_run"
+  source                        = "../../components/processing/terraform"
   project_id                    = var.project_id
   region                        = var.region
   bq_region                     = var.region
