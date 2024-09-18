@@ -70,3 +70,8 @@ variable "app_engine_service_name" {
   type        = string
   description = "The App Engine service name for the webui"
 }
+
+variable "lb_ssl_certificate_domains" {
+  description = "Custom domain pointing to the WebUI app, DNS configured"
+  type        = list(string)
+}
