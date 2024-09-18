@@ -15,7 +15,6 @@
 # limitations under the License.
 
 (
-  cd "$(dirname $0)/build"
+  cd "$(dirname "$0")/build" || exit
   docker buildx build --build-context libs=../../libs --build-context reqs=../../../../reqs .
 )
-

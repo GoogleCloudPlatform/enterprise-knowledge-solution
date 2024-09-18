@@ -14,17 +14,16 @@
 
 
 locals {
-  registry_url = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}"
+  registry_url        = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}"
   cloud_build_fileset = fileset("${path.module}/src/", "**/*")
   cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : fileexists(f) ? filesha512(f) :
-    sha512("file-not-found")]))
-  service_account_name     = var.classifier_cloud_run_job_name
+  sha512("file-not-found")]))
+  service_account_name = var.classifier_cloud_run_job_name
 }
 
 # See https://github.com/terraform-google-modules/terraform-google-gcloud
 module "gcloud" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.4"
+  source = "github.com/terraform-google-modules/gcloud/google?ref=db25ab9"
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT

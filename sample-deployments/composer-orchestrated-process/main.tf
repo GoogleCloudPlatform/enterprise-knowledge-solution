@@ -19,9 +19,9 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name = "doc-processor"
+  processing_cloud_run_job_name  = "doc-processor"
   form_parser_cloud_run_job_name = "form-parser"
-  classifier_cloud_run_job_name = "doc-classifier"
+  classifier_cloud_run_job_name  = "doc-classifier"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
@@ -74,35 +74,35 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 module "processor" {
-  source                        = "../../components/processing/terraform"
-  project_id                    = var.project_id
-  region                        = var.region
-  bq_region                     = var.region
-  gcs_region                    = var.region
-  repository_region             = var.region
-  artifact_repo_name            = module.common_infra.artifact_repo.name
+  source                            = "../../components/processing/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  bq_region                         = var.region
+  gcs_region                        = var.region
+  repository_region                 = var.region
+  artifact_repo_name                = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  processing_cloud_run_job_name = local.processing_cloud_run_job_name
+  processing_cloud_run_job_name     = local.processing_cloud_run_job_name
 }
 
 module "form_parser_processor" {
-  source            = "../../components/processing/form_parser/deployment"
-  project_id        = var.project_id
-  region            = var.region
-  location          = var.docai_location
-  gcs_input_prefix  = module.common_infra.gcs_process_bucket_name
-  gcs_output_prefix = module.common_infra.gcs_process_bucket_name
+  source                         = "../../components/processing/form_parser/deployment"
+  project_id                     = var.project_id
+  region                         = var.region
+  location                       = var.docai_location
+  gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
+  gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
 }
 
 module "doc_classifier_job" {
-  source                        = "../../components/doc-classifier/terraform"
-  project_id                    = var.project_id
-  region                        = var.region
-  repository_region             = var.region
-  artifact_repo_name            = module.common_infra.artifact_repo.name
+  source                            = "../../components/doc-classifier/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  repository_region                 = var.region
+  artifact_repo_name                = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
+  classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
 }
 
@@ -163,7 +163,7 @@ resource "local_file" "env_file" {
     processing_service_account    = module.processor.doc_processor_service_account
 
     form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
-    form_parser_service_account = module.form_parser_processor.form_parser_service_account
+    form_parser_service_account    = module.form_parser_processor.form_parser_service_account
 
     classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
     classifier_service_account    = module.doc_classifier_job.classifier_service_account

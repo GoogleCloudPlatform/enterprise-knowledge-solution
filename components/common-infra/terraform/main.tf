@@ -40,7 +40,7 @@ resource "google_artifact_registry_repository" "docker-repo" {
 }
 
 module "cloud_build_account" {
-  source     = "terraform-google-modules/service-accounts/google"
+  source     = "https://terraform-google-modules/service-accounts/google"
   version    = "~> 4.2"
   project_id = var.project_id
   names      = ["cloud-build"]

@@ -57,7 +57,7 @@ module "project_services" {
 }
 
 module "doc_processor_account" {
-  source     = "terraform-google-modules/service-accounts/google"
+  source     = "https://terraform-google-modules/service-accounts/google"
   version    = "~> 4.2"
   project_id = var.project_id
   prefix     = "dpu"

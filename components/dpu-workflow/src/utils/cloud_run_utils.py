@@ -16,7 +16,7 @@ import logging
 import os
 from enum import Enum
 
-from google.cloud import storage, documentai
+from google.cloud import documentai, storage
 
 
 class FolderNames(str, Enum):
@@ -26,22 +26,23 @@ class FolderNames(str, Enum):
     CLASSIFICATION_RESULTS = "classified_pdfs_results"
 
 
-def get_process_job_params(bq_table, doc_processor_job_name, gcs_reject_bucket,
-                           mv_params):
+def get_process_job_params(
+    bq_table, doc_processor_job_name, gcs_reject_bucket, mv_params
+):
     process_job_params = []
     for mv_obj in mv_params:
-        dest = (f"gs://{mv_obj['destination_bucket']}/"
-                f"{mv_obj['destination_object']}")
-        reject_dest = (f"gs://{gcs_reject_bucket}/"
-                       f"{mv_obj['destination_object']}")
-        bq_id = (f"{bq_table['project_id']}.{bq_table['dataset_id']}."
-                 f"{bq_table['table_id']}")
+        dest = f"gs://{mv_obj['destination_bucket']}/" f"{mv_obj['destination_object']}"
+        reject_dest = f"gs://{gcs_reject_bucket}/" f"{mv_obj['destination_object']}"
+        bq_id = (
+            f"{bq_table['project_id']}.{bq_table['dataset_id']}."
+            f"{bq_table['table_id']}"
+        )
         job_param = {
             "overrides": {
                 "container_overrides": [
                     {
-                        "name":       f"{doc_processor_job_name}",
-                        "args":       [
+                        "name": f"{doc_processor_job_name}",
+                        "args": [
                             dest,
                             reject_dest,
                             "--write_json=False",
@@ -50,8 +51,8 @@ def get_process_job_params(bq_table, doc_processor_job_name, gcs_reject_bucket,
                         "clear_args": False,
                     }
                 ],
-                "task_count":          1,
-                "timeout":             "300s",
+                "task_count": 1,
+                "timeout": "300s",
             }
         }
         process_job_params.append(job_param)
@@ -63,10 +64,15 @@ def __build_gcs_path__(bucket: str, folder: str, folder_name: FolderNames):
 
 
 def forms_parser_job_params(bq_table, process_bucket, process_folder):
-    bq_table_id = f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
-    gcs_input_prefix = __build_gcs_path__(process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT)
-    gcs_output_prefix = __build_gcs_path__(process_bucket, process_folder,
-                                         FolderNames.PDF_FORMS_OUTPUT)
+    bq_table_id = (
+        f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
+    )
+    gcs_input_prefix = __build_gcs_path__(
+        process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT
+    )
+    gcs_output_prefix = __build_gcs_path__(
+        process_bucket, process_folder, FolderNames.PDF_FORMS_OUTPUT
+    )
 
     return {
         "container_overrides": [
@@ -74,8 +80,7 @@ def forms_parser_job_params(bq_table, process_bucket, process_folder):
                 "env": [
                     {"name": "BQ_TABLE_ID", "value": bq_table_id},
                     {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
-                    {"name": "GCS_OUTPUT_PREFIX", "value":
-                        gcs_output_prefix},
+                    {"name": "GCS_OUTPUT_PREFIX", "value": gcs_output_prefix},
                 ]
             }
         ],
@@ -85,17 +90,19 @@ def forms_parser_job_params(bq_table, process_bucket, process_folder):
 
 
 def get_doc_classifier_job_overrides(
-        classifier_project_id: str,
-        classifier_location: str,
-        classifier_processor_id: str,
-        process_folder: str,
-        process_bucket: str,
-        timeout_in_seconds: int = 3000,
+    classifier_project_id: str,
+    classifier_location: str,
+    classifier_processor_id: str,
+    process_folder: str,
+    process_bucket: str,
+    timeout_in_seconds: int = 3000,
 ):
-    gcs_input_prefix = __build_gcs_path__(process_bucket, process_folder,
-                                          FolderNames.PDF_GENERAL)
-    gcs_output_uri = __build_gcs_path__(process_bucket, process_folder,
-                                        FolderNames.CLASSIFICATION_RESULTS)
+    gcs_input_prefix = __build_gcs_path__(
+        process_bucket, process_folder, FolderNames.PDF_GENERAL
+    )
+    gcs_output_uri = __build_gcs_path__(
+        process_bucket, process_folder, FolderNames.CLASSIFICATION_RESULTS
+    )
     return {
         "container_overrides": [
             {
@@ -112,6 +119,7 @@ def get_doc_classifier_job_overrides(
         "timeout": f"{timeout_in_seconds}s",
     }
 
+
 def read_classifier_job_output(
     process_bucket: str,
     process_folder: str,
@@ -121,7 +129,6 @@ def read_classifier_job_output(
 
     gcs_input_prefix = f"{process_folder}/{FolderNames.PDF_GENERAL.value}"
 
-
     storage_client = storage.Client()
     classification_mv_params = []
 
@@ -129,13 +136,11 @@ def read_classifier_job_output(
     prefix = f"{process_folder}/{FolderNames.CLASSIFICATION_RESULTS.value}"
 
     bucket = storage_client.get_bucket(process_bucket)
-    output_blobs = bucket.list_blobs(
-        prefix=prefix,
-        match_glob="**/*.json"
-    )
+    output_blobs = bucket.list_blobs(prefix=prefix, match_glob="**/*.json")
     output_blobs = list(output_blobs)
-    logging.info(f"Found {len(output_blobs)} under bucket {process_bucket} "
-                 f"with {prefix=}")
+    logging.info(
+        f"Found {len(output_blobs)} under bucket {process_bucket} " f"with {prefix=}"
+    )
     # Document AI may output multiple JSON files per source file
     # In fact, Output file name contains the original file name without the extension
     # but also adds a dash and a sequential number in the filename (before the
@@ -162,10 +167,8 @@ def read_classifier_job_output(
 
         # assuming the original file was a PDF, reconstruct the original
         # filename and put into the collected map the entities found
-        original_with_suffix_basename = os.path.basename(blob.name).split(".json")[
-            0]
-        output_file_name_split_dashes = original_with_suffix_basename.split(
-            "-")[:-1]
+        original_with_suffix_basename = os.path.basename(blob.name).split(".json")[0]
+        output_file_name_split_dashes = original_with_suffix_basename.split("-")[:-1]
         original_filename = "-".join(output_file_name_split_dashes) + ".pdf"
         full_original_file_name = f"{gcs_input_prefix}/{original_filename}"
         logging.info(f"reading results for file {full_original_file_name}")
@@ -173,27 +176,30 @@ def read_classifier_job_output(
             original_filename_to_json_output_map[full_original_file_name] = []
 
         original_filename_to_json_output_map[full_original_file_name].extend(
-            document.entities)
+            document.entities
+        )
 
     # Now that we covered all json output and collected data into our map,
     # we can loop over the map and make the final decision for each file
-    for original_blob_path, entities in (
-            original_filename_to_json_output_map.items()):
+    for original_blob_path, entities in original_filename_to_json_output_map.items():
         # Take the classified entities
         # 1. filter out any unknown labels
         # 2. filter out any labels that are under the threshold confidence level
         # 3. sort the remaining labels according to the confidence level
         # 4. convert the label to a lower case
         sorted_entities_type_but_only_above_threshold = list(
-            map(lambda e: e.type.strip().lower(),
+            map(
+                lambda e: e.type.strip().lower(),
                 sorted(
                     filter(
                         lambda e: e.confidence > threshold,
-                        filter(lambda e: e.type.strip().lower() in known_labels,
-                            entities
-                        )
-                    ), key=lambda e: e.confidence, reverse=True
-                )
+                        filter(
+                            lambda e: e.type.strip().lower() in known_labels, entities
+                        ),
+                    ),
+                    key=lambda e: e.confidence,
+                    reverse=True,
+                ),
             )
         )
 
@@ -208,27 +214,28 @@ def read_classifier_job_output(
             # take the unclassified documents (general) and keep them in
             # place, so the easiest solution is to just remove them from this
             # output.
-            logging.info(f"{original_blob_path} was not detected to be "
-                         f"of a specific type.")
+            logging.info(
+                f"{original_blob_path} was not detected to be " f"of a specific type."
+            )
             continue
 
         # if we do have some labels after filtering, we will take the
         # first one, since the labels were also sorted, so we will use
         # the highest confidence label.
         chosen_label = sorted_entities_type_but_only_above_threshold[0]
-        logging.info(f"{original_blob_path} was detected to be "
-                         f"a '{chosen_label}'.")
+        logging.info(f"{original_blob_path} was detected to be " f"a '{chosen_label}'.")
         original_filename = os.path.basename(original_blob_path)
         # prepare mv operation parameters, that will be used in the next step.
         parameter_obj = {
-            "source_object":      original_blob_path,
+            "source_object": original_blob_path,
             "destination_bucket": process_bucket,
             "destination_object": f"{process_folder}/pdf-{chosen_label}/"
-                                  f"{original_filename}",
+            f"{original_filename}",
         }
         source_blob = bucket.blob(original_blob_path)
-        destination_blob = (f"{process_folder}/pdf-{chosen_label}/"
-                            f"input/{original_filename}")
+        destination_blob = (
+            f"{process_folder}/pdf-{chosen_label}/" f"input/{original_filename}"
+        )
         bucket.copy_blob(
             blob=source_blob,
             destination_bucket=bucket,

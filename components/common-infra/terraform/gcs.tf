@@ -13,31 +13,37 @@
 # limitations under the License.
 
 module "input_bucket" {
-  source        = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version       = "~> 5.0"
-  project_id    = module.project_services.project_id
-  name          = "docs-input-${var.project_id}"
-  location      = var.region
-  force_destroy = false
-  labels        = local.dpu_label
+  source                   = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version                  = "~> 5.0"
+  project_id               = module.project_services.project_id
+  name                     = "docs-input-${var.project_id}"
+  location                 = var.region
+  force_destroy            = false
+  labels                   = local.dpu_label
+  public_access_prevention = "enforced"
+  bucket_policy_only       = "true"
 }
 
 module "process_bucket" {
-  source        = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version       = "~> 5.0"
-  project_id    = module.project_services.project_id
-  name          = "dpu-process-${var.project_id}"
-  location      = var.region
-  force_destroy = false
-  labels        = local.dpu_label
+  source                   = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version                  = "~> 5.0"
+  project_id               = module.project_services.project_id
+  name                     = "dpu-process-${var.project_id}"
+  location                 = var.region
+  force_destroy            = false
+  labels                   = local.dpu_label
+  public_access_prevention = "enforced"
+  bucket_policy_only       = "true"
 }
 
 module "reject_bucket" {
-  source        = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version       = "~> 5.0"
-  project_id    = module.project_services.project_id
-  name          = "dpu-reject-${var.project_id}"
-  location      = var.region
-  force_destroy = false
-  labels        = local.dpu_label
+  source                   = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version                  = "~> 5.0"
+  project_id               = module.project_services.project_id
+  name                     = "dpu-reject-${var.project_id}"
+  location                 = var.region
+  force_destroy            = false
+  labels                   = local.dpu_label
+  public_access_prevention = "enforced"
+  bucket_policy_only       = "true"
 }

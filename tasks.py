@@ -13,15 +13,13 @@
 # limitations under the License.
 
 
-import os
 import glob
-
-from invoke import task, Collection
-from uv import find_uv_bin
+import os
 
 import components.processing.tasks
 import components.webui.tasks
-
+from invoke import Collection, task
+from uv import find_uv_bin
 
 # Find the base directory for invoke
 BASE_DIR = os.path.dirname(__file__)
@@ -76,12 +74,12 @@ def lock(c, upgrade=False, upgrade_package="", quiet=True):
     c.run(f'cat "{REQS_ALL}" | grep -v "^-e " > "{CONSTRAINTS}"')
 
     # Gather all requirements
-    reqs_in = list(glob.glob(
-        os.path.join(BASE_DIR, "**", "pyproject.toml"),
-        recursive=True))
-    reqs_in += list(glob.glob(
-        os.path.join(BASE_DIR, "**", "requirements.in"),
-        recursive=True))
+    reqs_in = list(
+        glob.glob(os.path.join(BASE_DIR, "**", "pyproject.toml"), recursive=True)
+    )
+    reqs_in += list(
+        glob.glob(os.path.join(BASE_DIR, "**", "requirements.in"), recursive=True)
+    )
 
     # Re-generate the requirements.txt for specific deployments
     # (honouring consolidated requirements)
@@ -95,6 +93,7 @@ def lock(c, upgrade=False, upgrade_package="", quiet=True):
                 'grep -v "\\${PROJECT_ROOT}" >'
                 f'"{req_txt}"'
             )
+
 
 #
 # Build collection from all available tasks

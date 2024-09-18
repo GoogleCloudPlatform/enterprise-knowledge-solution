@@ -19,5 +19,5 @@ output "form_parser_cloud_run_job_name" {
 
 output "form_parser_service_account" {
   description = "Service Account used for handling form parsing jobs."
-  value = google_service_account.dpu_run_service_account.email
+  value       = google_service_account.dpu_run_service_account.email
 }

@@ -17,22 +17,30 @@ import os
 import sys
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
-from google.api_core.exceptions import InternalServerError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
-from google.api_core.exceptions import RetryError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
-from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.client_options import (
+    ClientOptions,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
+from google.api_core.exceptions import (
+    InternalServerError,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
+from google.api_core.exceptions import (
+    RetryError,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
+from google.cloud import (
+    documentai,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
 
 
-
-def batch_classify_documents(project_id: str,
-                             location: str,
-                             processor_id: str,
-                             gcs_input_prefix: str,
-                             gcs_output_uri: str,
-                             processor_version_id: Optional[str] = None,
-                             field_mask: Optional[str] = None,
-                             timeout: int = 400,
-                             ):
+def batch_classify_documents(
+    project_id: str,
+    location: str,
+    processor_id: str,
+    gcs_input_prefix: str,
+    gcs_output_uri: str,
+    processor_version_id: Optional[str] = None,
+    field_mask: Optional[str] = None,
+    timeout: int = 400,
+):
     """Function for processing PDF documents in batch"""
     # You must set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
@@ -77,8 +85,9 @@ def batch_classify_documents(project_id: str,
     # This could take some time for larger files
     # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
     try:
-        logging.info(f"Waiting for operation {operation.operation.name} to "
-              f"complete...")
+        logging.info(
+            f"Waiting for operation {operation.operation.name} to " f"complete..."
+        )
         operation.result(timeout=timeout)
     # Catch exception when operation doesn't finish before timeout
     except (RetryError, InternalServerError) as e:
@@ -91,6 +100,7 @@ def batch_classify_documents(project_id: str,
     #
     # operation.add_done_callback(my_callback)
 
+
 # Main entry point
 if __name__ == "__main__":
     # Retrieve Job-defined env vars
@@ -98,18 +108,18 @@ if __name__ == "__main__":
     TASK_ATTEMPT = os.getenv("CLOUD_RUN_TASK_ATTEMPT", 0)
 
     # Retrieve User-defined env vars
-    PROJECT_ID = os.getenv('PROJECT_ID')
-    LOCATION = os.getenv('LOCATION')
-    PROCESSOR_ID = os.getenv('PROCESSOR_ID')
-    GCS_INPUT_PREFIX = os.getenv('GCS_INPUT_PREFIX')
-    GCS_OUTPUT_URI = os.getenv('GCS_OUTPUT_URI')
+    PROJECT_ID = os.getenv("PROJECT_ID")
+    LOCATION = os.getenv("LOCATION")
+    PROCESSOR_ID = os.getenv("PROCESSOR_ID")
+    GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX")
+    GCS_OUTPUT_URI = os.getenv("GCS_OUTPUT_URI")
 
-
-    if (not PROJECT_ID or
-            not LOCATION or
-            not PROCESSOR_ID or
-            not GCS_INPUT_PREFIX or
-            not GCS_OUTPUT_URI
+    if (
+        not PROJECT_ID
+        or not LOCATION
+        or not PROCESSOR_ID
+        or not GCS_INPUT_PREFIX
+        or not GCS_OUTPUT_URI
     ):
         message = (
             f"Environment variables missing; "
@@ -124,19 +134,21 @@ if __name__ == "__main__":
 
     try:
         logging.info(f"Starting Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
-        logging.info(f"{PROCESSOR_ID=}, "
-                     f"{PROJECT_ID=}, "
-                     f"{LOCATION=}, "
-                     f"{GCS_INPUT_PREFIX=}, "
-                     f"{GCS_OUTPUT_URI=}")
-        batch_classify_documents(project_id=PROJECT_ID,
-                                 location=LOCATION,
-                                 processor_id=PROCESSOR_ID,
-                                 gcs_input_prefix=GCS_INPUT_PREFIX,
-                                 gcs_output_uri=GCS_OUTPUT_URI,
-                                 )
+        logging.info(
+            f"{PROCESSOR_ID=}, "
+            f"{PROJECT_ID=}, "
+            f"{LOCATION=}, "
+            f"{GCS_INPUT_PREFIX=}, "
+            f"{GCS_OUTPUT_URI=}"
+        )
+        batch_classify_documents(
+            project_id=PROJECT_ID,
+            location=LOCATION,
+            processor_id=PROCESSOR_ID,
+            gcs_input_prefix=GCS_INPUT_PREFIX,
+            gcs_output_uri=GCS_OUTPUT_URI,
+        )
         logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:
-        logging.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!"
-                      f"{e}")
+        logging.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")
         sys.exit(1)
