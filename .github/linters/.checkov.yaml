@@ -9,7 +9,9 @@ output-baseline-as-skipped: true
 # allow scans of external modules
 download-external-modules: true
 
-# CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80, disable checks for CMEK/CSEK on resources, not relevant to the sample repo, but relevant for production
+# CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_82 disable checks for CMEK/CSEK on resources, not relevant to the sample repo, but relevant for production
 # CKV_GCP_121 disable check for BQ deletion protection. This is too disruptive for development, but relevant for production
-skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121
-#TODO: all the CKV_TF_1
+# CKV_DOCKER_2 Disregard warning about mandatory healthcheck in dockerfile, that is configured through cloud run not the container itself
+skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121,CKV_GCP_82,CKV_DOCKER_2
+
+skip-path: /tmp/*

@@ -13,8 +13,11 @@
 # limitations under the License.
 
 
-# Initialize a new build stage and set the 
+# Initialize a new build stage and set the
 FROM python:3.10
+
+# Explicitly set a user to avoid running as root
+USER daemon
 
 # Expose port you want your app on
 EXPOSE 8080

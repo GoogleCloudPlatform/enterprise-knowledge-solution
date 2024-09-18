@@ -21,10 +21,9 @@ locals {
   service_account_name = var.classifier_cloud_run_job_name
 }
 
-# See https://github.com/terraform-google-modules/terraform-google-gcloud
+# See github.com/terraform-google-modules/terraform-google-gcloud
 module "gcloud" {
-  source = "github.com/terraform-google-modules/gcloud/google?ref=db25ab9"
-
+  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
     builds submit ${path.module}/../src \

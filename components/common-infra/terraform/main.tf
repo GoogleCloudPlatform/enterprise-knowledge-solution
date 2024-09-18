@@ -18,8 +18,7 @@ locals {
   }
 }
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -40,8 +39,7 @@ resource "google_artifact_registry_repository" "docker-repo" {
 }
 
 module "cloud_build_account" {
-  source     = "https://terraform-google-modules/service-accounts/google"
-  version    = "~> 4.2"
+  source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   names      = ["cloud-build"]
   project_roles = [

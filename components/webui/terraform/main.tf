@@ -16,8 +16,7 @@
  * Activate required service API:s
  */
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -34,10 +33,8 @@ module "project_services" {
  * VPC configuration for App Engine
  */
 
-module "vpc" {
-  source  = "terraform-google-modules/network/google//modules/subnets"
-  version = "~> 9.1"
-
+module "webui-subnet" {
+  source       = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
   project_id   = module.project_services.project_id
   network_name = var.vpc_network_name
 
@@ -189,8 +186,7 @@ locals {
 
 # Build and upload the app container
 module "app_build" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.4"
+  source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   platform        = "linux"
   create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo.name}/${local.ui_service_name}\" \"${path.module}/../\""

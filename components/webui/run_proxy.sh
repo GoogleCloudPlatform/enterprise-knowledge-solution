@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcloud run services proxy $SERVICE_NAME --project $GOOGLE_CLOUD_PROJECT --region $AR_REPO_LOCATION
+gcloud run services proxy "$SERVICE_NAME" --project "$GOOGLE_CLOUD_PROJECT" --region "$AR_REPO_LOCATION"
