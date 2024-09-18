@@ -172,7 +172,7 @@ def process_recursive(
 
     # Return with the children
     for child in list(output.list()):
-        results.extend(process_recursive(child, reject_dir))
+        results.extend(process_recursive(child, reject_dir, supported_files))
 
     return results
 
