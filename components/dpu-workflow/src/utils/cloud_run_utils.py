@@ -15,6 +15,7 @@
 import logging
 import os
 from enum import Enum
+from typing import Dict
 
 from google.cloud import storage, documentai
 
@@ -27,8 +28,10 @@ class FolderNames(str, Enum):
 
 
 def get_process_job_params(bq_table, doc_processor_job_name, gcs_reject_bucket,
-                           mv_params):
+                           mv_params, supported_files: Dict[str, str]):
     process_job_params = []
+    supported_files_args = [f"--file-type={k}:{v}" for k,
+                            v in supported_files.items()]
     for mv_obj in mv_params:
         dest = (f"gs://{mv_obj['destination_bucket']}/"
                 f"{mv_obj['destination_object']}")
@@ -36,18 +39,20 @@ def get_process_job_params(bq_table, doc_processor_job_name, gcs_reject_bucket,
                        f"{mv_obj['destination_object']}")
         bq_id = (f"{bq_table['project_id']}.{bq_table['dataset_id']}."
                  f"{bq_table['table_id']}")
+        args = [
+            dest,
+            reject_dest,
+            "--write_json=False",
+            f"--write_bigquery={bq_id}",
+        ]
+        args.extend(supported_files_args)
         job_param = {
             "overrides": {
                 "container_overrides": [
                     {
                         "name":       f"{doc_processor_job_name}",
-                        "args":       [
-                            dest,
-                            reject_dest,
-                            "--write_json=False",
-                            f"--write_bigquery={bq_id}",
-                        ],
-                        "clear_args": False,
+                        "args":       args,
+                        "clear_args": False
                     }
                 ],
                 "task_count":          1,
