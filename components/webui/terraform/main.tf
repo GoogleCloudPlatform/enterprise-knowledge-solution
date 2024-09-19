@@ -287,9 +287,5 @@ resource "google_app_engine_flexible_app_version" "deployed_version" {
       serving_status,
       deployment[0].container[0].image
     ]
-    # create_before_destroy = true
-    replace_triggered_by = [
-      null_resource.appengine_deploy_trigger
-    ]
   }
 }

@@ -32,5 +32,5 @@ components/doc-classifier/terraform/build/cloudbuild.yaml
 # Linting and formatting
 super-linter-output
 super-linter.log
-external_modules/*
-
+.external_modules/*
+.mypy_cache/*
