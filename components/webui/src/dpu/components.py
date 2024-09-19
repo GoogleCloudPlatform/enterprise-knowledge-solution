@@ -226,7 +226,9 @@ def choose_related_document(related_docs: list, initial_value: int):
 
         # Find the chosen row (may be initial if not chosen yet)
         if res.selected_rows is not None:
-            chosen_row = res.selected_rows.to_dict("records")[0]  # pylint: disable=unsubscriptable-object
+            chosen_row = res.selected_rows.to_dict("records")[
+                0
+            ]  # pylint: disable=unsubscriptable-object
 
     # Find the doc_id (same as root_doc_id initially, but may change)
     if chosen_row["objid"]:

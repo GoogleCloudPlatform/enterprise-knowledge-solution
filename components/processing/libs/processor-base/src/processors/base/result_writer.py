@@ -56,7 +56,9 @@ class BigQueryWriter:
         # Bring in the schema if requested (required first time)
         if with_schema:
             proto_schema = types.ProtoSchema()
-            proto_descriptor = descriptor_pb2.DescriptorProto()  # pylint: disable=no-member
+            proto_descriptor = (
+                descriptor_pb2.DescriptorProto()
+            )  # pylint: disable=no-member
             type(obj[0]).pb().DESCRIPTOR.CopyToProto(proto_descriptor)
             proto_schema.proto_descriptor = proto_descriptor
             proto_data.writer_schema = proto_schema
@@ -64,7 +66,9 @@ class BigQueryWriter:
         # Serialize the rows
         proto_rows = types.ProtoRows()
         for o in obj:
-            proto_rows.serialized_rows.append(type(o).serialize(o))  # pylint: disable=no-member
+            proto_rows.serialized_rows.append(
+                type(o).serialize(o)
+            )  # pylint: disable=no-member
 
         proto_data.rows = proto_rows
 

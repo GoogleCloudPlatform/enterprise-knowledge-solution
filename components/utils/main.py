@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from converter import write_jsonl
+from converter import write_jsonl, xlsx_to_pdf
 
 
 def jsonl() -> None:

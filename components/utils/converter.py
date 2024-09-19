@@ -53,13 +53,13 @@ def to_csv(xls_filename, csv_filename) -> None:
 
 def to_csv_pd(xls_filename, csv_filename) -> str:
     read_file = pd.read_excel(xls_filename)
-    read_file.to_csv(csv_filename, index=None, header=True)
+    return read_file.to_csv(csv_filename, index=None, header=True)
 
 
 def xlsx_to_pdf(xls_filename, html_filename, pdf_filename) -> str:
     df = pd.read_excel(xls_filename)
     df.to_html(html_filename)
-    pdfkit.from_file(html_filename, pdf_filename)
+    return pdfkit.from_file(html_filename, pdf_filename)
 
 
 def generate_document_id(document_str: str):

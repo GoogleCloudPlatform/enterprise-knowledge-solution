@@ -69,7 +69,9 @@ def msg_processor(
         )
 
         # Extract message content
-        msg_path = pathlib.Path(output, f"{nmsg.defaultFolderName}.txt")  # pylint: disable=no-member
+        msg_path = pathlib.Path(
+            output, f"{nmsg.defaultFolderName}.txt"
+        )  # pylint: disable=no-member
         with open(msg_path, "wb") as f:
             f.write(nmsg.getSaveBody())  # pylint: disable=no-member
 
