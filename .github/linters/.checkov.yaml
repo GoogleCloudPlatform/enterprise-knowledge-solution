@@ -12,6 +12,7 @@ download-external-modules: false
 # CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_82 disable checks for CMEK/CSEK on resources, not relevant to the sample repo, but relevant for production
 # CKV_GCP_121 disable check for BQ deletion protection. This is too disruptive for development, but relevant for production
 # CKV_DOCKER_2 Disregard warning about mandatory healthcheck in dockerfile, that is configured through cloud run not the container itself
-skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121,CKV_GCP_82,CKV_DOCKER_2
+# CKV_GCP_62 Access and Storage Logging is the legacy feature, no longer recommended
+skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121,CKV_GCP_82,CKV_DOCKER_2,CKV_GCP_62
 
 skip-path: /tmp/*
