@@ -42,6 +42,13 @@ resource "google_iap_client" "project_client" {
   brand        = "projects/${data.google_project.project.number}/brands/${data.google_project.project.number}"
 }
 
+resource "google_project_iam_member" "iap_users" {
+  for_each = var.iap_access_domains
+  project  = module.project_services.project_id
+  role     = "roles/iap.httpsResourceAccessor"
+  member   = each.key
+}
+
 
 data "google_compute_default_service_account" "default" {
   project = module.project_services.project_id
