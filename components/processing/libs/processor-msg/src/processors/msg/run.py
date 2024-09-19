@@ -26,16 +26,20 @@ def main() -> None:
         description="process and extract messages",
     )
     parser.add_argument("process_dir", type=str, help="Process folder to process")
-    parser.add_argument("reject_dir", type=str, help="Reject folder for files that fail")
+    parser.add_argument(
+        "reject_dir", type=str, help="Reject folder for files that fail"
+    )
     parser.add_argument(
         "--write_json", type=bool, default=True, help="Write JSON files"
     )
-    parser.add_argument("-l", "--log",
-                        dest="logLevel",
-                        choices=['DEBUG', 'INFO', 'WARNING',
-                                 'ERROR', 'CRITICAL'],
-                        default='INFO',
-                        help="Set the logging level")
+    parser.add_argument(
+        "-l",
+        "--log",
+        dest="logLevel",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Set the logging level",
+    )
     parser.add_argument(
         "--write_bigquery",
         type=str,

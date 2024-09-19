@@ -27,8 +27,8 @@ WORKDIR /app
 COPY . ./
 
 # Upgrade pip, install requirements and install curl
-RUN python -m pip install --upgrade pip
-RUN pip install --require-hashes -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip==24.2
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 # TODO - Implement Sign On in the App and use the service account to access the GCP APIs
 # ENV GOOGLE_APPLICATION_CREDENTIALS=./adc.json

@@ -13,15 +13,15 @@
 # limitations under the License.
 
 
-import logging
 import json
+import logging
+from typing import Callable, Dict, Optional
+
+from processors.base.gcsio import GCSPath
+from processors.base.result_writer import BigQueryWriter, DocumentMetadata
 from processors.msg.msg_processor import msg_processor
 from processors.xlsx import xlsx_processor
 from processors.zip.unzip_processor import unzip_processor
-from processors.base.gcsio import GCSPath
-from processors.base.result_writer import DocumentMetadata, BigQueryWriter
-from typing import Dict, Optional, Callable
-
 
 logger = logging.getLogger(__name__)
 
@@ -82,18 +82,17 @@ def reject_oversized_file(
     return False
 
 
-
 def process_recursive(
     source: GCSPath,
     reject_dir: GCSPath,
 ) -> list[dict]:
 
     result = {
-        'objid': '',
-        'uri': str(source),
-        'mimetype': source.mimetype,
-        'metadata': {},
-        'status': 'UNPROCESSED',
+        "objid": "",
+        "uri": str(source),
+        "mimetype": source.mimetype,
+        "metadata": {},
+        "status": "UNPROCESSED",
     }
     results = [result]
 
@@ -101,50 +100,48 @@ def process_recursive(
 
         # current file size limit of 100MB in Data Store
         if reject_oversized_file(source, reject_dir, 100):
-            result['status'] = 'Rejected -- over 100MB'
+            result["status"] = "Rejected -- over 100MB"
             return results
 
         # current file size limit of 2.5MB for TXT in Data Store
         if source.suffix == ".txt" and reject_oversized_file(source, reject_dir, 2.5):
-            result['status'] = 'Rejected -- over 2.5MB and text'
+            result["status"] = "Rejected -- over 2.5MB and text"
             return results
 
-        result['objid'] = source.hash
-        result['status'] = 'Indexed'
+        result["objid"] = source.hash
+        result["status"] = "Indexed"
         return results
 
     # Find processor, if any, for generating outputs for this object
     processor = find_processor(source)
     if not processor:
-        result['status'] = 'Not indexed or expanded'
+        result["status"] = "Not indexed or expanded"
         return results
 
     # Attempt to use it.
     output = GCSPath(str(source) + ".out")
     if output.exists():
         logger.info("Output directory already exists... what is going on?")
-        result['status'] = 'Output directory already exists'
+        result["status"] = "Output directory already exists"
         return results
 
     try:
         # Generate outputs and find more metadata
         metadata = processor(source, output)
         if metadata is None:
-            result['status'] = 'Processor returned no data'
+            result["status"] = "Processor returned no data"
             return results
 
-        result['status'] = 'Expanded'
-        result['metadata'] = metadata
+        result["status"] = "Expanded"
+        result["metadata"] = metadata
 
     except Exception as e:
         logger.error(f"error running processor: {e}")
         logger.exception(e)
 
         # Move the failed to process doc to the reject folder
-        move_rejected_file(
-            source, reject_dir, f"Doc processor fail with error: {e}"
-        )
-        result['status'] = f'Processor failed with error {e}'
+        move_rejected_file(source, reject_dir, f"Doc processor fail with error: {e}")
+        result["status"] = f"Processor failed with error {e}"
         return results
 
     # Return with the children
@@ -161,36 +158,34 @@ def process_object(
     bq_writer: Optional[BigQueryWriter] = None,
 ):
 
-    logger.info(f'Processing {source}...')
+    logger.info(f"Processing {source}...")
 
     # Extract everything
     objs = process_recursive(source, reject_dir)
 
-    logger.debug(f'Objects: {objs}')
+    logger.debug(f"Objects: {objs}")
 
     # Create a object map with a subset of the data
-    obj_keys = ['uri', 'objid', 'status', 'mimetype']
+    obj_keys = ["uri", "objid", "status", "mimetype"]
     obj_map = []
     for obj in objs:
-        obj_map.append(dict((
-          (k, obj[k]) for k in obj_keys
-        )))
-    logger.debug(f'Object map: {obj_map}')
+        obj_map.append(dict(((k, obj[k]) for k in obj_keys)))
+    logger.debug(f"Object map: {obj_map}")
 
     for obj in objs:
 
         # Skip if no 'objid' (not to be indexed)
-        if not obj['objid']:
+        if not obj["objid"]:
             continue
 
         # Object metadata
         obj_metadata = {
             # Map of all related objects
-            'objs': obj_map,
+            "objs": obj_map,
             # Metadata for this one object
-            'metadata': obj['metadata'],
+            "metadata": obj["metadata"],
             # Status of processing
-            'status': obj['status'],
+            "status": obj["status"],
         }
 
         # Write to BigQuery if necessary
@@ -198,11 +193,11 @@ def process_object(
             bq_writer.write_results(
                 [
                     DocumentMetadata(
-                        id=obj['objid'],
+                        id=obj["objid"],
                         jsonData=json.dumps(obj_metadata, default=str),
                         content=DocumentMetadata.Content(
-                            mimeType=obj['mimetype'],
-                            uri=obj['uri'],
+                            mimeType=obj["mimetype"],
+                            uri=obj["uri"],
                         ),
                     )
                 ]
@@ -210,15 +205,15 @@ def process_object(
 
         # Write to JSON
         if write_json:
-            json_metadata = GCSPath(str(obj['uri']) + ".json")
+            json_metadata = GCSPath(str(obj["uri"]) + ".json")
             json_metadata.write_text(
                 json.dumps(
                     {
-                        "id": obj['objid'],
+                        "id": obj["objid"],
                         "structData": obj_metadata,
                         "content": {
-                            "mimeType": obj['mimetype'],
-                            "uri": obj['uri'],
+                            "mimeType": obj["mimetype"],
+                            "uri": obj["uri"],
                         },
                     },
                     default=str,

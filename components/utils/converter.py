@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import markdown
 import csv
-import openpyxl
-import pandas as pd
-from google.cloud import storage
-import jsonlines
 import hashlib
 import uuid
+
+import jsonlines
+import markdown
+import openpyxl
+import pandas as pd
 import pdfkit
+from google.cloud import storage
 
 
 def md_to_html(md_filename: str, html_filename: str) -> None:
@@ -54,10 +55,11 @@ def to_csv_pd(xls_filename, csv_filename) -> str:
     read_file = pd.read_excel(xls_filename)
     read_file.to_csv(csv_filename, index=None, header=True)
 
+
 def xlsx_to_pdf(xls_filename, html_filename, pdf_filename) -> str:
-  df = pd.read_excel(xls_filename)
-  df.to_html(html_filename)
-  pdfkit.from_file(html_filename, pdf_filename)
+    df = pd.read_excel(xls_filename)
+    df.to_html(html_filename)
+    pdfkit.from_file(html_filename, pdf_filename)
 
 
 def generate_document_id(document_str: str):

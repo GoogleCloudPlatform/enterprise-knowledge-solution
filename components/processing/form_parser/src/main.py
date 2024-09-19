@@ -22,12 +22,8 @@ from google.api_core.exceptions import (
     InternalServerError,
     RetryError,
 )
-from google.cloud import storage
-from google.cloud import documentai
-from google.cloud import logging
-from load_data_in_bigquery import load_rows_into_bigquery
-from load_data_in_bigquery import build_output_metadata
-
+from google.cloud import documentai, logging, storage
+from load_data_in_bigquery import build_output_metadata, load_rows_into_bigquery
 
 # Retrieve Job-defined env vars
 TASK_INDEX = os.getenv("CLOUD_RUN_TASK_INDEX", 0)

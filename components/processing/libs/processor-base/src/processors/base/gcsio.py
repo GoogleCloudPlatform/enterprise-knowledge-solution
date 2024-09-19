@@ -24,16 +24,15 @@ import json
 import logging
 import mimetypes
 import os
-from pathlib import Path
 import re
 import shutil
 import tempfile
-from typing import Optional, Iterator, TypeVar
 import uuid
+from pathlib import Path
+from typing import Iterator, Optional, TypeVar
 
 from google.api_core.client_info import ClientInfo
 from google.cloud import storage  # type: ignore[attr-defined, import-untyped]
-
 
 logger = logging.getLogger(__name__)
 
@@ -106,8 +105,10 @@ class GCSPath:
     def as_gcs_link(self):
         """Return HTTPS storage link or file:// for path"""
         if self.bucket:
-            return ('<a href="https://storage.cloud.google.com/' +
-                    f'{self.bucket.name}/{self.path}">{str(self)}</a>')
+            return (
+                '<a href="https://storage.cloud.google.com/'
+                + f'{self.bucket.name}/{self.path}">{str(self)}</a>'
+            )
         return f'<a href="file://{self.path}">{str(self)}</a>'
 
     # See if the file or object exists
@@ -158,7 +159,7 @@ class GCSPath:
             dst = dest.bucket.blob(dest.path)
             token, _, _ = dst.rewrite(source=src)
             while token is not None:
-                token, _ , _ = dst.rewrite(source=src, token=token)
+                token, _, _ = dst.rewrite(source=src, token=token)
 
         # Make local directories if necessary
         if not dest.bucket:
@@ -197,7 +198,7 @@ class GCSPath:
                     shutil.copyfile(self.path, dest.path)
 
     # Write as text the file or object
-    def write_text(self, txt, encoding='utf8'):
+    def write_text(self, txt, encoding="utf8"):
         """Write text to the object or file"""
         logger.debug("Writing text to %s", str(self))
         if self.bucket:

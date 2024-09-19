@@ -124,6 +124,7 @@ def read_classifier_job_output(
     process_bucket: str,
     process_folder: str,
     known_labels: list[str],
+    original_filename_to_json_output_map: dict,
     threshold: float = 0.7,
 ) -> list:
 
@@ -147,8 +148,6 @@ def read_classifier_job_output(
     # .json extension), which can optionally be more then once - so we
     # need to gather all data from all related output json files and then
     # parse them
-    original_filename_to_json_output_map: dict
-
     for blob in output_blobs:
         # Document AI should only output JSON files to GCS
         if blob.content_type != "application/json":

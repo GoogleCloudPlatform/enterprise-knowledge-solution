@@ -18,7 +18,6 @@ import os
 from dotenv import load_dotenv
 from invoke import task
 
-
 # Find the base directory for invoke
 BASE_DIR = os.path.dirname(__file__)
 ROOT_DIR = os.path.join(BASE_DIR, "../../")
@@ -30,10 +29,12 @@ load_dotenv()
 @task
 def local_dev(c, debug=False):
     """Start local streamlit webui"""
-    OPTS = " ".join([
-         "--browser.gatherUsageStats=false",  # Disable usage stats
-         "--server.headless=true",            # Disable collection of email address
-    ])
+    OPTS = " ".join(
+        [
+            "--browser.gatherUsageStats=false",  # Disable usage stats
+            "--server.headless=true",  # Disable collection of email address
+        ]
+    )
     if debug:
         OPTS += " --logger.level=DEBUG"
     with c.cd(ROOT_DIR):

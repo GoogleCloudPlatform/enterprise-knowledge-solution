@@ -15,8 +15,7 @@
 import streamlit as st  # type: ignore
 from dpu.components import LOGO
 
-
-logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAccessIssue]
+logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
 
 
 st.set_page_config(
@@ -33,13 +32,15 @@ with cols[1]:
     st.title(":green[Enterprise Knowledge Solution (EKS) Web UI]")
 
 st.markdown("""   """)
-st.markdown("""
+st.markdown(
+    """
     ### About
     This app demonstrates the search and summarization capabilities of the
     Enterprise Knowledge Solution (EKS).
 
     The app integrates with the Vertex AI Agent Builder using APIs.
-""")
+"""
+)
 
 if st.button("Start Search"):
     st.switch_page("pages/1_Search_Documents.py")

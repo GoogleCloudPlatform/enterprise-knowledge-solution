@@ -13,23 +13,25 @@
 # limitations under the License.
 
 
-import tempfile
 import argparse
-import email.utils
-from faker import Faker
 import datetime
-from dotenv import load_dotenv
+import email.utils
 import os
-from processors.base.gcsio import GCSPath
+import tempfile
+import uuid
+
+from dotenv import load_dotenv
 from extract_msg import OleWriter
 from extract_msg.enums import PropertiesType
 from extract_msg.properties import PropertiesStore
 from extract_msg.properties.prop import createNewProp, createProp
+from faker import Faker
+from processors.base.gcsio import GCSPath
 from processors.xlsx import XLSXGenerator
-import uuid
 
 
 class emptyDirectoryEntry:
+
     def __init__(self, name):
         self.name = name
         self.entry_type = 1
@@ -40,6 +42,7 @@ class emptyDirectoryEntry:
 
 
 class emptyStorageDirectoryEntry(emptyDirectoryEntry):
+
     def __init__(self, name):
         super().__init__(name)
         self.entry_type = 2
@@ -74,7 +77,7 @@ def create_msg_file(
     db = db[:24] + b"\x00\x00\x00\x00\x00\x00\x00\x00" + db[24:]
     w.addOleEntry(
         ["__properties_version1.0"],
-        emptyStorageDirectoryEntry("__properties_version1.0"), # pyright: ignore
+        emptyStorageDirectoryEntry("__properties_version1.0"),  # pyright: ignore
         db,
     )
 
@@ -114,19 +117,21 @@ def create_msg_file(
 
             # Attachment properties.
             attach_props = PropertiesStore(
-                data=None, type_=PropertiesType.ATTACHMENT, writable=True)
-            attach_prop_data = b'\x03\x00\x057\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
+                data=None, type_=PropertiesType.ATTACHMENT, writable=True
+            )
+            attach_prop_data = (
+                b"\x03\x00\x057\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00"
+            )
             attach_props.addProperty(createProp(attach_prop_data), True)
 
             # Add in Ole entries
             label = f"__attach_version1.0_{i:08d}"
-            w.addOleEntry(
-                [label],
-                emptyDirectoryEntry(label),  # pyright: ignore
-                b"")
+            w.addOleEntry([label], emptyDirectoryEntry(label), b"")  # pyright: ignore
             w.addOleEntry(
                 [label, "__properties_version1.0"],
-                emptyStorageDirectoryEntry("__properties_version1.0"), # pyright: ignore
+                emptyStorageDirectoryEntry(
+                    "__properties_version1.0"
+                ),  # pyright: ignore
                 attach_props.toBytes(),
             )
             w.addOleEntry(
@@ -146,19 +151,20 @@ def create_msg_file(
     w.addOleEntry(
         ["__nameid_version1.0"],
         emptyDirectoryEntry("__nameid_version1.0"),  # pyright: ignore
-        b""
+        b"",
     )
     for key in ["__substg1.0_00020102", "__substg1.0_00030102", "__substg1.0_00040102"]:
         w.addOleEntry(
             ["__nameid_version1.0", key],
             emptyStorageDirectoryEntry(key),  # pyright: ignore
-            b""
+            b"",
         )
 
     w.write(omsg)
 
 
 class MSGGenerator:
+
     def __init__(self):
         self.fake = Faker()
 
@@ -242,18 +248,16 @@ def main():
         "--output_dir",
         default=f"gs://{os.getenv('GCS_INPUT_BUCKET')}/input",
         type=str,
-        help="Output directory for .msg files")
+        help="Output directory for .msg files",
+    )
     parser.add_argument(
-        "--count",
-        type=int,
-        default=1,
-        help="Count of .msg files to produce"
+        "--count", type=int, default=1, help="Count of .msg files to produce"
     )
     parser.add_argument(
         "--name-prefix",
         type=str,
         default=f"gen-{uuid.uuid1()}",
-        help="Prefix of filename"
+        help="Prefix of filename",
     )
 
     args = parser.parse_args()
