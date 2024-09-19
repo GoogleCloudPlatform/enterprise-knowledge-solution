@@ -122,14 +122,8 @@ resource "google_project_service_identity" "iap_sa" {
 
 data "google_iam_policy" "webui_policy" {
   binding {
-    role    = "roles/iap.httpsResourceAccessor"
-    members = var.iap_access_domains
-  }
-  binding {
     role    = "roles/run.invoker"
-    members = [
-      google_project_service_identity.iap_sa.member
-    ]
+    members = setunion(var.iap_access_domains,[google_project_service_identity.iap_sa.member])
   }
 }
 
