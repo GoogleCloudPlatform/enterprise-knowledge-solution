@@ -32,7 +32,7 @@ module "cloud_run_web_account" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  name = "eks-webui"
+  name = var.webui_service_name
   location = var.region
   ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
   template {

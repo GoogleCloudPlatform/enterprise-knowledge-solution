@@ -22,30 +22,10 @@ module "project_services" {
   disable_services_on_destroy = false
   disable_dependent_services  = false
   activate_apis = [
-    "appengine.googleapis.com",
     "compute.googleapis.com",
-    "appengineflex.googleapis.com",
     "iap.googleapis.com",
     "aiplatform.googleapis.com"
   ]
-}
-
-/*
- * VPC configuration for App Engine
- */
-
-module "vpc" {
-  source  = "terraform-google-modules/network/google//modules/subnets"
-  version = "~> 9.1"
-
-  project_id   = module.project_services.project_id
-  network_name = var.vpc_network_name
-
-  subnets = [{
-    subnet_name   = "dpu-ui-subnet"
-    subnet_ip     = "10.10.20.0/24"
-    subnet_region = var.region
-  }]
 }
 
 data "google_project" "project" {
@@ -62,81 +42,6 @@ resource "google_iap_client" "project_client" {
   brand        = "projects/${data.google_project.project.number}/brands/${data.google_project.project.number}"
 }
 
-/*
- * Configuring of App Engine Flex and permission
- */
-
-# Configure App Engine region
-resource "google_app_engine_application" "app" {
-  project     = module.project_services.project_id
-  location_id = var.region
-
-  iap {
-    oauth2_client_id     = google_iap_client.project_client.client_id
-    oauth2_client_secret = google_iap_client.project_client.secret
-    enabled              = true
-  }
-
-  lifecycle {
-    ignore_changes = [
-      serving_status,
-      location_id
-    ]
-  }
-}
-
-# Identify the app engine service account
-data "google_app_engine_default_service_account" "default" {
-  project = module.project_services.project_id
-  depends_on = [
-    google_app_engine_application.app
-  ]
-}
-
-resource "google_artifact_registry_repository_iam_binding" "registry_viewer" {
-  project    = var.artifact_repo.project
-  location   = var.artifact_repo.location
-  repository = var.artifact_repo.name
-  role       = "roles/artifactregistry.reader"
-  members = [
-    "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-  ]
-}
-
-# Grant project access to use the network
-resource "google_project_iam_member" "gae_api" {
-  project = module.project_services.project_id
-  role    = "roles/compute.networkUser"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-}
-
-# Grant project access to write to logs
-resource "google_project_iam_member" "logs_writer" {
-  project = module.project_services.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-}
-
-# Grant access to Vertex AI
-resource "google_project_iam_member" "vertex_ai_user" {
-  project = module.project_services.project_id
-  role    = "roles/aiplatform.user"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-}
-
-# Grant access to Agent Builder
-resource "google_project_iam_member" "agent_builder_viewer" {
-  project = module.project_services.project_id
-  role    = "roles/discoveryengine.viewer"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-}
-
-# Grant access to Object Storage
-resource "google_project_iam_member" "gcs_object_store" {
-  project = module.project_services.project_id
-  role    = "roles/storage.objectUser"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
-}
 
 data "google_compute_default_service_account" "default" {
   project = module.project_services.project_id
@@ -167,18 +72,6 @@ resource "time_sleep" "wait_for_policy_propagation" {
   ]
 }
 
-/*
- * Configure IAP for App Engine
- */
-
-# Policy for users who can access App Engine
-data "google_iam_policy" "end_users" {
-  binding {
-    role    = "roles/iap.httpsResourceAccessor"
-    members = var.iap_access_domains
-  }
-}
-
 locals {
   ui_service_name     = "dpu-ui"
   forwarded_port      = "8080/tcp"
@@ -203,97 +96,4 @@ module "app_build" {
   module_depends_on = [
     time_sleep.wait_for_policy_propagation
   ]
-}
-
-# Apply policy to IAP for App Engine
-resource "google_iap_web_type_app_engine_iam_policy" "policy" {
-  project     = google_app_engine_application.app.project
-  app_id      = google_app_engine_application.app.app_id
-  policy_data = data.google_iam_policy.end_users.policy_data
-}
-
-resource "null_resource" "appengine_deploy_trigger" {
-  triggers = {
-    source_contents_hash = local.cloud_build_content_hash
-  }
-}
-
-resource "google_app_engine_flexible_app_version" "deployed_version" {
-  # version_id = "v${local.cloud_build_content_hash}"
-  version_id = "v1"
-  # version_id = "v${formatdate("YYYYMMDDHHMMSS", timestamp())}"
-  project = module.project_services.project_id
-  service = var.app_engine_service_name
-  runtime = "custom"
-
-  deployment {
-    container {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo.name}/${local.ui_service_name}:latest"
-    }
-  }
-
-  liveness_check {
-    path              = "/healthz"
-    check_interval    = "31s"
-    timeout           = "4s"
-    failure_threshold = "2"
-    success_threshold = "2"
-  }
-
-  readiness_check {
-    path              = "/healthz"
-    check_interval    = "30s"
-    timeout           = "4s"
-    failure_threshold = "2"
-    success_threshold = "2"
-    app_start_timeout = "120s"
-  }
-
-  network {
-    name       = var.vpc_network_id
-    subnetwork = module.vpc.subnets["${var.region}/dpu-ui-subnet"].name
-    # forwarded_ports = ["${local.forwarded_port}"]
-  }
-
-  resources {
-    cpu       = "2"
-    memory_gb = "4"
-    disk_gb   = "40"
-  }
-
-  automatic_scaling {
-    min_total_instances = "1"
-    max_total_instances = "2"
-    cpu_utilization {
-      target_utilization = "0.5"
-    }
-  }
-
-  env_variables = {
-    PROJECT_ID                  = module.project_services.project_id
-    AGENT_BUILDER_LOCATION      = var.vertex_ai_data_store_region
-    AGENT_BUILDER_DATA_STORE_ID = var.agent_builder_data_store_id
-    AGENT_BUILDER_SEARCH_ID     = var.agent_builder_search_id
-  }
-
-  # Depend on permissions being defined
-  depends_on = [
-    google_artifact_registry_repository_iam_binding.registry_viewer,
-    google_project_iam_member.gae_api,
-    google_project_iam_member.logs_writer,
-    module.app_build.wait
-  ]
-
-  # Ignore serving status for this version
-  noop_on_destroy = true
-  lifecycle {
-    ignore_changes = [
-      serving_status,
-      deployment[0].container[0].image
-    ]
-    # create_before_destroy = true
-    replace_triggered_by = [
-      null_resource.appengine_deploy_trigger
-    ]
-  }
 }

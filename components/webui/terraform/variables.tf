@@ -22,10 +22,6 @@ variable "region" {
   description = "Google Cloud region where app engine is located "
 }
 
-variable "application_title" {
-  description = "Enterprise Knowledge Search app"
-}
-
 variable "artifact_repo" {
   description = "artifact registry"
 }
@@ -51,22 +47,12 @@ variable "agent_builder_search_id" {
   type        = string
 }
 
-variable "vpc_network_name" {
-  type        = string
-  description = "The name of the network where subnets will be created"
-}
-
-variable "vpc_network_id" {
-  type        = string
-  description = "ID of the network where subnets will be created"
-}
-
 variable "gcs_object_store" {
   type        = string
   description = "GCS bucket for objects viewed through webui"
 }
 
-variable "app_engine_service_name" {
+variable "webui_service_name" {
   type        = string
   description = "The App Engine service name for the webui"
 }

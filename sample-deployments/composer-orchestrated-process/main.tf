@@ -130,16 +130,13 @@ module "dpu_ui" {
   source                      = "../../components/webui/terraform"
   project_id                  = var.project_id
   region                      = var.region
-  application_title           = "DPU Web UI"
   artifact_repo               = module.common_infra.artifact_repo
   iap_access_domains          = var.iap_access_domains
   vertex_ai_data_store_region = var.vertex_ai_data_store_region
   agent_builder_data_store_id = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id     = google_discovery_engine_search_engine.basic.engine_id
-  vpc_network_name            = module.common_infra.vpc_network_name
-  vpc_network_id              = module.common_infra.vpc_network_id
   gcs_object_store            = module.common_infra.gcs_process_bucket_name
-  app_engine_service_name     = var.webui_service_name
+  webui_service_name          = var.webui_service_name
   lb_ssl_certificate_domains  = var.webui_domains
 }
 
