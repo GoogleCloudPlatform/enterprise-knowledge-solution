@@ -10,6 +10,7 @@ local_dev/**
 **/terraform.tfstate*
 **/terraform.tfvars
 **/.terraform.tfstate*
+**/backend.tf
 **/.terraform/**
 **/.terraform.lock.hcl
 dp.md

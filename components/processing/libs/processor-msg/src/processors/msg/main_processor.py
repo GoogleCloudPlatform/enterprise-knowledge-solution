@@ -15,8 +15,10 @@
 
 import json
 import logging
-from typing import Callable, Dict, Optional
+from enum import Enum
 
+from dict import Dict
+from optional import Optional
 from processors.base.gcsio import GCSPath
 from processors.base.result_writer import BigQueryWriter, DocumentMetadata
 from processors.msg.msg_processor import msg_processor
@@ -26,20 +28,25 @@ from processors.zip.unzip_processor import unzip_processor
 logger = logging.getLogger(__name__)
 
 
-def find_processor(source: GCSPath) -> Optional[Callable[[GCSPath, GCSPath], Dict]]:
-    if source.suffix == ".msg":
-        return msg_processor
-    elif source.suffix == ".zip":
-        return unzip_processor
-    elif source.suffix in (".xlsx", ".xlsm"):
-        return xlsx_processor
+class Processors(str, Enum):
+    TXT = "txt-processor"
+    MSG = "msg-processor"
+    ZIP = "zip-processor"
+    XLSX = "xlsx-processor"
 
-    return None
+
+PROCESSOR_NAMES_TO_CALLABLE = {
+    Processors.TXT.value: None,  # Special case - handled inline within code
+    Processors.MSG.value: msg_processor,
+    Processors.ZIP.value: unzip_processor,
+    Processors.XLSX.value: xlsx_processor,
+}
 
 
 def process_all_objects(
     source_dir: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
     write_json=True,
     write_bigquery: str = "",
 ):
@@ -53,6 +60,7 @@ def process_all_objects(
         process_object(
             obj,
             reject_dir,
+            supported_files,
             write_json=write_json,
             bq_writer=writer,
         )
@@ -85,6 +93,7 @@ def reject_oversized_file(
 def process_recursive(
     source: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
 ) -> list[dict]:
 
     result = {
@@ -96,7 +105,13 @@ def process_recursive(
     }
     results = [result]
 
-    if source.suffix in (".txt", ".html", ".pdf", ".docx"):
+    if not supported_files.get(source.suffix, False):
+        result["status"] = "Not indexed or expanded"
+        result["metadata"]["reason"] = f"file of type {source.suffix} not " f"supported"
+        return results
+    processor_name = supported_files[source.suffix]
+
+    if processor_name == Processors.TXT.value:
 
         # current file size limit of 100MB in Data Store
         if reject_oversized_file(source, reject_dir, 100):
@@ -112,10 +127,17 @@ def process_recursive(
         result["status"] = "Indexed"
         return results
 
-    # Find processor, if any, for generating outputs for this object
-    processor = find_processor(source)
-    if not processor:
+    # the one special case is txt-processor, that will return None, but this
+    # should have been handled above - beware of changes to the order of
+    # operations here.
+    processor = PROCESSOR_NAMES_TO_CALLABLE.get(processor_name)
+    if processor is None:
         result["status"] = "Not indexed or expanded"
+        result["metadata"]["reason"] = (
+            f"file type {source.suffix} is mapped "
+            f"to a processor {processor_name} that "
+            f"is not mapped to a callable"
+        )
         return results
 
     # Attempt to use it.
@@ -146,7 +168,7 @@ def process_recursive(
 
     # Return with the children
     for child in list(output.list()):
-        results.extend(process_recursive(child, reject_dir))
+        results.extend(process_recursive(child, reject_dir, supported_files))
 
     return results
 
@@ -154,6 +176,7 @@ def process_recursive(
 def process_object(
     source: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
     write_json=True,
     bq_writer: Optional[BigQueryWriter] = None,
 ):
@@ -161,7 +184,7 @@ def process_object(
     logger.info(f"Processing {source}...")
 
     # Extract everything
-    objs = process_recursive(source, reject_dir)
+    objs = process_recursive(source, reject_dir, supported_files)
 
     logger.debug(f"Objects: {objs}")
 

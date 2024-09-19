@@ -27,35 +27,35 @@ function trigger_dag() {
     "supported_files": [
         {
             "file-suffix": "pdf",
-            "processor": "agent-builder"
+            "processor": "txt-processor"
         },
         {
             "file-suffix": "txt",
-            "processor": "agent-builder"
+            "processor": "txt-processor"
         },
         {
             "file-suffix": "html",
-            "processor": "agent-builder"
+            "processor": "txt-processor"
         },
         {
             "file-suffix": "msg",
-            "processor": "dpu-doc-processor"
+            "processor": "msg-processor"
         },
         {
             "file-suffix": "zip",
-            "processor": "dpu-doc-processor"
+            "processor": "zip-processor"
         },
         {
             "file-suffix": "xlsx",
-            "processor": "dpu-doc-processor"
+            "processor": "xlsx-processor"
         },
         {
             "file-suffix": "xlsm",
-            "processor": "dpu-doc-processor"
+            "processor": "xlsx-processor"
         },
         {
             "file-suffix": "docx",
-            "processor": "dpu-doc-processor"
+            "processor": "txt-processor"
         }
     ],
     "classifier": {

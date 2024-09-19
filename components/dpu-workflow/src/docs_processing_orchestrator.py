@@ -176,9 +176,11 @@ def generate_process_job_params(**context):
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
     doc_processor_job_name = os.environ.get("DOC_PROCESSOR_JOB_NAME")
     gcs_reject_bucket = os.environ.get("DPU_REJECT_BUCKET")
-
+    supported_files = {
+        x["file-suffix"]: x["processor"] for x in context["params"]["supported_files"]
+    }
     process_job_params = cloud_run_utils.get_process_job_params(
-        bq_table, doc_processor_job_name, gcs_reject_bucket, mv_params
+        bq_table, doc_processor_job_name, gcs_reject_bucket, mv_params, supported_files
     )
     return process_job_params
 
@@ -222,14 +224,14 @@ with DAG(
         "input_folder": "",
         "supported_files": Param(
             [
-                {"file-suffix": "pdf", "processor": "agent-builder"},
-                {"file-suffix": "docx", "processor": "agent-builder"},
-                {"file-suffix": "txt", "processor": "agent-builder"},
-                {"file-suffix": "html", "processor": "agent-builder"},
-                {"file-suffix": "msg", "processor": "dpu-doc-processor"},
-                {"file-suffix": "zip", "processor": "dpu-doc-processor"},
-                {"file-suffix": "xlsx", "processor": "dpu-doc-processor"},
-                {"file-suffix": "xlsm", "processor": "dpu-doc-processor"},
+                {"file-suffix": "pdf", "processor": "txt-processor"},
+                {"file-suffix": "docx", "processor": "txt-processor"},
+                {"file-suffix": "txt", "processor": "txt-processor"},
+                {"file-suffix": "html", "processor": "txt-processor"},
+                {"file-suffix": "msg", "processor": "msg-processor"},
+                {"file-suffix": "zip", "processor": "zip-processor"},
+                {"file-suffix": "xlsx", "processor": "xlsx-processor"},
+                {"file-suffix": "xlsm", "processor": "xlsx-processor"},
             ],
             type="array",
             items={

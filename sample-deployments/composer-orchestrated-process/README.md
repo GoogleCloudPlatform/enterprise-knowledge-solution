@@ -7,10 +7,11 @@ The components of EKS can be deployed individually or as part of a custom setup.
 ## Additional Resources
 
 In additional to the EKS components this example also deployes the following resources:
-| Name | Description |
-|------|-------------|
-| [Agent Builder Data Store](https://cloud.google.com/dialogflow/vertex/docs/concept/data-store) | The data store where processed documents are collected and indexed. This is the backbone that powers the search and summarization capabilities. |
-| [Agent Builder Search App](https://cloud.google.com/generative-ai-app-builder/docs/create-datastore-ingest) | A generic Agent Builder search app that provides the API interface for searching documents in the Data Store. |
+
+| Name                                                                                                        | Description                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Agent Builder Data Store](https://cloud.google.com/dialogflow/vertex/docs/concept/data-store)              | The data store where processed documents are collected and indexed. This is the backbone that powers the search and summarization capabilities. |
+| [Agent Builder Search App](https://cloud.google.com/generative-ai-app-builder/docs/create-datastore-ingest) | A generic Agent Builder search app that provides the API interface for searching documents in the Data Store.                                   |
 
 ## Get Started with the Deployment Guide
 
