@@ -32,9 +32,9 @@ module "cloud_run_web_account" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  name = var.webui_service_name
+  name     = var.webui_service_name
   location = var.region
-  ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
   template {
     scaling {
       max_instance_count = 2
@@ -45,34 +45,31 @@ resource "google_cloud_run_v2_service" "eks_webui" {
         container_port = 8080
       }
       env {
-        name = "PROJECT_ID"
+        name  = "PROJECT_ID"
         value = module.project_services.project_id
       }
-            env {
-        name = "AGENT_BUILDER_LOCATION"
+      env {
+        name  = "AGENT_BUILDER_LOCATION"
         value = var.vertex_ai_data_store_region
       }
-            env {
-        name = "AGENT_BUILDER_DATA_STORE_ID"
+      env {
+        name  = "AGENT_BUILDER_DATA_STORE_ID"
         value = var.agent_builder_data_store_id
       }
-            env {
-        name = "AGENT_BUILDER_SEARCH_ID"
+      env {
+        name  = "AGENT_BUILDER_SEARCH_ID"
         value = var.agent_builder_search_id
       }
       resources {
         limits = {
-          cpu = "2"
+          cpu    = "2"
           memory = "1024Mi"
         }
       }
     }
     service_account = module.cloud_run_web_account.email
+
   }
-  
-  depends_on = [
-    module.app_build.wait
-  ]
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
@@ -88,8 +85,8 @@ module "eks_webui_lb" {
   source  = "terraform-google-modules/lb-http/google//modules/serverless_negs"
   version = "~> 11.0"
 
-  name    = "eks-webui-lb"
-  project = var.project_id
+  name                            = "eks-webui-lb"
+  project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
   https_redirect                  = true
@@ -106,7 +103,7 @@ module "eks_webui_lb" {
       enable_cdn = false
 
       iap_config = {
-        enable = true
+        enable               = true
         oauth2_client_id     = google_iap_client.project_client.client_id
         oauth2_client_secret = google_iap_client.project_client.secret
       }
@@ -119,14 +116,14 @@ module "eks_webui_lb" {
 
 resource "google_project_service_identity" "iap_sa" {
   provider = google-beta
-  project = module.project_services.project_id
-  service = "iap.googleapis.com"
+  project  = module.project_services.project_id
+  service  = "iap.googleapis.com"
 }
 
 data "google_iam_policy" "webui_policy" {
   binding {
     role    = "roles/run.invoker"
-    members = setunion(var.iap_access_domains,[google_project_service_identity.iap_sa.member])
+    members = setunion(var.iap_access_domains, [google_project_service_identity.iap_sa.member])
   }
 }
 

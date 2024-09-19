@@ -74,7 +74,6 @@ resource "time_sleep" "wait_for_policy_propagation" {
 
 locals {
   ui_service_name     = "dpu-ui"
-  forwarded_port      = "8080/tcp"
   cloud_build_fileset = setunion(fileset("${path.module}", "../src/**"), fileset("${path.module}", "../Dockerfile"), fileset("${path.module}", "../requirements.txt"))
   cloud_build_content_hash = sha512(join(",", [
   for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
