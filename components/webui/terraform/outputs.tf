@@ -11,8 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-output "web_ui_uri" {
-  description = "App Engine URI"
-  value       = google_app_engine_application.app.default_hostname
-}
