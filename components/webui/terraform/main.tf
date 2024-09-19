@@ -43,7 +43,7 @@ resource "google_iap_client" "project_client" {
 }
 
 resource "google_project_iam_member" "iap_users" {
-  for_each = var.iap_access_domains
+  for_each = toset(var.iap_access_domains)
   project  = module.project_services.project_id
   role     = "roles/iap.httpsResourceAccessor"
   member   = each.key
