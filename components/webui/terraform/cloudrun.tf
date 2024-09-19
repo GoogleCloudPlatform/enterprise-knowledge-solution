@@ -68,8 +68,11 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       }
     }
     service_account = module.cloud_run_web_account.email
-    
   }
+  
+  depends_on = [
+    module.app_build.wait
+  ]
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
