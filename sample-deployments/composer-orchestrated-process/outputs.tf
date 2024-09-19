@@ -36,8 +36,3 @@ output "agent_app_uri" {
   description = "Agent Builder Search App URI"
   value       = "https://console.cloud.google.com/gen-app-builder/locations/${var.vertex_ai_data_store_region}/engines/${google_discovery_engine_search_engine.basic.engine_id}/preview/search?project=${var.project_id}"
 }
-
-output "web_ui_uri" {
-  description = "EKS Web UI URI"
-  value       = "https://${module.dpu_ui.web_ui_uri}/"
-}
