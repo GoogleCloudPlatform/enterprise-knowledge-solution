@@ -132,6 +132,12 @@ To deploy this solution, perform the follow steps:
     ```
     The provisioning process may take about 30 minutes to complete.
 
+1. Migrate Terraform state to the remote Cloud Storage backend:
+    ```sh
+    terraform init -migrate-state
+    ```
+    Terraform detects that you already have a state file locally and prompts you to migrate the state to the new Cloud Storage bucket. When prompted, enter `yes`.
+
 ### Update your environment with new code/new version
 
 If you update the source code or pull the latest changes from the repository, re-run the following command to apply the changes to your deployed environment:
