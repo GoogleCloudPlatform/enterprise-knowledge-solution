@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import re
 from typing import Optional
 
 from google.api_core.client_options import ClientOptions
@@ -22,7 +23,11 @@ from google.api_core.exceptions import (
     RetryError,
 )
 from google.cloud import storage
-from load_data_in_bigquery import *
+from google.cloud import documentai
+from google.cloud import logging
+from load_data_in_bigquery import load_rows_into_bigquery
+from load_data_in_bigquery import build_output_metadata
+
 
 # Retrieve Job-defined env vars
 TASK_INDEX = os.getenv("CLOUD_RUN_TASK_INDEX", 0)

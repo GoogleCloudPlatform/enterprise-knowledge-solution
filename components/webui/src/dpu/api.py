@@ -253,10 +253,12 @@ def fetch_all_agent_docs() -> list[dict]:
     )
 
     # Accumulate the corpus of documents
-    corpus = []
+    # corpus = []
+    corpus: list[dict]  # annotate type to pass mypy checks
     for doc in client.list_documents(request=request):
-        corpus.append(_document_to_dict(doc))
-
+        tmp = _document_to_dict(doc)
+        if isinstance(tmp, dict):  # mypy: only return valid dict results
+            corpus.append(tmp)
     return corpus
 
 

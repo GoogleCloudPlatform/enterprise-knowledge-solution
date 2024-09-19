@@ -168,7 +168,7 @@ def show_gcs_object(
             # Render the markdown (at least the first bit of it)
             if content_type == "text/plain":
                 st.markdown(
-                    ":red[The following frame displays the partial content of the file. To view the full content of the file, you can open or download the file by clicking the buttons above.]"
+                    ":red[To view the full content of the file, click the button above.]"
                 )
                 st.markdown(str(data[:4096], "utf-8"))
             else:
@@ -226,7 +226,9 @@ def choose_related_document(related_docs: list, initial_value: int):
 
         # Find the chosen row (may be initial if not chosen yet)
         if res.selected_rows is not None:
-            chosen_row = res.selected_rows.to_dict("records")[0]  # pylint: disable=unsubscriptable-object
+            chosen_row = res.selected_rows.to_dict("records")[
+                0
+            ]  # pylint: disable=unsubscriptable-object
 
     # Find the doc_id (same as root_doc_id initially, but may change)
     if chosen_row["objid"]:

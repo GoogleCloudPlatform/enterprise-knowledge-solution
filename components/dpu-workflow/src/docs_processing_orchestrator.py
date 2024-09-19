@@ -298,7 +298,8 @@ with DAG(
         move_unsupported_files_to_rejected_bucket = GCSToGCSOperator(
             task_id="move_files_to_rejected_bucket",
             source_bucket="{{ params.input_bucket }}",
-            source_objects="{{ ti.xcom_pull(task_ids='initial_load_from_input_bucket.process_supported_types', key='files_to_reject') }}",
+            source_objects="{{ ti.xcom_pull(task_ids='initial_load_from_input_bucket.process_supported_types', \
+                key='files_to_reject') }}",
             destination_bucket=os.environ.get("DPU_REJECT_BUCKET"),
             move_object=True,
         )
@@ -387,7 +388,8 @@ with DAG(
             ),  # pyright: ignore[reportArgumentType]
             deferrable=False,
             overrides="{{ ti.xcom_pull("
-            "task_ids='classify_pdfs.generate_classify_job_params' , key='return_value') }}",  # pyright: ignore[reportArgumentType]
+            "task_ids='classify_pdfs.generate_classify_job_params' , \
+                key='return_value') }}",  # pyright: ignore[reportArgumentType]
         )
 
         parse_doc_classifier_results_and_move_files = PythonOperator(
@@ -439,7 +441,8 @@ with DAG(
             job_name=os.environ["FORMS_PARSER_JOB_NAME"],
             deferrable=False,
             overrides="{{ ti.xcom_pull("
-            "task_ids='forms_processing.create_form_process_job_params', key='return_value') }}",  # pyright: ignore[reportArgumentType]
+            "task_ids='forms_processing.create_form_process_job_params', \
+                key='return_value') }}",  # pyright: ignore[reportArgumentType]
         )
 
         import_forms_to_data_store = PythonOperator(

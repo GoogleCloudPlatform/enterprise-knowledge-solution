@@ -36,7 +36,8 @@ SAMPLE_QUERIES = """
     How can we automate our document processing workflow to save time and reduce errors? Generate answer in spanish.
 ```
 ```
-    समय बचाने और त्रुटियों को कम करने के लिए हम अपने दस्तावेज़ प्रसंस्करण वर्कफ़्लो को कैसे स्वचालित कर सकते हैं?  अंग्रेज़ी में उत्तर दें.
+    समय बचाने और त्रुटियों को कम करने के लिए हम अपने दस्तावेज़ प्रसंस्करण वर्कफ़्लो को कैसे स्वचालित कर सकते हैं?
+    अंग्रेज़ी में उत्तर दें.
 ```
 ```
     How many shares are offered by Ryde Group Ltd?
