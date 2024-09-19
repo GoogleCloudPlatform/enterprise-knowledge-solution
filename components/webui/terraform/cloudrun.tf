@@ -87,7 +87,7 @@ module "eks_webui_lb" {
 
   name    = "eks-webui-lb"
   project = var.project_id
-  managed_ssl_certificate_domains = ["webui.chwa.demo.altostrat.com"]
+  managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
   https_redirect                  = true
   labels                          = local.eks_label
@@ -120,12 +120,22 @@ resource "google_project_service_identity" "iap_sa" {
   service = "iap.googleapis.com"
 }
 
-resource "google_cloud_run_service_iam_binding" "iap_sa_biding" {
-  location = google_cloud_run_v2_service.eks_webui.location
-  project = google_cloud_run_v2_service.eks_webui.project
-  service = google_cloud_run_v2_service.eks_webui.name
-  role = "roles/run.invoker"
-  members = [
-    google_project_service_identity.iap_sa.member
-  ]
+data "google_iam_policy" "webui_policy" {
+  binding {
+    role    = "roles/iap.httpsResourceAccessor"
+    members = var.iap_access_domains
+  }
+  binding {
+    role    = "roles/run.invoker"
+    members = [
+      google_project_service_identity.iap_sa.member
+    ]
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_policy" "policy" {
+  project     = google_cloud_run_v2_service.eks_webui.project
+  location    = google_cloud_run_v2_service.eks_webui.location
+  name        = google_cloud_run_v2_service.eks_webui.name
+  policy_data = data.google_iam_policy.webui_policy.policy_data
 }
