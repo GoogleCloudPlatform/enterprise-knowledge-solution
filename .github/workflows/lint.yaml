@@ -36,57 +36,56 @@ jobs:
         uses: super-linter/super-linter@v7.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  pre_commit:
+#    concurrency:
+# Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+# github.head_ref: head_ref or source branch of the pull request
+# github.ref: ref of the branch that triggered the workflow
+#      group: ${{ github.workflow }}-pre-commit-${{ github.head_ref || github.ref }}-${{ github.event_name }}
+#      cancel-in-progress: true
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: "Run pre-commit"
+#        run: |
+#          set -o errexit
+#          set -o nounset
+#
+#          scripts/run-pre-commit.sh
 
-  pre_commit:
-    concurrency:
-      # Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-      # github.head_ref: head_ref or source branch of the pull request
-      # github.ref: ref of the branch that triggered the workflow
-      group: ${{ github.workflow }}-pre-commit-${{ github.head_ref || github.ref }}-${{ github.event_name }}
-      cancel-in-progress: true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: "Run pre-commit"
-        run: |
-          set -o errexit
-          set -o nounset
-
-          scripts/run-pre-commit.sh
-
-  # Uncomment this job definition and remove this comment line if you need automated fixes
-  # fix-lint-issues:
-  #   concurrency:
-  #     # Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-  #     # github.head_ref: head_ref or source branch of the pull request
-  #     # github.ref: ref of the branch that triggered the workflow
-  #     group: ${{ github.workflow }}-fix-lint-issues-${{ github.head_ref || github.ref }}-${{ github.event_name }}
-  #     cancel-in-progress: true
-  #   permissions:
-  #     # To write linting fixes
-  #     contents: write
-  #     # To write Super-linter status checks
-  #     statuses: write
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Load super-linter configuration
-  #       run: cat config/lint/super-linter.env >> "$GITHUB_ENV"
-  #     - name: Load super-linter fix mode configuration
-  #       run: cat config/lint/super-linter-fix-mode.env >> "$GITHUB_ENV"
-  #     - name: Super-Linter
-  #       uses: super-linter/super-linter@v7.1.0
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Commit and push linting fixes
-  #       if: >
-  #         github.event_name == 'pull_request' &&
-  #         github.ref_name != github.event.repository.default_branch
-  #       uses: stefanzweifel/git-auto-commit-action@v5.0.1
-  #       with:
-  #         branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
-  #         commit_message: "chore: fix linting issues"
-  #         commit_user_name: super-linter
-  #         commit_user_email: super-linter@super-linter.dev
+# Uncomment this job definition and remove this comment line if you need automated fixes
+# fix-lint-issues:
+#   concurrency:
+#     # Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+#     # github.head_ref: head_ref or source branch of the pull request
+#     # github.ref: ref of the branch that triggered the workflow
+#     group: ${{ github.workflow }}-fix-lint-issues-${{ github.head_ref || github.ref }}-${{ github.event_name }}
+#     cancel-in-progress: true
+#   permissions:
+#     # To write linting fixes
+#     contents: write
+#     # To write Super-linter status checks
+#     statuses: write
+#   runs-on: ubuntu-latest
+#   steps:
+#     - uses: actions/checkout@v4
+#       with:
+#         fetch-depth: 0
+#     - name: Load super-linter configuration
+#       run: cat config/lint/super-linter.env >> "$GITHUB_ENV"
+#     - name: Load super-linter fix mode configuration
+#       run: cat config/lint/super-linter-fix-mode.env >> "$GITHUB_ENV"
+#     - name: Super-Linter
+#       uses: super-linter/super-linter@v7.1.0
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     - name: Commit and push linting fixes
+#       if: >
+#         github.event_name == 'pull_request' &&
+#         github.ref_name != github.event.repository.default_branch
+#       uses: stefanzweifel/git-auto-commit-action@v5.0.1
+#       with:
+#         branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+#         commit_message: "chore: fix linting issues"
+#         commit_user_name: super-linter
+#         commit_user_email: super-linter@super-linter.dev
