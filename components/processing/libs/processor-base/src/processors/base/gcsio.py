@@ -13,8 +13,8 @@
 # limitations under the License.
 """Utilities for abstracting over GCS objects, paths, and local files and paths
 
-  These utilities enable to build code that will work equally well using GCS as
-  using local filesystems within Python.
+    These utilities enable to build code that will work equally well using GCS as
+    using local filesystems within Python.
 """
 import base64
 import contextlib

@@ -65,3 +65,18 @@ indent_size = unset
 # Don't try forcing a style to the LICENSE file because it's a rendered template
 indent_size = unset
 indent_style = unset
+
+# Don't try forcing a style to the YAML template because it's rendered
+[**/**.yaml.template]
+indent_size = unset
+indent_style = unset
+
+# Don't try forcing a style to the requirements_*.in because it's rendered
+[**/**.in]
+indent_size = unset
+indent_style = unset
+
+# Don't try forcing a style to the requirements_*.txt because it's rendered
+[**/requirements*.txt]
+indent_size = unset
+indent_style = unset
