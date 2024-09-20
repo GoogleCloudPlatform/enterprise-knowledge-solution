@@ -91,9 +91,9 @@ data "google_app_engine_default_service_account" "default" {
 }
 
 resource "google_artifact_registry_repository_iam_binding" "registry_viewer" {
-  project    = var.artifact_repo.project
-  location   = var.artifact_repo.location
-  repository = var.artifact_repo.name
+  project    = var.project_id
+  location   = var.region
+  repository = var.artifact_repo
   role       = "roles/artifactregistry.reader"
   members = [
     "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
@@ -188,7 +188,7 @@ module "app_build" {
   source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   platform        = "linux"
-  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo.name}/${local.ui_service_name}\" \"${path.module}/../\""
+  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${local.ui_service_name}\" \"${path.module}/../\""
   enabled         = true
 
   create_cmd_triggers = {
@@ -223,7 +223,7 @@ resource "google_app_engine_flexible_app_version" "deployed_version" {
 
   deployment {
     container {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo.name}/${local.ui_service_name}:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${local.ui_service_name}:latest"
     }
   }
 
@@ -246,7 +246,7 @@ resource "google_app_engine_flexible_app_version" "deployed_version" {
 
   network {
     name       = var.vpc_network_id
-    subnetwork = module.vpc.subnets["${var.region}/dpu-ui-subnet"].name
+    subnetwork = module.webui-subnet.subnets["${var.region}/dpu-ui-subnet"].name
     # forwarded_ports = ["${local.forwarded_port}"]
   }
 

@@ -112,7 +112,7 @@ resource "google_composer_environment" "composer_env" {
     environment_size = var.composer_environment_size
     node_config {
       network         = var.vpc_network_id
-      subnetwork      = module.vpc.subnets["${var.region}/composer-subnet"].id
+      subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
       service_account = module.composer_service_account.email
       ip_allocation_policy {
         cluster_secondary_range_name  = local.cluster_secondary_range_name

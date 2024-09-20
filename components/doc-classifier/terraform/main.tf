@@ -14,7 +14,7 @@
 
 
 locals {
-  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}/${var.classifier_cloud_run_job_name}:latest"
+  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.classifier_cloud_run_job_name}:latest"
 }
 
 # Enable APIs

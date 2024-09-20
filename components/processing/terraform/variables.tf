@@ -27,7 +27,7 @@ variable "repository_region" {
   type        = string
 }
 
-variable "artifact_repo_name" {
+variable "artifact_repo" {
   description = "Docker registry"
   type        = string
   default     = ""

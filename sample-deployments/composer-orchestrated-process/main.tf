@@ -73,13 +73,13 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 module "processor" {
-  source                            = "../../components/processing/terraform"
-  project_id                        = var.project_id
-  region                            = var.region
-  bq_region                         = var.region
-  gcs_region                        = var.region
+  source     = "../../components/processing/terraform"
+  project_id = var.project_id
+  region     = var.region
+  # bq_region                         = var.region
+  # gcs_region                        = var.region
   repository_region                 = var.region
-  artifact_repo_name                = module.common_infra.artifact_repo.name
+  artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   processing_cloud_run_job_name     = local.processing_cloud_run_job_name
 }
@@ -95,11 +95,11 @@ module "form_parser_processor" {
 }
 
 module "doc_classifier_job" {
-  source                            = "../../components/doc-classifier/terraform"
-  project_id                        = var.project_id
-  region                            = var.region
-  repository_region                 = var.region
-  artifact_repo_name                = module.common_infra.artifact_repo.name
+  source     = "../../components/doc-classifier/terraform"
+  project_id = var.project_id
+  region     = var.region
+  # repository_region                 = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
@@ -126,19 +126,19 @@ module "dpu_workflow" {
 }
 
 module "dpu_ui" {
-  source                      = "../../components/webui/terraform"
-  project_id                  = var.project_id
-  region                      = var.region
-  application_title           = "DPU Web UI"
-  artifact_repo               = module.common_infra.artifact_repo
+  source     = "../../components/webui/terraform"
+  project_id = var.project_id
+  region     = var.region
+  #application_title           = "DPU Web UI"
+  artifact_repo               = module.common_infra.artifact_repo.name
   iap_access_domains          = var.iap_access_domains
   vertex_ai_data_store_region = var.vertex_ai_data_store_region
   agent_builder_data_store_id = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id     = google_discovery_engine_search_engine.basic.engine_id
   vpc_network_name            = module.common_infra.vpc_network_name
   vpc_network_id              = module.common_infra.vpc_network_id
-  gcs_object_store            = module.common_infra.gcs_process_bucket_name
-  app_engine_service_name     = var.webui_service_name
+  #gcs_object_store            = module.common_infra.gcs_process_bucket_name
+  app_engine_service_name = var.webui_service_name
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account
@@ -152,7 +152,7 @@ resource "local_file" "env_file" {
     bq_region          = var.region,
     gcs_region         = var.region,
     repository_region  = var.region,
-    artifact_repo_name = module.common_infra.artifact_repo.name
+    artifact_repo      = module.common_infra.artifact_repo.name
     gcs_input_bucket   = module.common_infra.gcs_input_bucket_name
     gcs_process_bucket = module.common_infra.gcs_process_bucket_name
     gcs_reject_bucket  = module.common_infra.gcs_reject_bucket_name

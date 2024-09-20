@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 locals {
-  registry_url = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}"
+  registry_url = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}"
   cloud_build_fileset = [
     "${path.module}/build/cloudbuild.yaml.template",
     "${path.module}/build/cloudbuild.yaml",

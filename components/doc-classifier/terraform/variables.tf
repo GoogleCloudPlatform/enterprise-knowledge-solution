@@ -22,8 +22,14 @@ variable "region" {
   type        = string
 }
 
-variable "artifact_repo_name" {
+variable "artifact_repo" {
   description = "Docker registry"
+  type        = string
+  default     = ""
+}
+
+variable "cloud_build_service_account_email" {
+  description = "IAM service account email used for cloud build."
   type        = string
   default     = ""
 }

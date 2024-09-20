@@ -23,10 +23,10 @@ variable "region" {
 }
 
 variable "artifact_repo" {
+  description = "Docker registry"
   type        = string
-  description = "artifact registry"
+  default     = ""
 }
-
 
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
