@@ -68,6 +68,7 @@ create_oauth_consent_config() {
 }
 
 create_custom_role_iap() {
+  set +e # disenable errexit
   __customIapAdmin=$(gcloud iam roles list --project="$PROJECT_ID" | grep customIAPAdmin)
   set -e # Re-enable errexit
   if [[ $__customIapAdmin ]]; then
