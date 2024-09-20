@@ -38,12 +38,6 @@ variable "webui_service_name" {
   default     = "default"
 }
 
-variable "artifact_repo" {
-  description = "Docker registry"
-  type        = string
-  default     = ""
-}
-
 variable "docai_location" {
   description = "Google Cloud region where compute services are located."
   type        = string

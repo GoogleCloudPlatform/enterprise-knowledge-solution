@@ -23,6 +23,7 @@ COPY --chown=app requirements.txt $HOME
 RUN python3 -m uv pip install --no-cache-dir --require-hashes -r $HOME/requirements.txt
 
 # Copy and install the libraries to the image
+# hadolint ignore=DL3022
 COPY --from=libs --chown=app / /components/processing/libs/
 RUN python3 -m uv pip install --no-cache-dir \
   -e components/processing/libs/processor-base \

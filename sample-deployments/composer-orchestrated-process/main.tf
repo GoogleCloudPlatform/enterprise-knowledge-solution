@@ -99,9 +99,9 @@ module "doc_classifier_job" {
   project_id = var.project_id
   region     = var.region
   # repository_region                 = var.region
-  artifact_repo                     = module.common_infra.artifact_repo.name
-  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
+  artifact_repo = module.common_infra.artifact_repo.name
+  # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
 
 }
 
