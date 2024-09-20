@@ -16,9 +16,9 @@ from converter import write_jsonl, to_csv_pd, to_csv, md_to_html
 
 def jsonl() -> None:
     write_jsonl(
-        in_bucket_name="dpu-cardinal-bkt",
+        in_bucket_name="sample_in_bkt",
         in_path="output",
-        out_bucket_name="cardinal_search_bkt",
+        out_bucket_name="sample_out_bkt",
         out_path="output",
     )
 
