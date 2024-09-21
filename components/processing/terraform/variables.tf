@@ -22,22 +22,12 @@ variable "region" {
   type        = string
 }
 
-variable "bq_region" {
-  description = "Google Cloud region where BigQuery data is stored."
-  type        = string
-}
-
-variable "gcs_region" {
-  description = "Google Cloud region where GCS data is stored."
-  type        = string
-}
-
 variable "repository_region" {
   description = "Google Cloud region where container images are stored."
   type        = string
 }
 
-variable "artifact_repo_name" {
+variable "artifact_repo" {
   description = "Docker registry"
   type        = string
   default     = ""

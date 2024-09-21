@@ -13,8 +13,7 @@
 # limitations under the License.
 
 module "docs_store_dataset" {
-  source         = "terraform-google-modules/bigquery/google"
-  version        = "~> 7.0"
+  source         = "github.com/terraform-google-modules/terraform-google-bigquery?ref=b349bf87446f478c54604a79f1a88145d5cea36f" # commit hash of version 8.1.0
   dataset_id     = var.bq_store_dataset
   dataset_name   = var.bq_store_dataset
   project_id     = module.project_services.project_id

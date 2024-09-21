@@ -34,26 +34,36 @@ usage() {
 # Process command line arguments
 while getopts ":d:u:t:b:p:l:" opt; do
   case "${opt}" in
-    d) 
-      DOC_ID=${OPTARG} ;;
-    u) 
-      DOC_URI=${OPTARG} ;;
-    t) 
-      BQ_TABLE=${OPTARG} ;;
-    b)
-      BATCH_ID=${OPTARG} ;;
-    p) 
-      PROJECT_ID=${OPTARG} ;;
-    l)
-      LOCATION=${OPTARG} ;;
-    \?) 
-      echo "Invalid option: -${OPTARG}" >&2; usage ;;
-    :) 
-      echo "Option -${OPTARG} requires an argument." >&2; usage ;;
+  d)
+    DOC_ID=${OPTARG}
+    ;;
+  u)
+    DOC_URI=${OPTARG}
+    ;;
+  t)
+    BQ_TABLE=${OPTARG}
+    ;;
+  b)
+    BATCH_ID=${OPTARG}
+    ;;
+  p)
+    PROJECT_ID=${OPTARG}
+    ;;
+  l)
+    LOCATION=${OPTARG}
+    ;;
+  \?)
+    echo "Invalid option: -${OPTARG}" >&2
+    usage
+    ;;
+  :)
+    echo "Option -${OPTARG} requires an argument." >&2
+    usage
+    ;;
   esac
 done
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 DOC_ID=${DOC_ID:-}
 DOC_URI=${DOC_URI:-}
@@ -174,10 +184,10 @@ elif [ "$MODE" = "batch" ]; then
     fi
 
     bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-    "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+      "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
 
     echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-  done <<< "$RESULTS"
+  done <<<"$RESULTS"
 
   bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
 

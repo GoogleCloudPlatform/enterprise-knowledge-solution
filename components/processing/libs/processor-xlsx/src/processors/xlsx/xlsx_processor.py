@@ -13,13 +13,12 @@
 # limitations under the License.
 
 
-import pyexcel
 import logging
 from typing import Dict
+
+import pyexcel
 from markdowngenerator import MarkdownGenerator
-
 from processors.base.gcsio import GCSPath
-
 
 # mypy: disable-error-code="import-untyped"
 
@@ -54,7 +53,7 @@ def xlsx_processor(source: GCSPath, output_dir: GCSPath) -> Dict:
             # Markdown output
             with (
                 GCSPath(output_dir, name + ".txt").write_as_file() as f,
-                MarkdownGenerator(filename=f) as m
+                MarkdownGenerator(filename=f) as m,
             ):
                 m.addHeader(1, name)
 
@@ -65,14 +64,11 @@ def xlsx_processor(source: GCSPath, output_dir: GCSPath) -> Dict:
                     if first_row:
                         first_row = False
                         continue
-                    data.append([
-                        cleanse_string(v) for v in row
-                    ])
+                    data.append([cleanse_string(v) for v in row])
 
                 # Generate the table
                 m.addTable(
-                    header_names=sheet.colnames,
-                    alignment="left",
-                    row_elements=data)
+                    header_names=sheet.colnames, alignment="left", row_elements=data
+                )
 
     return dict()

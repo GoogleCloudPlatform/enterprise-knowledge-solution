@@ -1,4 +1,3 @@
-
 # Cloud Run Deployment
 
 ## Overview
@@ -16,7 +15,7 @@ to be done outside of this code.
 Create a project that will run with Cloud Run enabled. Terraform is provided to do
 this, along with create a artifact repository.
 
-### Run invoke.sh 
+### Run invoke.sh
 
 Run `../../invoke.sh cloud-run.deploy` or `../../invoke.sh cloud-run.cloud-build` depending
 if cloud build is intended to be used or a local docker build.

@@ -2,16 +2,16 @@
 name = "processor-web-ui"
 version = "0.0.1.dev"
 dependencies = [
-  "protobuf",
-  "streamlit",
-  "streamlit-aggrid",
-  "streamlit-modal",
-  "streamlit-antd-components",
-  "pandas",
-  "firebase-admin",
-  "google-api-core",
-  "google-cloud-firestore",
-  "google-cloud-discoveryengine",
-  "google-cloud-aiplatform",
-  "google-cloud-storage",
+    "protobuf",
+    "streamlit",
+    "streamlit-aggrid",
+    "streamlit-modal",
+    "streamlit-antd-components",
+    "pandas",
+    "firebase-admin",
+    "google-api-core",
+    "google-cloud-firestore",
+    "google-cloud-discoveryengine",
+    "google-cloud-aiplatform",
+    "google-cloud-storage",
 ]

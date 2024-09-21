@@ -29,8 +29,7 @@ def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
         else None
     )
     client = discoveryengine.DocumentServiceClient(
-        client_options=client_options,
-        client_info=ClientInfo(user_agent=USER_AGENT)
+        client_options=client_options, client_info=ClientInfo(user_agent=USER_AGENT)
     )
     parent = client.branch_path(
         project=bq_table["project_id"],

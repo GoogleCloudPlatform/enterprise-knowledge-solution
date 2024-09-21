@@ -14,6 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ROOT="$(realpath $(dirname $0))"
+ROOT="$(realpath "$(dirname "$0")")"
 
 exec "${ROOT}/run.sh" invoke "$@"

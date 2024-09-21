@@ -13,13 +13,15 @@
 # limitations under the License.
 
 
-from processors.base.gcsio import GCSPath
 import tempfile
-from faker import Faker
+
 import pyexcel
+from faker import Faker
+from processors.base.gcsio import GCSPath
 
 
 class XLSXGenerator:
+
     def __init__(self):
         self.fake = Faker()
         self.COLUMNS = {

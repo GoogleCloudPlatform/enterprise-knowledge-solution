@@ -13,14 +13,16 @@
 # limitations under the License.
 
 
-import unittest
 import base64
-from tempfile import TemporaryDirectory, NamedTemporaryFile
-from processors.base.gcsio import GCSPath, get_mimetype, GCS_TMP_PREFIX
+import unittest
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+
 from google_crc32c import Checksum
+from processors.base.gcsio import GCS_TMP_PREFIX, GCSPath, get_mimetype
 
 
 class TestGCSIO(unittest.TestCase):
+
     def test_mimetype(self):
         self.assertEqual(get_mimetype("something.MD"), "text/plain")
         self.assertEqual(get_mimetype("again/file.txt"), "text/plain")

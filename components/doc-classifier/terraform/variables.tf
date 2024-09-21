@@ -22,20 +22,10 @@ variable "region" {
   type        = string
 }
 
-variable "repository_region" {
-  description = "Google Cloud region where container images are stored."
-  type        = string
-}
-
-variable "artifact_repo_name" {
+variable "artifact_repo" {
   description = "Docker registry"
   type        = string
   default     = ""
-}
-
-variable "cloud_build_service_account_email" {
-  description = "IAM service account email used for cloud build."
-  type        = string
 }
 
 variable "classifier_cloud_run_job_name" {

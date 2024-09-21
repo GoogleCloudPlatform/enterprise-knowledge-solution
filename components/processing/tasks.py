@@ -17,7 +17,6 @@ import os
 
 from invoke import task
 
-
 # Find the base directory for invoke
 BASE_DIR = os.path.dirname(__file__)
 ROOT_DIR = os.path.join(BASE_DIR, "../../")
@@ -35,7 +34,7 @@ def cloud_run_remote_build(c):
             "gcloud builds submit "
             f"--region {os.getenv('REGION')} "
             f"--project {os.getenv('PROJECT_ID')} "
-            "--config \"components/processing/terraform/build/cloudbuild.yaml\" .",
+            '--config "components/processing/terraform/build/cloudbuild.yaml" .',
             pty=True,
         )
 
@@ -126,9 +125,10 @@ def process(
 
     It will operate on GCS or local files as specified.
     """
+    import logging
+
     from processors.base.gcsio import GCSPath
     from processors.msg.main_processor import process_all_objects
-    import logging
 
     logging.basicConfig(format="%(asctime)s %(name)s: %(message)s")
     logging.getLogger("processors").setLevel(logging.DEBUG if debug else logging.INFO)

@@ -2,16 +2,16 @@
 name = "processor-msg"
 version = "0.0.1.dev"
 dependencies = [
-  # MSG specific requirements
-  "wkhtmltopdf",
-  "extract-msg",
-  "faker",
+    # MSG specific requirements
+    "wkhtmltopdf",
+    "extract-msg",
+    "faker",
 
-  # Load common requirements
-  "processor-base @ ${PROJECT_ROOT}/components/processing/libs/processor-base",
+    # Load common requirements
+    "processor-base @ ${PROJECT_ROOT}/components/processing/libs/processor-base",
 
-  # Load xlsx processor
-  "processor-xlsx @ ${PROJECT_ROOT}/components/processing/libs/processor-xlsx",
+    # Load xlsx processor
+    "processor-xlsx @ ${PROJECT_ROOT}/components/processing/libs/processor-xlsx",
 ]
 
 [project.scripts]

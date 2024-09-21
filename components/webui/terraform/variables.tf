@@ -22,14 +22,11 @@ variable "region" {
   description = "Google Cloud region where app engine is located "
 }
 
-variable "application_title" {
-  description = "Enterprise Knowledge Search app"
-}
-
 variable "artifact_repo" {
-  description = "artifact registry"
+  description = "Docker registry"
+  type        = string
+  default     = ""
 }
-
 
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
@@ -59,11 +56,6 @@ variable "vpc_network_name" {
 variable "vpc_network_id" {
   type        = string
   description = "ID of the network where subnets will be created"
-}
-
-variable "gcs_object_store" {
-  type        = string
-  description = "GCS bucket for objects viewed through webui"
 }
 
 variable "app_engine_service_name" {

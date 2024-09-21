@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from converter import write_jsonl, to_csv_pd, to_csv, md_to_html
+from converter import write_jsonl, xlsx_to_pdf
+
 
 def jsonl() -> None:
     write_jsonl(
@@ -28,7 +29,11 @@ def main() -> None:
     # to_csv("./samples/test_file.xlsm", "./samples/out/test_file.csv")
     # to_csv_pd("./samples/test_file.xlsm", "./samples/out/test_file_pd.csv")
     # md_to_html("./samples/test_file.md", "./samples/out/test_file.html")
-    xlsx_to_pdf("./samples/test_file.xlsm", "./samples/out/test_file.html", "./samples/out/test_file.pdf")
+    xlsx_to_pdf(
+        "./samples/test_file.xlsm",
+        "./samples/out/test_file.html",
+        "./samples/out/test_file.pdf",
+    )
 
 
 if __name__ == "__main__":

@@ -13,8 +13,11 @@
 # limitations under the License.
 
 
-# Initialize a new build stage and set the 
+# Initialize a new build stage and set the
 FROM python:3.10
+
+# Explicitly set a user to avoid running as root
+USER daemon
 
 # Expose port you want your app on
 EXPOSE 8080
@@ -24,8 +27,8 @@ WORKDIR /app
 COPY . ./
 
 # Upgrade pip, install requirements and install curl
-RUN python -m pip install --upgrade pip
-RUN pip install --require-hashes -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip==24.2
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 # TODO - Implement Sign On in the App and use the service account to access the GCP APIs
 # ENV GOOGLE_APPLICATION_CREDENTIALS=./adc.json

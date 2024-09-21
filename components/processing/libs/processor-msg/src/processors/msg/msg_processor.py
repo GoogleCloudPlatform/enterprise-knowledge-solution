@@ -13,16 +13,14 @@
 # limitations under the License.
 
 
+import logging
 import pathlib
+from typing import Dict
 
 from extract_msg import openMsg
-from extract_msg.msg_classes import MessageBase
 from extract_msg.enums import ErrorBehavior
-
+from extract_msg.msg_classes import MessageBase
 from processors.base.gcsio import GCSPath
-from typing import Dict
-import logging
-
 
 error_behavior = ErrorBehavior.RTFDE | ErrorBehavior.ATTACH_NOT_IMPLEMENTED
 MAX_BODY_SIZE = 1024
@@ -71,7 +69,9 @@ def msg_processor(
         )
 
         # Extract message content
-        msg_path = pathlib.Path(output, f"{nmsg.defaultFolderName}.txt")  # pylint: disable=no-member
+        msg_path = pathlib.Path(
+            output, f"{nmsg.defaultFolderName}.txt"
+        )  # pylint: disable=no-member
         with open(msg_path, "wb") as f:
             f.write(nmsg.getSaveBody())  # pylint: disable=no-member
 

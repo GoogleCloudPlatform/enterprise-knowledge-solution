@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from .xlsx_processor import xlsx_processor
 from .xlsx_generator import XLSXGenerator
+from .xlsx_processor import xlsx_processor
 
 __all__ = [
     "xlsx_processor",

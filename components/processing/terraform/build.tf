@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 locals {
-  registry_url = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}"
+  registry_url = "${var.repository_region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}"
   cloud_build_fileset = [
     "${path.module}/build/cloudbuild.yaml.template",
     "${path.module}/build/cloudbuild.yaml",
@@ -38,10 +38,9 @@ resource "local_file" "cloudbuild_cloud_run" {
   })
 }
 
-# See https://github.com/terraform-google-modules/terraform-google-gcloud
+# See github.com/terraform-google-modules/terraform-google-gcloud
 module "gcloud" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.4"
+  source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = "builds submit --region ${var.region} --project ${var.project_id} --config \"${local_file.cloudbuild_cloud_run.filename}\" \"${path.module}/../../..\""

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import streamlit as st  # type: ignore
-from dpu.components import show_agent_document, choose_source_id, LOGO, PREAMBLE
 from dpu.api import generate_answer
+from dpu.components import LOGO, PREAMBLE, choose_source_id, show_agent_document
 
 logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -36,7 +36,8 @@ SAMPLE_QUERIES = """
     How can we automate our document processing workflow to save time and reduce errors? Generate answer in spanish.
 ```
 ```
-    समय बचाने और त्रुटियों को कम करने के लिए हम अपने दस्तावेज़ प्रसंस्करण वर्कफ़्लो को कैसे स्वचालित कर सकते हैं?  अंग्रेज़ी में उत्तर दें.
+    समय बचाने और त्रुटियों को कम करने के लिए हम अपने दस्तावेज़ प्रसंस्करण वर्कफ़्लो को कैसे स्वचालित कर सकते हैं?
+    अंग्रेज़ी में उत्तर दें.
 ```
 ```
     How many shares are offered by Ryde Group Ltd?
@@ -72,14 +73,14 @@ st.divider()
 #
 
 
-if not 'answer' in st.session_state:
-    st.session_state['answer'] = ''
-if not 'sources' in st.session_state:
-    st.session_state['sources'] = []   
-if not 'chosen_row' in st.session_state:
-    st.session_state['chosen_row'] = None
-if not 'preamble' in st.session_state:
-    st.session_state['preamble'] = PREAMBLE
+if "answer" not in st.session_state:
+    st.session_state["answer"] = ""
+if "sources" not in st.session_state:
+    st.session_state["sources"] = []
+if "chosen_row" not in st.session_state:
+    st.session_state["chosen_row"] = None
+if "preamble" not in st.session_state:
+    st.session_state["preamble"] = PREAMBLE
 
 #
 # Form
@@ -90,8 +91,8 @@ st.markdown(
     """### Given a query, EKS will generate an answer with citations to the documents."""
 )
 
-if not 'preamble' in st.session_state:
-    st.session_state['preamble'] = PREAMBLE
+if "preamble" not in st.session_state:
+    st.session_state["preamble"] = PREAMBLE
 
 my_js = """ const textArea = document.querySelector('.textarea-test')
     textArea.addEventListener('input',(e)=>{
@@ -103,20 +104,22 @@ my_js = """ const textArea = document.querySelector('.textarea-test')
 with st.container():
 
     def update_preamble():
-        logger.info(f'preamble update: {st.session_state.preamble_new}')
+        logger.info(f"preamble update: {st.session_state.preamble_new}")
         st.session_state.preamble = st.session_state.preamble_new
-    
+
     preamble_new = st.text_area(
         ":blue[Change the :orange[***search context***] below:]",
         value=st.session_state["preamble"],
         placeholder="Search Context",
         key="preamble_new",
         on_change=update_preamble,
-        height=140
+        height=140,
     )
 
     def question_change():
-        result = generate_answer(st.session_state.question, preamble=st.session_state['preamble'])
+        result = generate_answer(
+            st.session_state.question, preamble=st.session_state["preamble"]
+        )
         st.session_state.answer = result["answer"]
         st.session_state.sources = result["sources"]
 
@@ -127,7 +130,7 @@ with st.container():
             value="",
             placeholder="Question",
             key="question",
-            on_change=question_change
+            on_change=question_change,
         )
     with example_col:
         st.write("")
@@ -136,17 +139,15 @@ with st.container():
 
 # Render answer if there's a summary returned in the response
 if st.session_state.answer:
-    st.text_area(
-        ":blue[Summary Response: ]",
-        value=st.session_state.answer,
-        height=140
-    )
+    st.text_area(":blue[Summary Response: ]", value=st.session_state.answer, height=140)
 
 # Render list of other documents
 if st.session_state.sources:
-    st.session_state['source_id'] = choose_source_id(st.session_state.sources, "Search Results")
+    st.session_state["source_id"] = choose_source_id(
+        st.session_state.sources, "Search Results"
+    )
 
 # Render the selected document or reference
-if 'source_id' in st.session_state and st.session_state.source_id: 
-  logger.info(f'source_id: {st.session_state.source_id}')
-  show_agent_document(st.session_state.source_id)
+if "source_id" in st.session_state and st.session_state.source_id:
+    logger.info(f"source_id: {st.session_state.source_id}")
+    show_agent_document(st.session_state.source_id)

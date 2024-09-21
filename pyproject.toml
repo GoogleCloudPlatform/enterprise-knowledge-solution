@@ -10,17 +10,17 @@
 
 # Source roots - important for finding imports
 source-roots = [
-   "components/processing/libs/processor-base/src",
-   "components/processing/libs/processor-msg/src",
-   "components/processing/libs/processor-xlsx/src",
-   "components/forms-classifier/src",
-   "components/webui/src",
+    "components/processing/libs/processor-base/src",
+    "components/processing/libs/processor-msg/src",
+    "components/processing/libs/processor-xlsx/src",
+    "components/forms-classifier/src",
+    "components/webui/src",
 ]
 
 [tool.pylint."MESSAGE_CONTROL"]
 
 # Disable everything
-disable="all" 
+disable="all"
 
 # But enable warnings and unused-import
 enable="E,unused-import"
@@ -40,15 +40,16 @@ include=[
 
 # Paths of modules for dependencies
 executionEnvironments = [
-{ root = ".", extraPaths = [
-    "components/processing/libs/processor-xlsx/src",
-    "components/processing/libs/processor-base/src",
-    "components/processing/libs/processor-msgx/src",
-    "components/forms-classifier/src",
-    "components/webui/src",
-  ] }
+    { root = ".", extraPaths = [
+        "components/processing/libs/processor-xlsx/src",
+        "components/processing/libs/processor-base/src",
+        "components/processing/libs/processor-msgx/src",
+        "components/forms-classifier/src",
+        "components/webui/src",
+        ]
+    }
 ]
- 
+
 reportMissingImports=true
 reportMissingTypeStubs=false
 
