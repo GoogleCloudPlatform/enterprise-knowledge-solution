@@ -31,6 +31,12 @@ module "cloud_run_web_account" {
   description  = "specific custom service account for Web APP"
 }
 
+resource "null_resource" "deployment_trigger" {
+  triggers = {
+    source_contents_hash = local.cloud_build_content_hash
+  }
+}
+
 resource "google_cloud_run_v2_service" "eks_webui" {
   name     = var.webui_service_name
   location = var.region
@@ -68,7 +74,10 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       }
     }
     service_account = module.cloud_run_web_account.email
+  }
 
+  lifecycle {
+    replace_triggered_by = [ null_resource.deployment_trigger ]
   }
 }
 
