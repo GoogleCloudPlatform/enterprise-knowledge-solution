@@ -49,7 +49,6 @@ resource "google_project_iam_member" "iap_users" {
   member   = each.key
 }
 
-
 data "google_compute_default_service_account" "default" {
   project = module.project_services.project_id
 }
@@ -76,30 +75,5 @@ resource "time_sleep" "wait_for_policy_propagation" {
   depends_on = [
     google_project_iam_member.gce_gcs_access,
     google_project_iam_member.gce_ar_access
-  ]
-}
-
-locals {
-  ui_service_name     = "dpu-ui"
-  cloud_build_fileset = setunion(fileset("${path.module}", "../src/**"), fileset("${path.module}", "../Dockerfile"), fileset("${path.module}", "../requirements.txt"))
-  cloud_build_content_hash = sha512(join(",", [
-  for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
-}
-
-# Build and upload the app container
-module "app_build" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.4"
-
-  platform        = "linux"
-  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo.name}/${local.ui_service_name}\" \"${path.module}/../\""
-  enabled         = true
-
-  create_cmd_triggers = {
-    source_contents_hash = local.cloud_build_content_hash
-  }
-
-  module_depends_on = [
-    time_sleep.wait_for_policy_propagation
   ]
 }

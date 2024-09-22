@@ -79,6 +79,10 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   lifecycle {
     replace_triggered_by = [ null_resource.deployment_trigger ]
   }
+
+  depends_on = [
+    module.app_build.wait
+  ]
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
