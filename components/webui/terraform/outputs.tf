@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 output "dns_configuration" {
-  value = "${module.eks_webui_lb.managed_ssl_certificate_domains} => ${module.eks_webui_lb.external_ip}"
+  value = "${join(",", var.lb_ssl_certificate_domains)} => ${module.eks_webui_lb.external_ip}"
 }
