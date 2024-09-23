@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # Initialize a new build stage and set the
-FROM python:3.10
-
-# Explicitly set a user to avoid running as root
-USER daemon
+FROM python:3.11-slim
 
 # Expose port you want your app on
 EXPOSE 8080
@@ -32,4 +28,6 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 # TODO - Implement Sign On in the App and use the service account to access the GCP APIs
 # ENV GOOGLE_APPLICATION_CREDENTIALS=./adc.json
+# Explicitly set a user to avoid running as root
+USER daemon
 ENTRYPOINT ["streamlit", "run", "src/Home.py", "--server.port=8080", "--server.address=0.0.0.0"]
