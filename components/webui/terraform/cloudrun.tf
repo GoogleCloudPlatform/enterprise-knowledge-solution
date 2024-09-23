@@ -45,7 +45,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       max_instance_count = 2
     }
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo.name}/${local.ui_service_name}:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${local.ui_service_name}:latest"
       ports {
         container_port = 8080
       }

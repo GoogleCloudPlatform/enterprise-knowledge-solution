@@ -23,7 +23,7 @@ locals {
 module "app_build" {
   source          = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   platform        = "linux"
-  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo.name}/${local.ui_service_name}\" \"${path.module}/../\""
+  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${local.ui_service_name}\" \"${path.module}/../\""
   enabled         = true
 
   create_cmd_triggers = {
