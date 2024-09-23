@@ -285,9 +285,9 @@ google-api-python-client==2.134.0 \
     # via
     #   -c reqs/constraints.txt
     #   firebase-admin
-google-auth==2.30.0 \
-    --hash=sha256:8df7da660f62757388b8a7f249df13549b3373f24388cb5d2f1dd91cc18180b5 \
-    --hash=sha256:ab630a1320f6720909ad76a7dbdb6841cdf5c66b328d690027e4867bdfb16688
+google-auth==2.35.0 \
+    --hash=sha256:25df55f327ef021de8be50bad0dfd4a916ad0de96da86cd05661c9297723ad3f \
+    --hash=sha256:f4c64ed4e01e8e8b646ef34c018f8bf3338df0c8e37d8b3bba40e7f574a3278a
     # via
     #   -c reqs/constraints.txt
     #   google-api-core
