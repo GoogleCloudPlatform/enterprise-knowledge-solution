@@ -13,9 +13,7 @@
 # limitations under the License.
 
 module "vpc" {
-  source  = "terraform-google-modules/network/google"
-  version = "~> 9.1"
-
+  source       = "github.com/terraform-google-modules/terraform-google-network?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
   project_id   = module.project_services.project_id
   network_name = "dpu-network"
   routing_mode = "GLOBAL"

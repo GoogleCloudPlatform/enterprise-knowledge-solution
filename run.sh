@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ROOT="$(realpath $(dirname $0))"
+ROOT="$(realpath "$(dirname "$0")")"
 VENV="${ROOT}/.venv"
 [ -d "${VENV}" ] || (
-  cd "${ROOT}"
+  cd "${ROOT}" || exit
 
   # Create and bootstrap the virtual environment
   python3 -m venv "${VENV}"
@@ -30,6 +30,7 @@ VENV="${ROOT}/.venv"
 DOTENV="${ROOT}/.env"
 if [ -f "${DOTENV}" ]; then
   set -o allexport
+  # shellcheck source=/dev/null
   source "${DOTENV}"
   set +o allexport
 fi
@@ -38,7 +39,7 @@ CMD="$1"
 shift
 
 if [ ! -f "${VENV}/bin/${CMD}" ]; then
-  echo "Usage: $(basename $0) command [... command args]"
+  echo "Usage: $(basename "$0") command [... command args]"
   echo ""
   echo "Command is a bin available in the virtual environment,"
   echo "including python3 interpreter itself."

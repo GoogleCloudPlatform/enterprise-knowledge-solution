@@ -23,9 +23,10 @@ variable "region" {
 }
 
 variable "artifact_repo" {
-  description = "artifact registry"
+  description = "Docker registry"
+  type        = string
+  default     = ""
 }
-
 
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
@@ -45,11 +46,6 @@ variable "agent_builder_data_store_id" {
 variable "agent_builder_search_id" {
   description = "Agent builder search engine id"
   type        = string
-}
-
-variable "gcs_object_store" {
-  type        = string
-  description = "GCS bucket for objects viewed through webui"
 }
 
 variable "webui_service_name" {

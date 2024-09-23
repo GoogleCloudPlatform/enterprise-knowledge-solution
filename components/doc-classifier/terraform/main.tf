@@ -14,15 +14,14 @@
 
 
 locals {
-  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo_name}/${var.classifier_cloud_run_job_name}:latest"
+  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.classifier_cloud_run_job_name}:latest"
 }
 
 # Enable APIs
-# See https://github.com/terraform-google-modules/terraform-google-project-factory
+# See github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -56,8 +55,7 @@ module "project_services" {
 }
 
 module "doc_classifier_account" {
-  source     = "terraform-google-modules/service-accounts/google"
-  version    = "~> 4.2"
+  source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   prefix     = "eks"
   names      = [local.service_account_name]

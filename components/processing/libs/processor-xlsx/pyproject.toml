@@ -2,11 +2,11 @@
 name = "processor-xlsx"
 version = "0.0.1.dev"
 dependencies = [
-  "pyexcel==0.6.7",
-  "pyexcel-xlsx==0.6.0",
-  "openpyxl==3.0.10",
-  "pyexcel-text==0.2.7.1",
-  "faker",
-  "python-markdown-generator",
-  "processor-base @ ${PROJECT_ROOT}/components/processing/libs/processor-base",
+    "pyexcel==0.6.7",
+    "pyexcel-xlsx==0.6.0",
+    "openpyxl==3.0.10",
+    "pyexcel-text==0.2.7.1",
+    "faker",
+    "python-markdown-generator",
+    "processor-base @ ${PROJECT_ROOT}/components/processing/libs/processor-base",
 ]

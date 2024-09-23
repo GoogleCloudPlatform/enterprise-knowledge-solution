@@ -1,0 +1,3 @@
+---
+ignored:
+  - DL3059 # "multiple conservutive RUN commands, consider consolidation" https://github.com/hadolint/hadolint/wiki/DL3059

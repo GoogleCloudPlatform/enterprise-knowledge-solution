@@ -23,8 +23,7 @@ locals {
 }
 
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -39,8 +38,7 @@ module "project_services" {
 }
 
 module "composer_service_account" {
-  source  = "terraform-google-modules/service-accounts/google"
-  version = "~> 4.2"
+  source = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
 
   project_id = module.project_services.project_id
   prefix     = local.env_name
@@ -50,9 +48,8 @@ module "composer_service_account" {
   project_roles = local.composer_sa_roles
 }
 
-module "vpc" {
-  source  = "terraform-google-modules/network/google//modules/subnets"
-  version = "~> 9.1"
+module "dpu-subnet" {
+  source = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
 
   project_id   = module.project_services.project_id
   network_name = var.vpc_network_name
@@ -115,7 +112,7 @@ resource "google_composer_environment" "composer_env" {
     environment_size = var.composer_environment_size
     node_config {
       network         = var.vpc_network_id
-      subnetwork      = module.vpc.subnets["${var.region}/composer-subnet"].id
+      subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
       service_account = module.composer_service_account.email
       ip_allocation_policy {
         cluster_secondary_range_name  = local.cluster_secondary_range_name
@@ -131,9 +128,9 @@ resource "google_composer_environment" "composer_env" {
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
-  for_each = fileset("${path.module}/../src", "**/*.py")
-  name   = "dags/${each.value}"
-  bucket = google_composer_environment.composer_env.storage_config.0.bucket
-  source = "${path.module}/../src/${each.value}"
+  for_each       = fileset("${path.module}/../src", "**/*.py")
+  name           = "dags/${each.value}"
+  bucket         = google_composer_environment.composer_env.storage_config[0].bucket
+  source         = "${path.module}/../src/${each.value}"
   detect_md5hash = "true"
 }

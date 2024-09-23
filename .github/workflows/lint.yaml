@@ -1,0 +1,38 @@
+---
+name: Lint
+
+on: # yamllint disable-line rule:truthy
+  push: null
+  pull_request: null
+  workflow_call: null
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    concurrency:
+      # Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+      # github.head_ref: head_ref or source branch of the pull request
+      # github.ref: ref of the branch that triggered the workflow
+      group: ${{ github.workflow }}-lint-${{ github.head_ref || github.ref }}-${{ github.event_name }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Load super-linter configuration
+        # Use grep inverse matching to exclude eventual comments in the .env file
+        # because the GitHub Actions command to set environment variables doesn't
+        # support comments.
+        # Ref: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
+        run: grep -v '^#' .github/linters/super-linter.env >> "$GITHUB_ENV"
+      - name: Super-Linter
+        uses: super-linter/super-linter@v7.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

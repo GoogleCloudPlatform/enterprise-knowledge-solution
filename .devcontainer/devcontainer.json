@@ -1,0 +1,91 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "Cloud Solutions devcontainer",
+  "image": "ghcr.io/super-linter/super-linter:v7.1.0",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "css.validate": false,
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file",
+        "editor.rulers": [80],
+        "editor.wordWrap": "off",
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true,
+        "hadolint.cliOptions": [
+          "--config",
+          "/workspaces/.github/linters/.hadolint.yaml"
+        ],
+        "less.validate": false,
+        "markdownlint.config": {
+          "extends": "${workspaceFolder}/.github/linters/.markdown-lint.yaml"
+        },
+        "prettier.resolveGlobalModules": true,
+        "redhat.telemetry.enabled": false,
+        "scss.validate": false,
+        "telemetry.telemetryLevel": "off",
+        "[css]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[html]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[markdown]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.wordWrap": "off"
+        },
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        "[scss]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[shellscript]": {
+          "editor.defaultFormatter": "mkhl.shfmt"
+        },
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform"
+        },
+        "[terraform-vars]": {
+          "editor.defaultFormatter": "hashicorp.terraform"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      },
+      "extensions": [
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode",
+        "exiasr.hadolint",
+        "HashiCorp.terraform",
+        "mads-hartmann.bash-ide-vscode",
+        "mkhl.shfmt",
+        "ms-azuretools.vscode-docker",
+        "ms-python.black-formatter",
+        "ms-python.pylint",
+        "stylelint.vscode-stylelint",
+        "timonwong.shellcheck"
+      ]
+    }
+  },
+  "runArgs": ["--rm", "--env-file", ".github/linters/super-linter.env"]
+}

@@ -16,8 +16,7 @@
  * Activate required service API:s
  */
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
