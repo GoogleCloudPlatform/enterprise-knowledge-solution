@@ -129,7 +129,7 @@ module "dpu_ui" {
   source                      = "../../components/webui/terraform"
   project_id                  = var.project_id
   region                      = var.region
-  artifact_repo               = module.common_infra.artifact_repo
+  artifact_repo               = module.common_infra.artifact_repo.name
   iap_access_domains          = var.iap_access_domains
   vertex_ai_data_store_region = var.vertex_ai_data_store_region
   agent_builder_data_store_id = google_discovery_engine_data_store.dpu_ds.data_store_id
