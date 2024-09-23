@@ -90,7 +90,7 @@ Many of the files in the repository are checked against linting tools and static
 
 1. To validate that your code passes these checks, use the following methods depending on your environment:
 
-   1. **Github Actions**: Github Actions will automatically run all configured checks when a PR is created or modified.
+   1. **GitHub Actions**: GitHub Actions will automatically run all configured checks when a PR is created or modified.
 
    1. **Local**: You can manually trigger the tests in a docker container from your local environment with the following command:
 
@@ -107,4 +107,4 @@ Many of the files in the repository are checked against linting tools and static
       scripts/lint.sh
       ```
 
-   1. **Devcontainer**: Use a [devcontainer](https://containers.dev/) with your preferred IDE to automatically configure all the extensions defined in this repository. Once installed, when you upon the top-level folder of this repostiroy in your repo, you will be prompted to launch the devcontainer with all linting extensions preconfigured. See [setup instructions for VSCode](https://code.visualstudio.com/docs/devcontainers/containers).
+   1. **Devcontainer**: Use a [devcontainer](https://containers.dev/) with your preferred IDE to automatically configure all the extensions defined in this repository. Once installed, when you upon the top-level folder of this repository, you will be prompted to launch the devcontainer with all linting extensions preconfigured. See [setup instructions for Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers).
