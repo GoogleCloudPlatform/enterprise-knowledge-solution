@@ -143,43 +143,6 @@ check_api_enabled() {
   unset __api_endpoint
 }
 
-# shell script function to check is policy rule is fullfilled, then set it if not set
-check_and_set_policy_rule() {
-  local _policy_name=$1 _rule_pattern=$2 _rule_set_pattern=$3 _project_id=$4 __org
-  __org=$(gcloud projects get-ancestors "$4" | grep organization | cut -f1 -d' ')
-  echo "policy: ${_policy_name}"
-  if ! gcloud asset analyze-org-policies --constraint=constraints/"$_policy_name" \
-    --scope=organizations/"$__org" \
-    --filter=consolidated_policy.attached_resource="//cloudresourcemanager.googleapis.com/projects/${_project_id}" \
-    --format="get(consolidatedPolicy.rules)" |
-    grep -i "${_rule_pattern}"; then
-    if ! set_policy_rule "${_policy_name}" "${_rule_set_pattern}" "${_project_id}"; then
-      echo "Org policy: '${_policy_name}' with rule: '${_rule_pattern}' cannot be set but is required. Contact your org-admin to set the policy before continue with deployment"
-      exit 1
-    fi
-  fi
-}
-
-# shell script function to set policy rule
-set_policy_rule() {
-  local _policy_name=$1 _rule_pattern=$2 _project_id=$3
-  local _policy_str="{
-    \"name\": \"projects/${_project_id}/policies/${_policy_name}\",
-    \"spec\": {
-      \"rules\": [
-        {
-          ${_rule_pattern}
-        }
-      ]
-    }
-  }"
-  gcloud org-policies set-policy <(echo "$_policy_str")
-  unset _policy_name
-  unset _rule_pattern
-  unset _project_id
-  unset _policy_str
-}
-
 # shell script function to enable api
 enable_api() {
   local __api_endpoint=$1

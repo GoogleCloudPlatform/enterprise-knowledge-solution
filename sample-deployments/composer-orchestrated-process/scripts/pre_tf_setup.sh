@@ -54,12 +54,6 @@ section_open "Explicitly declare underlying permissions for Cloud Build processe
 enable_builder_roles
 section_close
 
-section_open "Check and try to set required org-policies on project: ${PROJECT_ID}"
-check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
-check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
-check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
-section_close
-
 section_open "Set Application Default Credentials to be used by Terraform"
 yes | gcloud auth application-default login --impersonate-service-account="${SERVICE_ACCOUNT_ID}"
 section_close
