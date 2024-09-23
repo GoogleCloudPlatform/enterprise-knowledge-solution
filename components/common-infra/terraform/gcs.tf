@@ -20,7 +20,6 @@ module "input_bucket" {
   force_destroy            = false
   labels                   = local.dpu_label
   public_access_prevention = "enforced"
-  bucket_policy_only       = "true"
 }
 
 module "process_bucket" {
@@ -31,7 +30,6 @@ module "process_bucket" {
   force_destroy            = false
   labels                   = local.dpu_label
   public_access_prevention = "enforced"
-  bucket_policy_only       = "true"
 }
 
 module "reject_bucket" {
@@ -42,5 +40,4 @@ module "reject_bucket" {
   force_destroy            = false
   labels                   = local.dpu_label
   public_access_prevention = "enforced"
-  bucket_policy_only       = "true"
 }

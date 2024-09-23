@@ -151,6 +151,7 @@ iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g
     ```sh
     terraform init -migrate-state
     ```
+
     Terraform detects that you already have a state file locally and prompts you to migrate the state to the new Cloud Storage bucket. When prompted, enter `yes`.
 
 ### Update your environment with new code/new version
@@ -242,8 +243,8 @@ Once the workflow completes successfully, all documents will be imported into th
 
 1. Access the EKS Web UI:
 
-    - Open your web browser and navigate to domain address which you have configured for the WebUI.
-    - First time y will need to authenticate with your Google Cloud credentials
+   - Open your web browser and navigate to domain address which you have configured for the WebUI.
+   - First time y will need to authenticate with your Google Cloud credentials
 
 1. Search and Explore:
    - In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
