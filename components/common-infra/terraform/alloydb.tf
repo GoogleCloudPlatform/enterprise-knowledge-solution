@@ -13,23 +13,6 @@
 # limitations under the License.
 
 
-resource "google_compute_global_address" "private_ip_alloc" {
-  project       = var.project_id
-  name          = "adb-psa"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 12
-  network       = module.vpc.network_id
-  address       = "172.16.0.0"
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = module.vpc.network_id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-  deletion_policy         = "ABANDON"
-}
-
 module "docs_results" {
   source         = "GoogleCloudPlatform/alloy-db/google"
   version        = "~> 3.0"
@@ -40,19 +23,11 @@ module "docs_results" {
   cluster_location     = var.region
   cluster_labels       = {}
   cluster_display_name = var.alloy_db_cluster_id
-#   cluster_initial_user = {
-#     user     = var.alloy_db_username
-#     password = var.alloy_db_password
-#   }
-  network_self_link = module.vpc.network_id
+  psc_enabled = true
 
   primary_instance = {
     instance_id = "${var.alloy_db_cluster_id}-primary"
-    instance_type = "PRIMARY",
+    instance_type = "PRIMARY"
     machine_cpu_count = 2
   }
-#   read_pool_instance = null
-  depends_on = [
-    google_service_networking_connection.vpc_connection
-  ]
 }
