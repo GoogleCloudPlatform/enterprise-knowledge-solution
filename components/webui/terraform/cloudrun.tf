@@ -18,8 +18,7 @@ locals {
 }
 
 module "cloud_run_web_account" {
-  source     = "terraform-google-modules/service-accounts/google"
-  version    = "~> 4.2"
+  source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   names      = ["cloud-run-web"]
   project_roles = [
@@ -77,7 +76,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   }
 
   lifecycle {
-    replace_triggered_by = [ null_resource.deployment_trigger ]
+    replace_triggered_by = [null_resource.deployment_trigger]
   }
 
   depends_on = [
@@ -95,9 +94,8 @@ resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
 }
 
 module "eks_webui_lb" {
-  source  = "terraform-google-modules/lb-http/google//modules/serverless_negs"
-  version = "~> 11.0"
-
+  source                          = "terraform-google-modules/lb-http/google//modules/serverless_negs" #checkov:skip=CKV_TF_1:Commit hash cannot be used for sub-module
+  version                         = "~> 11.0"
   name                            = "eks-webui-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains

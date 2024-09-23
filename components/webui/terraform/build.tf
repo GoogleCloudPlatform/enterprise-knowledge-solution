@@ -14,16 +14,14 @@
 
 locals {
   ui_service_name     = "eks-ui"
-  cloud_build_fileset = setunion(fileset("${path.module}", "../src/**"), fileset("${path.module}", "../Dockerfile"), fileset("${path.module}", "../requirements.txt"))
+  cloud_build_fileset = setunion(fileset(path.module, "../src/**"), fileset(path.module, "../Dockerfile"), fileset(path.module, "../requirements.txt"))
   cloud_build_content_hash = sha512(join(",", [
   for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
 }
 
 # Build and upload the app container
 module "app_build" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.4"
-
+  source          = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   platform        = "linux"
   create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo.name}/${local.ui_service_name}\" \"${path.module}/../\""
   enabled         = true
