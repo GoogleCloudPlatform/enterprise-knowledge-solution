@@ -44,3 +44,7 @@ variable "docai_location" {
   default     = "us"
 }
 
+variable "webui_domains" {
+  description = "Custom domain pointing to the WebUI app, DNS configured"
+  type        = list(string)
+}

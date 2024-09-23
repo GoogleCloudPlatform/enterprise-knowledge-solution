@@ -37,7 +37,7 @@ output "agent_app_uri" {
   value       = "https://console.cloud.google.com/gen-app-builder/locations/${var.vertex_ai_data_store_region}/engines/${google_discovery_engine_search_engine.basic.engine_id}/preview/search?project=${var.project_id}"
 }
 
-output "web_ui_uri" {
-  description = "EKS Web UI URI"
-  value       = "https://${module.dpu_ui.web_ui_uri}/"
+output "webui_dns_config" {
+  description = "DNS Record for WebUI"
+  value       = module.dpu_ui.dns_configuration
 }

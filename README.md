@@ -43,6 +43,8 @@ To deploy this solution, perform the follow steps:
 
 1.  [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
+1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
+
 1.  This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview):
 
     - Roles required at the organization:
@@ -126,6 +128,8 @@ vertex_ai_data_store_region = # The region for your Agent Builder Data Store, th
 
 docai_location = # Sets the location for Document AI service
 
+webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
+
 iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])
 
 1.  Review the proposed changes, and apply them:
@@ -136,10 +140,18 @@ iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g
 
     The provisioning process may take about 30 minutes to complete.
 
+1.  Print the DNS configuration for the WebUI and configure the DNS records for the WebUI accordingly:
+
+    ```sh
+    terraform output webui_dns_config
+    ```
+
 1.  Migrate Terraform state to the remote Cloud Storage backend:
+
     ```sh
     terraform init -migrate-state
     ```
+
     Terraform detects that you already have a state file locally and prompts you to migrate the state to the new Cloud Storage bucket. When prompted, enter `yes`.
 
 ### Update your environment with new code/new version
@@ -229,15 +241,9 @@ Once the workflow completes successfully, all documents will be imported into th
 
 ### Search and Explore from EKS Web UI
 
-1. Get the EKS Web UI URI:
-
-   ```sh
-   terraform output web_ui_uri
-   ```
-
 1. Access the EKS Web UI:
 
-   - Open your web browser and navigate to the URI obtained in the previous step.
+   - Open your web browser and navigate to domain address which you have configured for the WebUI.
    - First time y will need to authenticate with your Google Cloud credentials
 
 1. Search and Explore:

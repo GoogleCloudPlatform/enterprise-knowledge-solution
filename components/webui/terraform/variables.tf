@@ -48,17 +48,12 @@ variable "agent_builder_search_id" {
   type        = string
 }
 
-variable "vpc_network_name" {
-  type        = string
-  description = "The name of the network where subnets will be created"
-}
-
-variable "vpc_network_id" {
-  type        = string
-  description = "ID of the network where subnets will be created"
-}
-
-variable "app_engine_service_name" {
+variable "webui_service_name" {
   type        = string
   description = "The App Engine service name for the webui"
+}
+
+variable "lb_ssl_certificate_domains" {
+  description = "Custom domain pointing to the WebUI app, DNS configured"
+  type        = list(string)
 }
