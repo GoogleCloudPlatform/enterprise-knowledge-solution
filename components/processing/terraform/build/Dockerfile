@@ -5,7 +5,7 @@ FROM python:3.11-slim
 # # Install required system packages and cleanup to reduce image size
 RUN apt-get update -y && \
   apt-get install --no-install-recommends -y -q \
-  wkhtmltopdf=0.12.6-2 mime-support=3.66 media-types=10.1.0 && \
+  wkhtmltopdf=0.12.6-2+b1 mime-support=3.66 media-types=10.0.0 && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
