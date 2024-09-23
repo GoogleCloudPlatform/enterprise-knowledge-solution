@@ -26,3 +26,19 @@ variable "bq_store_dataset" {
   type        = string
   default     = "docs_store"
 }
+
+variable "alloy_db_cluster_id" {
+  description = "AlloyDB Cluster ID"
+  type = string
+  default = "eks-docs-results"
+}
+
+variable "alloy_db_username" {
+  description = "AlloyDB Username"
+  type = string
+}
+
+variable "alloy_db_password" {
+  description = "AlloyDB Password"
+  type = string
+}

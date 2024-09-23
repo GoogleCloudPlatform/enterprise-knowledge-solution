@@ -26,6 +26,8 @@ module "project_services" {
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
     "bigquery.googleapis.com",
+    "alloydb.googleapis.com",
+    "servicenetworking.googleapis.com",
   ]
 }
 

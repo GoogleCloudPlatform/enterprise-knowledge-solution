@@ -31,6 +31,8 @@ module "common_infra" {
   source     = "../../components/common-infra/terraform"
   project_id = var.project_id
   region     = var.region
+  alloy_db_username = var.alloy_db_username
+  alloy_db_password = var.alloy_db_password
 }
 
 module "project_services" {
