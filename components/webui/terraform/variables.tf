@@ -28,6 +28,12 @@ variable "artifact_repo" {
   default     = ""
 }
 
+variable "cloud_build_service_account_email" {
+  description = "IAM service account email used for cloud build."
+  type        = string
+  default     = ""
+}
+
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
   type        = list(string)

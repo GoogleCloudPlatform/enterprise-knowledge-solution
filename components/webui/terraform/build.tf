@@ -19,18 +19,24 @@ locals {
   for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
 }
 
+resource "local_file" "cloudbuild_config" {
+  filename = "${path.module}/build/cloudbuild.yaml"
+  content = templatefile("${path.module}/build/cloudbuild.yaml.template", {
+    project_id            = var.project_id,
+    build_service_account = var.cloud_build_service_account_email,
+    image_tag             = "${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${local.ui_service_name}"
+  })
+}
+
 # Build and upload the app container
 module "app_build" {
-  source          = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
-  platform        = "linux"
-  create_cmd_body = "builds submit --region ${var.region} --project ${var.project_id} --tag \"${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${local.ui_service_name}\" \"${path.module}/../\""
-  enabled         = true
+  source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
+
+  create_cmd_entrypoint = "gcloud"
+  create_cmd_body       = "builds submit --region ${var.region} --project ${var.project_id} --config \"${local_file.cloudbuild_config.filename}\" \"${path.module}/../../..\""
+  enabled               = true
 
   create_cmd_triggers = {
     source_contents_hash = local.cloud_build_content_hash
   }
-
-  module_depends_on = [
-    time_sleep.wait_for_policy_propagation
-  ]
 }
