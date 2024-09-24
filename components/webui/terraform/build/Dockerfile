@@ -20,10 +20,10 @@ ENV VIRTUAL_ENV=/usr/local
 COPY --chown=app requirements.txt $HOME
 RUN python3 -m uv pip install --no-cache-dir --require-hashes -r $HOME/requirements.txt
 
-# Copy app source filed
-# hadolint ignore=DL3022 # copy from named context libs
+# Copy app source filed from named context: libs
+# hadolint ignore=DL3022
 COPY --from=libs --chown=app /app $HOME/app/
-# hadolint ignore=DL3022 # copy from named context libs
+# hadolint ignore=DL3022
 COPY --from=libs --chown=app /src $HOME/src/
 
 # Expose port you want your app on
