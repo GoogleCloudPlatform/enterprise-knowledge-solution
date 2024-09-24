@@ -16,12 +16,14 @@
 import re
 from typing import Optional
 
+from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
 from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 from google.api_core.exceptions import InternalServerError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 from google.api_core.exceptions import RetryError # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 
+USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 def batch_process_documents(
     project_id: str, # e.g.: "5112113116"
@@ -39,7 +41,7 @@ def batch_process_documents(
     # You must set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint= "us-documentai.googleapis.com")
 
-    client = documentai.DocumentProcessorServiceClient(client_options=opts)
+    client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT))
 
     if gcs_input_uri:
         # Specify specific GCS URIs to process individual documents
@@ -107,7 +109,7 @@ def batch_process_documents(
     if metadata.state != documentai.BatchProcessMetadata.State.SUCCEEDED:
         raise ValueError(f"Batch Process Failed: {metadata.state_message}")
 
-    storage_client = storage.Client()
+    storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
 
     classification_dict = {}
 

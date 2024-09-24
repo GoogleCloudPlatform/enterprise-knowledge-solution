@@ -19,7 +19,9 @@ import re
 
 from google.cloud import documentai
 from google.cloud import bigquery
+from google.api_core.gapic_v1.client_info import ClientInfo 
 
+USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 def load_rows_into_bigquery(rows_to_insert, table_id):
   """Program that loads list of rows in BigQuery.
@@ -28,8 +30,9 @@ def load_rows_into_bigquery(rows_to_insert, table_id):
         rows_to_insert: list of rows with each row as json string,
         table_id: bigquery table id
     """
+
   # Construct a BigQuery client object.
-  client = bigquery.Client()
+  client = bigquery.Client(client_info=ClientInfo(user_agent=USER_AGENT))
   # Make an API request to insert rows into the table
   errors = client.insert_rows_json(table_id, rows_to_insert)
 

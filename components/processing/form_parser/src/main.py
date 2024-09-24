@@ -18,6 +18,7 @@ from typing import Optional
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import InternalServerError, GoogleAPICallError
 from google.api_core.exceptions import RetryError
+from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import storage
 from load_data_in_bigquery import *
 
@@ -32,6 +33,8 @@ PROCESSOR_ID = os.getenv("PROCESSOR_ID") # Example: - ac27785bf4bee278
 GCS_OUTPUT_PREFIX = os.getenv("GCS_OUTPUT_PREFIX") # Must end with a trailing slash `/`. Format: gs://bucket/directory/subdirectory/
 GCS_INPUT_PREFIX = os.getenv("GCS_INPUT_PREFIX") # Example: - "gs://doc-ai-processor/input-forms/" # Format: gs://bucket/directory/
 BQ_TABLE_ID = os.getenv("BQ_TABLE_ID") # Specify your table ID in the format 'your-project.your_dataset.your_table'
+
+USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 def batch_process_documents(
     project_id: str,
@@ -52,10 +55,11 @@ def batch_process_documents(
         gcs_output_uri: GCS directory to store the out json files,
         gcs_input_prefix: GCS directory to store input files to be processed
     """
+
   # Set the `api_endpoint` if you use a location other than "us".
   opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
 
-  client = documentai.DocumentProcessorServiceClient(client_options=opts)
+  client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT))
 
   # Specify a GCS URI Prefix to process an entire directory
   gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
@@ -100,7 +104,7 @@ def batch_process_documents(
   if metadata.state != documentai.BatchProcessMetadata.State.SUCCEEDED:
     raise ValueError(f"Batch Process Failed: {metadata.state_message}")
 
-  storage_client = storage.Client()
+  storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
 
   logging.info("Output files:")
 
