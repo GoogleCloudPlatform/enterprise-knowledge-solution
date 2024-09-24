@@ -64,3 +64,8 @@ variable "gcs_input_prefix" {
   type        = string
   default     = "gs://doc-ai-processor/input-forms/"
 }
+
+variable "alloydb_cluster_name" {
+  description = "Name of the AlloyDB cluster to save the parsed forms results"
+  type = string
+}

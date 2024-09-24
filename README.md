@@ -23,12 +23,12 @@ The solution comprises the following key components:
 ## Solution Architecture
 
 ![Solution Architecture](assets/deployment-architecture.png "Solution Architecture")
-The above diagram dipicts a [Dataflow](DATAFLOW.md) of how the documents uploaded into Google Cloud Storage bucket is processed and prepared for search and summarization.
+The above diagram depicts a [Dataflow](DATAFLOW.md) of how the documents uploaded into Google Cloud Storage bucket is processed and prepared for search and summarization.
 
 ### Enterprise Foundations
 
 This Solution assumes that you have already configured an enterprise-ready foundation.
-The foundation is not a technical prequisite (meaning, you can use the [deployment guide](#deployment-guide) without a foundation).
+The foundation is not a technical prerequisite (meaning, you can use the [deployment guide](#deployment-guide) without a foundation).
 However, we recommend that you build an enterprise-ready foundation before releasing production workloads with sensitive data.
 
 For more details, see [Deploying Solutions to an enterprise-ready foundation](docs/foundation.md)
@@ -205,10 +205,15 @@ After successfully completing the steps in thge previous section Deployment Guid
    - In the Airflow UI, locate the DAG (Directed Acyclic Graph) named: `run_docs_processing`, which represents the document processing workflow.
    - Click the "Trigger DAG" button to access the trigger page. Here, you can view the input parameters for the workflow.
    - Leave the default parameters as they are and click the "Trigger" button to initiate the workflow.
-   - Set the following paramerts per your environment:
-     - pdf_classifier_project_id
-     - pdf_classifier_location
-     - pdf_classifier_processor_id
+   - Set the `classifier` parameter per your environment, with the following structure:
+   ```json
+     {
+        "location": "<CLASSIFER_LOCATION>",
+        "processor_id": "<CLASSIFIER_ID>",
+        "project_id": "<PROJECT_ID>"
+     }
+    ```
+    All these parameters are available from the Cloud Console, in the classifier overview page.
 
 1. Monitor Execution Progress:
    - Navigate to the DAG details view using the URL:
