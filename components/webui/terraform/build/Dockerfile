@@ -31,7 +31,6 @@ EXPOSE 8080
 
 # Copy app code and set working directory
 WORKDIR $HOME
-USER app
 
 # TODO - Implement Sign On in the App and use the service account to access the GCP APIs
 # ENV GOOGLE_APPLICATION_CREDENTIALS=./adc.json
