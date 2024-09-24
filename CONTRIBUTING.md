@@ -36,7 +36,7 @@ The files `requirement.txt` and `constraints.txt` are generated through a script
 
 2. Generate the locked `requirement.txt` with the following script:
 
-   ```
+   ```bash
    ./invoke.sh lock
    ```
 
