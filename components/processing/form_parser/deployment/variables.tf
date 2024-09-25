@@ -67,5 +67,5 @@ variable "gcs_input_prefix" {
 
 variable "alloydb_cluster_name" {
   description = "Name of the AlloyDB cluster to save the parsed forms results"
-  type = string
+  type        = string
 }

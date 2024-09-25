@@ -43,8 +43,8 @@ resource "google_project_iam_member" "storage_admin" {
 }
 
 resource "google_alloydb_user" "form_parser_user" {
-  cluster = var.alloydb_cluster_name
-  user_id = google_service_account.dpu_run_service_account.email
+  cluster   = var.alloydb_cluster_name
+  user_id   = google_service_account.dpu_run_service_account.email
   user_type = "ALLOYDB_IAM_USER"
 
   database_roles = ["alloydbiamuser"]

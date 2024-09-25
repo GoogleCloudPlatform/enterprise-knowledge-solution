@@ -206,14 +206,16 @@ After successfully completing the steps in thge previous section Deployment Guid
    - Click the "Trigger DAG" button to access the trigger page. Here, you can view the input parameters for the workflow.
    - Leave the default parameters as they are and click the "Trigger" button to initiate the workflow.
    - Set the `classifier` parameter per your environment, with the following structure:
+
    ```json
-     {
-        "location": "<CLASSIFER_LOCATION>",
-        "processor_id": "<CLASSIFIER_ID>",
-        "project_id": "<PROJECT_ID>"
-     }
-    ```
-    All these parameters are available from the Cloud Console, in the classifier overview page.
+   {
+     "location": "<CLASSIFER_LOCATION>",
+     "processor_id": "<CLASSIFIER_ID>",
+     "project_id": "<PROJECT_ID>"
+   }
+   ```
+
+   All these parameters are available from the Cloud Console, in the classifier overview page.
 
 1. Monitor Execution Progress:
    - Navigate to the DAG details view using the URL:

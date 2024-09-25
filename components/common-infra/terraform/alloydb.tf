@@ -14,20 +14,20 @@
 
 
 module "docs_results" {
-  source         = "GoogleCloudPlatform/alloy-db/google"
-  version        = "~> 3.0"
+  source  = "GoogleCloudPlatform/alloy-db/google"
+  version = "~> 3.0"
 
-  project_id     = module.project_services.project_id
+  project_id = module.project_services.project_id
 
   cluster_id           = var.alloy_db_cluster_id
   cluster_location     = var.region
   cluster_labels       = {}
   cluster_display_name = var.alloy_db_cluster_id
-  psc_enabled = true
+  psc_enabled          = true
 
   primary_instance = {
-    instance_id = "${var.alloy_db_cluster_id}-primary"
-    instance_type = "PRIMARY"
+    instance_id       = "${var.alloy_db_cluster_id}-primary"
+    instance_type     = "PRIMARY"
     machine_cpu_count = 2
     database_flags = {
       # This flag enables authenticating using IAM, however, creating databases and tables from terraform is not
