@@ -253,7 +253,7 @@ def fetch_all_agent_docs() -> list[dict]:
     )
 
     # Accumulate the corpus of documents
-    corpus = [] # type: ignore
+    corpus = []  # type: ignore
     for doc in client.list_documents(request=request):
         tmp = _document_to_dict(doc)
         if isinstance(tmp, dict):  # mypy: only return valid dict results
