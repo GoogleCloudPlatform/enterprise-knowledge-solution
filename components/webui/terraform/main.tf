@@ -47,32 +47,3 @@ resource "google_project_iam_member" "iap_users" {
   role     = "roles/iap.httpsResourceAccessor"
   member   = each.key
 }
-
-data "google_compute_default_service_account" "default" {
-  project = module.project_services.project_id
-}
-
-# Grant default compute engine view access to cloud storage
-resource "google_project_iam_member" "gce_gcs_access" {
-  project = module.project_services.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-# Grant default compute engine view access to artifact registry
-resource "google_project_iam_member" "gce_ar_access" {
-  project = module.project_services.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-
-# Propagation time for change of access policy typically takes 2 minutes
-# according to https://cloud.google.com/iam/docs/access-change-propagation
-# this wait make sure the policy changes are propagated before proceeding
-# with the build
-resource "time_sleep" "wait_for_policy_propagation" {
-  create_duration = "120s"
-  depends_on = [
-    google_project_iam_member.gce_gcs_access,
-    google_project_iam_member.gce_ar_access
-  ]
-}
