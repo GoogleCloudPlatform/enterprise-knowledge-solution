@@ -1,38 +1,42 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.11-slim
+FROM python:3.12-slim AS builder
 
-# Install required system packages and cleanup to reduce image size
-RUN apt-get update -y && \
-apt-get clean && \
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENV HOME=/app
+WORKDIR $HOME
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Bootstrap venv
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install the dependencies into venv
+RUN --mount=from=libs,target=/libs pip install --no-cache-dir --require-hashes -r /libs/requirements.txt
+
+# Final stage
+FROM python:3.12-slim
 
 # Create user for the application
-ENV HOME=/app/
+ENV HOME=/app
+# Explicitly set a user to avoid running as root
 RUN useradd -rm -d $HOME -s /bin/bash -u 1000 app
+USER app
 
-# Bootstrap uv
-RUN python3 -m ensurepip --upgrade
-RUN --mount=from=reqs,target=/reqs pip install --no-cache-dir --require-hashes -r /reqs/requirements_bootstrap.txt
-ENV VIRTUAL_ENV=/usr/local
-
-# Copy requirements into the image and install the dependencies
-COPY --chown=app requirements.txt $HOME
-RUN python3 -m uv pip install --no-cache-dir --require-hashes -r $HOME/requirements.txt
-
+# Copy venv from builder
+COPY --from=builder --chown=app /opt/venv /opt/venv
 # Copy app source filed from named context: libs
 # hadolint ignore=DL3022
 COPY --from=libs --chown=app /app $HOME/app/
 # hadolint ignore=DL3022
 COPY --from=libs --chown=app /src $HOME/src/
 
+WORKDIR $HOME
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Expose port you want your app on
 EXPOSE 8080
 
-# Copy app code and set working directory
-WORKDIR $HOME
-
-# TODO - Implement Sign On in the App and use the service account to access the GCP APIs
-# ENV GOOGLE_APPLICATION_CREDENTIALS=./adc.json
-# Explicitly set a user to avoid running as root
-ENTRYPOINT ["streamlit", "run", "src/Home.py", "--server.port=8080", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit"]
+CMD ["run", "src/Home.py", "--server.port=8080", "--server.address=0.0.0.0"]
