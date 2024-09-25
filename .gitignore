@@ -35,3 +35,4 @@ super-linter-output
 super-linter.log
 .external_modules/*
 .mypy_cache/*
+sample-deployments/composer-orchestrated-process/env.sh
