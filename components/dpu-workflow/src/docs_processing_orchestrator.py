@@ -443,7 +443,9 @@ with DAG(
             task_id="execute_forms_parser",
             job_name=os.environ["FORMS_PARSER_JOB_NAME"],
             deferrable=False,
-            overrides="{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}",
+            overrides=(
+                "{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}"
+            ),
             # pyright: ignore[reportArgumentType]
         )
 

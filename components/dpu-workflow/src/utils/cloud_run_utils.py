@@ -15,7 +15,7 @@
 import logging
 import os
 from enum import Enum
-from typing import Dict
+from typing import Any, Dict
 
 from google.cloud import documentai, storage
 
@@ -157,7 +157,7 @@ def read_classifier_job_output(
     # .json extension), which can optionally be more then once - so we
     # need to gather all data from all related output json files and then
     # parse them
-    original_filename_to_json_output_map = {}
+    original_filename_to_json_output_map: Dict[str, Any] = {}
 
     for blob in output_blobs:
         # Document AI should only output JSON files to GCS
