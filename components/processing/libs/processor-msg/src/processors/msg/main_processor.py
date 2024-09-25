@@ -196,7 +196,7 @@ def process_object(
 
     for obj in objs:
 
-        # Skip if no 'objid' (not to be indexed)
+        # Skip if no "objid" (not to be indexed)
         if not obj["objid"]:
             continue
 

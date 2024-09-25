@@ -36,6 +36,7 @@ def get_process_job_params(
 ):
     process_job_params = []
     supported_files_args = [f"--file-type={k}:{v}" for k, v in supported_files.items()]
+
     for mv_obj in mv_params:
         dest = f"gs://{mv_obj['destination_bucket']}/" f"{mv_obj['destination_object']}"
         reject_dest = f"gs://{gcs_reject_bucket}/{mv_obj['destination_object']}"
@@ -73,7 +74,7 @@ def __build_gcs_path__(bucket: str, folder: str, folder_name: FolderNames):
 
 def forms_parser_job_params(bq_table, process_bucket, process_folder):
     bq_table_id = (
-        f"{bq_table['project_id']}.{bq_table['dataset_id']}." f"{bq_table['table_id']}"
+        f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
     )
     gcs_input_prefix = __build_gcs_path__(
         process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT
@@ -156,7 +157,7 @@ def read_classifier_job_output(
     # .json extension), which can optionally be more then once - so we
     # need to gather all data from all related output json files and then
     # parse them
-    original_filename_to_json_output_map = {}  # type: dict
+    original_filename_to_json_output_map = {}
 
     for blob in output_blobs:
         # Document AI should only output JSON files to GCS
@@ -227,7 +228,7 @@ def read_classifier_job_output(
             # place, so the easiest solution is to just remove them from this
             # output.
             logging.info(
-                f"{original_blob_path} was not detected to be " f"of a specific type."
+                f"{original_blob_path} was not detected to be of a specific type."
             )
             continue
 
@@ -235,7 +236,7 @@ def read_classifier_job_output(
         # first one, since the labels were also sorted, so we will use
         # the highest confidence label.
         chosen_label = sorted_entities_type_but_only_above_threshold[0]
-        logging.info(f"{original_blob_path} was detected to be " f"a '{chosen_label}'.")
+        logging.info(f"{original_blob_path} was detected to be a '{chosen_label}'.")
         original_filename = os.path.basename(original_blob_path)
         # prepare mv operation parameters, that will be used in the next step.
         parameter_obj = {
@@ -245,7 +246,7 @@ def read_classifier_job_output(
         }
         source_blob = bucket.blob(original_blob_path)
         destination_blob = (
-            f"{process_folder}/pdf-{chosen_label}/" f"input/{original_filename}"
+            f"{process_folder}/pdf-{chosen_label}/input/{original_filename}"
         )
         bucket.copy_blob(
             blob=source_blob,
