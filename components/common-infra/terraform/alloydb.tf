@@ -14,8 +14,7 @@
 
 
 module "docs_results" {
-  source  = "GoogleCloudPlatform/alloy-db/google"
-  version = "~> 3.0"
+  source = "github.com/GoogleCloudPlatform/terraform-google-alloy-db?ref=fa1d5faf54b56abfe410f5c29483e365d48ec1a3" #commit hash for version 3.2.0
 
   project_id = module.project_services.project_id
 
