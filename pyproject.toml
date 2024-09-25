@@ -40,16 +40,14 @@ include=[
 
 # Paths of modules for dependencies
 executionEnvironments = [
-    { root = ".", extraPaths = [
-        "components/processing/libs/processor-xlsx/src",
-        "components/processing/libs/processor-base/src",
-        "components/processing/libs/processor-msgx/src",
-        "components/forms-classifier/src",
-        "components/webui/src",
-        ]
-    }
+{ root = ".", extraPaths = [
+    "components/processing/libs/processor-xlsx/src",
+    "components/processing/libs/processor-base/src",
+    "components/processing/libs/processor-msgx/src",
+    "components/forms-classifier/src",
+    "components/webui/src",
+    ] }
 ]
 
 reportMissingImports=true
 reportMissingTypeStubs=false
-

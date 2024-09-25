@@ -45,16 +45,14 @@ To deploy this solution, perform the follow steps:
 
 1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
 
-1.  This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview):
+1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
 
-    - Roles required at the organization:
-      - Organization Policy Admin
-      - Cloud Asset Viewer
-    - Roles required on your project:
-      - Project IAM Admin
-      - Role Admin
-      - Service Account Admin
-      - Service Usage Admin
+1.  This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
+
+    - Project IAM Admin
+    - Role Admin
+    - Service Account Admin
+    - Service Usage Admin
 
 1.  To deploy this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
 
@@ -100,10 +98,6 @@ To deploy this solution, perform the follow steps:
     - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
     - Enables the required IAM roles used for underlying Cloud Build processes
     - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform.
-    - Validate common org policies that might interfere with deploying the Web UI interface in App Engine Flex. If you are not able to modify organization policies, you can opt to exclude the Web UI component during by setting the Terraform variable `deploy_ui` to `false`.
-      - `compute.vmExternalIpAccess`
-      - `compute.requireShieldedVm`
-      - `iam.allowedPolicyMemberDomains`
     - Build a custom container image used for form parsing
 
     ```sh
