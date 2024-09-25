@@ -241,7 +241,7 @@ def document_service_client() -> discoveryengine.DocumentServiceClient:
 
 
 @st.cache_resource(ttl=3600)
-def fetch_all_agent_docs(corpus) -> list[dict]:
+def fetch_all_agent_docs() -> list[dict]:
     """List Enterprise Search Corpus"""
 
     # Create request
@@ -253,6 +253,7 @@ def fetch_all_agent_docs(corpus) -> list[dict]:
     )
 
     # Accumulate the corpus of documents
+    corpus = [] # type: ignore
     for doc in client.list_documents(request=request):
         tmp = _document_to_dict(doc)
         if isinstance(tmp, dict):  # mypy: only return valid dict results
