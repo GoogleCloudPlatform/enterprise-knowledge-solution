@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Copyright 2024 Google LLC
 #
@@ -32,6 +32,8 @@ declare -a apis_array=("cloudresourcemanager.googleapis.com"
                 "iam.googleapis.com"
                 "compute.googleapis.com"
                 "orgpolicy.googleapis.com"
+                "artifactregistry.googleapis.com"
+                "cloudbuild.googleapis.com"
                 )
 
 # DISPLAY HELPERS
@@ -154,22 +156,5 @@ enable_all_apis () {
     do
         enable_apis "$i"
     done
-}
-
-set_application_default_credentials() {
-  _SOURCE_ROOT=$1
-  _CREDENTIAL_FILE_DIR="${_SOURCE_ROOT}/.credentials"
-  _CREDENTIAL_FILE_PATH="${_CREDENTIAL_FILE_DIR}/application_default_credentials.json"
-  if [ ! -f "${_CREDENTIAL_FILE_PATH}" ]; then
-    _AUTH_OUTPUT=$( gcloud auth application-default login 2>&1 | tee /dev/tty )
-    _CRED_PATH=$( echo ${_AUTH_OUTPUT} | cut -d "[" -f2 | cut -d "]" -f1 )
-    mkdir -p "${_CREDENTIAL_FILE_DIR}" && cp "${_CRED_PATH}" "${_CREDENTIAL_FILE_PATH}"
-    unset _CRED_PATH
-    unset _AUTH_OUTPUT
-  fi
-  export GOOGLE_APPLICATION_CREDENTIALS="${_CREDENTIAL_FILE_PATH}"
-  unset _CREDENTIAL_FILE_PATH
-  unset _CREDENTIAL_FILE_DIR
-  unset _SOURCE_ROOT
 }
 

@@ -14,7 +14,7 @@
 
 locals {
   dpu_label = {
-    goog-packaged-solution : "dpu-solution"
+    goog-packaged-solution : "eks-solution"
   }
 }
 module "project_services" {

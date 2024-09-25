@@ -14,13 +14,13 @@
 
 import re
 import base64
-import pandas as pd
+import pandas as pd  # type: ignore
 import os.path
 import pathlib
-from dpu.api import fetch_agent_doc, PROJECT_ID, fetch_gcs_object
-import streamlit as st
+from dpu.api import fetch_agent_doc, fetch_gcs_blob, PROJECT_ID
+import streamlit as st  # type: ignore
 
-from st_aggrid import (
+from st_aggrid import (  # type: ignore
     GridOptionsBuilder,
     AgGrid,
     ColumnsAutoSizeMode,
@@ -34,44 +34,61 @@ logger = st.logger.get_logger(__name__)   # pyright: ignore[reportAttributeAcces
 
 LOGO = os.path.join(os.path.dirname(__file__), "../../app/images/logo.png")
 
+PREAMBLE = (
+    "I want to find information from the documents stored in the data store. "
+    "The files and attachments in the data store contain information required "
+    "to answer the questions.\n"
+    "\n"
+    "Generate answers based on the information in the documents available "
+    "in the data store. Be factual. "
+    "Return only the top two to three sources in the search results. ")
+
 
 #
-# Show a list of sources (fetched from API), and return the selected source document ID
+# Show a list of sources (fetched from API), and return the
+# selected source document ID
 #
 def choose_source_id(sources):
-    with st.container():
-        st.header("Sources")
+    st.write(":blue[Sources: ]")
+    # Render list of sources
+    gb = GridOptionsBuilder()
+    gb.configure_selection(
+        selection_mode='single',
+    )
+    gb.configure_default_column(
+        resizable=True,
+    )
+    gb.configure_auto_height(True)
+    gb.configure_column("id", header_name="ID", flex=0)
+    gb.configure_column("title", header_name="Title", flex=0)
+    gb.configure_column("uri", header_name="GCS", flex=1)
+    MIN_HEIGHT = 5
+    MAX_HEIGHT = 800
+    ROW_HEIGHT = 40
+    df = pd.DataFrame(sources)
+    res = AgGrid(
+        df,
+        theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
+        gridOptions=gb.build(),
+        columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
+        data_return_mode=DataReturnMode.AS_INPUT,
+        enable_enterprise_modules=False,
+        height=min(MIN_HEIGHT + len(df) * ROW_HEIGHT, MAX_HEIGHT)
+    )
 
-        # Render list of sources
-        gb = GridOptionsBuilder()
-        gb.configure_selection(
-            selection_mode='single',
-        )
-        gb.configure_default_column(
-            resizable=True,
-        )
-        gb.configure_auto_height(True)
-        gb.configure_column("id", header_name="ID", flex=0)
-        gb.configure_column("title", header_name="Title", flex=0)
-        gb.configure_column("uri", header_name="GCS", flex=1)
-        res = AgGrid(
-            pd.DataFrame(sources),
-            theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
-            gridOptions=gb.build(),
-            columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-            data_return_mode=DataReturnMode.AS_INPUT,
-            enable_enterprise_modules=False,
-        )
+    # Pull out selected row or initial row into selected search result
+    if res.selected_rows is not None:
+        found_records = res.selected_rows.to_dict("records")
+        return found_records[0]['id']  # pylint: disable=unsubscriptable-object
 
-        # Pull out selected row or initial row into selected search result
-        if res.selected_rows is not None:
-            found_records = res.selected_rows.to_dict("records")
-            return found_records[0]['id']  # pylint: disable=unsubscriptable-object
-
-        return None
+    return None
 
 
-def show_gcs_object(uri: str, item_metadata: dict):
+def show_gcs_object(
+        uri: str,
+        item_metadata: dict,
+        use_direct_link: bool = False,
+        show_download_link: bool = True):
 
     logger.info(f'Rendering object {uri}.')
 
@@ -83,59 +100,54 @@ def show_gcs_object(uri: str, item_metadata: dict):
     bucket = gcs_match.group(1)
     path = gcs_match.group(2)
 
+    # Extract the title of the file
     title = pathlib.Path(path).name
 
     # Fetch the raw data and content_type
-    data, content_type = fetch_gcs_object(bucket, path)
+    blob = fetch_gcs_blob(bucket, path)
+    data = blob.download_as_bytes()
+    content_type = blob.content_type
 
-    with st.container():
-        st.subheader(title, divider=True)
+    # with st.container():
+    st.write(f':blue[{title}]')
 
-        # Metadata
-        st.json(item_metadata, expanded=False)
-
-        # Buttons
-        download, console = st.columns(2)
-        with download:
-            st.download_button(
-                'Download',
-                data,
-                file_name=path,
-                mime=content_type,
-                help='Download the object')
-        with console:
-            st.link_button(
-                'Console',
-                f'https://console.cloud.google.com/storage/browser/_details/{bucket}/{path};tab=live_object?project={PROJECT_ID}',
-                help='Open object in console',
-                type="secondary")
-
-
-        mime_types = [
-            # application/pdf does not seem to work consistently in all browsers
-            # 'application/pdf',
-            'text/html',
-            'text/plain'
-        ]
-        if content_type in mime_types:
-            with st.expander('Content', expanded=True):
-                tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
-                with tab_iframe:
-                    if content_type == 'application/octet-stream':
-                        st.markdown('Not available for application/octet-stream')
-                    else:
-                        encoded = base64.b64encode(data).decode('utf-8').strip()
-                        st.write(f'<embed '
-                                 f'src="data:{content_type};base64,{encoded}" width="100%" height="100%" '
-                                 f'type="{content_type}" style="align: center"></iframe>',
-                                 unsafe_allow_html=True)
-
-                with tab_markdown:
-                    # Render the markdown (at least the first bit of it)
-                    if content_type == 'text/plain':
-                        st.markdown(str(data[:1024], 'utf-8'))
-                    else:
-                        st.markdown('Only available for text/plain')
+    mime_types = [
+        # application/pdf does not seem to work consistently in all browsers
+        'application/pdf',
+        'text/html',
+        'text/plain'
+    ]
+    if content_type in mime_types:
+        col1, col2 = st.columns([15,185])
+        with col1:
+            if use_direct_link:
+                link = ('https://console.cloud.google.com/storage/browser/_details/'
+                        f'{bucket}/{path};tab=live_object?'
+                        f'project={PROJECT_ID}')
+            else:
+                link = f'https://storage.cloud.google.com/{uri.lstrip("gs://")}'
+            st.link_button("Open", link)
+        with col2:
+            if show_download_link:
+                st.download_button(
+                    'Download',
+                    data,
+                    file_name=path,
+                    mime=content_type,
+                    help='Download document')
+        tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
+        with tab_iframe:
+            if content_type == 'application/octet-stream':
+                st.markdown('Not available for application/octet-stream')
+            else:
+                render_embedded(data, content_type)
+        with tab_markdown:
+            # Render the markdown (at least the first bit of it)
+            if content_type == 'text/plain':
+                st.markdown(':red[The following frame displays the partial content of the file. To view the full content of the file, you can open or download the file by clicking the buttons above.]')
+                st.markdown(str(data[:4096], 'utf-8'))
+            else:
+                st.markdown('Only available for text/plain')
 
 
 def choose_related_document(related_docs: list, initial_value: int):
@@ -156,31 +168,30 @@ def choose_related_document(related_docs: list, initial_value: int):
         df['name'] = df['path'].apply(lambda p: pathlib.Path(p).name)
         common_prefix = os.path.commonprefix(
             df['path'].apply(lambda p: pathlib.Path(p).parent).to_list())
-        df['full_name' ] = df['path'].apply(lambda p: p[len(common_prefix):])
-        with st.container():
-            st.subheader('Related Documents', divider=True)
+        df['full_name'] = df['path'].apply(lambda p: p[len(common_prefix):])
 
+        st.write(':blue[Related Documents: ]')
 
-            gb = GridOptionsBuilder()
-            gb.configure_selection(
-                selection_mode='single',
-                pre_selected_rows=[str(initial_value)],
-            )
-            gb.configure_default_column(
-                resizable=True,
-            )
-            gb.configure_column("name", header_name="Name", flex=1)
-            gb.configure_column("mimetype", header_name="Type", flex=0)
-            gb.configure_column("status", header_name="Status", flex=0)
-            gb.configure_column("full_name", header_name="File", flex=1)
-            res = AgGrid(
-                df,
-                theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
-                gridOptions=gb.build(),
-                columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-                data_return_mode=DataReturnMode.AS_INPUT,
-                enable_enterprise_modules=False,
-            )
+        gb = GridOptionsBuilder()
+        gb.configure_selection(
+            selection_mode='single',
+            pre_selected_rows=[str(initial_value)],
+        )
+        gb.configure_default_column(
+            resizable=True,
+        )
+        gb.configure_column("name", header_name="Name", flex=1)
+        gb.configure_column("mimetype", header_name="Type", flex=0)
+        gb.configure_column("status", header_name="Status", flex=0)
+        gb.configure_column("full_name", header_name="File", flex=1)
+        res = AgGrid(
+            df,
+            theme=AgGridTheme.BALHAM,  # pyright: ignore[reportArgumentType]
+            gridOptions=gb.build(),
+            columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
+            data_return_mode=DataReturnMode.AS_INPUT,
+            enable_enterprise_modules=False,
+        )
 
         # Find the chosen row (may be initial if not chosen yet)
         if res.selected_rows is not None:
@@ -236,3 +247,19 @@ def show_agent_document(root_doc_id: str):
     show_gcs_object(uri, item_metadata)
 
     logger.info('Done rendering gcs object. Nothing more to do!')
+
+
+def render_embedded(data: bytes, mime_type: str):
+    # 1.5MB - Streamlit does not support rendering of files bigger than 1.5MB
+    max_size = 1.5 * 1024 * 1024
+
+    if len(data) > max_size:
+        logger.warning("Streamlit cannot render files larger than 1.5MB. "
+                       "Defaulting to a direct link to GCS. "
+                       "This may require updates to IAM permissions.")
+        st.markdown("The App cannot render files larger than 1.5MB.")
+    else:
+        base64_file = base64.b64encode(data).decode('utf-8')
+        st.markdown(f'<iframe src="data:{mime_type};base64,{base64_file}" '
+                    'width="100%" height="1000" type="{mime_type}"></iframe>',
+                    unsafe_allow_html=True)

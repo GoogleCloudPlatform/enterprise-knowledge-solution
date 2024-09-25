@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Copyright 2024 Google LLC
 #
@@ -37,11 +37,7 @@ section_open  "Setting the Google Cloud project to: ${PROJECT_ID}"
 section_close
 
 section_open  "SDK login"
-    gcloud auth login
-section_close
-
-section_open "Setting Google Application Default Credentials"
-    set_application_default_credentials "${SOURCE_ROOT}"
+    gcloud auth login --update-adc
 section_close
 
 section_open "Enable all the required APIs"
@@ -52,5 +48,9 @@ section_open "Check and try to set required org-policies on project: ${PROJECT_I
     check_and_set_policy_rule "compute.vmExternalIpAccess" "allowAll: true" '"allowAll": true'  "${PROJECT_ID}"
     check_and_set_policy_rule "compute.requireShieldedVm" "enforce: false" '"enforce": false' "${PROJECT_ID}"
     check_and_set_policy_rule "iam.allowedPolicyMemberDomains" "allowAll: true" '"allowAll": true' "${PROJECT_ID}"
+section_close
+
+section_open "Build and push container image to Artifact Registry for Form Processor"
+    ../../components/processing/form_parser/build/build_container_image.sh
 section_close
 

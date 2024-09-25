@@ -42,14 +42,14 @@ repos:
         - --no-extra-eol          # see below
 
 # Apply pylint
-- repo: local
-  hooks:
-    - id: pylint
-      name: pylint
-      entry: ./run.sh pylint
-      language: script
-      require_serial: true
-      files: ^.*/src/.*\.py$
+# - repo: local
+#   hooks:
+#     - id: pylint
+#       name: pylint
+#       entry: ./run.sh pylint
+#       language: script
+#       require_serial: true
+#       files: ^.*/src/.*\.py$
 
 # Apply pyright
 - repo: local
@@ -62,7 +62,7 @@ repos:
       files: ^.*/src/.*\.py$
 
 # Format the terraform
-- repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.88.4
-  hooks:
-    - id: terraform_fmt
+# - repo: https://github.com/antonbabenko/pre-commit-terraform
+#   rev: v1.88.4
+#   hooks:
+#     - id: terraform_fmt

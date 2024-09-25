@@ -1,0 +1,31 @@
+.gitignore
+.DS_Store
+local_dev/** 
+
+# Python
+**/__pycache__/**
+**/.venv/**
+
+# Terraform
+**/terraform.tfstate*
+**/terraform.tfvars
+**/.terraform.tfstate*
+**/.terraform/**
+**/.terraform.lock.hcl
+dp.md
+**/samples/
+
+# Generated files
+.env
+
+# Egg info directories
+**/*.egg-info/**
+sample-deployments/composer-orchestrated-process/dp.notes
+
+# Cloud SDK credentials
+**/.credentials/**
+sample-deployments/composer-orchestrated-process/terraform.tfvars.dp
+sample-deployments/composer-orchestrated-process/terraform.tfvars.go_demos
+sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh
+.gitignore
+sample-deployments/composer-orchestrated-process/env.sh
