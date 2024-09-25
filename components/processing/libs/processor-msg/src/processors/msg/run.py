@@ -21,14 +21,19 @@ from processors.msg.main_processor import process_all_objects, Processors
 
 # Specialized action to parse multiple key-value pairs into a dict
 class keyvalue(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string = None, 
-                 *args, **kwargs):
-        # if this is the first time we call this, we need to make sure that 
+    def __call__(
+        self,
+        parser,
+        namespace,
+        values,
+        option_string = None,
+        *args,
+        **kwargs):
+        # if this is the first time we call this, we need to make sure that
         # the namespace contains a dict for our `dest`
-        if (not hasattr(namespace, self.dest) or not 
+        if (not hasattr(namespace, self.dest) or not
             getattr(namespace, self.dest)):
             setattr(namespace, self.dest, dict())
-        
         # for each key-value pair, parse the key-value (seperated by an equal
         # sign), validate the key (starts with a dot) and store in the dict
         for value in values:
@@ -50,8 +55,8 @@ def main() -> None:
     )
     parser.add_argument("-l", "--log",
                         dest="logLevel",
-                        choices=['DEBUG', 'INFO', 'WARNING',
-                                 'ERROR', 'CRITICAL'],
+                        choices=[
+                            'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         default='INFO',
                         help="Set the logging level")
     parser.add_argument(
@@ -61,13 +66,14 @@ def main() -> None:
         help="BigQuery fully qualified table to write results",
     )
     all_processors = ", ".join([x.value for x in Processors])
-    parser.add_argument("--file-type", 
+    parser.add_argument("--file-type",
                         metavar="KEY:VALUE",
                         dest="supported_files",
-                        help="Set all supported file types in the form of "
-                             "FILE_TYPE:PROCESSOR. Minimum one is required. "
-                             "Multiple entries are possible. Supported "
-                             f"processors are {all_processors}",
+                        help=
+                        "Set all supported file types in the form of "
+                        "FILE_TYPE:PROCESSOR. Minimum one is required. "
+                        "Multiple entries are possible. Supported "
+                        f"processors are {all_processors}",
                         nargs="+",
                         required=True,
                         action=keyvalue)
@@ -80,7 +86,7 @@ def main() -> None:
     process_all_objects(
         GCSPath(args.process_dir),
         GCSPath(args.reject_dir),
-        args.supported_files,    
+        args.supported_files,
         write_json=args.write_json,
         write_bigquery=args.write_bigquery,
     )

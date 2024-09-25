@@ -197,7 +197,7 @@ def process_object(
     obj_map = []
     for obj in objs:
         obj_map.append(dict((
-          (k, obj[k]) for k in obj_keys
+            (k, obj[k]) for k in obj_keys
         )))
     logger.debug(f'Object map: {obj_map}')
 

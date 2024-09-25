@@ -43,16 +43,15 @@ from airflow.utils.task_group import TaskGroup
 
 from utils import file_utils, datastore_utils, cloud_run_utils
 
-
-sys.path.insert(0,os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "start_date": datetime(2024, 5, 12),  # Adjust as needed
+    "owner":            "airflow",
+    "depends_on_past":  False,
+    "start_date":       datetime(2024, 5, 12),  # Adjust as needed
     "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 0,
+    "email_on_retry":   False,
+    "retries":          0,
 }
 
 # This is the list of expected potential labels coming back from the classifier
@@ -75,6 +74,7 @@ def get_supported_file_types(**context):
     context["ti"].xcom_push(key="types_to_process", value=files_by_type)
     context["ti"].xcom_push(key="files_to_reject", value=unsupported_files)
 
+
 def has_files_to_process(**context):
     files_to_process = context["ti"].xcom_pull(
         task_ids='initial_load_from_input_bucket.process_supported_types',
@@ -84,9 +84,11 @@ def has_files_to_process(**context):
     else:
         return "initial_load_from_input_bucket.skip_bucket_creation"
 
+
 def generate_process_folder(**context):
     process_folder = file_utils.get_random_process_folder_name()
     context["ti"].xcom_push(key="process_folder", value=process_folder)
+
 
 def generate_mv_params(**context):
     files_to_process = context["ti"].xcom_pull(
@@ -98,19 +100,24 @@ def generate_mv_params(**context):
     input_folder = context["params"]["input_folder"]
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
 
-    parameter_obj_list = file_utils.get_mv_params(files_to_process,
-                                                  input_folder,
-                                       process_bucket, process_folder)
+    parameter_obj_list = file_utils.get_mv_params(
+        files_to_process,
+        input_folder,
+        process_bucket,
+        process_folder
+    )
     return parameter_obj_list
+
 
 def generate_classify_job_params_fn(**context):
     classifier_params = context["params"]["classifier"]
     if (not classifier_params.get("project_id") or
         not classifier_params.get("location") or
         not classifier_params.get("processor_id")):
-        logging.warning(f"Not all required parameters for the classifier are "
-                        f"provided (required `project_id`, `location` and "
-                        f"`processor_id`). {classifier_params=}")
+        logging.warning(
+            f"Not all required parameters for the classifier are "
+            f"provided (required `project_id`, `location` and "
+            f"`processor_id`). {classifier_params=}")
         raise AirflowSkipException()
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
@@ -126,6 +133,7 @@ def generate_classify_job_params_fn(**context):
         process_bucket=process_bucket,
     )
 
+
 def parse_doc_classifier_output(**context):
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
@@ -136,6 +144,7 @@ def parse_doc_classifier_output(**context):
         process_bucket, process_folder, KNOWN_LABELS_FOR_CLASSIFIER)
     # context["ti"].xcom_push(key="classifier_output", value=parsed_output)
     return parsed_output
+
 
 def data_store_import_docs(**context):
     data_store_region = os.environ.get("DPU_DATA_STORE_REGION")
@@ -148,14 +157,16 @@ def data_store_import_docs(**context):
     )
     return operation_name
 
+
 def generate_process_job_params(**context):
     mv_params = context["ti"].xcom_pull(
         key="return_value",
         task_ids="initial_load_from_input_bucket.generate_files_move_parameters"
     )
     if not mv_params:
-        logging.warning("No need to run, since generate_files_move_parameters "
-                        "did not generate any files to process")
+        logging.warning(
+            "No need to run, since generate_files_move_parameters "
+            "did not generate any files to process")
         raise AirflowSkipException()
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
     doc_processor_job_name = os.environ.get("DOC_PROCESSOR_JOB_NAME")
@@ -165,21 +176,25 @@ def generate_process_job_params(**context):
     process_job_params = cloud_run_utils.get_process_job_params(
         bq_table,
         doc_processor_job_name,
-        gcs_reject_bucket, 
-        mv_params, 
-        supported_files)
+        gcs_reject_bucket,
+        mv_params,
+        supported_files
+    )
     return process_job_params
+
 
 def generate_output_table_name(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
     output_table_name = process_folder.replace("-", "_")
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
+
 def generate_form_process_job_params(**context):
     # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
 
-    # Build GCS input and out prefix - gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
+    # Build GCS input and out prefix -
+    # gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
     process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
     process_folder = context["ti"].xcom_pull(key="process_folder")
 
@@ -189,6 +204,7 @@ def generate_form_process_job_params(**context):
         process_folder,
     )
     return form_parser_job_params
+
 
 def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
@@ -202,9 +218,9 @@ with (DAG(
     schedule_interval=None,
     render_template_as_native_obj=True,
     params={
-        "input_bucket": os.environ.get("DPU_INPUT_BUCKET"),
-        "process_bucket": os.environ.get("DPU_PROCESS_BUCKET"),
-        "input_folder": "",
+        "input_bucket":    os.environ.get("DPU_INPUT_BUCKET"),
+        "process_bucket":  os.environ.get("DPU_PROCESS_BUCKET"),
+        "input_folder":    "",
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "txt-processor"},
@@ -218,15 +234,15 @@ with (DAG(
             ],
             type="array",
             items={
-                "type": "object",
+                "type":       "object",
                 "properties": {
                     "file-suffix": {"type": "string"},
-                    "processor": {"type": "string"},
+                    "processor":   {"type": "string"},
                 },
-                "required": ["file-suffix", "processor"],
+                "required":   ["file-suffix", "processor"],
             },
         ),
-        "classifier": Param(
+        "classifier":      Param(
             default={
                 "project_id":   "",
                 "location":     "",
@@ -241,8 +257,11 @@ with (DAG(
             required=["project_id", "location", "processor_id"],
         ),
     },
-) as dag):
-    with TaskGroup(group_id="initial_load_from_input_bucket") as initial_load_from_input_bucket:
+    ) as dag):
+
+    with (TaskGroup(
+        group_id="initial_load_from_input_bucket") as
+        initial_load_from_input_bucket):
         list_all_input_files = GCSListObjectsOperator(
             task_id="list_all_input_files",
             prefix="{{ params.input_folder if params.input_folder }}",
@@ -257,12 +276,12 @@ with (DAG(
                     "{{ params.supported_files }}",
                     type="array",
                     items={
-                        "type": "object",
+                        "type":       "object",
                         "properties": {
                             "file-suffix": {"type": "string"},
-                            "processor": {"type": "string"},
+                            "processor":   {"type": "string"},
                         },
-                        "required": ["file-suffix", "processor"],
+                        "required":   ["file-suffix", "processor"],
                     },
                 )
             },
@@ -272,7 +291,9 @@ with (DAG(
         short_circuit_move_rejected_files_if_any = ShortCircuitOperator(
             task_id='short_circuit_move_rejected_files_if_any',
             python_callable=lambda **context: context["ti"].xcom_pull(
-                task_ids='initial_load_from_input_bucket.process_supported_types', key='files_to_reject'),
+                task_ids=
+                    'initial_load_from_input_bucket.process_supported_types',
+                key='files_to_reject'),
             provide_context=True,
 
         )
@@ -280,10 +301,11 @@ with (DAG(
         move_unsupported_files_to_rejected_bucket = GCSToGCSOperator(
             task_id="move_files_to_rejected_bucket",
             source_bucket="{{ params.input_bucket }}",
-            source_objects="{{ ti.xcom_pull(task_ids='initial_load_from_input_bucket.process_supported_types', key='files_to_reject') }}",
+            source_objects=
+                "{{ ti.xcom_pull(task_ids='initial_load_from_input_bucket"
+                ".process_supported_types', key='files_to_reject') }}",
             destination_bucket=os.environ.get("DPU_REJECT_BUCKET"),
             move_object=True,
-
         )
 
         has_files = BranchPythonOperator(
@@ -324,21 +346,32 @@ with (DAG(
             provide_context=True,
         )
 
-        create_output_table = create_bigquery_table = BigQueryCreateEmptyTableOperator(
+        create_output_table = BigQueryCreateEmptyTableOperator(
             task_id="create_output_table",
-            dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),  # pyright: ignore[reportArgumentType]
-            table_id="{{ ti.xcom_pull("
-                     "task_ids='prep_for_processing.create_output_table_name', "
-                     "key='output_table_name') }}",
+            dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),
+            # pyright: ignore[reportArgumentType]
+            table_id=
+            "{{ ti.xcom_pull("
+            "task_ids='prep_for_processing.create_output_table_name', "
+            "key='output_table_name') }}",
             schema_fields=[
-                {"name": "id", "mode": "REQUIRED", "type": "STRING", "fields": []},
-                {"name": "jsonData", "mode": "NULLABLE", "type": "STRING", "fields": []},
                 {
-                    "name": "content",
-                    "type": "RECORD",
-                    "mode": "NULLABLE",
+                    "name":   "id", "mode": "REQUIRED", "type": "STRING",
+                    "fields": []
+                },
+                {
+                    "name":   "jsonData", "mode": "NULLABLE", "type": "STRING",
+                    "fields": []
+                },
+                {
+                    "name":   "content",
+                    "type":   "RECORD",
+                    "mode":   "NULLABLE",
                     "fields": [
-                        {"name": "mimeType", "type": "STRING", "mode": "NULLABLE"},
+                        {
+                            "name": "mimeType", "type": "STRING",
+                            "mode": "NULLABLE"
+                        },
                         {"name": "uri", "type": "STRING", "mode": "NULLABLE"},
                     ],
                 },
@@ -353,13 +386,19 @@ with (DAG(
         )
 
         execute_doc_classifier = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"), # pyright: ignore[reportArgumentType]
-            region=os.environ.get("DPU_REGION"), # pyright: ignore[reportArgumentType]
+            project_id=os.environ.get("GCP_PROJECT"),
+            # pyright: ignore[reportArgumentType]
+            region=os.environ.get("DPU_REGION"),
+            # pyright: ignore[reportArgumentType]
             task_id="execute_doc_classifier",
-            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"), # pyright: ignore[reportArgumentType]
+            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"),
+            # pyright: ignore[reportArgumentType]
             deferrable=False,
-            overrides="{{ ti.xcom_pull("
-                      "task_ids='classify_pdfs.generate_classify_job_params' , key='return_value') }}", # pyright: ignore[reportArgumentType]
+            overrides=
+            "{{ ti.xcom_pull("
+            "task_ids='classify_pdfs.generate_classify_job_params' "
+            ", key='return_value') }}",
+            # pyright: ignore[reportArgumentType]
         )
 
         parse_doc_classifier_results_and_move_files = PythonOperator(
@@ -397,9 +436,9 @@ with (DAG(
 
     with TaskGroup(group_id="forms_processing") as forms_processing:
         create_form_process_job_params = PythonOperator(
-        task_id="create_form_process_job_params",
-        python_callable=generate_form_process_job_params,
-        provide_context=True,
+            task_id="create_form_process_job_params",
+            python_callable=generate_form_process_job_params,
+            provide_context=True,
         )
 
         execute_forms_parser = CloudRunExecuteJobOperator(
@@ -410,8 +449,8 @@ with (DAG(
             task_id="execute_forms_parser",
             job_name=os.environ["FORMS_PARSER_JOB_NAME"],
             deferrable=False,
-            overrides="{{ ti.xcom_pull("
-                      "task_ids='forms_processing.create_form_process_job_params', key='return_value') }}" # pyright: ignore[reportArgumentType]
+            overrides="{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}"
+            # pyright: ignore[reportArgumentType]
         )
 
         import_forms_to_data_store = PythonOperator(
@@ -421,56 +460,53 @@ with (DAG(
             provide_context=True,
         )
 
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # initial common actions - ends with a decision whether to continue
         # to basic processing, or stop working
-            list_all_input_files
-            >> process_supported_types
-            >> [short_circuit_move_rejected_files_if_any, has_files]
+        list_all_input_files
+        >> process_supported_types
+        >> [short_circuit_move_rejected_files_if_any, has_files]
     )
 
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         short_circuit_move_rejected_files_if_any
-            >> move_unsupported_files_to_rejected_bucket
+        >> move_unsupported_files_to_rejected_bucket
     )
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
-            has_files
-            >> [create_process_folder, skip_bucket_creation]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+        has_files
+        >> [create_process_folder, skip_bucket_creation]
     )
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # In the case we continue working, moving documents to processing
         # folder, and creating an output table where metadata will be saved
-            create_process_folder
-            >> generate_files_move_parameters
-            >> move_to_processing
-            >> create_output_table_name
-            >> create_output_table
+        create_process_folder
+        >> generate_files_move_parameters
+        >> move_to_processing
+        >> create_output_table_name
+        >> create_output_table
     )
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
-            # We then want to see if there are any forms, since those will be
-            # handled differently.
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+        # We then want to see if there are any forms, since those will be
+        # handled differently.
         create_output_table
-            >> generate_classify_job_params
-            >> execute_doc_classifier
-            >> parse_doc_classifier_results_and_move_files
-            >> classified_docs_moved_or_skipped
+        >> generate_classify_job_params
+        >> execute_doc_classifier
+        >> parse_doc_classifier_results_and_move_files
+        >> classified_docs_moved_or_skipped
     )
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # Continue to process forms, depending on move_forms executed
         # successfully. This doesn't have to wait for general processing.
-            parse_doc_classifier_results_and_move_files
-            >> create_form_process_job_params
-            >> execute_forms_parser
-            >> import_forms_to_data_store
+        parse_doc_classifier_results_and_move_files
+        >> create_form_process_job_params
+        >> execute_forms_parser
+        >> import_forms_to_data_store
     )
-    ( # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # General document processing has to wait for the forms to
         # move/skipped, since we don't want to process the forms using this job.
         classified_docs_moved_or_skipped
         >> create_process_job_params
         >> execute_doc_processors
         >> import_docs_to_data_store
-     )
-
-
-
+    )
