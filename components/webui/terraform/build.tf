@@ -14,7 +14,7 @@
 
 locals {
   ui_service_name     = "eks-ui"
-  cloud_build_fileset = setunion(fileset(path.module, "../src/**"), fileset(path.module, "build/Dockerfile"), fileset(path.module, "build/requirements.txt"), fileset(path.module, "build/cloudbuild.yaml"))
+  cloud_build_fileset = setunion(fileset(path.module, "../src/**"), fileset(path.module, "build/Dockerfile"), fileset(path.module, "../requirements.txt"), fileset(path.module, "build/cloudbuild.yaml"))
   cloud_build_content_hash = sha512(join(",", [
   for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
 }
