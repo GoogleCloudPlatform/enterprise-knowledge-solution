@@ -1,0 +1,14 @@
+.git/**
+.venv/**
+.devcontainer/**
+.github/**
+assets/**
+docs/**
+sample-deployments/**
+scripts/**
+*.md
+*.sh
+*.tf
+*.template
+**/__pycache__/**
+**/.terraform/**

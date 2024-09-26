@@ -92,6 +92,7 @@ module "form_parser_processor" {
   gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
   gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
+  alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
 }
 
 module "doc_classifier_job" {
@@ -126,16 +127,17 @@ module "dpu_workflow" {
 }
 
 module "dpu_ui" {
-  source                      = "../../components/webui/terraform"
-  project_id                  = var.project_id
-  region                      = var.region
-  artifact_repo               = module.common_infra.artifact_repo.name
-  iap_access_domains          = var.iap_access_domains
-  vertex_ai_data_store_region = var.vertex_ai_data_store_region
-  agent_builder_data_store_id = google_discovery_engine_data_store.dpu_ds.data_store_id
-  agent_builder_search_id     = google_discovery_engine_search_engine.basic.engine_id
-  webui_service_name          = var.webui_service_name
-  lb_ssl_certificate_domains  = var.webui_domains
+  source                            = "../../components/webui/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  iap_access_domains                = var.iap_access_domains
+  vertex_ai_data_store_region       = var.vertex_ai_data_store_region
+  agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
+  agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
+  webui_service_name                = var.webui_service_name
+  lb_ssl_certificate_domains        = var.webui_domains
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account

@@ -15,7 +15,7 @@
 import logging
 import os
 from enum import Enum
-from typing import Dict
+from typing import Any, Dict
 
 from google.cloud import documentai, storage
 
@@ -36,9 +36,10 @@ def get_process_job_params(
 ):
     process_job_params = []
     supported_files_args = [f"--file-type={k}:{v}" for k, v in supported_files.items()]
+
     for mv_obj in mv_params:
         dest = f"gs://{mv_obj['destination_bucket']}/" f"{mv_obj['destination_object']}"
-        reject_dest = f"gs://{gcs_reject_bucket}/" f"{mv_obj['destination_object']}"
+        reject_dest = f"gs://{gcs_reject_bucket}/{mv_obj['destination_object']}"
         bq_id = (
             f"{bq_table['project_id']}.{bq_table['dataset_id']}."
             f"{bq_table['table_id']}"
@@ -132,7 +133,6 @@ def read_classifier_job_output(
     process_bucket: str,
     process_folder: str,
     known_labels: list[str],
-    original_filename_to_json_output_map: dict,
     threshold: float = 0.7,
 ) -> list:
 
@@ -151,16 +151,20 @@ def read_classifier_job_output(
         f"Found {len(output_blobs)} under bucket {process_bucket} " f"with {prefix=}"
     )
     # Document AI may output multiple JSON files per source file
-    # In fact, Output file name contains the original file name without the extension
+    # In fact, Output file name contains the original file name without the
+    # extension
     # but also adds a dash and a sequential number in the filename (before the
     # .json extension), which can optionally be more then once - so we
     # need to gather all data from all related output json files and then
     # parse them
+    original_filename_to_json_output_map: Dict[str, Any] = {}
+
     for blob in output_blobs:
         # Document AI should only output JSON files to GCS
         if blob.content_type != "application/json":
             logging.info(
-                f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
+                f"Skipping non-supported file: {blob.name} - Mimetype: "
+                f"{blob.content_type}"
             )
             continue
 
@@ -169,8 +173,10 @@ def read_classifier_job_output(
             blob.download_as_bytes(), ignore_unknown_fields=True
         )
 
-        # For a full list of Document object attributes, please reference this page:
-        # https://cloud.google.com/python/docs/reference/documentai/latest/google.cloud.documentai_v1.types.Document
+        # For a full list of Document object attributes, please reference
+        # this page:
+        # https://cloud.google.com/python/docs/reference/documentai/latest
+        # /google.cloud.documentai_v1.types.Document
 
         # assuming the original file was a PDF, reconstruct the original
         # filename and put into the collected map the entities found
@@ -222,7 +228,7 @@ def read_classifier_job_output(
             # place, so the easiest solution is to just remove them from this
             # output.
             logging.info(
-                f"{original_blob_path} was not detected to be " f"of a specific type."
+                f"{original_blob_path} was not detected to be of a specific type."
             )
             continue
 
@@ -230,18 +236,17 @@ def read_classifier_job_output(
         # first one, since the labels were also sorted, so we will use
         # the highest confidence label.
         chosen_label = sorted_entities_type_but_only_above_threshold[0]
-        logging.info(f"{original_blob_path} was detected to be " f"a '{chosen_label}'.")
+        logging.info(f"{original_blob_path} was detected to be a '{chosen_label}'.")
         original_filename = os.path.basename(original_blob_path)
         # prepare mv operation parameters, that will be used in the next step.
         parameter_obj = {
             "source_object": original_blob_path,
             "destination_bucket": process_bucket,
-            "destination_object": f"{process_folder}/pdf-{chosen_label}/"
-            f"{original_filename}",
+            "destination_object": f"{process_folder}/pdf-{chosen_label}/{original_filename}",
         }
         source_blob = bucket.blob(original_blob_path)
         destination_blob = (
-            f"{process_folder}/pdf-{chosen_label}/" f"input/{original_filename}"
+            f"{process_folder}/pdf-{chosen_label}/input/{original_filename}"
         )
         bucket.copy_blob(
             blob=source_blob,

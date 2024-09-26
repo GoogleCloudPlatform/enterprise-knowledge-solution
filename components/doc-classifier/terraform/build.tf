@@ -27,8 +27,8 @@ module "gcloud" {
   create_cmd_body       = <<-EOT
     builds submit ${path.module}/../src \
       --pack image=${local.image_name_and_tag} \
-      --project $PROJECT_ID \
-      --region $REGION
+      --project ${var.project_id} \
+      --region ${var.region}
   EOT
   enabled               = true
 
