@@ -16,9 +16,8 @@
 import json
 import logging
 from enum import Enum
+from typing import Dict, Optional
 
-from dict import Dict
-from optional import Optional
 from processors.base.gcsio import GCSPath
 from processors.base.result_writer import BigQueryWriter, DocumentMetadata
 from processors.msg.msg_processor import msg_processor
@@ -197,7 +196,7 @@ def process_object(
 
     for obj in objs:
 
-        # Skip if no 'objid' (not to be indexed)
+        # Skip if no "objid" (not to be indexed)
         if not obj["objid"]:
             continue
 

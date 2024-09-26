@@ -1,6 +1,5 @@
 projects/${PROJECT_ID}/roles/customIAPAdmin
-roles/appengine.appAdmin
-roles/appengine.appCreator
+roles/alloydb.admin
 roles/artifactregistry.admin
 roles/bigquery.dataOwner
 roles/composer.admin

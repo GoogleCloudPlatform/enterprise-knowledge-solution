@@ -27,7 +27,6 @@ class keyvalue(argparse.Action):
         # the namespace contains a dict for our `dest`
         if not hasattr(namespace, self.dest) or not getattr(namespace, self.dest):
             setattr(namespace, self.dest, dict())
-
         # for each key-value pair, parse the key-value (seperated by an equal
         # sign), validate the key (starts with a dot) and store in the dict
         for value in values:
