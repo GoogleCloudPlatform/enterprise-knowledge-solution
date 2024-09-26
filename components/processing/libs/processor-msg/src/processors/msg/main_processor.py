@@ -66,8 +66,13 @@ def process_all_objects(
 
 
 def move_rejected_file(source: GCSPath, reject_dir: GCSPath, error_msg: str):
-    source.move(GCSPath(reject_dir, source.name))
-    json_err_msg = GCSPath(reject_dir, source.name + ".json")
+    # Remove the first two elements which is the job run folder and document type.
+    # Remove the last element which is the file name.
+    # Ends with array of relative folders in between
+    relative_folders = source.path.split("/")[2:-1]
+    relative_folders_str = "/".join(relative_folders)
+    source.move(GCSPath(str(reject_dir) + f"{relative_folders_str}", source.name))
+    json_err_msg = GCSPath(str(reject_dir) + f"{relative_folders_str}", source.name + ".json")
     json_err_msg.write_text(
         json.dumps(
             {"error_msg": error_msg},
