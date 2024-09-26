@@ -79,8 +79,6 @@ resource "google_cloud_run_v2_service" "eks_webui" {
     service_account = module.cloud_run_web_account.email
   }
 
-
-
   depends_on = [
     module.app_build.wait
   ]

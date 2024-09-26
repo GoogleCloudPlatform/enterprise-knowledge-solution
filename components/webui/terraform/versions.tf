@@ -32,6 +32,10 @@ terraform {
       source  = "hashicorp/null"
       version = "3.2.3"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.2"
+    }
   }
 
   provider_meta "google" {
