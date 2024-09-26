@@ -56,6 +56,7 @@ steps:
           'deploy', '${processing_cloud_run_job_name}',
           '--image=$_IMAGE_TAG',
           '--task-timeout=60m',
+          '--memory=3Gi',
           '--service-account', '$_SERVICE_ACCOUNT' ]
 
 serviceAccount: 'projects/${project_id}/serviceAccounts/${build_service_account}'
