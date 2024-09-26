@@ -92,6 +92,7 @@ module "form_parser_processor" {
   gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
   gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
+  alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
 }
 
 module "doc_classifier_job" {

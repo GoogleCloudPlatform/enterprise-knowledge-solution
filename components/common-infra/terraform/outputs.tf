@@ -53,3 +53,7 @@ output "vpc_network_id" {
 output "vpc_network_name" {
   value = module.vpc.network_name
 }
+
+output "alloydb_cluster_name" {
+  value = module.docs_results.cluster_name
+}
