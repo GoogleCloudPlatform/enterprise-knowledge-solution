@@ -16,9 +16,8 @@
 import json
 import logging
 from enum import Enum
+from typing import Dict, Optional
 
-from typing import Dict
-from typing import Optional
 from processors.base.gcsio import GCSPath
 from processors.base.result_writer import BigQueryWriter, DocumentMetadata
 from processors.msg.msg_processor import msg_processor
