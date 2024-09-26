@@ -230,8 +230,11 @@ with DAG(
                 {"file-suffix": "html", "processor": "txt-processor"},
                 {"file-suffix": "msg", "processor": "msg-processor"},
                 {"file-suffix": "zip", "processor": "zip-processor"},
-                {"file-suffix": "xlsx", "processor": "xlsx-processor"},
-                {"file-suffix": "xlsm", "processor": "xlsx-processor"},
+                # Default to out-of-box agent builder process for excel file,
+                # but we still have our xlsx-processor, that does the conversion to txt,
+                # as alternative for xlsx and xlsm
+                {"file-suffix": "xlsx", "processor": "txt-processor"},
+                {"file-suffix": "xlsm", "processor": "txt-processor"},
             ],
             type="array",
             items={
