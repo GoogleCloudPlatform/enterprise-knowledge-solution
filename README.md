@@ -47,6 +47,7 @@ To deploy this solution, perform the follow steps:
 
 1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
 
+<<<<<<< HEAD
 1.  This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
 
     - Project IAM Admin

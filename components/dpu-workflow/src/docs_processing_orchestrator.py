@@ -52,6 +52,7 @@ default_args = {
     "retries": 0,
 }
 
+USER_AGENT = "cloud-solutions/eks-orchestrator-v1"
 # This is the list of expected potential labels coming back from the classifier
 # any label that is not in this list, would be treated as a "general" pdf and
 # would be processed accordingly.
@@ -212,7 +213,6 @@ def generate_pdf_forms_folder(**context):
     process_folder = context["ti"].xcom_pull(key="process_folder")
     pdf_forms_folder = f"{process_folder}/pdf-form/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
-
 
 with DAG(
     "run_docs_processing",

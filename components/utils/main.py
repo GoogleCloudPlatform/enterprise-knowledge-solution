@@ -17,9 +17,9 @@ from converter import write_jsonl, xlsx_to_pdf
 
 def jsonl() -> None:
     write_jsonl(
-        in_bucket_name="dpu-cardinal-bkt",
+        in_bucket_name="sample_in_bkt",
         in_path="output",
-        out_bucket_name="cardinal_search_bkt",
+        out_bucket_name="sample_out_bkt",
         out_path="output",
     )
 
