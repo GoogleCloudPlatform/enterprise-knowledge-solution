@@ -16,12 +16,19 @@
 """Module for classifying PDF document one at a time."""
 from typing import Optional
 
-from google.api_core.client_options import ClientOptions # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.api_core.client_options import (
+    ClientOptions,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
 from google.api_core.gapic_v1.client_info import ClientInfo  # type: ignore
-from google.cloud import documentai  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
-from google.cloud import storage # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+from google.cloud import (
+    documentai,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
+from google.cloud import (
+    storage,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
+)
 
 USER_AGENT = "cloud-solutions/eks-docai-v1"
+
 
 def is_form(
     project_id: str,
@@ -37,7 +44,9 @@ def is_form(
     # You must set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
 
-    client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT))
+    client = documentai.DocumentProcessorServiceClient(
+        client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT)
+    )
 
     if processor_version_id:
         # The full resource name of the processor version, e.g.:
@@ -86,8 +95,7 @@ def is_form(
     document = result.document
 
     for entity in document.entities:
-        if entity.type.lower() == 'form' and float(entity.confidence) > 0.7:
+        if entity.type.lower() == "form" and float(entity.confidence) > 0.7:
             return True
 
     return False
-
