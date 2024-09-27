@@ -14,9 +14,13 @@
 
 
 locals {
-  cloud_build_fileset = fileset("${path.module}/src/", "**/*")
-  cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : fileexists(f) ? filesha512(f) :
-  sha512("file-not-found")]))
+  classifier_cloud_build_content_hash = sha512(
+    join("", [
+      for f in fileset(path.module, "../src/**") :
+        filesha512("${path.module}/${f}")
+      ]
+    )
+  )
   service_account_name = var.classifier_cloud_run_job_name
 }
 
@@ -33,6 +37,6 @@ module "gcloud" {
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.cloud_build_content_hash
+    source_contents_hash = local.classifier_cloud_build_content_hash
   }
 }
