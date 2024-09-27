@@ -17,9 +17,8 @@ import logging
 import re
 import uuid
 
-from google.cloud import documentai
-from google.cloud import bigquery
-from google.api_core.gapic_v1.client_info import ClientInfo 
+from google.api_core.gapic_v1.client_info import ClientInfo
+from google.cloud import bigquery, documentai
 
 USER_AGENT = "cloud-solutions/eks-docai-v1"
 
