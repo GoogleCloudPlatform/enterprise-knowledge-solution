@@ -45,8 +45,6 @@ To deploy this solution, perform the follow steps:
 
 1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
 
-1.  To provide a secure and reliable connection to solutions Web UI, you need to own a domain name used to access the web application. A SSL load balancer with managed certificate are provisioned for your domain and securely routes traffic to the WebUI application.
-
 1.  This example code is deployed through terraform using the identity of a least privilege service account. To create this service account and validate other requirements with a setup script, your user identity must have the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project:
 
     - Project IAM Admin
@@ -112,19 +110,18 @@ To deploy this solution, perform the follow steps:
     terraform init
     ```
 
-1.  Create a terraform.tfvars file with the following variables:
+1.  Create a terraform.tfvars file with the following variables:  
+      ``project_id = # Your Google Cloud project ID.``
 
-project_id = # Your Google Cloud project ID.
+      ``region = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").``
 
-region = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").
+      ``vertex_ai_data_store_region = # The region for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). Choose a region the is align with you overal region of choice to avoid cross regional traffic.``
 
-vertex_ai_data_store_region = # The region for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). Choose a region the is align with you overal region of choice to avoid cross regional traffic.
+      ``docai_location = # Sets the location for Document AI service.``
 
-docai_location = # Sets the location for Document AI service
+      ``webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])``
 
-webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
-
-iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])
+      ``iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])``
 
 1.  Review the proposed changes, and apply them:
 
@@ -178,7 +175,9 @@ After successfully completing the steps in thge previous section Deployment Guid
 1. Upload Your Documents:
    - Click the "Upload Files" button or drag and drop your files into the bucket. Supported file types:
      - MS Outlook (msg)
-     - MS Excel(xlsx, xlsm)
+     - MS Excel (xlsx, xlsm)
+     - MS Word (docx)
+     - MS PowerPoint (pptx)
      - PDF with text only content
      - PDF with forms
      - HTML

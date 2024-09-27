@@ -13,7 +13,6 @@ local_dev/**
 **/backend.tf
 **/.terraform/**
 **/.terraform.lock.hcl
-dp.md
 **/samples/
 
 # Generated files
@@ -22,6 +21,7 @@ dp.md
 # Egg info directories
 **/*.egg-info/**
 sample-deployments/composer-orchestrated-process/dp.notes
+sample-deployments/composer-orchestrated-process/env.sh
 
 # Cloud SDK credentials
 **/.credentials/**
@@ -35,3 +35,4 @@ super-linter-output
 super-linter.log
 .external_modules/*
 .mypy_cache/*
+

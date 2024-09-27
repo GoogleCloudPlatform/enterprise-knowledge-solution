@@ -52,6 +52,7 @@ default_args = {
     "retries": 0,
 }
 
+USER_AGENT = "cloud-solutions/eks-orchestrator-v1"
 # This is the list of expected potential labels coming back from the classifier
 # any label that is not in this list, would be treated as a "general" pdf and
 # would be processed accordingly.
@@ -213,7 +214,6 @@ def generate_pdf_forms_folder(**context):
     pdf_forms_folder = f"{process_folder}/pdf-form/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
 
-
 with DAG(
     "run_docs_processing",
     default_args=default_args,
@@ -231,8 +231,11 @@ with DAG(
                 {"file-suffix": "html", "processor": "txt-processor"},
                 {"file-suffix": "msg", "processor": "msg-processor"},
                 {"file-suffix": "zip", "processor": "zip-processor"},
-                {"file-suffix": "xlsx", "processor": "xlsx-processor"},
-                {"file-suffix": "xlsm", "processor": "xlsx-processor"},
+                # Default to out-of-box agent builder process for excel file,
+                # but we still have our xlsx-processor, that does the conversion to txt,
+                # as alternative for xlsx and xlsm
+                {"file-suffix": "xlsx", "processor": "txt-processor"},
+                {"file-suffix": "xlsm", "processor": "txt-processor"},
             ],
             type="array",
             items={
