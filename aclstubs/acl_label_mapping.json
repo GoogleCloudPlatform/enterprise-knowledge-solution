@@ -1,0 +1,29 @@
+{
+    "default":{
+        "principals":{
+            "groups": ["operators@example.com"]
+        }
+},
+    "labels":
+    {
+        "foo": {
+            "principals":{
+                "users": ["user1@example.com", "user2@example.com"],
+                "groups": ["group1@example.com", "group2@example.com"]
+            }
+        },
+        "bar": {
+            "principals":{
+                "users": ["user3@example.com"],
+                "groups": ["group3@example.com"]
+            }
+
+        },
+        "baz": {
+            "principals":{
+                "users": ["user4@example.com"]
+            }
+
+        }
+    }
+}

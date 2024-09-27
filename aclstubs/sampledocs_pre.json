@@ -1,0 +1,5 @@
+{"id":"doc-0","structData":{"title":"test_doc_0","date":"2004q3"},"content":{"mimeType":"application/pdf","uri":"gs://agentbuilder-acltest-0909-samplesrc/2004Q3_earnings.pdf"},"metadata":{"labels":["foo"]},"acl_info":{"readers":[{"principals":[{"group_id":"eks-readers-1@ellioteaton.altostrat.com"}]}]}}
+{"id":"doc-1","structData":{"title":"test_doc_1","date":"2005q3"},"content":{"mimeType":"application/pdf","uri":"gs://agentbuilder-acltest-0909-samplesrc/2005Q2_earnings_google.pdf"},"metadata":{"labels":["bar"]}}
+{"id":"doc-2","structData":{"title":"test_doc_2","date":"2006q3"},"content":{"mimeType":"application/pdf","uri":"gs://agentbuilder-acltest-0909-samplesrc/2006Q2_earnings_google.pdf"},"metadata":{"labels":["foo","bar"]}}
+{"id":"doc-3","structData":{"title":"test_doc_3","date":"2007q3"},"content":{"mimeType":"application/pdf","uri":"gs://agentbuilder-acltest-0909-samplesrc/2007Q2_earnings_google.pdf"},"metadata":{}}
+{"id":"doc-4","structData":{"title":"test_doc_4","date":"2008q3"},"content":{"mimeType":"application/pdf","uri":"gs://agentbuilder-acltest-0909-samplesrc/2008Q2_earnings_google.pdf"},"metadata":{"labels":["baz"]}}
