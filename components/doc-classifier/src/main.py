@@ -26,9 +26,13 @@ from google.api_core.exceptions import (
 from google.api_core.exceptions import (
     RetryError,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 )
+from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import (
     documentai,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 )
+
+
+USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 
 def batch_classify_documents(
@@ -45,7 +49,7 @@ def batch_classify_documents(
     # You must set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
 
-    client = documentai.DocumentProcessorServiceClient(client_options=opts)
+    client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT))
 
     # Specify a GCS URI Prefix to process an entire directory
     gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
