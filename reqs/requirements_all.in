@@ -8,6 +8,7 @@
 -r ../components/dpu-workflow/requirements.in
 -r ../components/processing/form_parser/src/requirements.in
 -r ../components/doc-classifier/src/requirements.in
+-r ../components/invoice-parser/src/requirements.in
 
 # Additional development and bootstrap tools
 -r requirements_dev.in
