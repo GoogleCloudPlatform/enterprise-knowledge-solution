@@ -10,7 +10,7 @@ Python dependencies are resolved to a single [reqs/requirements_all.txt](reqs/re
 
 There are Python-based libraries, such as in [libs/processor-base](libs/processor-base) which also have a requirements.in. There can be one or more .pth files, such as [libs/packages.pth](libs/packages.pth) which define libraries that should be included in the site path. These are loaded into the common virtual environment.
 
-See the deployments for patterns for including the libraries in Docker containers and in Cloud Functions.
+See the deployments for patterns for including the libraries in Docker containers.
 It uses tasks.py and the [pyinvoke](https://www.pyinvoke.org/) library and can be used to define common tasks that need to be run, including re-synchronising the environment as well as running Python scripts.
 
 ## Processor Base Framework

@@ -281,3 +281,5 @@ To classify documents, you must [create a custom document classifier in the Goog
 - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
 
 - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
+
+- You must deploy the custom classifier and mark it as a default version for the Cloud Composer workflow to detect and use it.
