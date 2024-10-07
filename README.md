@@ -46,6 +46,8 @@ To deploy this solution, you need:
 
 - You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
 
+- VPC network creation is configurable. If you prefer to use an existing VPC network, provide VPC network information during the deployment process. 
+
 ### Deploying the Sample
 1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
 1. Clone this repository
@@ -91,6 +93,12 @@ To deploy this solution, you need:
         deploy_ui                   = # Toggler for the Web-UI component, boolean value true or false. If the scripts/pre_tf_setup.sh failed to set the required org-policies set this variable to false.
 
         webui_service_name          = # set this to "default" for the first run and change it if you intend to have a different service name for your App.
+
+        create_vpc_network          = # set false if you want to use your existing vpc or set true
+
+        vpc_name                    = # Provide VPC name if 'create_vpc_network' is set to true else set to "dpu-network"
+
+        vpc_id.                     = # Provide VPC id if 'create_vpc_network' is set to true else leave empty like ""
 
 1. Review the proposed changes, and apply them:
 
