@@ -26,3 +26,21 @@ variable "bq_store_dataset" {
   type        = string
   default     = "docs_store"
 }
+
+variable "create_vpc_network" {
+  type = bool
+  description = "configuration to manage vpc creation"
+  default = true
+}
+
+variable "vpc_name" {
+  type = string
+  description = "name of vpc network"
+  default = "dpu-network"
+}
+
+variable "vpc_id" {
+  type = string
+  description = "id of vpc network"
+  default = ""
+}

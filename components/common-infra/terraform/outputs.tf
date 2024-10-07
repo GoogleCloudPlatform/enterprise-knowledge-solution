@@ -42,9 +42,9 @@ output "bq_store_dataset_id" {
 }
 
 output "vpc_network_id" {
-  value = module.vpc.network_id
+  value = var.create_vpc_network ? module.vpc[0].network_id : var.vpc_id
 }
 
 output "vpc_network_name" {
-  value = module.vpc.network_name
+  value = var.create_vpc_network ? module.vpc[0].network_name : var.vpc_name
 }

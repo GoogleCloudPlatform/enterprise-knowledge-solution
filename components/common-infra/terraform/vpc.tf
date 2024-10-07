@@ -13,11 +13,12 @@
 # limitations under the License.
 
 module "vpc" {
+  count = var.create_vpc_network ? 1 : 0
   source  = "terraform-google-modules/network/google"
   version = "~> 9.1"
 
   project_id   = module.project_services.project_id
-  network_name = "dpu-network"
+  network_name = var.vpc_name
   routing_mode = "GLOBAL"
 
   subnets = []
