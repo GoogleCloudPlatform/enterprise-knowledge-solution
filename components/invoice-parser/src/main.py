@@ -116,6 +116,8 @@ class DetectedEntity:
     run_id: str
     results_file: str
 
+
+
 def run() -> None:
     parser = create_parser()
     args = parser.parse_args(sys.argv[1:])
