@@ -98,7 +98,7 @@ To deploy this solution, you need:
 
         vpc_name                    = # Provide VPC name if 'create_vpc_network' is set to true else set to "dpu-network"
 
-        vpc_id.                     = # Provide VPC id if 'create_vpc_network' is set to true else leave empty like ""
+        vpc_id                      = # Provide VPC id if 'create_vpc_network' is set to true else leave empty like ""
 
 1. Review the proposed changes, and apply them:
 
