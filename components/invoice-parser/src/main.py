@@ -30,7 +30,7 @@ USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    
+
     parser.add_argument(
         "--run-id",
         dest="run_id",
@@ -116,8 +116,6 @@ class DetectedEntity:
     run_id: str
     results_file: str
 
-
-
 def run() -> None:
     parser = create_parser()
     args = parser.parse_args(sys.argv[1:])
@@ -126,7 +124,7 @@ def run() -> None:
         args.alloydb_location,
         args.alloydb_cluster,
         args.alloydb_instance,
-        args.alloydb_database
+        args.alloydb_database,
     )
     storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
     logging.info("Verifying AlloyDB output table")
@@ -143,8 +141,8 @@ def run() -> None:
     individual_process_statuses = docai.wait_for_completion_and_verify_success(batch_operation)
     logging.info(f"Parsing results from {args.gcs_output_uri}")
     parsed_results = docai.read_and_parse_batch_results(
-        storage_client, 
-        individual_process_statuses, 
+        storage_client,
+        individual_process_statuses,
         args.gcs_input_prefix,
         args.run_id,
     )

@@ -22,6 +22,7 @@ locals {
   processing_cloud_run_job_name  = "doc-processor"
   form_parser_cloud_run_job_name = "form-parser"
   classifier_cloud_run_job_name  = "doc-classifier"
+  invoice_parser_cloud_run_job_name  = "invice-parser"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
@@ -115,6 +116,13 @@ module "doc_classifier_job" {
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
+module "invoice_parser_job" {
+  source = "../../components/invoice-parser/terraform"
+  project_id = var.project_id
+  region = var.region
+  artifact_repo = module.common_infra.artifact_repo.name
+  invoice_parser_cloud_run_job_name = local.invoice_parser_cloud_run_job_name
+  bigquery_dataset_id = module.common_infra.bq_store_dataset_id
 }
 
 module "dpu_workflow" {
@@ -136,6 +144,7 @@ module "dpu_workflow" {
     FORMS_PARSER_JOB_NAME   = module.form_parser_processor.form_parser_cloud_run_job_name
     DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
     DOC_REGISTRY_JOB_NAME   = module.doc_registry.doc_registry_service_cloud_run_job_name
+    INVOICE_PARSER_JOB_NAME = module.invoice_parser_job.invoice_parser_cloud_run_job_name
   }
 }
 
