@@ -24,7 +24,7 @@ steps:
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         # export TEST_PROJECT_ID=eks-int-${SHORT_SHA} ;
         echo "the project id is:"
-        echo $PROJECT
+        echo $PROJECT_ID
         gcloud projects create ${_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete --quiet $${_PROJECT_ID}" ERR ;
