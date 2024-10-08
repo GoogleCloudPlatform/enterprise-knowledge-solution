@@ -51,9 +51,19 @@ check_exec_dependency() {
   unset EXECUTABLE_NAME
 }
 
+set_active_principal() {
+  local __active_principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+  if echo "$__active_principal" | grep "@iam.gserviceaccount.com"; then
+    ACTIVE_PRINCIPAL="serviceAccount:${__active_principal}"
+  else
+    ACTIVE_PRINCIPAL="user:${__active_principal}"
+  fi
+}
+
+
 create_oauth_consent_config() {
   create_custom_role_iap
-  enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$CURRENT_USER" "projects/$PROJECT_ID"
+  enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "$ACTIVE_PRINCIPAL" "projects/$PROJECT_ID"
   echo "Check if OAuth Consent Screen (brand) already exists"
   set +e # Disable errexit
   __iap_brand="$(gcloud iap oauth-brands list --format='get(name)')"
@@ -120,7 +130,7 @@ create_service_account_and_enable_impersonation() {
       --display-name="EKS deployer service account" \
       --project="$PROJECT_ID"
   fi
-  enable_role "roles/iam.serviceAccountTokenCreator" "user:$CURRENT_USER" "$SERVICE_ACCOUNT_ID"
+  enable_role "roles/iam.serviceAccountTokenCreator" "$ACTIVE_PRINCIPAL" "$SERVICE_ACCOUNT_ID"
   unset __deployer_sa
 }
 
