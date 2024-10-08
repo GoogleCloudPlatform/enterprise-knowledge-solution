@@ -23,6 +23,8 @@ steps:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         # export TEST_PROJECT_ID=eks-int-${SHORT_SHA} ;
+        echo "the project id is:"
+        echo $PROJECT
         gcloud projects create ${_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete --quiet $${_PROJECT_ID}" ERR ;
@@ -31,7 +33,8 @@ steps:
       - "PROJECT_ID=${_PROJECT_ID}"
 
   - id: pre_tf_setup
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    name: gcr.io/cloud-builders/gcloud-slim
+    #name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: /bin/bash
     args:
       - "-c"
