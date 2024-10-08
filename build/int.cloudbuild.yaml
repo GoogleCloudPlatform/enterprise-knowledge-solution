@@ -22,8 +22,8 @@ steps:
       - "-x"
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        echo "the project id is:"
-        echo $_PROJECT_ID
+        echo "the project id is:";
+        echo $_PROJECT_ID;
         gcloud projects create ${_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete --quiet $${_PROJECT_ID}" ERR ;
