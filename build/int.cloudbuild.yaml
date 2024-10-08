@@ -39,7 +39,7 @@ steps:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         cd sample-deployments/composer-orchestrated-process;
-        export PROJECT_ID=${_PROJECT_ID}
+        export PROJECT_ID=${_PROJECT_ID};
         scripts/pre_tf_setup.sh;
     env:
       - "REGION=us-central1"
