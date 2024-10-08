@@ -43,7 +43,6 @@ steps:
         scripts/pre_tf_setup.sh;
     env:
       - "REGION=us-central1"
-      - "IAP_ADMIN_ACCOUNT='eks-cicd-bootstrap-sa@eks-cicd-orchestrator.iam.gserviceaccount.com'"
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
