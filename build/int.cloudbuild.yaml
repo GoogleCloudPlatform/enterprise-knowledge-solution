@@ -23,7 +23,7 @@ steps:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         echo "the project id is:"
-        echo $PROJECT_ID
+        echo $_PROJECT_ID
         gcloud projects create ${_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete --quiet $${_PROJECT_ID}" ERR ;
@@ -39,9 +39,9 @@ steps:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         cd sample-deployments/composer-orchestrated-process;
+        export PROJECT_ID=${_PROJECT_ID}
         scripts/pre_tf_setup.sh;
     env:
-      - "PROJECT_ID=${_PROJECT_ID}"
       - "REGION=us-central1"
       - "IAP_ADMIN_ACCOUNT='eks-cicd-bootstrap-sa@eks-cicd-orchestrator.iam.gserviceaccount.com'"
 
