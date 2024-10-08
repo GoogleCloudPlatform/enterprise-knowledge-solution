@@ -165,7 +165,7 @@ elif [ "$MODE" = "batch" ]; then
   # Iterate through results and delete documents from Datastore and GCS
   # Check if any results were returned
   if [ -z "$RESULTS" ]; then
-      echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
+    echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
   else
     while read -r line; do
       DOC_ID=$(echo "$line" | awk '{print $1}')
@@ -179,7 +179,7 @@ elif [ "$MODE" = "batch" ]; then
         "${DELETE_URI}"
 
       bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-      "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+        "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
 
       echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
     done <<<"$RESULTS"
