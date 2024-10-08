@@ -176,6 +176,7 @@ enable_role() {
   echo $__role
   echo $__principal
   echo $__resource
+  echo $PROJECT_ID
   gcloud projects add-iam-policy-binding "$PROJECT_ID" --role="$__role" --member="$__principal" 1>/dev/null
   unset __role
   unset __principal
