@@ -61,7 +61,7 @@ module "invoice_parser_account" {
   description  = "Account used to run the invoice parser jobs"
 }
 
-resource "google_cloud_run_v2_job" "invoice-parser-processor-job" {
+resource "google_cloud_run_v2_job" "invoice_parser_processor_job" {
   name     = var.invoice_parser_cloud_run_job_name
   location = var.region
 
