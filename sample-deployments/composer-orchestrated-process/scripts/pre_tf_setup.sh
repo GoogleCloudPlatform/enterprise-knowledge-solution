@@ -37,11 +37,11 @@ gcloud config set project "${PROJECT_ID}"
 section_close
 
 section_open "Enable the required APIs for bootstrap scripts"
-enable_bootstrap_apis
+#enable_bootstrap_apis
 section_close
 
 section_open "Setup OAuth consent screen (brand) required for IAP"
-create_oauth_consent_config
+# create_oauth_consent_config
 section_close
 
 section_open "Create deployer service account and enable $ACTIVE_PRINCIPAL to use service account impersonation "

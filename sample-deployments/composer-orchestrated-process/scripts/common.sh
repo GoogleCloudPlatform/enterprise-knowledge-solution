@@ -173,6 +173,9 @@ enable_bootstrap_apis() {
 enable_role() {
   local __role=$1 __principal=$2 __resource=$3
   echo "granting IAM Role $__role to $__principal at resource $__resource "
+  echo $__role
+  echo $__principal
+  echo $__resource
   gcloud projects add-iam-policy-binding "$PROJECT_ID" --role="$__role" --member="$__principal" 1>/dev/null
   unset __role
   unset __principal
