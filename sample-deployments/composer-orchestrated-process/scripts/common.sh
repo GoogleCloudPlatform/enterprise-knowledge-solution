@@ -53,7 +53,7 @@ check_exec_dependency() {
 
 set_active_principal() {
   local __active_principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-  if echo "$__active_principal" | grep "@iam.gserviceaccount.com"; then
+  if echo "$__active_principal" | grep "iam.gserviceaccount.com"; then
     ACTIVE_PRINCIPAL="serviceAccount:${__active_principal}"
   else
     ACTIVE_PRINCIPAL="user:${__active_principal}"
