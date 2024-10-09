@@ -1,4 +1,4 @@
-module github.com/cloudspannerecosystem/autoscaler/terraform/cloud-functions/per-project
+module github.com/eeaton/document-processing-and-understanding/build/test
 
 go 1.21
 
