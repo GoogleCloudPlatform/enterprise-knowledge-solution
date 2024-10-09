@@ -43,8 +43,8 @@
 
 	 const (
 		 region = "us-central1"
-		 iap_access_domains = ["domain:eks-cicd.joonix.net"]
-		 webui_domains = ["eks-cicd.altostrat.com", "demo.eks-cicd.altostrat.com"]
+		 iap_access_domains = "['domain:eks-cicd.joonix.net']"
+		 webui_domains = "['eks-cicd.altostrat.com', 'demo.eks-cicd.altostrat.com']"
 		 docai_location = "us"
 	 )
 
@@ -88,7 +88,7 @@
 		 terraform.ApplyAndIdempotent(t, terraformOptions)
 	 })
 
-	 /*
+
 	 test_structure.RunTestStage(t, "validate", func() {
 		 terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
 		 ctx := context.Background()
@@ -114,5 +114,5 @@
 		 // Wait up to five minutes for Spanner to report final processing units
 		 waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTargetProcessingUnits, 5*6, time.Second*10)
 	 })
-	 */
+
  }
