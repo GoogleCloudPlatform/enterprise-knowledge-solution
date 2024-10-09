@@ -84,6 +84,12 @@ To install all dependencies in the local venv, run the following script:
 This repository defines a number of CI tests in `./github/workflows`.
 All tests must pass before a feature branch can be merged to a release branch.
 
+## Cloud Build integration tests
+
+Before a PR can be merged to a major version branch, it must pass integration test that confirms the repo can be deployed and pass functional tests in a clean GCP project.
+
+1. A Cloud Build trigger is configured on an internal (non-public) GCP project to run on Pull Requests to each major version branch. The trigger runs the build defined at [/build/int.cloudbuild.yaml](/build/int.cloudbuild.yaml).
+
 ## Linting and Formatting
 
 Many of the files in the repository are checked against linting tools and static code analysis for secure coding practices. This workflow is triggered by [.github/workflows/lint.yaml](.github/workflows/lint.yaml), running multiple lint libraries in [Super-Linter](https://github.com/super-linter/super-linter) with the settings configured in [.github/linters/super-linter.env](.github/linters/super-linter.env)

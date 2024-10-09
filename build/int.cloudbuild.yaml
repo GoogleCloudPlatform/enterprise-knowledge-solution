@@ -53,8 +53,8 @@ steps:
       - "-c"
       - >-
         ls;
-        invoke.sh sync
-        invoke.sh lock
+        ./invoke.sh sync
+        ./invoke.sh lock
     entrypoint: /bin/bash
 
   - id: cleanup
@@ -79,4 +79,3 @@ substitutions:
   _PROJECT_ID: "eks-int-${SHORT_SHA}"
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.22"
-  _IAP_SUPPORT_EMAIL: "iap-support-email@eks-cicd.joonix.net"
