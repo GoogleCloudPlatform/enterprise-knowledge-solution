@@ -17,13 +17,12 @@ import logging
 import sys
 from dataclasses import dataclass
 
-from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud import storage, bigquery
-
 import alloydb
-import bigquery
+import bigquery as bq_fns
 import docai
 import gcs
+from google.api_core.gapic_v1.client_info import ClientInfo
+from google.cloud import bigquery, storage
 
 USER_AGENT = "cloud-solutions/eks-docai-v1"
 
@@ -117,7 +116,6 @@ class DetectedEntity:
     results_file: str
 
 
-
 def run() -> None:
     parser = create_parser()
     args = parser.parse_args(sys.argv[1:])
@@ -137,10 +135,12 @@ def run() -> None:
         args.location,
         args.processor_id,
         args.gcs_input_prefix,
-        args.gcs_output_uri
+        args.gcs_output_uri,
     )
     logging.info("Waiting for Batch operation to finish")
-    individual_process_statuses = docai.wait_for_completion_and_verify_success(batch_operation)
+    individual_process_statuses = docai.wait_for_completion_and_verify_success(
+        batch_operation
+    )
     logging.info(f"Parsing results from {args.gcs_output_uri}")
     parsed_results = docai.read_and_parse_batch_results(
         storage_client,
@@ -148,9 +148,17 @@ def run() -> None:
         args.gcs_input_prefix,
         args.run_id,
     )
-    bucket_name, csv_blob_name = gcs.write_results_to_gcs(storage_client, parsed_results, args.gcs_output_uri)
+    bucket_name, csv_blob_name = gcs.write_results_to_gcs(
+        storage_client, parsed_results, args.gcs_output_uri
+    )
     alloydb.write_results_to_alloydb(bucket_name, csv_blob_name, alloydb_connection)
-    bigquery.write_results_to_bigquery(bucket_name, csv_blob_name, args.bigquery_project, args.bigquery_dataset, args.bigquery_table)
+    bq_fns.write_results_to_bigquery(
+        bucket_name,
+        csv_blob_name,
+        args.bigquery_project,
+        args.bigquery_dataset,
+        args.bigquery_table,
+    )
 
 
 if __name__ == "__main__":

@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.cloud import storage
-from typing import List, Tuple
-from main import DetectedEntity
-from dataclasses import asdict
 import csv
-import re
 import logging
+import re
+from dataclasses import asdict
+from typing import List, Tuple
+
+from google.cloud import storage
+from main import DetectedEntity
+
 
 def write_results_to_gcs(
     storage_client: storage.Client,
     parsed_results: List[DetectedEntity],
-    gcs_output_uri: str
+    gcs_output_uri: str,
 ) -> Tuple[str, str]:
     """
     Write the detected entities to the GCS bucket as a CSV
@@ -41,7 +43,9 @@ def write_results_to_gcs(
     data_dicts = [asdict(d) for d in parsed_results]
     with blob.open("w") as f:
         # not sure why pyright detects `f` as an invalid argument type for csv.DictWriter as an error - this actually works
-        writer = csv.DictWriter(f, fieldnames=data_dicts[0].keys())  # pyright: ignore [reportArgumentType]
+        writer = csv.DictWriter(
+            f, fieldnames=data_dicts[0].keys()
+        )  # pyright: ignore [reportArgumentType]
         writer.writeheader()
         writer.writerows(data_dicts)
     return bucket_name, str(blob.name)
@@ -49,7 +53,7 @@ def write_results_to_gcs(
 
 def get_bucket_name(gcs_output_uri: str) -> Tuple[str, str]:
     """
-    Function to get a GCS uri, in the format of `gs://<BUCKET>/<PATH>` and return a tuple of the bucket name and the output path. 
+    Function to get a GCS uri, in the format of `gs://<BUCKET>/<PATH>` and return a tuple of the bucket name and the output path.
     Args:
         gcs_output_uri: The prefix GCS path in the format of `gs://<BUCKET>/<PATH>`
 
@@ -66,5 +70,3 @@ def get_bucket_name(gcs_output_uri: str) -> Tuple[str, str]:
     else:
         logging.error("No bucket name found in the given string.")
         raise ValueError(f"Could not extract bucket from {gcs_output_uri}")
-
-
