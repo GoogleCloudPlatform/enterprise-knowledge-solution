@@ -51,8 +51,8 @@ steps:
       - "-x"
       - "-c"
       - >-
-        export TEST_PROJECT_ID=eks-int-${SHORT_SHA} ;
-        gcloud projects delete $${TEST_PROJECT_ID} --quiet
+        gcloud config unset auth/impersonate_service_account
+        gcloud projects delete ${_PROJECT_ID} --quiet
     entrypoint: /bin/bash
 
 tags:
