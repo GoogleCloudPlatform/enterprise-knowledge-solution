@@ -31,6 +31,17 @@ steps:
     env:
       - "PROJECT_ID=${_PROJECT_ID}"
 
+  - id: checkCFT
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: /bin/bash
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        apt install python3.10-venv;
+        ./invoke.sh sync
+        ./invoke.sh lock
+
   - id: pre_tf_setup
     name: gcr.io/cloud-builders/gcloud-slim
     #name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
