@@ -1,0 +1,7 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    script: |
+      docker build -t us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder .
+    automapSubstitutions: true
+images:
+  - "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"

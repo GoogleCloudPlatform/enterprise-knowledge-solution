@@ -38,7 +38,6 @@ steps:
       - "-x"
       - "-c"
       - >-
-        apt install python3.10-venv;
         ./invoke.sh sync
         ./invoke.sh lock
 
