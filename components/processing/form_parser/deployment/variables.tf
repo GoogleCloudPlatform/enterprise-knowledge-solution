@@ -69,3 +69,9 @@ variable "alloydb_cluster_name" {
   description = "Name of the AlloyDB cluster to save the parsed forms results"
   type        = string
 }
+
+variable "bq_dataset_id" {
+  description = "The BigQuery Dataset ID to hold the parsed results of forms"
+  type        = string
+  default     = "docs_store"
+}
