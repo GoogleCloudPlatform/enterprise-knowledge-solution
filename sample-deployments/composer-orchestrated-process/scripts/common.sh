@@ -208,3 +208,12 @@ enable_builder_roles() {
   unset __principal
   unset __PROJECTNUM
 }
+
+set_adc() {
+  # check if the script is manually triggered by a user, or automated in a service account. Different methods of ADC for each
+  if echo "$ACTIVE_PRINCIPAL" | grep "iam.gserviceaccount.com"; then
+    gcloud config set auth/impersonate_service_account "${SERVICE_ACCOUNT_ID}"
+  else
+    yes | gcloud auth application-default login --impersonate-service-account="${SERVICE_ACCOUNT_ID}"
+  fi
+}
