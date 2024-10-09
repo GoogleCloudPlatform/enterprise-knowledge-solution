@@ -40,7 +40,7 @@ steps:
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         cd sample-deployments/composer-orchestrated-process;
         export PROJECT_ID=${_PROJECT_ID};
-        export IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}
+        export IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL};
         scripts/pre_tf_setup.sh;
     env:
       - "REGION=us-central1"
