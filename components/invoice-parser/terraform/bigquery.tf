@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-resource "google_bigquery_table" "form_values" {
+resource "google_bigquery_table" "invoice_values" {
   dataset_id = var.bigquery_dataset_id
-  table_id   = "form_values"
-  schema     = file("${path.module}/form_values.json")
+  table_id   = "invoice_values"
+  schema     = file("${path.module}/invoice_values.json")
 }
