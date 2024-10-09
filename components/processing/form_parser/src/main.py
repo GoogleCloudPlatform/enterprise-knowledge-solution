@@ -23,8 +23,6 @@ from google.api_core.exceptions import (
     RetryError,
 )
 from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud import storage
-from load_data_in_bigquery import *
 from google.cloud import documentai, logging, storage
 from load_data_in_bigquery import build_output_metadata, load_rows_into_bigquery
 
@@ -66,10 +64,11 @@ def batch_process_documents(
         gcs_output_uri: GCS directory to store the out json files,
         gcs_input_prefix: GCS directory to store input files to be processed
     """
-
     # Set the `api_endpoint` if you use a location other than "us".
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
-    client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT))
+    client = documentai.DocumentProcessorServiceClient(
+        client_options=opts, client_info=ClientInfo(user_agent=USER_AGENT)
+    )
 
     # Specify a GCS URI Prefix to process an entire directory
     gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
