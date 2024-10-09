@@ -1,7 +1,7 @@
 resource "google_bigquery_table" "form_values" {
-  project = var.project_id
+  project    = var.project_id
   dataset_id = var.bq_dataset_id
-  table_id = "form_values"
+  table_id   = "form_values"
 
   deletion_protection = true
 
