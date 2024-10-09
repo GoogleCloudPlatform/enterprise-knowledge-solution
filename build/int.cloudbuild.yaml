@@ -53,8 +53,8 @@ steps:
       - "-c"
       - >-
         ls;
-        ../..invoke.sh sync
-        ../..invoke.sh lock
+        invoke.sh sync
+        invoke.sh lock
     entrypoint: /bin/bash
 
   - id: cleanup
