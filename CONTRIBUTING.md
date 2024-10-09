@@ -88,7 +88,14 @@ All tests must pass before a feature branch can be merged to a release branch.
 
 Before a PR can be merged to a major version branch, it must pass integration test that confirms the repo can be deployed and pass functional tests in a clean GCP project.
 
-1. A Cloud Build trigger is configured on an internal (non-public) GCP project to run on Pull Requests to each major version branch. The trigger runs the build defined at [/build/int.cloudbuild.yaml](/build/int.cloudbuild.yaml).
+1. A Cloud Build trigger is configured on an internal (non-public) GCP project to run on Pull Requests to each major version branch of this repository. The trigger runs the build defined at [/build/int.cloudbuild.yaml](/build/int.cloudbuild.yaml), which does the following high-level tasks:
+   1. Create a new GCP project in an internal test environment
+   1. Run the pre_tf_setup.sh script to prepare the GCP project and deployer service account
+   1. Run the invoke.sh script to verify that python dependencies can be installed
+   1. Apply terraform to create all the terraform resources
+   1. Run functional tests to confirm the resources and services are working as intended, defined at [TODO]
+   1. Tear down the ephemeral project
+1.
 
 ## Linting and Formatting
 

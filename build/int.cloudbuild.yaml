@@ -52,7 +52,7 @@ steps:
       - "-x"
       - "-c"
       - >-
-        ls;
+        apt install python3.10-venv;
         ./invoke.sh sync
         ./invoke.sh lock
     entrypoint: /bin/bash
