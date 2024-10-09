@@ -35,5 +35,5 @@ variable "invoice_parser_cloud_run_job_name" {
 
 variable "bigquery_dataset_id" {
   description = "BigQuery Dataset id"
-  type = string
+  type        = string
 }

@@ -14,10 +14,10 @@
 
 
 locals {
-  cloud_build_fileset = fileset(path.module, "../src/**/*")
+  cloud_build_fileset      = fileset(path.module, "../src/**/*")
   cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : filesha512("${path.module}/${f}")]))
-  service_account_name = var.invoice_parser_cloud_run_job_name
-  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.invoice_parser_cloud_run_job_name}:latest"
+  service_account_name     = var.invoice_parser_cloud_run_job_name
+  image_name_and_tag       = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.invoice_parser_cloud_run_job_name}:latest"
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud

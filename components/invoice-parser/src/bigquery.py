@@ -15,7 +15,14 @@
 
 from google.cloud import bigquery
 
-def write_results_to_bigquery(bucket_name: str, csv_blob_name: str, bigquery_project: str, bigquery_dataset: str, bigquery_table: str):
+
+def write_results_to_bigquery(
+    bucket_name: str,
+    csv_blob_name: str,
+    bigquery_project: str,
+    bigquery_dataset: str,
+    bigquery_table: str,
+):
     """Loads data from a CSV file in GCS to a BigQuery table with append logic.
 
     Args:
@@ -29,7 +36,9 @@ def write_results_to_bigquery(bucket_name: str, csv_blob_name: str, bigquery_pro
     client = bigquery.Client()
 
     # Construct the full table ID.
-    table_ref = client.get_dataset(f"{bigquery_project}.{bigquery_dataset}").table(bigquery_table)
+    table_ref = client.get_dataset(f"{bigquery_project}.{bigquery_dataset}").table(
+        bigquery_table
+    )
 
     # Configure the load job.
     job_config = bigquery.LoadJobConfig(

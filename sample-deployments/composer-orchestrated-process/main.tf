@@ -19,10 +19,10 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name  = "doc-processor"
-  form_parser_cloud_run_job_name = "form-parser"
-  classifier_cloud_run_job_name  = "doc-classifier"
-  invoice_parser_cloud_run_job_name  = "invice-parser"
+  processing_cloud_run_job_name     = "doc-processor"
+  form_parser_cloud_run_job_name    = "form-parser"
+  classifier_cloud_run_job_name     = "doc-classifier"
+  invoice_parser_cloud_run_job_name = "invice-parser"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
@@ -117,12 +117,12 @@ module "doc_classifier_job" {
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
 module "invoice_parser_job" {
-  source = "../../components/invoice-parser/terraform"
-  project_id = var.project_id
-  region = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
+  source                            = "../../components/invoice-parser/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
   invoice_parser_cloud_run_job_name = local.invoice_parser_cloud_run_job_name
-  bigquery_dataset_id = module.common_infra.bq_store_dataset_id
+  bigquery_dataset_id               = module.common_infra.bq_store_dataset_id
 }
 
 module "dpu_workflow" {
