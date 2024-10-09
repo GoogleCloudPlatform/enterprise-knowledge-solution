@@ -110,8 +110,8 @@ To deploy this solution, perform the follow steps:
     terraform init
     ```
 
-1.  Create a terraform.tfvars file with the following variables:  
-     `project_id = # Your Google Cloud project ID.`
+1.  Create a terraform.tfvars file with the following variables:
+    `project_id = # Your Google Cloud project ID.`
 
     `region = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").`
 
