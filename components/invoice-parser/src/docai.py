@@ -18,14 +18,13 @@ import re
 from typing import List
 
 from google.api_core.client_options import ClientOptions
-from google.api_core.exceptions import RetryError, GoogleAPICallError
+from google.api_core.exceptions import GoogleAPICallError, RetryError
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.api_core.operation import Operation
-from google.cloud import storage, documentai
+from google.cloud import documentai, storage
 from google.cloud.documentai_v1 import BatchProcessMetadata
 from google.cloud.exceptions import InternalServerError
-
-from main import DetectedEntity, USER_AGENT
+from main import USER_AGENT, DetectedEntity
 
 
 def call_batch_processor(
@@ -33,7 +32,7 @@ def call_batch_processor(
     location: str,
     processor_id: str,
     gcs_input_prefix: str,
-    gcs_output_uri: str
+    gcs_output_uri: str,
 ) -> Operation:
     """
     Call the DocAI processor to start the long running batch operation.
@@ -44,17 +43,21 @@ def call_batch_processor(
         gcs_input_prefix: GCS input prefix, where the input/source documents can be found.
         gcs_output_uri: GCS output, where to write the results of the processor
 
-    Returns: The instance of the operation. 
+    Returns: The instance of the operation.
 
     """
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
     client_info = ClientInfo(user_agent=USER_AGENT)
-    client = documentai.DocumentProcessorServiceClient(client_options=opts, client_info=client_info)
+    client = documentai.DocumentProcessorServiceClient(
+        client_options=opts, client_info=client_info
+    )
 
     gcs_prefix = documentai.GcsPrefix(gcs_uri_prefix=gcs_input_prefix)
     input_config = documentai.BatchDocumentsInputConfig(gcs_prefix=gcs_prefix)
 
-    gcs_output_config = documentai.DocumentOutputConfig.GcsOutputConfig(gcs_uri=gcs_output_uri)
+    gcs_output_config = documentai.DocumentOutputConfig.GcsOutputConfig(
+        gcs_uri=gcs_output_uri
+    )
     output_config = documentai.DocumentOutputConfig(gcs_output_config=gcs_output_config)
 
     processor_name = client.processor_path(project_id, location, processor_id)
@@ -69,8 +72,7 @@ def call_batch_processor(
 
 
 def wait_for_completion_and_verify_success(
-    batch_operation: Operation,
-    timeout=1000
+    batch_operation: Operation, timeout=1000
 ) -> List[BatchProcessMetadata.IndividualProcessStatus]:
     try:
         logging.info(
@@ -95,7 +97,7 @@ def read_and_parse_batch_results(
     storage_client: storage.Client,
     individual_process_statuses: List[BatchProcessMetadata.IndividualProcessStatus],
     gcs_input_prefix: str,
-    run_id: str
+    run_id: str,
 ) -> List[DetectedEntity]:
     output_rows: List[DetectedEntity] = []
     for process in individual_process_statuses:
@@ -130,25 +132,29 @@ def read_and_parse_batch_results(
 
             # Grab each key/value pair and their corresponding confidence scores.
             for entity in document.entities:
-                output_rows.append(DetectedEntity(
-                    results_file=f"gs://{output_bucket}/{blob.name}",
-                    entity_type=entity.type,
-                    original_filename=original_file_path,
-                    raw_text=entity.mention_text,
-                    normalized_text=entity.normalized_value.text,
-                    confidence=entity.confidence,
-                    run_id=run_id,
-                ))
+                output_rows.append(
+                    DetectedEntity(
+                        results_file=f"gs://{output_bucket}/{blob.name}",
+                        entity_type=entity.type,
+                        original_filename=original_file_path,
+                        raw_text=entity.mention_text,
+                        normalized_text=entity.normalized_value.text,
+                        confidence=entity.confidence,
+                        run_id=run_id,
+                    )
+                )
                 # Get Properties (Sub-Entities) with confidence scores
                 for prop in entity.properties:
-                    output_rows.append(DetectedEntity(
-                        results_file=f"gs://{output_bucket}/{blob.name}",
-                        entity_type=prop.type,
-                        original_filename=original_file_path,
-                        raw_text=prop.mention_text,
-                        normalized_text=prop.normalized_value.text,
-                        confidence=prop.confidence,
-                        run_id=run_id,
-                    ))
+                    output_rows.append(
+                        DetectedEntity(
+                            results_file=f"gs://{output_bucket}/{blob.name}",
+                            entity_type=prop.type,
+                            original_filename=original_file_path,
+                            raw_text=prop.mention_text,
+                            normalized_text=prop.normalized_value.text,
+                            confidence=prop.confidence,
+                            run_id=run_id,
+                        )
+                    )
 
     return output_rows
