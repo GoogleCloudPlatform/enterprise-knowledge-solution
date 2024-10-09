@@ -99,7 +99,7 @@ for DOC_ID in "${document_list[@]}"; do
 
     # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
     curl -X DELETE \
-    -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
-    -H "x-goog-user-project: $PROJECT_ID" \
-    "${DELETE_URI}"
+      -H "Authorization: Bearer $ACCESS_TOKEN" \
+      -H "x-goog-user-project: $PROJECT_ID" \
+      "${DELETE_URI}"
 done
