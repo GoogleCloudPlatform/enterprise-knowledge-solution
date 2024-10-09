@@ -24,7 +24,6 @@ from google.api_core.exceptions import (
 )
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import documentai, logging, storage
-from load_data_in_bigquery import *
 from load_data_in_bigquery import build_output_metadata, load_rows_into_bigquery
 
 # Retrieve Job-defined env vars
