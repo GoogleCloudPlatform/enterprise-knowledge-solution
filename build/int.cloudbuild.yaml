@@ -45,6 +45,17 @@ steps:
     env:
       - "REGION=us-central1"
 
+  - id: invoke_python_dependencies
+    name: gcr.io/cloud-builders/gcloud-slim
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        ls
+        ~/invoke.sh sync
+        ~/invoke.sh lock
+    entrypoint: /bin/bash
+
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
     args:
