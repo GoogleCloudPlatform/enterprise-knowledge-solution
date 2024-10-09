@@ -39,7 +39,6 @@ from airflow.providers.google.cloud.transfers.gcs_to_gcs import (  # type: ignor
 )
 from airflow.utils.task_group import TaskGroup
 from airflow.utils.trigger_rule import TriggerRule  # type: ignore
-
 from utils import cloud_run_utils, datastore_utils, file_utils
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

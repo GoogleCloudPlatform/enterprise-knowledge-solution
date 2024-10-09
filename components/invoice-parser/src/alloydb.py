@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import logging
+
 import sqlalchemy
-from sqlalchemy.engine import Engine
 from google.cloud.alloydb.connector import Connector
+from sqlalchemy.engine import Engine
+
 
 def verify_alloydb_table(alloydb_connection: Engine) -> None:
     """
@@ -27,7 +29,8 @@ def verify_alloydb_table(alloydb_connection: Engine) -> None:
         None
     """
     with alloydb_connection.connect() as db_conn:
-        db_conn.execute("""
+        db_conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS `parsed_invoice_data` (
                 results_file VARCHAR(2048) NOT NULL,
                 original_filename VARCHAR(2048) NOT NULL,
@@ -37,7 +40,8 @@ def verify_alloydb_table(alloydb_connection: Engine) -> None:
                 confidence REAL NOT NULL DEFAULT 0,
                 run_id VARCHAR(256)
             )
-        """)
+        """
+        )
 
 
 def create_alloydb_connection_pool(
@@ -45,7 +49,7 @@ def create_alloydb_connection_pool(
     alloydb_location: str,
     alloydb_cluster: str,
     alloydb_instance: str,
-    alloydb_database: str
+    alloydb_database: str,
 ) -> Engine:
     """
     Create a connection pool to the AlloyDB instance.
@@ -78,7 +82,10 @@ def create_alloydb_connection_pool(
     )
     return pool
 
-def write_results_to_alloydb(bucket_name: str, csv_blob_name: str, alloydb_connection: Engine):
+
+def write_results_to_alloydb(
+    bucket_name: str, csv_blob_name: str, alloydb_connection: Engine
+):
     """
 
     Args:
@@ -89,7 +96,9 @@ def write_results_to_alloydb(bucket_name: str, csv_blob_name: str, alloydb_conne
     Returns:
 
     """
-    logging.info(f"Copying data to AlloyDB table from CSV gs://{bucket_name}/{csv_blob_name}")
+    logging.info(
+        f"Copying data to AlloyDB table from CSV gs://{bucket_name}/{csv_blob_name}"
+    )
     with alloydb_connection.connect() as conn:
         sql = f"""
             COPY `parsed_invoice_data`
@@ -100,4 +109,3 @@ def write_results_to_alloydb(bucket_name: str, csv_blob_name: str, alloydb_conne
             )
         """
         conn.execute(sql)
-
