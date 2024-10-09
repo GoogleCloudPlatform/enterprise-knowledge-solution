@@ -215,6 +215,7 @@ def generate_pdf_forms_folder(**context):
     pdf_forms_folder = f"{process_folder}/pdf-form/input/"
     context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
 
+
 with DAG(
     "run_docs_processing",
     default_args=default_args,
