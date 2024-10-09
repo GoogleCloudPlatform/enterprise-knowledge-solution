@@ -59,7 +59,7 @@ steps:
   #    entrypoint: /bin/bash
 
   - id: terratest
-    name: "us-central1-docker.pkg.dev/oss-spanner-autoscaler-ci-mgmt/ci/test-builder:v1"
+    name: "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
     args:
       - "-e"
       - "-x"
