@@ -47,7 +47,6 @@
  func TestPerProjectEndToEndDeployment(t *testing.T) {
 
 
-	// TODO
 	 const (
 		 region = "us-central1"
 		 iap_access_domains = ["domain:eks-cicd.joonix.net"]
@@ -65,7 +64,6 @@
 		 t.Fatal()
 	 }
 
-	 // TODO
 	 terraformDir := "../sample-deployments/composer-orchestrated-process"
 
 	 test_structure.RunTestStage(t, "setup", func() {

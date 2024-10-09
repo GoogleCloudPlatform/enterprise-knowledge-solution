@@ -14,6 +14,18 @@
 
 timeout: 14400s
 steps:
+  - id: terratest
+    name: "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        go mod init github.com/eeaton/document-processing-and-understanding
+        cd /workspace/build/test ;
+        go test -v -run ./ -timeout 30m --tags=e2e
+    entrypoint: /bin/bash
+
   - id: prepare
     name: gcr.io/cloud-builders/gcloud-slim
     entrypoint: /bin/bash
@@ -57,17 +69,6 @@ steps:
   #        ./invoke.sh sync;
   #        ./invoke.sh lock
   #    entrypoint: /bin/bash
-
-  - id: terratest
-    name: "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >-
-        cd /workspace/build/test ;
-        go test -v -run ./ -timeout 30m --tags=e2e
-    entrypoint: /bin/bash
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
