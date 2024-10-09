@@ -57,9 +57,9 @@ DSTORE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}
 
 # Execute the curl command and store the result in a variable
 response=$(curl -X GET \
-    -H "Authorization: Bearer $ACCESS_TOKEN" \
-    -H "x-goog-user-project: dpu-demo" \
-    "${DSTORE_URI}")
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "x-goog-user-project: dpu-demo" \
+  "${DSTORE_URI}")
 
 # Print response
 echo "Response: $response"
@@ -74,32 +74,30 @@ fi
 document_names=$(echo "$response" | jq -r '.documents[].name' | awk -F '/' '{print $NF}')
 printf "%s\n" "${document_names}"
 
-
 # Create an array from the extracted information
-readarray -t document_list <<< "$document_names"
+readarray -t document_list <<<"$document_names"
 
 # Print the list (optional)
 printf "%s\n" "${document_list[@]}"
 
-
 # Confirmation prompt
 read -r -p "You are about to delete all documents from project '$PROJECT_ID'. Are you sure? [y/N] " response
 if [[ ! "$response" =~ ^[yY]$ ]]; then
-    echo "Aborting deletion."
-    exit 0
+  echo "Aborting deletion."
+  exit 0
 fi
 
 # Iterate through the list
 for DOC_ID in "${document_list[@]}"; do
 
-    printf "You are about to delete document with ID '$DOC_ID' from project '$PROJECT_ID'"
+  printf "You are about to delete document with ID %s from project %s" "$DOC_ID" "$PROJECT_ID"
 
-    # Construct Agent Builder Datastore deletion URI
-    DELETE_URI="${DSTORE_URI}/${DOC_ID}"
+  # Construct Agent Builder Datastore deletion URI
+  DELETE_URI="${DSTORE_URI}/${DOC_ID}"
 
-    # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
-    curl -X DELETE \
-      -H "Authorization: Bearer $ACCESS_TOKEN" \
-      -H "x-goog-user-project: $PROJECT_ID" \
-      "${DELETE_URI}"
+  # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
+  curl -X DELETE \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "x-goog-user-project: $PROJECT_ID" \
+    "${DELETE_URI}"
 done
