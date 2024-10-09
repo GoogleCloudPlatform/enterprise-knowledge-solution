@@ -73,11 +73,11 @@ create_oauth_consent_config() {
   if [[ $__iap_brand ]]; then
     echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
   else
-    echo $CURRENT_USER
+    echo $ACTIVE_PRINCIPAL
     echo 'gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
       --support_email="${ACTIVE_PRINCIPAL}"'
     gcloud iap oauth-brands create --application_title="Enterprise Knowledge Search Web-UI" \
-      --support_email="$CURRENT_USER"
+      --support_email="$ACTIVE_PRINCIPAL"
   fi
   unset __iap_brand
 }
