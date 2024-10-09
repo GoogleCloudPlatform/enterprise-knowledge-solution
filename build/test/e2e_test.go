@@ -25,12 +25,6 @@
 	 "testing"
 	 "time"
 
-	 scheduler "cloud.google.com/go/scheduler/apiv1beta1"
-	 schedulerpb "cloud.google.com/go/scheduler/apiv1beta1/schedulerpb"
-	 instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	 instancepb "cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
-	 fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
-
 	 logger "github.com/gruntwork-io/terratest/modules/logger"
 	 retry "github.com/gruntwork-io/terratest/modules/retry"
 	 terraform "github.com/gruntwork-io/terratest/modules/terraform"
