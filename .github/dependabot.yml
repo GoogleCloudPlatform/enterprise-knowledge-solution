@@ -29,4 +29,3 @@ updates:
     schedule:
       interval: "weekly"
 version: 2
-...

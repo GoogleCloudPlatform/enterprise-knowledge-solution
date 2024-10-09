@@ -165,7 +165,7 @@ elif [ "$MODE" = "batch" ]; then
   # Iterate through results and delete documents from Datastore and GCS
   # Check if any results were returned
   if [ -z "$RESULTS" ]; then
-      echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
+    echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
   else
     while read -r line; do
       DOC_ID=$(echo "$line" | awk '{print $1}')
@@ -178,22 +178,12 @@ elif [ "$MODE" = "batch" ]; then
         -H "x-goog-user-project: $PROJECT_ID" \
         "${DELETE_URI}"
 
-    gsutil rm -r "$DOC_URI"
-    # Conditional logic for DocAI form parser output
-    if [[ $DOC_URI == *"pdf-forms"* && $DOC_URI == *.txt ]]; then
-      JSON_URI="${DOC_URI%.txt}.json"
-      gsutil rm -r "$JSON_URI"
-    else
-      gsutil rm -r "$DOC_URI".json
-    fi
+      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+        "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
 
-    bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-      "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
-
-    echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-  done <<<"$RESULTS"
-
-  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
+      echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
+    done <<<"$RESULTS"
+  fi
 
   # Delete the GCS folder associated with the batch ID
   GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID//_/-}"
