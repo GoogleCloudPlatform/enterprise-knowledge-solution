@@ -31,16 +31,6 @@ steps:
     env:
       - "PROJECT_ID=${_PROJECT_ID}"
 
-  - id: checkCFT
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    entrypoint: /bin/bash
-    args:
-      - "-x"
-      - "-c"
-      - >-
-        ./invoke.sh sync
-        ./invoke.sh lock
-
   - id: pre_tf_setup
     name: gcr.io/cloud-builders/gcloud-slim
     #name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -56,15 +46,30 @@ steps:
     env:
       - "REGION=us-central1"
 
-  - id: invoke_python_dependencies
-    name: gcr.io/cloud-builders/gcloud-slim
+  #TODO: I might not need a dedicated python check, if this is effectively tested when serivces are built and funcitonal tests
+  #  - id: invoke_python_dependencies
+  #    name: gcr.io/cloud-builders/gcloud-slim
+  #    args:
+  #      - "-x"
+  #      - "-c"
+  #      - >-
+  #        apt install python3.10-venv;
+  #        ./invoke.sh sync;
+  #        ./invoke.sh lock
+  #    entrypoint: /bin/bash
+
+  - id: terratest
+    name: "us-central1-docker.pkg.dev/oss-spanner-autoscaler-ci-mgmt/ci/test-builder:v1"
     args:
+      - "-e"
       - "-x"
       - "-c"
       - >-
-        apt install python3.10-venv;
-        ./invoke.sh sync
-        ./invoke.sh lock
+        trap "gcloud projects delete --quiet ${_PROJECT_ID}" ERR ;
+        ls;
+        cd /workspace/build/test ;
+        export PROJECT_ID=${_PROJECT_ID} ;
+        go test -v -run ./ -timeout 30m --tags=e2e
     entrypoint: /bin/bash
 
   - id: cleanup
@@ -84,7 +89,6 @@ tags:
 options:
   logging: CLOUD_LOGGING_ONLY
 
-  #TODO: move IAP_SUPPORT_EMAIL and anything else with meaningful id to the Cloud Build vars
 substitutions:
   _PROJECT_ID: "eks-int-${SHORT_SHA}"
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
