@@ -114,5 +114,5 @@
 		 // Wait up to five minutes for Spanner to report final processing units
 		 waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTargetProcessingUnits, 5*6, time.Second*10)
 	 })
+	 */
  }
- */
