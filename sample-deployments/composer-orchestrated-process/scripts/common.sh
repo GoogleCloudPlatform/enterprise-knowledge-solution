@@ -67,9 +67,7 @@ create_oauth_consent_config() {
   echo "Check if OAuth Consent Screen (brand) already exists"
   set +e # Disable errexit
   __iap_brand="$(gcloud iap oauth-brands list --format='get(name)')"
-    echo "did it get here 1"
   set -e # Re-enable errexit
-  echo "did it get here 2"
   if [[ $__iap_brand ]]; then
     echo "OAuth Consent Screen (brand) $__iap_brand has already been created"
   else
@@ -203,6 +201,8 @@ enable_builder_roles() {
 
   ## necessary permissions for building AR
   for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"; do
+    echo "builder role $i"
+    echo "about to run: enable_role $i $__principal projects/$PROJECT_ID"
     enable_role "$i" "$__principal" "projects/$PROJECT_ID"
   done
   unset __principal
