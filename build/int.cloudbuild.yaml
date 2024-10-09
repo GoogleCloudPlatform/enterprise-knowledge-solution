@@ -21,7 +21,7 @@ steps:
       - "-x"
       - "-c"
       - >-
-        go mod init github.com/eeaton/document-processing-and-understanding
+        go mod init github.com/eeaton/document-processing-and-understanding ;
         cd /workspace/build/test ;
         go test -v -run ./ -timeout 30m --tags=e2e
     entrypoint: /bin/bash
