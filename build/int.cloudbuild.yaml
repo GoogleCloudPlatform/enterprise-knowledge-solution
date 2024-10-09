@@ -38,6 +38,7 @@ steps:
     args:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+        ls
         cd sample-deployments/composer-orchestrated-process;
         export PROJECT_ID=${_PROJECT_ID};
         export IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL};
@@ -52,8 +53,8 @@ steps:
       - "-c"
       - >-
         ls
-        ~/invoke.sh sync
-        ~/invoke.sh lock
+        ../..invoke.sh sync
+        ../..invoke.sh lock
     entrypoint: /bin/bash
 
   - id: cleanup
@@ -62,7 +63,7 @@ steps:
       - "-x"
       - "-c"
       - >-
-        gcloud config unset auth/impersonate_service_account
+        gcloud config unset auth/impersonate_service_account;
         gcloud projects delete ${_PROJECT_ID} --quiet
     entrypoint: /bin/bash
 
@@ -73,6 +74,7 @@ tags:
 options:
   logging: CLOUD_LOGGING_ONLY
 
+  #TODO: move IAP_SUPPORT_EMAIL and anything else with meaningful id to the Cloud Build vars
 substitutions:
   _PROJECT_ID: "eks-int-${SHORT_SHA}"
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
