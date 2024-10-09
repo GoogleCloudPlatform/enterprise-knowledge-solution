@@ -38,7 +38,7 @@ steps:
     args:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        ls
+        ls;
         cd sample-deployments/composer-orchestrated-process;
         export PROJECT_ID=${_PROJECT_ID};
         export IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL};
@@ -52,7 +52,7 @@ steps:
       - "-x"
       - "-c"
       - >-
-        ls
+        ls;
         ../..invoke.sh sync
         ../..invoke.sh lock
     entrypoint: /bin/bash
