@@ -299,6 +299,7 @@ def generate_specialized_process_job_params(**context):
     )
     return specialized_parser_job_params_list
 
+
 with DAG(
     "run_docs_processing",
     default_args=default_args,
