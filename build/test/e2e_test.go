@@ -37,8 +37,8 @@ func TestPerProjectEndToEndDeployment(t *testing.T) {
 
 	const (
 		region             = "us-central1"
-		iap_access_domains = "['domain:eks-cicd.joonix.net']"
-		webui_domains      = "['eks-cicd.altostrat.com', 'demo.eks-cicd.altostrat.com']"
+		iap_access_domains = `["domain:eks-cicd.joonix.net"]`
+		webui_domains      = `["eks-cicd.altostrat.com", "demo.eks-cicd.altostrat.com"]`
 		docai_location     = "us"
 	)
 
