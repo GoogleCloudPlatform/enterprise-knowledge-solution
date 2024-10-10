@@ -66,7 +66,7 @@
 
 			 Vars: map[string]interface{}{
 				 "project_id":                    config.ProjectId,
-				 "region":                        region
+				 "region":                        region,
 				 "iap_access_domains":            iap_access_domains,
 				 "webui_domains":                 webui_domains,
 				 "docai_location":                docai_location
