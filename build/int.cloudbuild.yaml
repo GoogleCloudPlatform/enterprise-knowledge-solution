@@ -14,18 +14,6 @@
 
 timeout: 14400s
 steps:
-  - id: terratest
-    name: "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >-
-        cd /workspace/build/test ;
-        export PROJECT_ID=${_PROJECT_ID};
-        go test -v -run ./ -timeout 30m --tags=e2e
-    entrypoint: /bin/bash
-
   - id: prepare
     name: gcr.io/cloud-builders/gcloud-slim
     entrypoint: /bin/bash
@@ -57,6 +45,18 @@ steps:
         scripts/pre_tf_setup.sh;
     env:
       - "REGION=us-central1"
+
+  - id: terratest
+    name: "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        cd /workspace/build/test ;
+        export PROJECT_ID=${_PROJECT_ID};
+        go test -v -run ./ -timeout 30m --tags=e2e
+    entrypoint: /bin/bash
 
   #TODO: I might not need a dedicated python check, if this is effectively tested when serivces are built and funcitonal tests
   #  - id: invoke_python_dependencies
