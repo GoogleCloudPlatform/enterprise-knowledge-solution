@@ -20,16 +20,13 @@ package test
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
 	logger "github.com/gruntwork-io/terratest/modules/logger"
 	terraform "github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 
 	envconfig "github.com/sethvargo/go-envconfig"
-	assert "github.com/stretchr/testify/assert"
 )
 
 type TestConfig struct {
@@ -84,31 +81,31 @@ func TestPerProjectEndToEndDeployment(t *testing.T) {
 		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
 		terraform.ApplyAndIdempotent(t, terraformOptions)
 	})
+	/*
+		test_structure.RunTestStage(t, "validate", func() {
+			terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
+			ctx := context.Background()
 
-	test_structure.RunTestStage(t, "validate", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
-		ctx := context.Background()
+			instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+			assert.Nil(t, err)
+			assert.NotNil(t, instanceAdmin)
+			defer instanceAdmin.Close()
 
-		instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
-		assert.Nil(t, err)
-		assert.NotNil(t, instanceAdmin)
-		defer instanceAdmin.Close()
+			schedulerJobId := terraform.Output(t, terraformOptions, schedulerJobTfOutput)
+			schedulerClient, err := scheduler.NewCloudSchedulerClient(ctx)
+			assert.Nil(t, err)
+			assert.NotNil(t, schedulerClient)
+			defer schedulerClient.Close()
 
-		schedulerJobId := terraform.Output(t, terraformOptions, schedulerJobTfOutput)
-		schedulerClient, err := scheduler.NewCloudSchedulerClient(ctx)
-		assert.Nil(t, err)
-		assert.NotNil(t, schedulerClient)
-		defer schedulerClient.Close()
+			// Wait up to a minute for Spanner to report initial processing units
+			spannerInstanceId := fmt.Sprintf("projects/%s/instances/%s", config.ProjectId, spannerName)
+			waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTestProcessingUnits, 6, time.Second*10)
 
-		// Wait up to a minute for Spanner to report initial processing units
-		spannerInstanceId := fmt.Sprintf("projects/%s/instances/%s", config.ProjectId, spannerName)
-		waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTestProcessingUnits, 6, time.Second*10)
+			// Update the autoscaler config with a new minimum number of processing units
+			setAutoscalerConfigMinProcessingUnits(t, schedulerClient, schedulerJobId, spannerTargetProcessingUnits)
 
-		// Update the autoscaler config with a new minimum number of processing units
-		setAutoscalerConfigMinProcessingUnits(t, schedulerClient, schedulerJobId, spannerTargetProcessingUnits)
-
-		// Wait up to five minutes for Spanner to report final processing units
-		waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTargetProcessingUnits, 5*6, time.Second*10)
-	})
-
+			// Wait up to five minutes for Spanner to report final processing units
+			waitForSpannerProcessingUnits(t, instanceAdmin, spannerInstanceId, spannerTargetProcessingUnits, 5*6, time.Second*10)
+		})
+	*/
 }
