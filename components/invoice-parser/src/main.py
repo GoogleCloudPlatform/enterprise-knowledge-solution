@@ -22,7 +22,7 @@ import bigquery as bq_fns
 import docai
 import gcs
 from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud import bigquery, storage
+from google.cloud import storage
 
 USER_AGENT = "cloud-solutions/eks-docai-v1"
 
