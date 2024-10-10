@@ -59,11 +59,12 @@ func TestPerProjectEndToEndDeployment(t *testing.T) {
 			TerraformDir: terraformDir,
 
 			Vars: map[string]interface{}{
-				"project_id":         config.ProjectId,
-				"region":             region,
-				"iap_access_domains": iap_access_domains,
-				"webui_domains":      webui_domains,
-				"docai_location":     docai_location,
+				"project_id":                  config.ProjectId,
+				"region":                      region,
+				"iap_access_domains":          iap_access_domains,
+				"webui_domains":               webui_domains,
+				"docai_location":              docai_location,
+				"vertex_ai_data_store_region": region,
 			},
 			NoColor: true,
 		}
