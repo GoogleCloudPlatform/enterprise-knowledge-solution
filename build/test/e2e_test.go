@@ -71,11 +71,12 @@ func TestPerProjectEndToEndDeployment(t *testing.T) {
 		test_structure.SaveTerraformOptions(t, terraformDir, terraformOptions)
 		terraform.Init(t, terraformOptions)
 	})
-
-	defer test_structure.RunTestStage(t, "teardown", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
-		terraform.Destroy(t, terraformOptions)
-	})
+	/*
+		defer test_structure.RunTestStage(t, "teardown", func() {
+			terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
+			terraform.Destroy(t, terraformOptions)
+		})
+	*/
 
 	test_structure.RunTestStage(t, "apply", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)

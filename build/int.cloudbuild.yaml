@@ -22,6 +22,7 @@ steps:
       - "-c"
       - >-
         cd /workspace/build/test ;
+        export PROJECT_ID=${_PROJECT_ID};
         go test -v -run ./ -timeout 30m --tags=e2e
     entrypoint: /bin/bash
 
