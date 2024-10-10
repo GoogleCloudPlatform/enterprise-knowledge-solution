@@ -5,7 +5,6 @@ go 1.21
 require (
 	github.com/gruntwork-io/terratest v0.43.0
 	github.com/sethvargo/go-envconfig v0.9.0
-	github.com/stretchr/testify v1.8.4
 )
 
 require (
@@ -66,6 +65,7 @@ require (
 	github.com/pquerna/otp v1.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tmccombs/hcl2json v0.3.3 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/urfave/cli v1.22.2 // indirect

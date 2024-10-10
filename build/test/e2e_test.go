@@ -52,7 +52,7 @@ func TestPerProjectEndToEndDeployment(t *testing.T) {
 		t.Fatal()
 	}
 
-	terraformDir := "../sample-deployments/composer-orchestrated-process"
+	terraformDir := "../../sample-deployments/composer-orchestrated-process"
 
 	test_structure.RunTestStage(t, "setup", func() {
 		terraformOptions := &terraform.Options{
