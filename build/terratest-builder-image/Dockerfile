@@ -3,12 +3,12 @@ FROM golang:latest
 ARG tf_version=1.8.1-1
 
 # Install gcloud CLI
-RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"  | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list   && \
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
-    apt-get update && \
-    apt-get install -y google-cloud-sdk
+#RUN apt-get update && \
+#    apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common && \
+#    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"  | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list   && \
+#    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+#    apt-get update && \
+#    apt-get install -y google-cloud-sdk
 
 # Install terratest
 RUN apt-get update && apt-get install -y gnupg software-properties-common curl \
@@ -18,4 +18,4 @@ RUN apt-get update && apt-get install -y gnupg software-properties-common curl \
     && apt-get install terraform=${tf_version}
 
 # Set the working directory
-WORKDIR /app
+# WORKDIR /app

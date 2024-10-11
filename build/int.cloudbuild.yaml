@@ -57,6 +57,8 @@ steps:
         export PROJECT_ID=${_PROJECT_ID};
         go test -v -run ./ -timeout 30m --tags=e2e
     entrypoint: /bin/bash
+    env:
+      - "GCLOUD_TF_DOWNLOAD=always"
 
   #TODO: I might not need a dedicated python check, if this is effectively tested when serivces are built and funcitonal tests
   #  - id: invoke_python_dependencies
