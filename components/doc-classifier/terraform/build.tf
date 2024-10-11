@@ -21,7 +21,7 @@ locals {
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud" {
+module "gcloud_doc_classifier" {
   source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
