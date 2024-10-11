@@ -94,9 +94,9 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 module "processor" {
-  source     = "../../components/processing/terraform"
-  project_id = var.project_id
-  region     = var.region
+  source                            = "../../components/processing/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
   repository_region                 = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email

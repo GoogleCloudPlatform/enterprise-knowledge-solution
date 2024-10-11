@@ -11,12 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-locals {
-  simple_bucket_commit_hash = "e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
-}
 
 module "input_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=${local.simple_bucket_commit_hash}"
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "docs-input-${var.project_id}"
   location                 = var.region
@@ -26,7 +23,7 @@ module "input_bucket" {
 }
 
 module "process_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=${local.simple_bucket_commit_hash}"
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "dpu-process-${var.project_id}"
   location                 = var.region
@@ -36,7 +33,7 @@ module "process_bucket" {
 }
 
 module "reject_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=${local.simple_bucket_commit_hash}"
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "dpu-reject-${var.project_id}"
   location                 = var.region
