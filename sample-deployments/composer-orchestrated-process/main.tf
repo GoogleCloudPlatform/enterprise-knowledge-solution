@@ -103,7 +103,10 @@ module "doc_classifier_job" {
   artifact_repo = module.common_infra.artifact_repo.name
   # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
-  depends_on = [ ../../components/doc-classifier/terraform/module.gcloud.wait ]
+
+  # explicitly force a dependency on the images builds in gcloud module finishing
+  #depends_on = [ ../../components/doc-classifier/terraform/module.gcloud.wait ]
+  depends_on = [module.common_infra.module.gcloud.wait]
 
 }
 
