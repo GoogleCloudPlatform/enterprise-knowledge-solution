@@ -107,7 +107,8 @@ module "doc_classifier_job" {
   # explicitly force a dependency on the images builds in gcloud module finishing
   #depends_on = [ ../../components/doc-classifier/terraform/module.gcloud.wait ]
   # depends_on = [module.common_infra.module.gcloud.wait]
-  depends_on = [module.common_infra.module.gcloud_doc_classifier.wait]
+  depends_on = [module.gcloud-doc-classifier.wait.value]
+
 
 }
 
