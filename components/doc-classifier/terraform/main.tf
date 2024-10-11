@@ -70,6 +70,8 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.classifier_cloud_run_job_name
   location = var.region
 
+  depends_on = [module.gcloud-doc-classifier.wait]
+
   template {
     template {
       service_account = module.doc_classifier_account.email
