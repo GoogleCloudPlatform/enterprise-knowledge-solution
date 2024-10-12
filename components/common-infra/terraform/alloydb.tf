@@ -40,7 +40,7 @@ module "docs_results" {
 
 
 resource "time_sleep" "wait_for_alloydb_ready_state" {
-  create_duration = "120s"
+  create_duration = "600s"
   depends_on = [
     module.docs_results
   ]
