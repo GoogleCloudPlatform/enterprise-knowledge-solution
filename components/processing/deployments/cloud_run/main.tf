@@ -123,7 +123,7 @@ resource "local_file" "cloudbuild_cloud_run" {
 }
 
 # See https://github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud-form-processor" {
+module "gcloud" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 3.4"
 

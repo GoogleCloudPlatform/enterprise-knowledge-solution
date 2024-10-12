@@ -59,8 +59,6 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.form_parser_cloud_run_job_name
   location = var.region
 
-  depends_on = [module.form_parser_processor.module.gcloud-form-processor.wait]
-
   template {
     labels = local.dpu_label
     template {
