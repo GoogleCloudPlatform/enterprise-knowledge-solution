@@ -93,6 +93,8 @@ module "form_parser_processor" {
   gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
   alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
+
+  depends_on = [module.common_infra.wait]
 }
 
 #resource "time_sleep" "wait_for_alloydb_ready_state" {

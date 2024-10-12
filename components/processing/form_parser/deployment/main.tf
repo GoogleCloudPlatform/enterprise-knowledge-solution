@@ -62,7 +62,7 @@ resource "google_alloydb_user" "form_parser_user" {
   database_roles = ["alloydbiamuser"]
 
   # need to force a dependency that alloydb has been created and is in a ready state. TF resource creation does not guarantee that it's in the ready state
-  depends_on = [google_cloud_run_v2_job.docai-form-processor-job]
+  # depends_on = [module.common_infra.wait]
 }
 
 resource "google_cloud_run_v2_job" "docai-form-processor-job" {
