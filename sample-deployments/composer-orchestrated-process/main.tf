@@ -95,6 +95,13 @@ module "form_parser_processor" {
   alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
 }
 
+resource "time_sleep" "wait_for_alloydb_ready_state" {
+  create_duration = "120s"
+  depends_on = [
+    module.form_parser_processor
+  ]
+}
+
 module "doc_classifier_job" {
   source     = "../../components/doc-classifier/terraform"
   project_id = var.project_id
