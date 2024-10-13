@@ -52,14 +52,15 @@ check_exec_dependency() {
 }
 
 set_active_principal() {
-  local __active_principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+  local __active_principal
+  __active_principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
   if echo "$__active_principal" | grep "iam.gserviceaccount.com"; then
     ACTIVE_PRINCIPAL="serviceAccount:${__active_principal}"
   else
     ACTIVE_PRINCIPAL="user:${__active_principal}"
   fi
+  unset __active_principal
 }
-
 
 create_oauth_consent_config() {
   create_custom_role_iap
@@ -173,11 +174,6 @@ enable_bootstrap_apis() {
 enable_role() {
   local __role=$1 __principal=$2 __resource=$3
   echo "granting IAM Role $__role to $__principal at resource $__resource "
-  echo $__role
-  echo $__principal
-  echo $__resource
-  echo $PROJECT_ID
-  echo "about to run: gcloud projects add-iam-policy-binding $PROJECT_ID --role=$__role --member=$__principal 1>/dev/null"
   gcloud projects add-iam-policy-binding "$PROJECT_ID" --role="$__role" --member="$__principal" 1>/dev/null
   unset __role
   unset __principal
@@ -201,8 +197,6 @@ enable_builder_roles() {
 
   ## necessary permissions for building AR
   for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"; do
-    echo "builder role $i"
-    echo "about to run: enable_role $i $__principal projects/$PROJECT_ID"
     enable_role "$i" "$__principal" "projects/$PROJECT_ID"
   done
   unset __principal

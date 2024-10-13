@@ -86,7 +86,7 @@ All tests must pass before a feature branch can be merged to a release branch.
 
 ## Cloud Build integration tests
 
-Before a PR can be merged to a major version branch, it must pass integration test that confirms the repo can be deployed and pass functional tests in a clean GCP project.
+Before a PR can be merged to a major version branch, it must pass integration test that confirms the repository can be deployed and pass functional tests in a clean GCP project.
 
 1. A Cloud Build trigger is configured on an internal (non-public) GCP project to run on Pull Requests to each major version branch of this repository. The trigger runs the build defined at [/build/int.cloudbuild.yaml](/build/int.cloudbuild.yaml), which does the following high-level tasks:
    1. Create a new GCP project in an internal test environment

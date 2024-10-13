@@ -1,17 +1,4 @@
-# Copyright 2021 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+---
 timeout: 14400s
 steps:
   - id: prepare
@@ -33,7 +20,7 @@ steps:
 
   - id: pre_tf_setup
     name: gcr.io/cloud-builders/gcloud-slim
-    #name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    # name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: /bin/bash
     args:
       - "-c"
@@ -59,18 +46,6 @@ steps:
     entrypoint: /bin/bash
     env:
       - "GCLOUD_TF_DOWNLOAD=always"
-
-  #TODO: I might not need a dedicated python check, if this is effectively tested when serivces are built and funcitonal tests
-  #  - id: invoke_python_dependencies
-  #    name: gcr.io/cloud-builders/gcloud-slim
-  #    args:
-  #      - "-x"
-  #      - "-c"
-  #      - >-
-  #        apt install python3.10-venv;
-  #        ./invoke.sh sync;
-  #        ./invoke.sh lock
-  #    entrypoint: /bin/bash
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
