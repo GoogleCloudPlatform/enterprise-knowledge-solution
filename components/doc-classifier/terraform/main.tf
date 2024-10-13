@@ -70,7 +70,7 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.classifier_cloud_run_job_name
   location = var.region
 
-  depends_on = [module.gcloud-doc-classifier.wait]
+  depends_on = [module.gcloud_build_doc_classifier.wait]
 
   template {
     template {

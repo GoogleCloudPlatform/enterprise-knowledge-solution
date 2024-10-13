@@ -80,7 +80,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   }
 
   depends_on = [
-    module.gcloud-app-build.wait
+    module.gcloud_app_build.wait
   ]
 }
 
