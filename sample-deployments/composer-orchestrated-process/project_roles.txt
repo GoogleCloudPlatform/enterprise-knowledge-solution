@@ -2,7 +2,7 @@ projects/${PROJECT_ID}/roles/customIAPAdmin
 roles/alloydb.admin
 roles/artifactregistry.admin
 roles/bigquery.dataOwner
-roles/cloudbuild.builds.editor
+roles/cloudbuild.builds.builder
 roles/composer.admin
 roles/compute.networkAdmin
 roles/compute.securityAdmin
@@ -13,7 +13,6 @@ roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
-roles/owner
 roles/resourcemanager.projectIamAdmin
 roles/run.developer
 roles/logging.logWriter
