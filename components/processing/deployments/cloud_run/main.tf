@@ -123,7 +123,7 @@ resource "local_file" "cloudbuild_cloud_run" {
 }
 
 # See https://github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud" {
+module "gcloud_build_processing" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 3.4"
 
@@ -139,4 +139,3 @@ module "gcloud" {
     time_sleep.wait_for_policy_propagation
   ]
 }
-

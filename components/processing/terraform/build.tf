@@ -39,7 +39,7 @@ resource "local_file" "cloudbuild_cloud_run" {
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud" {
+module "gcloud_processing_2" {
   source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   create_cmd_entrypoint = "gcloud"

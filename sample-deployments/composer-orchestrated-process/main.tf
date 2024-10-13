@@ -56,6 +56,8 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+
+  depends_on = [module.gcloud_build_processing, module.gcloud_processing_2]
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
