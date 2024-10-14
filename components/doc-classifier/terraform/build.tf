@@ -25,8 +25,7 @@ module "gcloud_build_doc_classifier" {
   source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    auth print-access-token && \
-    gcloud auth configure-docker ${var.region}-docker.pkg.dev && \
+    auth configure-docker ${var.region}-docker.pkg.dev && \
     gcloud builds submit ${path.module}/../src \
       --pack image=${local.image_name_and_tag} \
       --project ${var.project_id} \

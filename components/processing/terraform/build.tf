@@ -44,8 +44,7 @@ module "gcloud_build_processing_2" {
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    auth print-access-token && \
-    gcloud auth configure-docker ${var.region}-docker.pkg.dev && \
+    auth configure-docker ${var.region}-docker.pkg.dev && \
     gcloud builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
