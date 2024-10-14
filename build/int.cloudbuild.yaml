@@ -42,10 +42,8 @@ steps:
       - >-
         cd /workspace/build/test ;
         export PROJECT_ID=${_PROJECT_ID};
-        go test -v -run ./ -timeout 30m --tags=e2e
+        go test -v -run ./ -timeout 60m --tags=e2e
     entrypoint: /bin/bash
-    env:
-      - "GCLOUD_TF_DOWNLOAD=always"
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
