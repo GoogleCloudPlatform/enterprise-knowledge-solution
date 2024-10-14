@@ -34,12 +34,12 @@ module "gcloud_app_build" {
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    auth configure-docker ${var.region}-docker.pkg.dev && \
-    gcloud builds submit "${path.module}/../../.." \
+    builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_config.filename} \
-
+      --default-buckets-behavior=regional-user-owned-bucket \
+      --service-account "projects/${var.project_id}/serviceAccounts/deployer@${var.project_id}.iam.gserviceaccount.com"
 
   EOT
   enabled               = true
