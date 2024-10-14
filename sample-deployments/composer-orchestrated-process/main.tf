@@ -57,7 +57,7 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
 
-  # depends_on = [module.processor.gcloud_buildsdfgsdfg_processing, module.processor.gcloud_processing_2]
+  depends_on = [module.project_services]
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
