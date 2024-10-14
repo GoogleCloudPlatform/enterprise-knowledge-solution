@@ -264,9 +264,9 @@ gitpython==3.1.43 \
     # via
     #   -c reqs/constraints.txt
     #   streamlit
-google-api-core==2.19.0 \
-    --hash=sha256:8661eec4078c35428fd3f69a2c7ee29e342896b70f01d1a1cbcb334372dd6251 \
-    --hash=sha256:cf1b7c2694047886d2af1128a03ae99e391108a08804f87cfd35970e49c9cd10
+google-api-core==2.21.0 \
+    --hash=sha256:4a152fd11a9f774ea606388d423b68aa7e6d6a0ffe4c8266f74979613ec09f81 \
+    --hash=sha256:6869eacb2a37720380ba5898312af79a4d30b8bca1548fb4093e0697dc4bdf5d
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
