@@ -36,3 +36,6 @@ super-linter.log
 .external_modules/*
 .mypy_cache/*
 
+# integration testing
+**/.test-data/*
+accesstoken.txt
