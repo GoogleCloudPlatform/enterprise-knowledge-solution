@@ -39,5 +39,4 @@ module "gcloud_build_doc_classifier" {
   create_cmd_triggers = {
     source_contents_hash = local.cloud_build_content_hash
   }
-  # "output.wait"
 }
