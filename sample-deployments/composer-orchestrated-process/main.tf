@@ -57,7 +57,7 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
 
-  depends_on = [module.project_services]
+  depends_on = [module.project_services, module.processor, module.form_parser_processor]
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
@@ -99,12 +99,6 @@ module "form_parser_processor" {
   depends_on = [module.common_infra.wait]
 }
 
-#resource "time_sleep" "wait_for_alloydb_ready_state" {
-#  create_duration = "120s"
-#  depends_on = [
-#    module.form_parser_processor
-#  ]
-#}
 
 module "doc_classifier_job" {
   source     = "../../components/doc-classifier/terraform"
@@ -114,12 +108,6 @@ module "doc_classifier_job" {
   artifact_repo = module.common_infra.artifact_repo.name
   # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
-
-  # explicitly force a dependency on the images builds in gcloud module finishing
-  #depends_on = [ ../../components/doc-classifier/terraform/module.gcloud.wait ]
-  # depends_on = [module.common_infra.module.gcloud.wait]
-
-
 
 }
 
