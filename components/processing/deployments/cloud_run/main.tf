@@ -129,12 +129,13 @@ module "gcloud_build_processing" {
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    builds submit \"${path.module}/../../../../\"
+    auth list &&
+    gcloud builds submit \"${path.module}/../../../../\"
       --region ${var.region}
       --project ${var.project_id}
       --config \"${local_file.cloudbuild_cloud_run.filename}\"
       --default-buckets-behavior=regional-user-owned-bucket \
-      --serviceAccount "projects/${var.project_id}/serviceAccounts/deployer@${var.project_id}.iam.gserviceaccount.com"
+      --service-account "projects/${var.project_id}/serviceAccounts/deployer@${var.project_id}.iam.gserviceaccount.com"
   EOT
 
   enabled = true
