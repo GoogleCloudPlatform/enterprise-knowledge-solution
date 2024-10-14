@@ -38,4 +38,3 @@ super-linter.log
 
 # integration testing
 **/.test-data/*
-accesstoken.txt
