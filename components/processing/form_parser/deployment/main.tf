@@ -47,27 +47,19 @@ resource "google_project_iam_member" "storage_admin" {
   member  = "serviceAccount:${google_service_account.dpu_run_service_account.email}"
 }
 
-#resource "time_sleep" "wait_for_alloydb_ready_state" {
-#  create_duration = "120s"
-#  depends_on = [
-#    module.common_infra
-#  ]
-#}
-
 resource "google_alloydb_user" "form_parser_user" {
   cluster   = var.alloydb_cluster_name
   user_id   = google_service_account.dpu_run_service_account.email
   user_type = "ALLOYDB_IAM_USER"
 
   database_roles = ["alloydbiamuser"]
-
-  # need to force a dependency that alloydb has been created and is in a ready state. TF resource creation does not guarantee that it's in the ready state
-  # depends_on = [module.common_infra.wait]
 }
 
 resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.form_parser_cloud_run_job_name
   location = var.region
+
+  # TODO: once the image build is managed in Terraform, add a depends_on block to ensure that the build completes before this resource is created
 
   template {
     labels = local.dpu_label
