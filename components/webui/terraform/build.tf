@@ -34,7 +34,7 @@ module "gcloud_app_build" {
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    auth list &&
+    auth configure-docker ${var.region}-docker.pkg.dev && \
     gcloud builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
