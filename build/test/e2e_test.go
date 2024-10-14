@@ -33,7 +33,7 @@ type TestConfig struct {
 	ProjectId string `env:"PROJECT_ID,required"`
 }
 
-func TestPerProjectEndToEndDeployment(t *testing.T) {
+func TestE2eDeployment(t *testing.T) {
 
 	const (
 		region             = "us-central1"
