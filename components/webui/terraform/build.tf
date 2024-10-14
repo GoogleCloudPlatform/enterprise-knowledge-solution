@@ -34,7 +34,8 @@ module "gcloud_app_build" {
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    builds submit "${path.module}/../../.." \
+    auth list &&
+    gcloud builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_config.filename} \
