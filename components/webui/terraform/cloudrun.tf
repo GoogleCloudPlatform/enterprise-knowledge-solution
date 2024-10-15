@@ -94,8 +94,7 @@ resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
 }
 
 module "eks_webui_lb" {
-  source                          = "terraform-google-modules/lb-http/google//modules/serverless_negs" #checkov:skip=CKV_TF_1:Commit hash cannot be used for sub-module
-  version                         = "~> 11.0"
+  source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
   name                            = "eks-webui-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
