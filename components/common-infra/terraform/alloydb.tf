@@ -37,3 +37,11 @@ module "docs_results" {
     }
   }
 }
+
+
+resource "time_sleep" "wait_for_alloydb_ready_state" {
+  create_duration = "300s"
+  depends_on = [
+    module.docs_results
+  ]
+}

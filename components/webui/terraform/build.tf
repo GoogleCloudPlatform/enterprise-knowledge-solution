@@ -29,16 +29,19 @@ resource "local_file" "cloudbuild_config" {
 }
 
 # Build and upload the app container
-module "app_build" {
+module "gcloud_app_build" {
   source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    builds submit \
+    auth configure-docker ${var.region}-docker.pkg.dev && \
+    gcloud builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_config.filename} \
-      "${path.module}/../../.."
+      --default-buckets-behavior=regional-user-owned-bucket \
+      --service-account "projects/${var.project_id}/serviceAccounts/deployer@${var.project_id}.iam.gserviceaccount.com"
+
   EOT
   enabled               = true
 
