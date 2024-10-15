@@ -1,5 +1,5 @@
 ---
-timeout: 14400s
+timeout: 7200s
 steps:
   - id: prepare
     name: gcr.io/cloud-builders/gcloud-slim
@@ -9,8 +9,6 @@ steps:
       - "-x"
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        echo "Creat";
-        echo $_TEST_PROJECT_ID;
         gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
@@ -26,7 +24,7 @@ steps:
         export PROJECT_ID=${_TEST_PROJECT_ID};
         scripts/pre_tf_setup.sh;
     env:
-      - "REGION={_REGION}"
+      - "REGION=${_REGION}"
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
   - id: terratest
@@ -42,11 +40,11 @@ steps:
     entrypoint: /bin/bash
     env:
       - "GCLOUD_TF_DOWNLOAD=always"
-      - "REGION={_REGION}"
-      - "DOC_AI_LOCATION={_DOC_AI_LOCATION}"
-      - "VERTEX_AI_DATA_STORE_REGION={_VERTEX_AI_DATA_STORE_REGION}"
-      - "IAP_ACCESS_DOMAINS={_IAP_ACCESS_DOMAINS}"
-      - "WEB_UI_DOMAINS={_WEB_UI_DOMAINS}"
+      - "REGION=${_REGION}"
+      - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
+      - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
+      - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
+      - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
@@ -71,9 +69,10 @@ substitutions:
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
   # The following subsitutions are passed by the Cloud Build trigger:
-  # _WEB_UI_DOMAINS
+  # _BILLING_ACCOUNT
+  # _FOLDER_ID
   # _IAP_ACCESS_DOMAINS
   # _IAP_SUPPORT_EMAIL
-  # PROJECT_ID
-  # Note that PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
+  # _WEB_UI_DOMAINS
+  # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
   # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}
