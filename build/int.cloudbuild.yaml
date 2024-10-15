@@ -68,7 +68,7 @@ substitutions:
   _REGION: "us-central1"
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
-  # The following subsitutions are passed by the Cloud Build trigger:
+  # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
   # _FOLDER_ID
   # _IAP_ACCESS_DOMAINS
