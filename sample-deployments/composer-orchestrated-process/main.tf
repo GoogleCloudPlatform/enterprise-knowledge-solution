@@ -58,22 +58,6 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   create_advanced_site_search = false
   document_processing_config {
     default_parsing_config {
-      digital_parsing_config {}
-    }
-    parsing_config_overrides {
-      file_type = "pdf"
-      layout_parsing_config {}
-    }
-    parsing_config_overrides {
-      file_type = "docx"
-      layout_parsing_config {}
-    }
-    parsing_config_overrides {
-      file_type = "pptx"
-      layout_parsing_config {}
-    }
-    parsing_config_overrides {
-      file_type = "xlsx"
       layout_parsing_config {}
     }
   }
