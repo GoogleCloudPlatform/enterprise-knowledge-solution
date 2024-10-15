@@ -29,7 +29,7 @@ import (
 )
 
 type TestConfig struct {
-	ProjectId               string `env:"_PROJECT_ID,required"`
+	ProjectId               string `env:"PROJECT_ID,required"`
 	Region                  string `env:"_REGION,required"`
 	DocAiLocation           string `env:"_DOC_AI_LOCATION,required"`
 	VertexAiDataStoreRegion string `env:"_VERTEX_AI_DATA_STORE_REGION,required"`
