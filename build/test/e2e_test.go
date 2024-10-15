@@ -30,11 +30,11 @@ import (
 
 type TestConfig struct {
 	ProjectId               string `env:"PROJECT_ID,required"`
-	Region                  string `env:"_REGION,required"`
-	DocAiLocation           string `env:"_DOC_AI_LOCATION,required"`
-	VertexAiDataStoreRegion string `env:"_VERTEX_AI_DATA_STORE_REGION,required"`
-	IapAccessDomains        string `env:"_IAP_ACCESS_DOMAINS,required"`
-	WebUiDomains            string `env:"_WEB_UI_DOMAINS,required"`
+	Region                  string `env:"REGION,required"`
+	DocAiLocation           string `env:"DOC_AI_LOCATION,required"`
+	VertexAiDataStoreRegion string `env:"VERTEX_AI_DATA_STORE_REGION,required"`
+	IapAccessDomains        string `env:"IAP_ACCESS_DOMAINS,required"`
+	WebUiDomains            string `env:"WEB_UI_DOMAINS,required"`
 }
 
 func TestE2e(t *testing.T) {

@@ -9,29 +9,25 @@ steps:
       - "-x"
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        echo "the project id is:";
-        echo $_PROJECT_ID;
-        gcloud projects create ${_PROJECT_ID} --folder ${_FOLDER_ID} ;
+        echo "Creat";
+        echo $_TEST_PROJECT_ID;
+        gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
-        trap "gcloud projects delete ${_PROJECT_ID} --quiet " ERR ;
-        gcloud billing projects link ${_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
-    env:
-      - "PROJECT_ID=${_PROJECT_ID}"
+        trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
+        gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
   - id: pre_tf_setup
     name: gcr.io/cloud-builders/gcloud-slim
-    # name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: /bin/bash
     args:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        ls;
         cd sample-deployments/composer-orchestrated-process;
-        export PROJECT_ID=${_PROJECT_ID};
-        export IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL};
+        export PROJECT_ID=${_TEST_PROJECT_ID};
         scripts/pre_tf_setup.sh;
     env:
-      - "REGION=us-central1"
+      - "REGION={_REGION}"
+      - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
   - id: terratest
     name: "us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder"
@@ -41,11 +37,16 @@ steps:
       - "-c"
       - >-
         cd /workspace/build/test ;
-        export PROJECT_ID=${_PROJECT_ID};
+        export PROJECT_ID=${_TEST_PROJECT_ID};
         go test -v -run ./ -timeout 60m --tags=e2e
     entrypoint: /bin/bash
     env:
       - "GCLOUD_TF_DOWNLOAD=always"
+      - "REGION={_REGION}"
+      - "DOC_AI_LOCATION={_DOC_AI_LOCATION}"
+      - "VERTEX_AI_DATA_STORE_REGION={_VERTEX_AI_DATA_STORE_REGION}"
+      - "IAP_ACCESS_DOMAINS={_IAP_ACCESS_DOMAINS}"
+      - "WEB_UI_DOMAINS={_WEB_UI_DOMAINS}"
 
   - id: cleanup
     name: gcr.io/cloud-builders/gcloud-slim
@@ -54,7 +55,7 @@ steps:
       - "-c"
       - >-
         gcloud config unset auth/impersonate_service_account;
-        gcloud projects delete ${_PROJECT_ID} --quiet
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
     entrypoint: /bin/bash
 
 tags:
@@ -65,9 +66,14 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _PROJECT_ID: "eks-int-${SHORT_SHA}"
+  _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
   _REGION: "us-central1"
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
-  _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.22"
+  # The following subsitutions are passed by the Cloud Build trigger:
+  # _WEB_UI_DOMAINS
+  # _IAP_ACCESS_DOMAINS
+  # _IAP_SUPPORT_EMAIL
+  # PROJECT_ID
+  # Note that PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
+  # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}
