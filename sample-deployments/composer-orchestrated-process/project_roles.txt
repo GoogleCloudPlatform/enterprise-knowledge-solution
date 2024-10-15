@@ -13,7 +13,6 @@ roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
-roles/owner
 roles/resourcemanager.projectIamAdmin
 roles/run.developer
 roles/logging.logWriter
