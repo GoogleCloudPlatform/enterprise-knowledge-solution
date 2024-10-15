@@ -25,23 +25,19 @@ import (
 	logger "github.com/gruntwork-io/terratest/modules/logger"
 	terraform "github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
-
 	envconfig "github.com/sethvargo/go-envconfig"
 )
 
 type TestConfig struct {
-	ProjectId string `env:"PROJECT_ID,required"`
+	ProjectId               string `env:"_PROJECT_ID,required"`
+	Region                  string `env:"_REGION,required"`
+	DocAiLocation           string `env:"_DOC_AI_LOCATION,required"`
+	VertexAiDataStoreRegion string `env:"_VERTEX_AI_DATA_STORE_REGION,required"`
+	IapAccessDomains        string `env:"_IAP_ACCESS_DOMAINS,required"`
+	WebUiDomains            string `env:"_WEB_UI_DOMAINS,required"`
 }
 
-func TestE2eDeployment(t *testing.T) {
-
-	const (
-		region             = "us-central1"
-		multiregion        = "us"
-		iap_access_domains = `["domain:eks-cicd.joonix.net"]`
-		webui_domains      = `["eks-cicd.altostrat.com", "demo.eks-cicd.altostrat.com"]`
-		docai_location     = "us"
-	)
+func TestE2e(t *testing.T) {
 
 	var config TestConfig
 
@@ -61,11 +57,11 @@ func TestE2eDeployment(t *testing.T) {
 
 			Vars: map[string]interface{}{
 				"project_id":                  config.ProjectId,
-				"region":                      region,
-				"iap_access_domains":          iap_access_domains,
-				"webui_domains":               webui_domains,
-				"docai_location":              docai_location,
-				"vertex_ai_data_store_region": multiregion,
+				"region":                      config.Region,
+				"iap_access_domains":          config.IapAccessDomains,
+				"webui_domains":               config.WebUiDomains,
+				"docai_location":              config.DocAiLocation,
+				"vertex_ai_data_store_region": config.VertexAiDataStoreRegion,
 			},
 			NoColor: true,
 		}

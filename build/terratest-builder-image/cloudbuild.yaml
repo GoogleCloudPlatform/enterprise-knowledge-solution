@@ -2,7 +2,7 @@
 steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
     script: |
-      docker build -t us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder .
+      docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder .
     automapSubstitutions: true
 images:
-  - "us-central1-docker.pkg.dev/eks-cicd-orchestrator/ci/test-builder"
+  - "us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder"
