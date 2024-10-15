@@ -130,7 +130,7 @@ create_service_account_and_enable_impersonation() {
       --description="The service account used to deploy Enterprise Knowledge Solution resources" \
       --display-name="EKS deployer service account" \
       --project="$PROJECT_ID"
-    sleep 10; # ocassional flaky errors that "sa does not exist" when trying to apply IAM roles immediately after creation
+    sleep 10 # ocassional flaky errors that "sa does not exist" when trying to apply IAM roles immediately after creation
   fi
   enable_role "roles/iam.serviceAccountTokenCreator" "$ACTIVE_PRINCIPAL" "$SERVICE_ACCOUNT_ID"
   unset __deployer_sa
