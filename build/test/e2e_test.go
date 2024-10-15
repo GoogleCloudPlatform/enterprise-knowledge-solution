@@ -82,7 +82,7 @@ func TestE2eDeployment(t *testing.T) {
 
 	test_structure.RunTestStage(t, "apply", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
-		terraform.ApplyAndIdempotent(t, terraformOptions)
+		terraform.InitAndApply(t, terraformOptions)
 	})
 	/*
 		test_structure.RunTestStage(t, "validate", func() {
