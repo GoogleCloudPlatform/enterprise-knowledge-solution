@@ -37,6 +37,7 @@ func TestE2eDeployment(t *testing.T) {
 
 	const (
 		region             = "us-central1"
+		multiregion        = "us"
 		iap_access_domains = `["domain:eks-cicd.joonix.net"]`
 		webui_domains      = `["eks-cicd.altostrat.com", "demo.eks-cicd.altostrat.com"]`
 		docai_location     = "us"
@@ -64,7 +65,7 @@ func TestE2eDeployment(t *testing.T) {
 				"iap_access_domains":          iap_access_domains,
 				"webui_domains":               webui_domains,
 				"docai_location":              docai_location,
-				"vertex_ai_data_store_region": region,
+				"vertex_ai_data_store_region": multiregion,
 			},
 			NoColor: true,
 		}
