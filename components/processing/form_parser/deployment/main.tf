@@ -59,8 +59,6 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.form_parser_cloud_run_job_name
   location = var.region
 
-  # TODO: once the image build is managed in Terraform, add a depends_on block to ensure that the build completes before this resource is created
-
   template {
     labels = local.dpu_label
     template {
