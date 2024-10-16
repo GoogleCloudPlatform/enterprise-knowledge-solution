@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y gnupg software-properties-common curl -
   && rm -rf /var/lib/apt/lists/*
 
 # Install gcloud SDK
-RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-435.0.0-linux-x86_64.tar.gz && \
-  tar -xvzf google-cloud-cli-435.0.0-linux-x86_64.tar.gz && \
+RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-497.0.0-linux-x86_64.tar.gz && \
+  tar -xvzf google-cloud-cli-497.0.0-linux-x86_64.tar.gz && \
   ./google-cloud-sdk/install.sh -q && \
-  rm google-cloud-cli-435.0.0-linux-x86_64.tar.gz
+  rm google-cloud-cli-497.0.0-linux-x86_64.tar.gz
 
 ENV PATH=$PATH:/go/google-cloud-sdk/bin
