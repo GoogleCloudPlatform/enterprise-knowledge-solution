@@ -2,7 +2,7 @@
 timeout: 7200s
 steps:
   - id: prepare
-    name: gcr.io/cloud-builders/gcloud-slim
+    name: ${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_DIGEST}
     entrypoint: /bin/bash
     args:
       - "-e"
@@ -15,7 +15,7 @@ steps:
         gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
   - id: pre_tf_setup
-    name: gcr.io/cloud-builders/gcloud-slim
+    name: ${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_DIGEST}
     entrypoint: /bin/bash
     args:
       - "-c"
@@ -28,7 +28,7 @@ steps:
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
   - id: terratest
-    name: "us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_DIGEST}"
     args:
       - "-e"
       - "-x"
@@ -39,15 +39,15 @@ steps:
         go test -v -run ./ -timeout 60m --tags=e2e
     entrypoint: /bin/bash
     env:
-      - "GCLOUD_TF_DOWNLOAD=always"
       - "REGION=${_REGION}"
       - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
       - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
       - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
+  #      - "GCLOUD_TF_DOWNLOAD=always"
 
   - id: cleanup
-    name: gcr.io/cloud-builders/gcloud-slim
+    name: ${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_DIGEST}
     args:
       - "-x"
       - "-c"
@@ -68,6 +68,8 @@ substitutions:
   _REGION: "us-central1"
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
+  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
+  _BUILDER_IMAGE_DIGEST: "sha256:7c6cd63bb6f53996034db0142ad6a807690a69c73facad1e646b0939250c0d65"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
   # _FOLDER_ID

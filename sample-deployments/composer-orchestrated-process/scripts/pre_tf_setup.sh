@@ -23,8 +23,8 @@ set -o nounset
 section_open "Check if the necessary dependencies are available: gcloud, terraform"
 check_exec_dependency "gcloud"
 check_exec_version "gcloud"
-#check_exec_dependency "terraform"
-#check_exec_version "terraform"
+check_exec_dependency "terraform"
+check_exec_version "terraform"
 section_close
 
 section_open "Check and set mandatory environment variables"
