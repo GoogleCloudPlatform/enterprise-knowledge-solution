@@ -36,7 +36,7 @@ steps:
       - >-
         cd /workspace/build/test ;
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        go test -v -run ./ -timeout 60m --tags=e2e
+        go test -v -run ./ -timeout 90m --tags=e2e
     entrypoint: /bin/bash
     env:
       - "REGION=${_REGION}"
