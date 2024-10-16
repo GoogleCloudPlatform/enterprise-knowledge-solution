@@ -2,7 +2,7 @@
 timeout: 7200s
 steps:
   - id: prepare
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
       - "-e"
@@ -15,7 +15,7 @@ steps:
         gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
   - id: pre_tf_setup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
       - "-c"
@@ -28,7 +28,7 @@ steps:
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
   - id: terratest
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
       - "-x"
@@ -47,7 +47,7 @@ steps:
   #      - "GCLOUD_TF_DOWNLOAD=always"
 
   - id: cleanup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-x"
       - "-c"
