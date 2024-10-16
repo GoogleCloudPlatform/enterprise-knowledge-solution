@@ -97,12 +97,12 @@ module "form_parser_processor" {
 
 
 module "doc_classifier_job" {
-  source        = "../../components/doc-classifier/terraform"
-  project_id    = var.project_id
-  region        = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
-  # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
+  source                            = "../../components/doc-classifier/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
 }
 

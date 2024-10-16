@@ -35,7 +35,7 @@ module "gcloud_build_doc_classifier" {
       --project ${var.project_id} \
       --region ${var.region} \
       --default-buckets-behavior=regional-user-owned-bucket \
-      --service-account "projects/${var.project_id}/serviceAccounts/deployer@${var.project_id}.iam.gserviceaccount.com"
+      --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
 
   EOT
   enabled               = true
