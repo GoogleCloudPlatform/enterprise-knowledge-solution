@@ -46,7 +46,7 @@ To deploy this solution, you need:
 
 - You must deploy the customer classifier and mark it as a default version for the Cloud Composer workflow to detect it and use.
 
-- VPC network creation is configurable. If you prefer to use an existing VPC network, provide VPC network information during the deployment process. 
+- VPC network creation is configurable. If you prefer to use an existing VPC network, provide VPC network information in terraform.tfvars during the deployment process. You can create a vpc for testing using the [sample vpc terraform script](components/common-infra/test-vpc)
 
 ### Deploying the Sample
 1. Open [Cloud Shell](https://console.cloud.google.com/cloudshell)
@@ -175,6 +175,7 @@ Once the workflow completes successfully, all documents will be imported into th
     * The app will provide summarized answers based on the content of your documents, along with references to the specific source documents.
 
 ### Search and Explore from EKS Web-UI
+Skip this if you have not deployed the Web-UI component.  
 1. Get the EKS Web-UI URI:
     ```sh
     terraform output web_ui_uri
@@ -185,6 +186,8 @@ Once the workflow completes successfully, all documents will be imported into th
 1. Search and Explore:
     * In the `Search Documents` page, enter your questions or queries related to the documents you've uploaded and press enter to get summarized answers, along with references to the specific source documents.
     * In the `Browse Documents` page, explore and view the documents stored in the Data Store.
+
+For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
 
 ### Delete a document from EKS
 1. Identify the document you want to delete:
@@ -203,5 +206,4 @@ Once the workflow completes successfully, all documents will be imported into th
 
     ```sh
     scripts/delete_doc.sh -b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]
-    ``` 
-For more information on the Web-UI component, please refer to its [README](./components/webui/README.md).
+    ```
