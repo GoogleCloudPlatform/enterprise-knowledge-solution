@@ -73,11 +73,9 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 module "processor" {
-  source     = "../../components/processing/terraform"
-  project_id = var.project_id
-  region     = var.region
-  # bq_region                         = var.region
-  # gcs_region                        = var.region
+  source                            = "../../components/processing/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
   repository_region                 = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
@@ -93,16 +91,18 @@ module "form_parser_processor" {
   gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
   alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
+
+  depends_on = [module.common_infra.wait]
 }
 
+
 module "doc_classifier_job" {
-  source     = "../../components/doc-classifier/terraform"
-  project_id = var.project_id
-  region     = var.region
-  # repository_region                 = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
-  # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
+  source                            = "../../components/doc-classifier/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
 }
 

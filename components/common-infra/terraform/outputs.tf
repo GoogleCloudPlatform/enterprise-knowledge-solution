@@ -57,3 +57,8 @@ output "vpc_network_name" {
 output "alloydb_cluster_name" {
   value = module.docs_results.cluster_name
 }
+
+output "wait" {
+  description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules "
+  value       = time_sleep.wait_for_alloydb_ready_state
+}

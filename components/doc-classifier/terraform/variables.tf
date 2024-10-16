@@ -33,3 +33,8 @@ variable "classifier_cloud_run_job_name" {
   type        = string
   default     = "doc-classifier"
 }
+
+variable "cloud_build_service_account_email" {
+  description = "the user-managed service account configured for Cloud Build"
+  type        = string
+}

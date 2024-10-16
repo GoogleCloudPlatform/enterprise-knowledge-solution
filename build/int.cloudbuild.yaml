@@ -1,0 +1,80 @@
+---
+timeout: 7200s
+steps:
+  - id: prepare
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    entrypoint: /bin/bash
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+        gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
+        sleep 10 ;
+        trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
+        gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
+
+  - id: pre_tf_setup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+        cd sample-deployments/composer-orchestrated-process;
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        scripts/pre_tf_setup.sh;
+    env:
+      - "REGION=${_REGION}"
+      - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
+
+  - id: terratest
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        cd /workspace/build/test ;
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        go test -v -run ./ -timeout 90m --tags=e2e
+    entrypoint: /bin/bash
+    env:
+      - "REGION=${_REGION}"
+      - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
+      - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
+      - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
+      - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
+  #      - "GCLOUD_TF_DOWNLOAD=always"
+
+  - id: cleanup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        gcloud config unset auth/impersonate_service_account;
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+    entrypoint: /bin/bash
+
+tags:
+  - "ci"
+  - "integration"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
+  _REGION: "us-central1"
+  _DOC_AI_LOCATION: "us"
+  _VERTEX_AI_DATA_STORE_REGION: "us"
+  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
+  _BUILDER_IMAGE_TAG: "1.0.0"
+  # The following subsitutions must be passed by the Cloud Build trigger:
+  # _BILLING_ACCOUNT
+  # _FOLDER_ID
+  # _IAP_ACCESS_DOMAINS
+  # _IAP_SUPPORT_EMAIL
+  # _WEB_UI_DOMAINS
+  # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
+  # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}

@@ -51,9 +51,20 @@ check_exec_dependency() {
   unset EXECUTABLE_NAME
 }
 
+set_active_principal() {
+  local __active_principal
+  __active_principal=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+  if echo "$__active_principal" | grep "iam.gserviceaccount.com"; then
+    ACTIVE_PRINCIPAL="serviceAccount:${__active_principal}"
+  else
+    ACTIVE_PRINCIPAL="user:${__active_principal}"
+  fi
+  unset __active_principal
+}
+
 create_oauth_consent_config() {
   create_custom_role_iap
-  enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "user:$CURRENT_USER" "projects/$PROJECT_ID"
+  enable_role "projects/$PROJECT_ID/roles/customIAPAdmin" "$ACTIVE_PRINCIPAL" "projects/$PROJECT_ID"
   echo "Check if OAuth Consent Screen (brand) already exists"
   set +e # Disable errexit
   __iap_brand="$(gcloud iap oauth-brands list --format='get(name)')"
@@ -119,8 +130,9 @@ create_service_account_and_enable_impersonation() {
       --description="The service account used to deploy Enterprise Knowledge Solution resources" \
       --display-name="EKS deployer service account" \
       --project="$PROJECT_ID"
+    sleep 10 # ocassional flaky errors that "sa does not exist" when trying to apply IAM roles immediately after creation
   fi
-  enable_role "roles/iam.serviceAccountTokenCreator" "user:$CURRENT_USER" "$SERVICE_ACCOUNT_ID"
+  enable_role "roles/iam.serviceAccountTokenCreator" "$ACTIVE_PRINCIPAL" "$SERVICE_ACCOUNT_ID"
   unset __deployer_sa
 }
 
@@ -190,4 +202,14 @@ enable_builder_roles() {
   done
   unset __principal
   unset __PROJECTNUM
+}
+
+set_adc() {
+  # check if the script is manually triggered by a user, or automated in CI build by a service account. Different methods of ADC for each
+  if echo "$ACTIVE_PRINCIPAL" | grep "iam.gserviceaccount.com"; then
+    echo "WARNING: Setting application default credentials with an impersonated service account requires an interactive sign-in flow with your username and password, but this script has been run with a service account identity. Ensure that you set ADC with the correct service account before running terraform commands. https://cloud.google.com/docs/authentication/provide-credentials-adc"
+
+  else
+    gcloud auth application-default login --impersonate-service-account="${SERVICE_ACCOUNT_ID}"
+  fi
 }

@@ -1,8 +1,10 @@
+aiplatform.googleapis.com
 artifactregistry.googleapis.com
 cloudasset.googleapis.com
 cloudbuild.googleapis.com
 cloudresourcemanager.googleapis.com
 compute.googleapis.com
+discoveryengine.googleapis.com
 documentai.googleapis.com
 iam.googleapis.com
 iap.googleapis.com
