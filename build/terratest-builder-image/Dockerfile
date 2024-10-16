@@ -21,7 +21,3 @@ RUN wget -nv https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-c
 
 # make gcloud available on PATH
 ENV PATH=$PATH:/go/google-cloud-sdk/bin
-
-# Explicitly set a user to avoid running as root
-RUN useradd -r -s /bin/bash -u 1000 app
-USER app

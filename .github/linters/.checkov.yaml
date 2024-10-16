@@ -15,4 +15,4 @@ download-external-modules: false
 # CKV_GCP_62 Access and Storage Logging is the legacy feature, no longer recommended
 skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121,CKV_GCP_82,CKV_DOCKER_2,CKV_GCP_62
 
-skip-path: /tmp/*
+skip-path: /tmp/*, /build/terratest-builder-image/*
