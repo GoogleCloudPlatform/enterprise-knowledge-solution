@@ -2,7 +2,7 @@
 timeout: 7200s
 steps:
   - id: prepare
-    name: ${_BUILDER_IMAGE_NAME}@${_BUILDER_IMAGE_DIGEST}
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
     entrypoint: /bin/bash
     args:
       - "-e"
@@ -15,7 +15,7 @@ steps:
         gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
   - id: pre_tf_setup
-    name: ${_BUILDER_IMAGE_NAME}@${_BUILDER_IMAGE_DIGEST}
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
     entrypoint: /bin/bash
     args:
       - "-c"
@@ -28,7 +28,7 @@ steps:
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
   - id: terratest
-    name: "${_BUILDER_IMAGE_NAME}@${_BUILDER_IMAGE_DIGEST}"
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
     args:
       - "-e"
       - "-x"
@@ -47,7 +47,7 @@ steps:
   #      - "GCLOUD_TF_DOWNLOAD=always"
 
   - id: cleanup
-    name: ${_BUILDER_IMAGE_NAME}@${_BUILDER_IMAGE_DIGEST}
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_TAG}"
     args:
       - "-x"
       - "-c"
@@ -69,7 +69,7 @@ substitutions:
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
   _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
-  _BUILDER_IMAGE_DIGEST: "sha256:7c6cd63bb6f53996034db0142ad6a807690a69c73facad1e646b0939250c0d65"
+  _BUILDER_IMAGE_TAG: "1.0.0"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
   # _FOLDER_ID
