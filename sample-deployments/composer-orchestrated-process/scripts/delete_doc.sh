@@ -34,26 +34,36 @@ usage() {
 # Process command line arguments
 while getopts ":d:u:t:b:p:l:" opt; do
   case "${opt}" in
-    d) 
-      DOC_ID=${OPTARG} ;;
-    u) 
-      DOC_URI=${OPTARG} ;;
-    t) 
-      BQ_TABLE=${OPTARG} ;;
-    b)
-      BATCH_ID=${OPTARG} ;;
-    p) 
-      PROJECT_ID=${OPTARG} ;;
-    l)
-      LOCATION=${OPTARG} ;;
-    \?) 
-      echo "Invalid option: -${OPTARG}" >&2; usage ;;
-    :) 
-      echo "Option -${OPTARG} requires an argument." >&2; usage ;;
+  d)
+    DOC_ID=${OPTARG}
+    ;;
+  u)
+    DOC_URI=${OPTARG}
+    ;;
+  t)
+    BQ_TABLE=${OPTARG}
+    ;;
+  b)
+    BATCH_ID=${OPTARG}
+    ;;
+  p)
+    PROJECT_ID=${OPTARG}
+    ;;
+  l)
+    LOCATION=${OPTARG}
+    ;;
+  \?)
+    echo "Invalid option: -${OPTARG}" >&2
+    usage
+    ;;
+  :)
+    echo "Option -${OPTARG} requires an argument." >&2
+    usage
+    ;;
   esac
 done
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 DOC_ID=${DOC_ID:-}
 DOC_URI=${DOC_URI:-}
@@ -155,7 +165,7 @@ elif [ "$MODE" = "batch" ]; then
   # Iterate through results and delete documents from Datastore and GCS
   # Check if any results were returned
   if [ -z "$RESULTS" ]; then
-      echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
+    echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
   else
     while read -r line; do
       DOC_ID=$(echo "$line" | awk '{print $1}')
@@ -169,10 +179,10 @@ elif [ "$MODE" = "batch" ]; then
         "${DELETE_URI}"
 
       bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-      "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+        "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
 
       echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-    done <<< "$RESULTS"
+    done <<<"$RESULTS"
   fi
 
   # Delete the GCS folder associated with the batch ID

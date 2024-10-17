@@ -12,15 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "vpc" {
-  count = var.create_vpc_network ? 1 : 0
-  source  = "terraform-google-modules/network/google"
-  version = "~> 9.1"
+variable "create_vpc_network" {
+  type = bool
+  description = ""
+  default = true
+}
 
-  project_id   = module.project_services.project_id
-  network_name = var.vpc_name
-  routing_mode = "GLOBAL"
+variable "vpc_name" {
+  type = string
+  description = "eks-vpc"
+  default = "eks-vpc"
+}
 
-  subnets = []
-
+variable "project_id" {
+  type = string
+  description = "project id"
+  default = "eks1-2-1"
 }

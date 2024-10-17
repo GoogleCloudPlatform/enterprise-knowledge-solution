@@ -29,6 +29,9 @@ module "common_infra" {
   source     = "../../components/common-infra/terraform"
   project_id = var.project_id
   region     = var.region
+  create_vpc_network = var.create_vpc_network
+  vpc_name = var.vpc_name
+  vpc_id = var.vpc_id
 }
 
 module "project_services" {
@@ -55,6 +58,11 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+  document_processing_config {
+    default_parsing_config {
+      digital_parsing_config {}
+    }
+  }
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
