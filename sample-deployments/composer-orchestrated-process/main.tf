@@ -85,7 +85,7 @@ module "processor" {
 }
 
 module "form_parser_processor" {
-  source                         = "../../components/processing/form_parser/deployment"
+  source                         = "../../components/form_parser/deployment"
   project_id                     = var.project_id
   region                         = var.region
   location                       = var.docai_location

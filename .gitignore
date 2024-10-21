@@ -36,3 +36,7 @@ super-linter.log
 .external_modules/*
 .mypy_cache/*
 
+# IDE
+*.iml
+.*
+
