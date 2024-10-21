@@ -441,9 +441,9 @@ googleapis-common-protos==1.63.1 \
     #   google-api-core
     #   grpc-google-iam-v1
     #   grpcio-status
-grpc-google-iam-v1==0.13.0 \
-    --hash=sha256:53902e2af7de8df8c1bd91373d9be55b0743ec267a7428ea638db3775becae89 \
-    --hash=sha256:fad318608b9e093258fbf12529180f400d1c44453698a33509cc6ecf005b294e
+grpc-google-iam-v1==0.13.1 \
+    --hash=sha256:3ff4b2fd9d990965e410965253c0da6f66205d5a8291c4c31c6ebecca18a9001 \
+    --hash=sha256:c3e86151a981811f30d5e7330f271cee53e73bb87755e88cc3b6f0c7b5fe374e
     # via
     #   -c reqs/constraints.txt
     #   google-cloud-resource-manager
