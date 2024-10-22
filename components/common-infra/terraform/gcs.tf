@@ -13,7 +13,7 @@
 # limitations under the License.
 
 module "input_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=c86102c9b34e4a2e3cd37e40b687770990446679" # commit hash of version 6.1.0
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "docs-input-${var.project_id}"
   location                 = var.region
@@ -23,7 +23,7 @@ module "input_bucket" {
 }
 
 module "process_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=c86102c9b34e4a2e3cd37e40b687770990446679" # commit hash of version 6.1.0
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "dpu-process-${var.project_id}"
   location                 = var.region
@@ -33,7 +33,7 @@ module "process_bucket" {
 }
 
 module "reject_bucket" {
-  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=c86102c9b34e4a2e3cd37e40b687770990446679" # commit hash of version 6.1.0
+  source                   = "github.com/terraform-google-modules/terraform-google-cloud-storage.git//modules/simple_bucket?ref=e8bb6eb49fdaf5f6f300d1b6dc46f097173dc488" # version 6.1.0, this commit is needed where kms is upgraded to 3.0, otherwise will get version conflict for google provider
   project_id               = module.project_services.project_id
   name                     = "dpu-reject-${var.project_id}"
   location                 = var.region
