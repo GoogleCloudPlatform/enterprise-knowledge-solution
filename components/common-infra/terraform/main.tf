@@ -46,7 +46,7 @@ module "cloud_build_account" {
   names      = ["cloud-build"]
   project_roles = [
     "${var.project_id}=>roles/logging.logWriter",
-    "${var.project_id}=>roles/storage.objectAdmin",
+    "${var.project_id}=>roles/storage.admin",
     "${var.project_id}=>roles/artifactregistry.writer",
     "${var.project_id}=>roles/run.developer",
     "${var.project_id}=>roles/iam.serviceAccountUser",
