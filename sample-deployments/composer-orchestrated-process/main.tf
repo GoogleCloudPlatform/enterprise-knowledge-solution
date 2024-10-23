@@ -56,6 +56,11 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+  document_processing_config {
+    default_parsing_config {
+      layout_parsing_config {}
+    }
+  }
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
