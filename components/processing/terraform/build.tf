@@ -39,16 +39,18 @@ resource "local_file" "cloudbuild_cloud_run" {
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud" {
+module "gcloud_build_processing" {
   source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
-    builds submit \
+    auth configure-docker ${var.region}-docker.pkg.dev && \
+    gcloud builds submit "${path.module}/../../.." \
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_cloud_run.filename} \
-      "${path.module}/../../.."
+      --default-buckets-behavior=regional-user-owned-bucket \
+      --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
   EOT
   enabled               = true
 
