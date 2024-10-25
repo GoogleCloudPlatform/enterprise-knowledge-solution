@@ -175,3 +175,10 @@ resource "local_file" "env_file" {
     agent_builder_search_id     = google_discovery_engine_search_engine.basic.engine_id
   })
 }
+
+module "doc_registry" {
+  source        = "../../components/doc-registry/terraform"
+  project_id    = var.project_id
+  region        = var.region
+  artifact_repo = module.common_infra.artifact_repo.name
+}
