@@ -128,10 +128,11 @@ def input_row_to_document_info(row):
     )
     
 
-def detect_duplicates(bucket_name: str, registry_table: str):
+def detect_duplicates(folder_uri: str, registry_table: str):
     """Return all the file that already exist in the document registry"""
+    bucket_name, folder = extract_bucket_and_folder(folder_uri)
     bucket_to_check = open_bucket(bucket_name)
-    matches_found = look_up_document(registry_table, get_blob_crc32_in(bucket_to_check.list_blobs()))
+    matches_found = look_up_document(registry_table, get_blob_crc32_in(bucket_to_check.list_blobs(prefix=folder)))
     duplicates = []
     match_dict = {row.crc32: row for row in matches_found}
     for doc in bucket_to_check.list_blobs():
@@ -152,6 +153,12 @@ def detect_duplicates(bucket_name: str, registry_table: str):
 def base64_to_int(base64_str: str):
     crc32c_bytes = base64.b64decode(base64_str) 
     return int.from_bytes(crc32c_bytes, byteorder='big')
+
+def extract_bucket_and_folder(gcs_folder_uri: str):
+    parts = gcs_folder_uri.replace(r"gs://", "").split(r"/")
+    bucket_name = parts[0]
+    folder = "/".join(parts[1:])
+    return bucket_name, folder
 
 def extract_bucket_and_blob_name(row):
     """split gcsUri into bucket folder file"""
@@ -186,9 +193,9 @@ def get_proto_data(obj: Sequence[proto.Message], with_schema: bool = True):
     return proto_data
 
 def write_to_bucket(content:str, destination_uri:str, file_name:str, mime_type: str):
-    parts = destination_uri.replace(r"gs://", "").split(r"/")
-    bucket = open_bucket(parts[0])
-    blob_name = f'{"/".join(parts[1:])}/{file_name}'
+    bucket_name, folder = extract_bucket_and_folder(destination_uri)
+    bucket = open_bucket(bucket_name)
+    blob_name = f"{folder}/{file_name}"
     bucket.blob(blob_name).upload_from_string(
         content, content_type=mime_type
     )

@@ -79,6 +79,10 @@ resource "google_cloud_run_v2_job" "doc-registry-service-job" {
       service_account = module.doc_registry_service_account.email
       containers {
         image = local.image_name_and_tag
+        env {
+          name = "BQ_DOC_REGISTRY_TABLE"
+          value = "${var.project_id}.${module.docs_registry_dataset.bigquery_dataset.dataset_id}.${module.docs_registry_dataset.table_ids[0]}"
+        }
       }
     }
   }
