@@ -58,7 +58,8 @@ output "alloydb_cluster_name" {
   value = module.docs_results.cluster_name
 }
 
-output "wait" {
+output "alloydb_cluster_ready" {
   description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules "
-  value       = time_sleep.wait_for_alloydb_ready_state
+  value       = true
+  depends_on  = [time_sleep.wait_for_alloydb_ready_state]
 }

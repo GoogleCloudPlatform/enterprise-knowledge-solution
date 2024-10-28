@@ -86,3 +86,8 @@ variable "cloud_build_service_account_email" {
   description = "the user-managed service account configured for Cloud Build"
   type        = string
 }
+
+variable "alloydb_cluster_ready" {
+  description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules, and must be passed as a variable into this module (instead of depends_on) because the gcloud submodule has errors related to `depends_on` block. See: https://github.com/kingman/tf-dont-do-depends-on-module-demo/blob/main/demo-flow/README.md"
+  type        = bool
+}

@@ -96,10 +96,9 @@ module "form_parser_processor" {
   gcs_output_prefix                 = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name    = local.form_parser_cloud_run_job_name
   alloydb_cluster_name              = module.common_infra.alloydb_cluster_name
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-
-  #depends_on = [module.common_infra.wait]
 }
 
 

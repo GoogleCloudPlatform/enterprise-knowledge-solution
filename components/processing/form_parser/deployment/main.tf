@@ -53,6 +53,8 @@ resource "google_alloydb_user" "form_parser_user" {
   user_type = "ALLOYDB_IAM_USER"
 
   database_roles = ["alloydbiamuser"]
+
+  depends_on = [var.alloydb_cluster_ready]
 }
 
 resource "google_cloud_run_v2_job" "docai-form-processor-job" {
