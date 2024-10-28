@@ -332,9 +332,9 @@ google-cloud-discoveryengine==0.11.13 \
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
-google-cloud-firestore==2.16.0 \
-    --hash=sha256:3347ac38346c2702134d4c81f652a5e3451c840a6237f28b844501bd528e5fd8 \
-    --hash=sha256:e61ae70229a6e532e439c8d16447a32024447f2ee4a2303fc4d054c258d6877f
+google-cloud-firestore==2.19.0 \
+    --hash=sha256:1b2ce6e0b791aee89a1e4f072beba1012247e89baca361eed721fb467fe054b0 \
+    --hash=sha256:b49f0019d7bd0d4ab5972a4cff13994b0aabe72d24242200d904db2fb49df7f7
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
