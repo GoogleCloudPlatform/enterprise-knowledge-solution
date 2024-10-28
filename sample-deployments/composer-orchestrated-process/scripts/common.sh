@@ -190,20 +190,6 @@ enable_deployer_roles() {
   unset __principal
 }
 
-# enable a specific set of roles for the default Compute SA implicitly used by Cloud Build. https://cloud.google.com/build/docs/cloud-build-service-account-updates
-enable_builder_roles() {
-  local __PROJECTNUM
-  __PROJECTNUM=$(gcloud projects describe "$PROJECT_ID" --format="get(projectNumber)")
-  local __principal="serviceAccount:$__PROJECTNUM-compute@developer.gserviceaccount.com"
-
-  ## necessary permissions for building AR
-  for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"; do
-    enable_role "$i" "$__principal" "projects/$PROJECT_ID"
-  done
-  unset __principal
-  unset __PROJECTNUM
-}
-
 set_adc() {
   # check if the script is manually triggered by a user, or automated in CI build by a service account. Different methods of ADC for each
   if echo "$ACTIVE_PRINCIPAL" | grep "iam.gserviceaccount.com"; then
