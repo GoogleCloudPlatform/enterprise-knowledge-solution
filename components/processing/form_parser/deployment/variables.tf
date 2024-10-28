@@ -75,3 +75,14 @@ variable "bq_dataset_id" {
   type        = string
   default     = "docs_store"
 }
+
+variable "artifact_repo" {
+  description = "Docker registry"
+  type        = string
+  default     = ""
+}
+
+variable "cloud_build_service_account_email" {
+  description = "the user-managed service account configured for Cloud Build"
+  type        = string
+}

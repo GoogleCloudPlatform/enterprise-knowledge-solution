@@ -21,8 +21,7 @@ locals {
       ]
     )
   )
-  service_account_name = var.classifier_cloud_run_job_name
-  image_name_and_tag   = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/processing-form-parser:latest"
+  image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/processing-form-parser:latest"
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
