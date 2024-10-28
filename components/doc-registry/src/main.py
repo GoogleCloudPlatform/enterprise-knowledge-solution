@@ -139,11 +139,7 @@ class GCSFolder:
         bucket_name = parts[0]
         folder = "/".join(parts[1:])
         return bucket_name, folder
-        
 
-def open_bucket(bucket_name: str):
-    """Open a bucket."""    
-    return GoogleCloudClients.get_storage_client().bucket(bucket_name)  # pyright: ignore
 
 def look_up_document(registry_table: str, crc32s: list[str]):
     """Given a list of crc32 values and return all the matching entries from the document registry table"""
@@ -166,10 +162,10 @@ def add_new_documents_to_registry(input_table: str, registry_table: str):
     including internal id, gcsUri and crc32"""
     query = f"SELECT id, content.uri FROM {input_table}"
     rows = GoogleCloudClients.get_bq_client().query(query)
-    results = [input_row_to_document_info(row) for row in rows]
-    if len(results) == 0:
+    if rows.result().total_rows == 0:
         return
-    
+    input_folder = GCSFolder(extract_common_gcs_folder_from_processing_table(input_table))
+    results = input_rows_to_document_info(rows, input_folder)
     ref = bigquery.TableReference.from_string(registry_table)
     path = GoogleCloudClients.get_bq_write_stream().write_stream_path(
         project=ref.project,
@@ -183,19 +179,39 @@ def add_new_documents_to_registry(input_table: str, registry_table: str):
     req.proto_rows = get_proto_data(results)
     GoogleCloudClients.get_bq_write_stream().append_rows(requests=iter([req]))
 
+def extract_folder_including_bucket_from_blob_uri(blob_uri: str):
+    parts = blob_uri.replace(r"gs://", "").split(r"/")
+    return "/".join(parts[:-1])
 
-def input_row_to_document_info(row):
-    """Convert single document processing entry to DocumentInfo object"""
-    bucket_name, blob_name, file_name = extract_bucket_and_blob_name(row)
-    bucket = open_bucket(bucket_name)
-    blob = bucket.get_blob(blob_name)
-    return DocumentInfo(
-        id=row.id,
-        fileName=file_name,
-        gcsUri=row.uri,
-        crc32=str(GCSFolder.base64_to_int(blob.crc32c))
-    )
-    
+def extract_common_gcs_folder_from_processing_table(processing_table: str):
+    """Extrct the common path share by all the document uri:s in the input table"""
+    query = f"select max(content.uri) max_uri, min(content.uri) min_uri from {processing_table}"
+    rows = GoogleCloudClients.get_bq_client().query(query)
+    row = next(rows.result())
+    max_uri = extract_folder_including_bucket_from_blob_uri(row.max_uri)
+    min_uri = extract_folder_including_bucket_from_blob_uri(row.min_uri)
+    i = 0
+    while (i < len(min_uri)
+        and i < len(max_uri)
+        and max_uri[i] == min_uri[i]) :
+        i += 1
+    return  max_uri[:i]
+
+
+def input_rows_to_document_info(rows, input_folder: GCSFolder) -> Sequence[DocumentInfo]:
+    """Convert document processing entries to DocumentInfo object"""
+    uri_look_up = {doc.get_gcs_uri(): doc for doc in input_folder.get_documents_in_folder()}
+    result = []
+    for row in rows:
+        if row.uri in uri_look_up:
+            doc = uri_look_up[row.uri]
+            result.append(DocumentInfo(
+                id=row.id,
+                fileName=doc.name,
+                gcsUri=row.uri,
+                crc32=str(doc.crc32)))
+    return result
+
 
 def detect_duplicates(folder_uri: str, registry_table: str):
     """Return all the file that already exist in the document registry"""
