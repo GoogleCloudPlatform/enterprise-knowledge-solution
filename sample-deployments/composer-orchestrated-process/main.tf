@@ -88,14 +88,16 @@ module "processor" {
 }
 
 module "form_parser_processor" {
-  source                         = "../../components/processing/form_parser/deployment"
-  project_id                     = var.project_id
-  region                         = var.region
-  location                       = var.docai_location
-  gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
-  gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
-  form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
-  alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
+  source                            = "../../components/processing/form_parser/deployment"
+  project_id                        = var.project_id
+  region                            = var.region
+  location                          = var.docai_location
+  gcs_input_prefix                  = module.common_infra.gcs_process_bucket_name
+  gcs_output_prefix                 = module.common_infra.gcs_process_bucket_name
+  form_parser_cloud_run_job_name    = local.form_parser_cloud_run_job_name
+  alloydb_cluster_name              = module.common_infra.alloydb_cluster_name
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 
   depends_on = [module.common_infra.wait]
 }

@@ -59,12 +59,14 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
   name     = var.form_parser_cloud_run_job_name
   location = var.region
 
+  depends_on = [module.gcloud_processing_form_parser.wait]
+
   template {
     labels = local.dpu_label
     template {
       service_account = google_service_account.dpu_run_service_account.email
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/dpu-form-parser-repo/dpu-form-processor:latest"
+        image = local.image_name_and_tag
         env {
           name  = "PROJECT_ID"
           value = var.project_id

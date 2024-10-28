@@ -52,14 +52,6 @@ section_open "Enable all the required IAM roles for deployer service account, se
 enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
 section_close
 
-section_open "Explicitly declare underlying permissions for Cloud Build processes"
-enable_builder_roles
-section_close
-
-section_open "Build and push container image to Artifact Registry for Form Processor"
-../../components/processing/form_parser/build/build_container_image.sh
-section_close
-
 section_open "Set Application Default Credentials to be used by Terraform"
 set_adc
 section_close
