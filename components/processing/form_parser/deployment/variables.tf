@@ -73,7 +73,6 @@ variable "alloydb_cluster_name" {
 variable "bq_dataset_id" {
   description = "The BigQuery Dataset ID to hold the parsed results of forms"
   type        = string
-  default     = "docs_store"
 }
 
 variable "artifact_repo" {

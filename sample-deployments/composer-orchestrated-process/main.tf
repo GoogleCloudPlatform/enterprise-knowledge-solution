@@ -95,6 +95,7 @@ module "form_parser_processor" {
   gcs_input_prefix                  = module.common_infra.gcs_process_bucket_name
   gcs_output_prefix                 = module.common_infra.gcs_process_bucket_name
   form_parser_cloud_run_job_name    = local.form_parser_cloud_run_job_name
+  bq_dataset_id                     = module.common_infra.bq_store_dataset_id
   alloydb_cluster_name              = module.common_infra.alloydb_cluster_name
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   artifact_repo                     = module.common_infra.artifact_repo.name
