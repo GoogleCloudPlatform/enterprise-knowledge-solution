@@ -180,10 +180,11 @@ enable_role() {
   unset __principal
 }
 
-# enable all roles in the roles array for service account used to deploy terraform resources
-enable_persona_roles_deployer() {
-  local __principal="serviceAccount:$1"
-  readarray -t roles_array <persona_roles_deployer.txt
+# enable all roles bundled into a persona, based on a textfile listing the roles
+enable_persona_roles() {
+  local __principal="$1"
+  local __arrayfile=$2
+  readarray -t roles_array <$__arrayfile
   for i in "${roles_array[@]}"; do
     enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
   done

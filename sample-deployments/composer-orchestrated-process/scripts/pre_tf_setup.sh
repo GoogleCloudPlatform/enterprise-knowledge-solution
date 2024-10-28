@@ -49,15 +49,7 @@ create_service_account_and_enable_impersonation
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:""${SERVICE_ACCOUNT_ID}"""
-enable_persona_roles_deployer "${SERVICE_ACCOUNT_ID}"
-section_close
-
-section_open "Explicitly declare underlying permissions for Cloud Build processes"
-enable_builder_roles
-section_close
-
-section_open "Build and push container image to Artifact Registry for Form Processor"
-../../components/processing/form_parser/build/build_container_image.sh
+enable_persona_roles "serviceAccount:${SERVICE_ACCOUNT_ID}" "persona_roles_deployer.txt"
 section_close
 
 section_open "Set Application Default Credentials to be used by Terraform"
