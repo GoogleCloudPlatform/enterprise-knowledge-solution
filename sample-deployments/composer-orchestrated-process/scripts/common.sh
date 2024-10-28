@@ -181,9 +181,9 @@ enable_role() {
 }
 
 # enable all roles in the roles array for service account used to deploy terraform resources
-enable_deployer_roles() {
+enable_persona_roles_deployer() {
   local __principal="serviceAccount:$1"
-  readarray -t roles_array <project_roles.txt
+  readarray -t roles_array <persona_roles_deployer.txt
   for i in "${roles_array[@]}"; do
     enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
   done

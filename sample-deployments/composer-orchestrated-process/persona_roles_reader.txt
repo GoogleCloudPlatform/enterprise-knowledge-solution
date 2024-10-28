@@ -1,0 +1,3 @@
+roles/discoveryEngine.viewer
+roles/serviceUsage.user
+roles/storage.objectViewer

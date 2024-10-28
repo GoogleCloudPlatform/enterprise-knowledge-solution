@@ -49,7 +49,7 @@ create_service_account_and_enable_impersonation
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:""${SERVICE_ACCOUNT_ID}"""
-enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
+enable_persona_roles_deployer "${SERVICE_ACCOUNT_ID}"
 section_close
 
 section_open "Explicitly declare underlying permissions for Cloud Build processes"
