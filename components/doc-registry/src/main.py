@@ -66,17 +66,86 @@ class GoogleCloudClients:
                 client_info=cls.client_info
             )
         return cls.bq_write_client
+
+class RegistryDocument:
+    def __init__(self, id: str, bucket: str, folder: str, name: str, crc32: int):
+        self.id = id
+        self.bucket = bucket
+        self.folder = folder
+        self.name = name
+        self.crc32 = crc32
+
+    def get_json_str(self):
+        return json.dumps(self.__dict__)
+
+    def __str__(self):
+        return self.get_json_str()
+
+    def get_gcs_name(self):
+        return self.name if self.folder == "" else f"{self.folder}/{self.name}"
+
+    def get_gcs_uri(self):
+        return r"gs://"+f"{self.bucket}/{self.get_gcs_name()}"
+
+
+class GCSFolder:
+
+    def __init__(self, full_folder_path: str):
+        self.bucket_name, self.folder_prefix = GCSFolder.extract_bucket_and_folder(full_folder_path)
+        self.bucket: Optional[storage.Bucket] = None
+        self.docs: Optional[list[RegistryDocument]] = None
+
+    def get_bucket(self):
+        if self.bucket is None:
+            self.bucket = GoogleCloudClients.get_storage_client().bucket(self.bucket_name)
+        return self.bucket
+
+    def get_documents_in_folder(self):
+        if self.docs is None:
+            blobs = self.get_bucket().list_blobs(prefix=self.folder_prefix)
+            self.docs = [GCSFolder.blob_to_doc(blob) for blob in blobs]
+        for doc in self.docs:
+            yield doc
+
+    def write_to_folder(self, content:str, file_name:str, mime_type: str):
+        blob_name = file_name if self.folder_prefix == "" else f"{self.folder_prefix}/{file_name}"
+        self.get_bucket().blob(blob_name).upload_from_string(
+            content, content_type=mime_type
+        )
+
+    @staticmethod
+    def blob_to_doc(blob: storage.Blob) -> RegistryDocument:
+        crc32_int = GCSFolder.base64_to_int(blob.crc32c)
+        bucket_name = blob.bucket.name
+        folder, doc_name = GCSFolder.extract_folder_doc_name(blob.name)
+        return RegistryDocument(None, bucket_name, folder, doc_name, crc32_int)
+
+    @staticmethod
+    def base64_to_int(base64_str: str) -> int:
+        crc32c_bytes = base64.b64decode(base64_str)
+        return int.from_bytes(crc32c_bytes, byteorder='big')
+
+    @staticmethod
+    def extract_folder_doc_name(blob_name: str):
+        """split blob name into folder prefix and file"""
+        parts = blob_name.split(r"/")
+        doc_name = parts[-1]
+        folder = "/".join(parts[:-1])
+        return folder, doc_name
+
+    @staticmethod
+    def extract_bucket_and_folder(gcs_folder_uri: str):
+        parts = gcs_folder_uri.replace(r"gs://", "").split(r"/")
+        bucket_name = parts[0]
+        folder = "/".join(parts[1:])
+        return bucket_name, folder
         
 
 def open_bucket(bucket_name: str):
     """Open a bucket."""    
     return GoogleCloudClients.get_storage_client().bucket(bucket_name)  # pyright: ignore
 
-def get_blob_crc32_in(blob_list: list[storage.Blob]):
-    """Extract crc32c from a list of blob, also convert from base64 to int"""
-    return [base64_to_int(blob.crc32c) for blob in blob_list]
-
-def look_up_document(registry_table: str, crc32s: list[int]):
+def look_up_document(registry_table: str, crc32s: list[str]):
     """Given a list of crc32 values and return all the matching entries from the document registry table"""
     unique_crc32s = list(set(crc32s))
     select_crc32_rows = [f"SELECT '{crc32}' AS crc32" for crc32 in unique_crc32s]
@@ -124,23 +193,23 @@ def input_row_to_document_info(row):
         id=row.id,
         fileName=file_name,
         gcsUri=row.uri,
-        crc32=str(base64_to_int(blob.crc32c))
+        crc32=str(GCSFolder.base64_to_int(blob.crc32c))
     )
     
 
 def detect_duplicates(folder_uri: str, registry_table: str):
     """Return all the file that already exist in the document registry"""
-    bucket_name, folder = extract_bucket_and_folder(folder_uri)
-    bucket_to_check = open_bucket(bucket_name)
-    matches_found = look_up_document(registry_table, get_blob_crc32_in(bucket_to_check.list_blobs(prefix=folder)))
+    folder_to_check = GCSFolder(folder_uri)
+    crc32s = [str(doc.crc32) for doc in folder_to_check.get_documents_in_folder()]
+    matches_found = look_up_document(registry_table, crc32s)
     duplicates = []
     match_dict = {row.crc32: row for row in matches_found}
-    for doc in bucket_to_check.list_blobs():
-        doc_crc32 = str(base64_to_int(doc.crc32c))
+    for doc in folder_to_check.get_documents_in_folder():
+        doc_crc32 = str(doc.crc32)
         if doc_crc32 in match_dict:
             duplicates.append(
                 {
-                    'doc': doc.id,
+                    'doc': doc.get_gcs_uri(),
                     'existing_doc': {
                         'uri': match_dict[doc_crc32].gcsUri,
                         'id':  match_dict[doc_crc32].id
@@ -149,16 +218,9 @@ def detect_duplicates(folder_uri: str, registry_table: str):
             )
     return duplicates
 
-
-def base64_to_int(base64_str: str):
-    crc32c_bytes = base64.b64decode(base64_str) 
-    return int.from_bytes(crc32c_bytes, byteorder='big')
-
-def extract_bucket_and_folder(gcs_folder_uri: str):
-    parts = gcs_folder_uri.replace(r"gs://", "").split(r"/")
-    bucket_name = parts[0]
-    folder = "/".join(parts[1:])
-    return bucket_name, folder
+def run_detect_duplicates(folder_to_check, doc_registry_table, output_folder):
+  jsonl_str = "\n".join([json.dumps(dup) for dup in detect_duplicates(folder_to_check, doc_registry_table)])
+  GCSFolder(output_folder).write_to_folder(jsonl_str, "result.jsonl", "application/jsonl")
 
 def extract_bucket_and_blob_name(row):
     """split gcsUri into bucket folder file"""
@@ -191,14 +253,6 @@ def get_proto_data(obj: Sequence[proto.Message], with_schema: bool = True):
     proto_data.rows = proto_rows
 
     return proto_data
-
-def write_to_bucket(content:str, destination_uri:str, file_name:str, mime_type: str):
-    bucket_name, folder = extract_bucket_and_folder(destination_uri)
-    bucket = open_bucket(bucket_name)
-    blob_name = f"{folder}/{file_name}"
-    bucket.blob(blob_name).upload_from_string(
-        content, content_type=mime_type
-    )
 
 
 if __name__ == "__main__":
@@ -244,8 +298,7 @@ if __name__ == "__main__":
                 f"{GCS_INPUT_FILE_BUCKET=}, "
                 f"{BQ_DOC_REGISTRY_TABLE=}, "
             )
-            jsonl_str = "\n".join([json.dumps(dup) for dup in detect_duplicates(GCS_INPUT_FILE_BUCKET, BQ_DOC_REGISTRY_TABLE)])
-            write_to_bucket(jsonl_str, GCS_IO_URI, "result.jsonl", "application/jsonl")
+            run_detect_duplicates(GCS_INPUT_FILE_BUCKET, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI)
         else:
             logging.info(
                 f"{BQ_INGESTED_DOC_TABLE=}, "
