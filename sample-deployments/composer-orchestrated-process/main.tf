@@ -99,7 +99,7 @@ module "form_parser_processor" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 
-  depends_on = [module.common_infra.wait]
+  #depends_on = [module.common_infra.wait]
 }
 
 
