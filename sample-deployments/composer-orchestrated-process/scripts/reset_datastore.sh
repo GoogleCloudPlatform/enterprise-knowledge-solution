@@ -53,12 +53,12 @@ fi
 ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
 
 # Construct Agent Builder Datastore URI
-DSTORE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents"
+DSTORE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents"
 
 # Execute the curl command and store the result in a variable
 response=$(curl -X GET \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "x-goog-user-project: dpu-demo" \
+  -H "x-goog-user-project: $PROJECT_ID" \
   "${DSTORE_URI}")
 
 # Print response

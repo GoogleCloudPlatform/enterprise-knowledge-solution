@@ -15,6 +15,7 @@
 import os
 import re
 from typing import Optional
+import logging
 
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import (
@@ -23,7 +24,7 @@ from google.api_core.exceptions import (
     RetryError,
 )
 from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud import documentai, logging, storage
+from google.cloud import documentai, storage
 from load_data_in_bigquery import build_output_metadata, load_rows_into_bigquery
 
 # Retrieve Job-defined env vars

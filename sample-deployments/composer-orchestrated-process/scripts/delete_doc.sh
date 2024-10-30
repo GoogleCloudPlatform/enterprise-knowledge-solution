@@ -117,7 +117,7 @@ if [ "$MODE" = "single" ]; then
   fi
 
   # Construct Agent Builder Datastore deletion URI
-  DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
+  DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
 
   # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
   curl -X DELETE \
@@ -171,7 +171,7 @@ elif [ "$MODE" = "batch" ]; then
       DOC_ID=$(echo "$line" | awk '{print $1}')
       DOC_URI=$(echo "$line" | awk '{$1 = ""; sub(/^ /, "", $0); print $0}')
 
-      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
+      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
 
       curl -X DELETE \
         -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \

@@ -53,8 +53,8 @@ module "project_services" {
 resource "google_discovery_engine_data_store" "dpu_ds" {
   project                     = module.project_services.project_id
   location                    = var.vertex_ai_data_store_region
-  data_store_id               = "dpu-doc-store"
-  display_name                = "Document Processing & Understanding"
+  data_store_id               = "eks-data-store"
+  display_name                = "Enterprise Knowledge Store"
   industry_vertical           = "GENERIC"
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
@@ -69,10 +69,10 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
 resource "google_discovery_engine_search_engine" "basic" {
   project = module.project_services.project_id
   # TODO: Change this
-  engine_id      = module.project_services.project_id
+  engine_id      = "ent-search-agent"
   collection_id  = "default_collection"
   location       = var.vertex_ai_data_store_region
-  display_name   = "Example Display Name"
+  display_name   = "Enterprise Search Agent"
   data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
   search_engine_config {
     search_tier    = "SEARCH_TIER_ENTERPRISE"
