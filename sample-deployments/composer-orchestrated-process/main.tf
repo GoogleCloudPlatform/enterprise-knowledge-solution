@@ -31,6 +31,9 @@ module "common_infra" {
   source     = "../../components/common-infra/terraform"
   project_id = var.project_id
   region     = var.region
+  create_vpc_network = var.create_vpc_network
+  vpc_name = var.vpc_name
+  vpc_id = var.vpc_id
 }
 
 module "project_services" {

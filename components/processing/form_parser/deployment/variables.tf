@@ -65,6 +65,24 @@ variable "gcs_input_prefix" {
   default     = "gs://doc-ai-processor/input-forms/"
 }
 
+variable "create_vpc_network" {
+  type = bool
+  description = "configuration to manage vpc creation"
+  default = true
+}
+
+variable "vpc_name" {
+  type = string
+  description = "name of vpc network"
+  default = "dpu-network"
+}
+
+variable "vpc_id" {
+  type = string
+  description = "id of vpc network"
+  default = ""
+}
+
 variable "alloydb_cluster_name" {
   description = "Name of the AlloyDB cluster to save the parsed forms results"
   type        = string
