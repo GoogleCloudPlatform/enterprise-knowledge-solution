@@ -21,20 +21,25 @@ set -o nounset
 . scripts/common.sh
 
 section_open "Check that necessary environment variables are set"
-check_environment_variable "UPLOADER" "set the 'UPLOADER' environment variable "
-check_environment_variable "OPERATOR" "set the 'UPLOADER' environment variable "
-check_environment_variable "READER" "set the 'UPLOADER' environment variable "
-check_environment_variable "PROJECT_ID" "set the PROJECT_ID where IAM roles will be applied"
+check_mandatory_variable "PROJECT_ID" "set the PROJECT_ID where IAM roles will be applied"
 section_close
 
 section_open "Enable required IAM roles for the UPLOADER persona"
-enable_persona_roles "${UPLOADER}" "persona_roles_uploader.txt"
+check_and_set_persona "UPLOADER"
 section_close
 
-section_open "Enable required IAM roles for the OPERATOR persona"
-enable_persona_roles "${OPERATOR}" "persona_roles_operator.txt"
+section_open "Enable required IAM roles for the DEPLOYER persona"
+check_and_set_persona "DEPLOYER"
+section_close
+
+section_open "Enable required IAM roles for the OPERATOR (read-only) persona"
+check_and_set_persona "OPERATOR_READONLY"
+section_close
+
+section_open "Enable required IAM roles for the OPERATOR (read & write) persona"
+check_and_set_persona "OPERATOR_READWRITE"
 section_close
 
 section_open "Enable required IAM roles for the READER persona"
-enable_persona_roles "${READER}" "persona_roles_reader.txt"
+check_and_set_persona "READER"
 section_close

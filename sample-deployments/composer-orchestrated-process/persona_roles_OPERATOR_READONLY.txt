@@ -1,0 +1,10 @@
+roles/alloydb.viewer
+roles/bigquery.dataViewer
+roles/composer.environmentAndStorageObjectViewer
+roles/compute.viewer
+roles/container.viewer
+roles/discoveryengine.viewer
+roles/documentai.viewer
+roles/iap.httpsResourceAccessor
+roles/run.viewer
+roles/storage.objectViewer

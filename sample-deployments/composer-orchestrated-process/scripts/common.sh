@@ -102,7 +102,7 @@ check_exec_version() {
   unset EXECUTABLE_NAME
 }
 
-check_environment_variable() {
+check_mandatory_variable() {
   _VARIABLE_NAME=$1
   _ERROR_MESSAGE=$2
   _VARIABLE_VALUE="${!_VARIABLE_NAME:-}"
@@ -113,6 +113,19 @@ check_environment_variable() {
   unset _VARIABLE_NAME
   unset _ERROR_MESSAGE
   unset _VARIABLE_VALUE
+}
+
+check_and_set_persona(){
+  __persona_name=$1
+  __persona_value="${!__persona_name:-}"
+
+  if [ -z "${__persona_value}" ]; then
+
+    echo "$__persona_name is not set, skipping the role grants for this persona"
+  else
+    # pass the principal and and filename of roles
+    enable_persona_roles $__persona_value "persona_roles_$__persona_name.txt"
+  fi
 }
 
 create_service_account_and_enable_impersonation() {
@@ -189,20 +202,6 @@ enable_persona_roles() {
     enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
   done
   unset __principal
-}
-
-# enable a specific set of roles for the default Compute SA implicitly used by Cloud Build. https://cloud.google.com/build/docs/cloud-build-service-account-updates
-enable_builder_roles() {
-  local __PROJECTNUM
-  __PROJECTNUM=$(gcloud projects describe "$PROJECT_ID" --format="get(projectNumber)")
-  local __principal="serviceAccount:$__PROJECTNUM-compute@developer.gserviceaccount.com"
-
-  ## necessary permissions for building AR
-  for i in "roles/logging.logWriter" "roles/storage.objectUser" "roles/artifactregistry.createOnPushWriter"; do
-    enable_role "$i" "$__principal" "projects/$PROJECT_ID"
-  done
-  unset __principal
-  unset __PROJECTNUM
 }
 
 set_adc() {
