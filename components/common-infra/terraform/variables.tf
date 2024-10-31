@@ -28,21 +28,21 @@ variable "bq_store_dataset" {
 }
 
 variable "create_vpc_network" {
-  type = bool
+  type        = bool
   description = "configuration to manage vpc creation"
-  default = true
+  default     = true
 }
 
 variable "vpc_name" {
-  type = string
+  type        = string
   description = "name of vpc network"
-  default = "dpu-network"
+  default     = "dpu-network"
 }
 
 variable "vpc_id" {
-  type = string
+  type        = string
   description = "id of vpc network"
-  default = ""
+  default     = ""
 }
 
 variable "alloy_db_cluster_id" {

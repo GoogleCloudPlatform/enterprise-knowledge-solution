@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "create_vpc_network" {
-  type        = bool
-  description = ""
-  default     = true
-}
+terraform {
+  required_version = ">=1.5.7"
 
-variable "vpc_name" {
-  type        = string
-  description = "eks-vpc"
-  default     = "eks-vpc"
-}
-
-variable "project_id" {
-  type        = string
-  description = "project id"
-  default     = "eks1-2-1"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 4.0"
+    }
+  }
 }

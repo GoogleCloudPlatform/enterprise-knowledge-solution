@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import re
 from typing import Optional
-import logging
 
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import (

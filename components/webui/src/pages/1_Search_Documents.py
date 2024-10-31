@@ -141,15 +141,18 @@ with st.container():
 
 # Render answer if there's a summary returned in the response
 if st.session_state.answer:
-    
+
     # st.text_area(":blue[Summary Response: ]", value=st.session_state.answer, height=240)
-    st.write(f":blue[Summary Response: ]")
+    st.write(":blue[Summary Response: ]")
     ans = st.session_state.answer
-    # printable_ans = f"<div style='font-size:1rem; font-family:\"Source Sans Pro\", sans-serif; color:blue;'>{ans}</div>"
+    # printable_ans = (
+    #     f'<div style=\'font-size:1rem; font-family:"Source Sans Pro", sans-serif; '
+    #     f"color:blue;'>{ans}</div>"
+    # )
     # st.text_area(":blue[Summary Response: ]", value=ans, height=240)
     # st.html(printable_ans)
     st.markdown(ans.format())
-    
+
 
 # Render list of other documents
 if st.session_state.sources:
