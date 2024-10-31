@@ -126,6 +126,7 @@ module "dpu_workflow" {
     DPU_DATA_STORE_ID       = google_discovery_engine_data_store.dpu_ds.data_store_id
     FORMS_PARSER_JOB_NAME   = module.form_parser_processor.form_parser_cloud_run_job_name
     DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
+    DOC_REGISTRY_JOB_NAME   = module.doc_registry.doc_registry_service_cloud_run_job_name
   }
 }
 

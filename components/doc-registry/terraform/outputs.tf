@@ -26,3 +26,8 @@ output "bq_registry_table_id" {
   description = "BigQuery document registry table"
   value       = module.docs_registry_dataset.table_ids[0]   
 }
+
+output "doc_registry_service_cloud_run_job_name" {
+  description = "Doc Registry service job name"
+  value       = google_cloud_run_v2_job.doc-registry-service-job.name
+}
