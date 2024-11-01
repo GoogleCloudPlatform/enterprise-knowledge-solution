@@ -22,3 +22,13 @@ module "vpc" {
   subnets = []
 
 }
+
+resource "google_dns_policy" "dns-policy" {
+  name           = "dns-policy"
+  enable_logging = true
+
+  networks {
+    network_url = module.vpc[0].network_id
+  }
+}
+

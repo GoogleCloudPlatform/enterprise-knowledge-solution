@@ -118,10 +118,16 @@ module "eks_webui_lb" {
         oauth2_client_secret = google_iap_client.project_client.secret
       }
       log_config = {
-        enable = false
+        enable = true
       }
     }
   }
+}
+
+resource "google_compute_ssl_policy" "nonprod-ssl-policy" {
+  name            = "ssl-policy"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_2"
 }
 
 resource "google_project_service_identity" "iap_sa" {

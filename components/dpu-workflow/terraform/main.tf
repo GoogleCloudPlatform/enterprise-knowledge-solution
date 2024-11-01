@@ -59,6 +59,7 @@ module "dpu-subnet" {
     subnet_ip             = "10.10.10.0/24"
     subnet_region         = var.region
     subnet_private_access = "true"
+    subnet_flow_logs      = "true"
   }]
 
   secondary_ranges = {
