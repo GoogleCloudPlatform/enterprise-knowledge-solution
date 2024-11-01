@@ -78,10 +78,11 @@ def move_duplicated_files(duplicated_file_list_gcs_uri: str, destination_folder_
     duplicated_file_list_doc = GCSDoc(duplicated_file_list_gcs_uri)
     duplicated_file_list_blob = BucketRegistry.get_bucket(duplicated_file_list_doc.bucket_name).blob(duplicated_file_list_doc.blob_name)
     for line in duplicated_file_list_blob.download_as_string().split(b'\n'):
-        dup_obj = json.loads(line)        
-        move_doc = MoveDoc(dup_obj['doc'], destination_folder_ful_uri, line)
-        move_doc.move()
-        process_doc_list = process_files_by_type[move_doc.source_doc.get_doc_type()]
-        if move_doc.source_doc.get_doc_name() in process_doc_list:
-            del process_doc_list[process_doc_list.index(move_doc.source_doc.get_doc_name())]
+        if line:
+            dup_obj = json.loads(line)
+            move_doc = MoveDoc(dup_obj['doc'], destination_folder_ful_uri, line)
+            move_doc.move()
+            process_doc_list = process_files_by_type[move_doc.source_doc.get_doc_type()]
+            if move_doc.source_doc.get_doc_name() in process_doc_list:
+                del process_doc_list[process_doc_list.index(move_doc.source_doc.get_doc_name())]
         

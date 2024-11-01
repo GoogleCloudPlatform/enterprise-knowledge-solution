@@ -156,7 +156,7 @@ def look_up_document(registry_table: str, crc32s: list[str]):
     return GoogleCloudClients.get_bq_client().query(query)
 
 
-def add_new_documents_to_registry(input_table: str, registry_table: str):
+def add_new_documents_to_registry(input_table: str, registry_table: str, output_folder: str):
     """Given a document processing table, 
     for each entry insert corresponding entry to document registry table 
     including internal id, gcsUri and crc32"""
@@ -178,6 +178,11 @@ def add_new_documents_to_registry(input_table: str, registry_table: str):
     req.write_stream = path
     req.proto_rows = get_proto_data(results)
     GoogleCloudClients.get_bq_write_stream().append_rows(requests=iter([req]))
+    result_obj = {
+        "task": "add-new-documents-to-registry",
+        "result": f"Added {len(results)} new document entries from {input_table=}"
+    }
+    GCSFolder(output_folder).write_to_folder(json.dumps(result_obj), "result.json", "application/json")
 
 def extract_folder_including_bucket_from_blob_uri(blob_uri: str):
     parts = blob_uri.replace(r"gs://", "").split(r"/")
@@ -320,7 +325,7 @@ if __name__ == "__main__":
                 f"{BQ_INGESTED_DOC_TABLE=}, "
                 f"{BQ_DOC_REGISTRY_TABLE=}, "
             )
-            add_new_documents_to_registry(BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE)
+            add_new_documents_to_registry(BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI)
         logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:
         logging.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")

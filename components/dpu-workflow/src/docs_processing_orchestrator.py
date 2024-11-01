@@ -207,6 +207,20 @@ def data_store_import_docs(**context):
     return operation_name
 
 
+def generate_update_doc_registry_job_params_fn(**context):
+    bq_table = context["ti"].xcom_pull(key="bigquery_table")
+    input_bq_table = (
+        f"{bq_table['project_id']}.{bq_table['dataset_id']}."
+        f"{bq_table['table_id']}"
+    )
+    process_folder = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.create_process_folder",
+        key="process_folder",
+    )
+    output_folder = f'{os.environ.get("DPU_PROCESS_BUCKET")}/{process_folder}/workflow-io/update_doc_registry'
+    return cloud_run_utils.get_doc_registry_update_job_override(input_bq_table, output_folder)
+
+
 def generate_process_job_params(**context):
     mv_params = context["ti"].xcom_pull(
         key="return_value",
@@ -402,7 +416,7 @@ with DAG(
             provide_context=True,
         )
 
-        has_files_to_process_after_removing_duplicates = PythonOperator(
+        has_files_to_process_after_removing_duplicates = BranchPythonOperator(
             task_id="has_files_to_process_after_removing_duplicates",
             python_callable=has_files_to_process_after_removing_duplicates_fn,
             provide_context=True,
@@ -516,6 +530,24 @@ with DAG(
             provide_context=True,
         )
 
+        generate_update_doc_registry_job_params = PythonOperator(
+            task_id="generate_update_doc_registry_job_params",
+            python_callable=generate_update_doc_registry_job_params_fn,
+            execution_timeout=timedelta(seconds=3600),
+            provide_context=True,
+        )
+
+        update_doc_registry = CloudRunExecuteJobOperator(
+            project_id=os.environ.get("GCP_PROJECT"),
+            region=os.environ.get("DPU_REGION"),
+            task_id="update_doc_registry",
+            job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
+            deferrable=False,
+            overrides="{{ ti.xcom_pull("
+            "task_ids='general_processing.generate_update_doc_registry_job_params' "
+            ", key='return_value') }}",
+        )
+
     with TaskGroup(group_id="forms_processing") as forms_processing:
         create_form_process_job_params = PythonOperator(
             task_id="create_form_process_job_params",
@@ -598,5 +630,10 @@ with DAG(
         classified_docs_moved_or_skipped
         >> create_process_job_params
         >> execute_doc_processors
-        >> import_docs_to_data_store
+        >> [import_docs_to_data_store, generate_update_doc_registry_job_params]
+    )
+    (   # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+        # update the document registry with the newly ingested documents
+        generate_update_doc_registry_job_params
+        >> update_doc_registry
     )

@@ -281,3 +281,26 @@ def get_doc_registry_duplicate_job_override(
     if doc_registry_table:
         params["container_overrides"][0]["env"].append({"name": "BQ_DOC_REGISTRY_TABLE", "value": doc_registry_table})
     return params
+
+def get_doc_registry_update_job_override(
+    input_bq_table: str,
+    output_folder: str,
+    doc_registry_table: str = "",
+    timeout_in_seconds: int = 3000,
+):
+    params = {
+        "container_overrides": [
+            {
+                "env": [
+                    {"name": "ADD_DOCS", "value": "true"},
+                    {"name": "BQ_INGESTED_DOC_TABLE", "value": input_bq_table},
+                    {"name": "GCS_IO_URI", "value": output_folder},
+                ]
+            }
+        ],
+        "task_count": 1,
+        "timeout": f"{timeout_in_seconds}s",
+    }
+    if doc_registry_table:
+        params["container_overrides"][0]["env"].append({"name": "BQ_DOC_REGISTRY_TABLE", "value": doc_registry_table})
+    return params
