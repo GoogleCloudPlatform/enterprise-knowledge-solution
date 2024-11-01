@@ -32,49 +32,44 @@ resource "google_dns_policy" "dns-policy" {
   }
 }
 
-module "network_firewall_policy" {
-
-  source      = "github.com/terraform-google-modules/terraform-google-network.git//modules/network-firewall-policy?ref=7957e51850e248ca09b02fb445a6e56ac7a0e58c" #commit hash of version 9.3.0
-  project_id  = var.project_id
-  policy_name = "firewall-policy"
+resource "google_compute_network_firewall_policy" "policy" {
+  name        = "network-firewall-policy"
   description = "firewall policy to enable EKS functionality"
-  target_vpcs = [module.vpc[0].network_id]
+}
 
-  rules = [
-    {
-      priority       = "1000"
-      direction      = "EGRESS"
-      action         = "allow"
-      rule_name      = "allow-google-apis-restricted-vip"
-      description    = "Allow private HTTPS access to google apis on the restricted VIP"
-      enable_logging = true
-      match = {
-        dest_ip_ranges = ["199.36.153.4/30"]
-        layer4_configs = [
-          {
-            ip_protocol = "tcp"
-            ports       = ["443"]
-          },
-        ]
-      }
-    },
-    {
-      priority       = "65530"
-      direction      = "EGRESS"
-      action         = "deny"
-      rule_name      = "default-deny-egress"
-      description    = "low priority catch-all to block egress traffic unless explicitly allowed by another rule"
-      enable_logging = true
-      match = {
-        dest_ip_ranges = ["0.0.0.0/0"]
-        layer4_configs = [
-          {
-            ip_protocol = "all"
-          },
-        ]
-      }
-    },
-  ]
+resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
+  description     = "Allow private HTTPS access to google apis on the restricted VIP"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1000
+  rule_name       = "allow-google-apis-restricted-vip"
+
+  match {
+    dest_ip_ranges = ["199.36.153.4/30"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = ["443"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
+  description     = "Allow private HTTPS access to google apis on the restricted VIP"
+  action          = "deny"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 65530
+  rule_name       = "default-deny-egress"
+
+  match {
+    dest_ip_ranges = ["0.0.0.0/0"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
 }
 
 module "dns-private-zone" {
