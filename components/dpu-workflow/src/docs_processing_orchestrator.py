@@ -126,9 +126,7 @@ def generate_classify_job_params_fn(**context):
         key="types_to_process",
     )
     if "pdf" not in files_to_process:
-        logging.warning(
-            f"No PDF files to classify, skipping the classify step."
-        )
+        logging.warning("No PDF files to classify, skipping the classify step.")
         raise AirflowSkipException()
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
