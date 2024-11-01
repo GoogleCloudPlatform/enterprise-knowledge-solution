@@ -93,12 +93,19 @@ resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
   }
 }
 
+resource "google_compute_ssl_policy" "ssl-policy" {
+  name            = "ssl-policy"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_2"
+}
+
 module "eks_webui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
   name                            = "eks-webui-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
+  ssl_policy                      = google_compute_ssl_policy.ssl-policy.self_link
   https_redirect                  = true
   labels                          = local.eks_label
 
@@ -122,12 +129,8 @@ module "eks_webui_lb" {
       }
     }
   }
-}
 
-resource "google_compute_ssl_policy" "nonprod-ssl-policy" {
-  name            = "ssl-policy"
-  profile         = "MODERN"
-  min_tls_version = "TLS_1_2"
+  depends_on = [google_compute_ssl_policy.ssl-policy]
 }
 
 resource "google_project_service_identity" "iap_sa" {
