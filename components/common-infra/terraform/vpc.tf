@@ -38,7 +38,7 @@ module "network_firewall_policy" {
   project_id  = var.project_id
   policy_name = "firewall-policy"
   description = "firewall policy to enable EKS functionality"
-  target_vpcs = [module.vpc[0].network_self_link]
+  target_vpcs = [module.vpc[0].network_id]
 
   rules = [
     {
