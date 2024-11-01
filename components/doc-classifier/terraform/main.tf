@@ -80,4 +80,11 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [
+      effective_labels["goog-packaged-solution"],
+      terraform_labels["goog-packaged-solution"],
+      labels["goog-packaged-solution"]
+    ]
+  }
 }

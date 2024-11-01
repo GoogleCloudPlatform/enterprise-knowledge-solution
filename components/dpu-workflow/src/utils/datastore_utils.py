@@ -48,7 +48,7 @@ def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
         ),
         reconciliation_mode=discoveryengine.ImportDocumentsRequest.ReconciliationMode.INCREMENTAL,
     )
-    operation = client.import_documents(request=request)
+    operation = client.import_documents(request=request, timeout=3600.0)
     response = operation.result()
     metadata = discoveryengine.ImportDocumentsMetadata(operation.metadata)
     print(response)
