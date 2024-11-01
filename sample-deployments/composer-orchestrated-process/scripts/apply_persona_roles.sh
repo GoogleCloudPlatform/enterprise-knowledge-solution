@@ -33,11 +33,7 @@ check_and_set_persona "DEPLOYER"
 section_close
 
 section_open "Enable required IAM roles for the OPERATOR (read-only) persona"
-check_and_set_persona "OPERATOR_READONLY"
-section_close
-
-section_open "Enable required IAM roles for the OPERATOR (read & write) persona"
-check_and_set_persona "OPERATOR_READWRITE"
+check_and_set_persona "OPERATOR"
 section_close
 
 section_open "Enable required IAM roles for the READER persona"
