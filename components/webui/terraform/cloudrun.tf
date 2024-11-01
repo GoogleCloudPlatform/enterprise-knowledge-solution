@@ -106,7 +106,6 @@ module "eks_webui_lb" {
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
   ssl_policy                      = google_compute_ssl_policy.ssl-policy.self_link
-  https_redirect                  = true
   labels                          = local.eks_label
 
   backends = {
@@ -129,8 +128,6 @@ module "eks_webui_lb" {
       }
     }
   }
-
-  depends_on = [google_compute_ssl_policy.ssl-policy]
 }
 
 resource "google_project_service_identity" "iap_sa" {
