@@ -39,23 +39,23 @@ resource "google_compute_network_firewall_policy" "policy" {
   description = "firewall policy to enable EKS functionality"
 }
 
-resource "google_compute_network_firewall_policy_association" "primary" {
+resource "google_compute_network_firewall_policy_association" "association" {
   name              = "association"
   attachment_target = module.vpc[0].network_id
   firewall_policy   = google_compute_network_firewall_policy.policy.name
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
-  description     = "Allow private HTTPS access to google apis on the restricted VIP"
+  description     = "Allow private HTTPS access to google apis on the private VIP"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy.name
   priority        = 1000
-  rule_name       = "allow-google-apis-restricted-vip"
+  rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.4/30"]
+    dest_ip_ranges = ["199.36.153.8/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -73,10 +73,9 @@ resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
   rule_name       = "allow-subnet-internal"
 
   match {
-    dest_ip_ranges = [var.composer_cidr.primary]
+    dest_ip_ranges = [var.composer_cidr.subnet_primary]
     layer4_configs {
-      ip_protocol = "tcp,udp"
-      ports       = ["all"]
+      ip_protocol = "all"
     }
   }
 }
@@ -93,14 +92,13 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-s
   match {
     dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
     layer4_configs {
-      ip_protocol = "tcp,udp"
-      ports       = ["all"]
+      ip_protocol = "all"
     }
   }
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
-  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
+  description     = "Allow internal traffic to reach services on the secondary subnet range"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
@@ -111,8 +109,58 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-services-
   match {
     dest_ip_ranges = [var.composer_cidr.services_secondary_range]
     layer4_configs {
-      ip_protocol = "tcp,udp"
-      ports       = ["all"]
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
+  description     = "Allow internal traffic to reach the composer control plane"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1004
+  rule_name       = "allow-composer-control-plane"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.control_plane]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-sql" {
+  description     = "Allow internal traffic to reach the sql in tenant project"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1005
+  rule_name       = "allow-composer-sql"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.sql]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "default-deny-egress-logger" {
+  description     = "Logger"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 65529
+  rule_name       = "default-deny-egress-logger"
+
+  match {
+    dest_ip_ranges = ["0.0.0.0/0"]
+    layer4_configs {
+      ip_protocol = "all"
     }
   }
 }
@@ -135,7 +183,6 @@ resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
 }
 
 
-
 module "dns-private-zone-googleapis" {
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
@@ -147,7 +194,7 @@ module "dns-private-zone-googleapis" {
 
   recordsets = [
     {
-      name = "restricted"
+      name = "private"
       type = "A"
       ttl  = 300
       records = [
@@ -159,7 +206,7 @@ module "dns-private-zone-googleapis" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -180,7 +227,7 @@ module "dns-private-zone-composer1" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -201,7 +248,7 @@ module "dns-private-zone-composer2" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -222,7 +269,7 @@ module "dns-private-zone-pkg-dev" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -243,7 +290,7 @@ module "dns-private-zone-gcr-io" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]

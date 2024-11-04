@@ -56,7 +56,7 @@ module "dpu-subnet" {
 
   subnets = [{
     subnet_name           = "composer-subnet"
-    subnet_ip             = var.composer_cidr.primary
+    subnet_ip             = var.composer_cidr.subnet_primary
     subnet_region         = var.region
     subnet_private_access = "true"
     subnet_flow_logs      = "true"

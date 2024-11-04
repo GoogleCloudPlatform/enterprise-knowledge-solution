@@ -70,13 +70,17 @@ variable "webui_domains" {
 variable "composer_cidr" {
   description = "CIDR ranges for configuring Cloud Composer"
   type = object({
-    primary                  = string
+    subnet_primary           = string
     cluster_secondary_range  = string
     services_secondary_range = string
+    control_plane            = string
+    sql                      = string
   })
   default = {
-    primary                  = "10.10.10.0/24"
+    subnet_primary           = "10.10.10.0/24"
     cluster_secondary_range  = "10.154.0.0/17"
     services_secondary_range = "10.154.128.0/22"
+    control_plane            = "172.31.245.0/24"
+    sql                      = "10.0.0.0/12"
   }
 }
