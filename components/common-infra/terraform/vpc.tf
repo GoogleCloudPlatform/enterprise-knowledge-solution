@@ -39,6 +39,12 @@ resource "google_compute_network_firewall_policy" "policy" {
   description = "firewall policy to enable EKS functionality"
 }
 
+resource "google_compute_network_firewall_policy_association" "primary" {
+  name              = "association"
+  attachment_target = module.vpc[0].network_id
+  firewall_policy   = google_compute_network_firewall_policy.policy.name
+}
+
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   description     = "Allow private HTTPS access to google apis on the restricted VIP"
   action          = "allow"
