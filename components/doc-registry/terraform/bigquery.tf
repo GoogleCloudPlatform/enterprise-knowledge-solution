@@ -21,14 +21,14 @@ module "docs_registry_dataset" {
   dataset_labels = local.eks_label
 
   tables = [
-  {
-    table_id           = var.bq_registry_table
-    range_partitioning = null
-    time_partitioning  = null
-    expiration_time    = null
-    clustering         = ["crc32", "fileName"]
-    labels             = local.eks_label
-    schema             = <<-EOT
+    {
+      table_id           = var.bq_registry_table
+      range_partitioning = null
+      time_partitioning  = null
+      expiration_time    = null
+      clustering         = ["crc32", "fileName"]
+      labels             = local.eks_label
+      schema             = <<-EOT
       [
         {
           "mode": "REQUIRED",
@@ -52,6 +52,6 @@ module "docs_registry_dataset" {
         }
       ]
     EOT
-  }
+    }
   ]
 }

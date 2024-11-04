@@ -31,7 +31,7 @@ variable "bq_registry_dataset" {
 variable "bq_registry_table" {
   description = "BigQuery table for aggregated doument registry"
   type        = string
-  default     = "docs_registry"  
+  default     = "docs_registry"
 }
 
 variable "doc_registry_service_cloud_run_job_name" {

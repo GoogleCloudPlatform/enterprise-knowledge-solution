@@ -24,7 +24,7 @@ output "bq_registry_dataset_id" {
 
 output "bq_registry_table_id" {
   description = "BigQuery document registry table"
-  value       = module.docs_registry_dataset.table_ids[0]   
+  value       = module.docs_registry_dataset.table_ids[0]
 }
 
 output "doc_registry_service_cloud_run_job_name" {

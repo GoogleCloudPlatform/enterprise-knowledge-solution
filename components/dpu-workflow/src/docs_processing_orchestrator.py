@@ -93,14 +93,18 @@ def generate_process_folder(**context):
 def generate_check_duplicated_files_job_params_fn(**context):
     input_bucket = context["params"]["input_bucket"]
     input_folder = context["params"]["input_folder"]
-    input_folder_ful_uri = input_bucket if not input_folder else f"{input_bucket}/{input_folder}"
+    input_folder_ful_uri = (
+        input_bucket if not input_folder else f"{input_bucket}/{input_folder}"
+    )
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
     )
     output_folder = f'{os.environ.get("DPU_PROCESS_BUCKET")}/{process_folder}/workflow-io/check_duplicated_files'
     context["ti"].xcom_push(key="output_folder", value=output_folder)
-    return cloud_run_utils.get_doc_registry_duplicate_job_override(input_folder_ful_uri, output_folder)
+    return cloud_run_utils.get_doc_registry_duplicate_job_override(
+        input_folder_ful_uri, output_folder
+    )
 
 
 def move_duplicated_files_to_rejected_bucket_fn(**context):
@@ -116,7 +120,11 @@ def move_duplicated_files_to_rejected_bucket_fn(**context):
         task_ids="initial_load_from_input_bucket.process_supported_types",
         key="types_to_process",
     )
-    gcs_utils.move_duplicated_files(f'{output_folder}/result.jsonl', f'{os.environ.get("DPU_REJECT_BUCKET")}/{process_folder}', process_files_by_type)
+    gcs_utils.move_duplicated_files(
+        f"{output_folder}/result.jsonl",
+        f'{os.environ.get("DPU_REJECT_BUCKET")}/{process_folder}',
+        process_files_by_type,
+    )
     for key in list(process_files_by_type):
         if not process_files_by_type[key]:
             del process_files_by_type[key]
@@ -126,7 +134,7 @@ def move_duplicated_files_to_rejected_bucket_fn(**context):
 def has_files_to_process_after_removing_duplicates_fn(**context):
     files_to_process = context["ti"].xcom_pull(
         key="return_value",
-        task_ids="initial_load_from_input_bucket.move_duplicated_files_to_rejected_bucket"
+        task_ids="initial_load_from_input_bucket.move_duplicated_files_to_rejected_bucket",
     )
     if files_to_process:
         return "initial_load_from_input_bucket.generate_files_move_parameters"
@@ -137,7 +145,7 @@ def has_files_to_process_after_removing_duplicates_fn(**context):
 def generate_mv_params(**context):
     files_to_process = context["ti"].xcom_pull(
         key="return_value",
-        task_ids="initial_load_from_input_bucket.move_duplicated_files_to_rejected_bucket"
+        task_ids="initial_load_from_input_bucket.move_duplicated_files_to_rejected_bucket",
     )
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
@@ -210,15 +218,16 @@ def data_store_import_docs(**context):
 def generate_update_doc_registry_job_params_fn(**context):
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
     input_bq_table = (
-        f"{bq_table['project_id']}.{bq_table['dataset_id']}."
-        f"{bq_table['table_id']}"
+        f"{bq_table['project_id']}.{bq_table['dataset_id']}." f"{bq_table['table_id']}"
     )
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
     )
     output_folder = f'{os.environ.get("DPU_PROCESS_BUCKET")}/{process_folder}/workflow-io/update_doc_registry'
-    return cloud_run_utils.get_doc_registry_update_job_override(input_bq_table, output_folder)
+    return cloud_run_utils.get_doc_registry_update_job_override(
+        input_bq_table, output_folder
+    )
 
 
 def generate_process_job_params(**context):
@@ -601,7 +610,7 @@ with DAG(
         >> has_files_to_process_after_removing_duplicates
         >> [generate_files_move_parameters, skip_move_files]
     )
-    (   # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         generate_files_move_parameters
         >> move_to_processing
         >> create_output_table_name
@@ -632,7 +641,7 @@ with DAG(
         >> execute_doc_processors
         >> [import_docs_to_data_store, generate_update_doc_registry_job_params]
     )
-    (   # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
+    (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # update the document registry with the newly ingested documents
         generate_update_doc_registry_job_params
         >> update_doc_registry
