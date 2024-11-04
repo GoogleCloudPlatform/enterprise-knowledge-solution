@@ -21,7 +21,7 @@ from typing import Optional, Sequence
 
 import proto
 from google.api_core.client_info import ClientInfo
-from google.api_core.gapic_v1.client_info import ClientInfo
+from google.api_core.gapic_v1.client_info import ClientInfo as GapicClientInfo
 from google.cloud import bigquery_storage_v1  # type: ignore[import-untyped]
 from google.cloud import bigquery, storage
 from google.cloud.bigquery_storage_v1 import types
@@ -42,6 +42,7 @@ class GoogleCloudClients:
     bq_client: Optional[bigquery.Client] = None
     bq_write_client: Optional[bigquery_storage_v1.BigQueryWriteClient] = None
     client_info = ClientInfo(user_agent="cloud-solutions/eks-doc-processors-v1")
+    gapic_client_info = GapicClientInfo(user_agent="cloud-solutions/eks-doc-processors-v1")
 
     @classmethod
     def get_storage_client(cls):
@@ -59,7 +60,7 @@ class GoogleCloudClients:
     def get_bq_write_stream(cls):
         if cls.bq_write_client is None:
             cls.bq_write_client = bigquery_storage_v1.BigQueryWriteClient(
-                client_info=cls.client_info
+                client_info=cls.gapic_client_info
             )
         return cls.bq_write_client
 
