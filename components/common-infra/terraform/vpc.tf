@@ -76,16 +76,16 @@ resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
 
 module "dns-private-zone" {
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = "var.project_id"
+  project_id = var.project_id
   type       = "private"
-  name       = "googleapis.com"
+  name       = "googleapis"
   domain     = "googleapis.com."
 
   private_visibility_config_networks = [module.vpc[0].network_self_link]
 
   recordsets = [
     {
-      name = "restricted.googleapis.com."
+      name = "restricted"
       type = "A"
       ttl  = 300
       records = [
@@ -93,11 +93,11 @@ module "dns-private-zone" {
       ]
     },
     {
-      name = "*.googleapis.com."
+      name = "*"
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com",
+        "restricted.googleapis.com.",
       ]
     },
   ]
