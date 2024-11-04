@@ -21,6 +21,8 @@ module "vpc" {
 
   subnets = []
 
+  depends_on = [module.project_services]
+
 }
 
 resource "google_dns_policy" "dns-policy" {
