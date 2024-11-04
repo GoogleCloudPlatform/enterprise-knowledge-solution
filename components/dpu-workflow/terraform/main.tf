@@ -56,7 +56,7 @@ module "dpu-subnet" {
 
   subnets = [{
     subnet_name           = "composer-subnet"
-    subnet_ip             = "10.10.10.0/24"
+    subnet_ip             = var.composer_cidr.primary
     subnet_region         = var.region
     subnet_private_access = "true"
     subnet_flow_logs      = "true"
@@ -66,11 +66,11 @@ module "dpu-subnet" {
     composer-subnet = [
       {
         range_name    = local.cluster_secondary_range_name
-        ip_cidr_range = "10.154.0.0/17"
+        ip_cidr_range = var.composer_cidr.cluster_secondary_range
       },
       {
         range_name    = local.services_secondary_range_name
-        ip_cidr_range = "10.154.128.0/22"
+        ip_cidr_range = var.composer_cidr.services_secondary_range
       },
     ]
   }

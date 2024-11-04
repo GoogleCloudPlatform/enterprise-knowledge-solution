@@ -63,8 +63,62 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
+resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
+  description     = "Allow internal traffic within the composer subnet"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1001
+  rule_name       = "allow-subnet-internal"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.primary]
+    layer4_configs {
+      ip_protocol = "tcp,udp"
+      ports       = ["all"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
+  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1002
+  rule_name       = "allow-composer-cluster-secondary-range"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
+    layer4_configs {
+      ip_protocol = "tcp,udp"
+      ports       = ["all"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
+  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy.name
+  priority        = 1003
+  rule_name       = "allow-composer-services-secondary-range"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.services_secondary_range]
+    layer4_configs {
+      ip_protocol = "tcp,udp"
+      ports       = ["all"]
+    }
+  }
+}
+
 resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
-  description     = "Allow private HTTPS access to google apis on the restricted VIP"
+  description     = "Catch-all deny egress rule to block traffic that has not been explicitly allowed"
   action          = "deny"
   direction       = "EGRESS"
   enable_logging  = true
@@ -79,6 +133,8 @@ resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
     }
   }
 }
+
+
 
 module "dns-private-zone-googleapis" {
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0

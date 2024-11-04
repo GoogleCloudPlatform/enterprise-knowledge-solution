@@ -50,3 +50,12 @@ variable "alloy_db_cluster_id" {
   type        = string
   default     = "eks-docs-results"
 }
+
+variable "composer_cidr" {
+  description = "CIDR ranges for configuring Cloud Composer"
+  type = object({
+    primary                  = string
+    cluster_secondary_range  = string
+    services_secondary_range = string
+  })
+}
