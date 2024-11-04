@@ -80,11 +80,11 @@ resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
   }
 }
 
-module "dns-private-zone" {
+module "dns-private-zone-googleapis" {
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
-  name       = "googleapis"
+  name       = "googleapis-com"
   domain     = "googleapis.com."
 
   private_visibility_config_networks = [module.vpc[0].network_self_link]
@@ -98,6 +98,90 @@ module "dns-private-zone" {
         "199.36.153.4", "199.36.153.5", "199.36.153.6", "199.36.153.7",
       ]
     },
+    {
+      name = "*"
+      type = "CNAME"
+      ttl  = 300
+      records = [
+        "restricted.googleapis.com.",
+      ]
+    },
+  ]
+}
+
+module "dns-private-zone-composer1" {
+  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
+  project_id = var.project_id
+  type       = "private"
+  name       = "composer-cloud-google-com"
+  domain     = "composer.cloud.google.com."
+
+  private_visibility_config_networks = [module.vpc[0].network_self_link]
+
+  recordsets = [
+    {
+      name = "*"
+      type = "CNAME"
+      ttl  = 300
+      records = [
+        "restricted.googleapis.com.",
+      ]
+    },
+  ]
+}
+
+module "dns-private-zone-composer2" {
+  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
+  project_id = var.project_id
+  type       = "private"
+  name       = "composer-googleusercontent-com"
+  domain     = "composer.googleusercontent.com."
+
+  private_visibility_config_networks = [module.vpc[0].network_self_link]
+
+  recordsets = [
+    {
+      name = "*"
+      type = "CNAME"
+      ttl  = 300
+      records = [
+        "restricted.googleapis.com.",
+      ]
+    },
+  ]
+}
+
+module "dns-private-zone-pkg-dev" {
+  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
+  project_id = var.project_id
+  type       = "private"
+  name       = "pkg-dev"
+  domain     = "pkg.dev."
+
+  private_visibility_config_networks = [module.vpc[0].network_self_link]
+
+  recordsets = [
+    {
+      name = "*"
+      type = "CNAME"
+      ttl  = 300
+      records = [
+        "restricted.googleapis.com.",
+      ]
+    },
+  ]
+}
+
+module "dns-private-zone-gcr-io" {
+  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
+  project_id = var.project_id
+  type       = "private"
+  name       = "gcr-io"
+  domain     = "gcr.io."
+
+  private_visibility_config_networks = [module.vpc[0].network_self_link]
+
+  recordsets = [
     {
       name = "*"
       type = "CNAME"
