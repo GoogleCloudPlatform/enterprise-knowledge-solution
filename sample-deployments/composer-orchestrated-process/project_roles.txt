@@ -2,6 +2,7 @@ projects/${PROJECT_ID}/roles/customIAPAdmin
 roles/alloydb.admin
 roles/artifactregistry.admin
 roles/bigquery.dataOwner
+roles/cloudbuild.builds.builder
 roles/composer.admin
 roles/compute.networkAdmin
 roles/compute.securityAdmin

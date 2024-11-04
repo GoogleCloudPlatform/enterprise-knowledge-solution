@@ -82,11 +82,19 @@ To deploy this solution, perform the follow steps:
     export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
     ```
 
-    1. (Optional) By default, this repository automatically creates and uses a service account "deployer@$PROJECT_ID.iam.gserviceaccount.com" to deploy terraform resources. The necessary IAM roles and authentication are automatically configured in the setup script for ease of dpeloyment. If you have a service account in your existing terraform pipeline that you want to use instead, additionally set the optional environment variables:
+    1.  (Optional) By default, this repository automatically creates and uses a service account "deployer@$PROJECT_ID.iam.gserviceaccount.com" to deploy terraform resources. The necessary IAM roles and authentication are automatically configured in the setup script for ease of dpeloyment. If you have a service account in your existing terraform pipeline that you want to use instead, additionally set the optional environment variables to configure your custom deployer service account with the least privilege IAM roles:
 
-       ```sh
-       export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform. The setup script will add the IAM roles necessary to deploy resources in Terraform."
-       ```
+        ```sh
+        export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform."
+        ```
+
+    1.  (Optional) By default, this repository creates a new VPC network. If you want to use an existing VPC network instead, additional set the optional environment variables:
+
+        ```sh
+        create_vpc_network = false
+        vpc_name = "<the name of your existing VPC>"
+        vpc_id = "<the ID of your existing VPC>"
+        ```
 
 1.  Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
 
@@ -111,17 +119,15 @@ To deploy this solution, perform the follow steps:
     ```
 
 1.  Create a terraform.tfvars file with the following variables:
-    `project_id = # Your Google Cloud project ID.`
 
-    `region = # The desired region for deploying resources (e.g., "us-central1", "europe-west1").`
-
-    `vertex_ai_data_store_region = # The region for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). Choose a region the is align with you overal region of choice to avoid cross regional traffic.`
-
-    `docai_location = # Sets the location for Document AI service.`
-
-    `webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])`
-
-    `iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:google.com","domain:example.com"])`
+    ```sh
+    project_id = # Your Google Cloud project ID.
+    region = # The desired region for deploying single-region resources (e.g., "us-central1", "europe-west1").
+    vertex_ai_data_store_region = # The multiregion for your Agent Builder Data Store, the possible values are ("global", "us", or "eu").
+    docai_location = # Sets the location for Document AI service.
+    webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
+    iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])
+    ```
 
 1.  Review the proposed changes, and apply them:
 
@@ -129,7 +135,7 @@ To deploy this solution, perform the follow steps:
     terraform apply
     ```
 
-    The provisioning process may take about 30 minutes to complete.
+    The provisioning process may take approximately an hour to complete.
 
 1.  Print the DNS configuration for the WebUI and configure the DNS records for the WebUI accordingly:
 

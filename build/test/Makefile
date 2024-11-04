@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "vpc" {
-  count        = var.create_vpc_network ? 1 : 0
-  source       = "github.com/terraform-google-modules/terraform-google-network?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
-  project_id   = module.project_services.project_id
-  network_name = var.vpc_name
-  routing_mode = "GLOBAL"
+test-e2e:	## Run the end-to-end test
+	@echo "Running E2E test..."
+	@go test -v -run ./ -timeout 30m --tags=e2e
 
-  subnets = []
+.PHONY: help
+.DEFAULT_GOAL := help
 
-}
+help:
+	@fgrep -h "##" $(MAKEFILE_LIST) | sed -e 's/\(\:.*\#\#\)/\:\ /' | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'

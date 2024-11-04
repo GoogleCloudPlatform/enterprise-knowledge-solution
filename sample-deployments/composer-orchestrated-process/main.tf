@@ -28,9 +28,12 @@ locals {
 }
 
 module "common_infra" {
-  source     = "../../components/common-infra/terraform"
-  project_id = var.project_id
-  region     = var.region
+  source             = "../../components/common-infra/terraform"
+  project_id         = var.project_id
+  region             = var.region
+  create_vpc_network = var.create_vpc_network
+  vpc_name           = var.vpc_name
+  vpc_id             = var.vpc_id
 }
 
 module "project_services" {
@@ -50,8 +53,8 @@ module "project_services" {
 resource "google_discovery_engine_data_store" "dpu_ds" {
   project                     = module.project_services.project_id
   location                    = var.vertex_ai_data_store_region
-  data_store_id               = "dpu-doc-store"
-  display_name                = "Document Processing & Understanding"
+  data_store_id               = "eks-data-store"
+  display_name                = "Enterprise Knowledge Store"
   industry_vertical           = "GENERIC"
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
@@ -66,10 +69,10 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
 resource "google_discovery_engine_search_engine" "basic" {
   project = module.project_services.project_id
   # TODO: Change this
-  engine_id      = module.project_services.project_id
+  engine_id      = "ent-search-agent"
   collection_id  = "default_collection"
   location       = var.vertex_ai_data_store_region
-  display_name   = "Example Display Name"
+  display_name   = "Enterprise Search Agent"
   data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
   search_engine_config {
     search_tier    = "SEARCH_TIER_ENTERPRISE"
@@ -88,24 +91,28 @@ module "processor" {
 }
 
 module "form_parser_processor" {
-  source                         = "../../components/processing/form_parser/deployment"
-  project_id                     = var.project_id
-  region                         = var.region
-  location                       = var.docai_location
-  gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
-  gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
-  form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
-  alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
+  source                            = "../../components/processing/form_parser/deployment"
+  project_id                        = var.project_id
+  region                            = var.region
+  location                          = var.docai_location
+  gcs_input_prefix                  = module.common_infra.gcs_process_bucket_name
+  gcs_output_prefix                 = module.common_infra.gcs_process_bucket_name
+  form_parser_cloud_run_job_name    = local.form_parser_cloud_run_job_name
+  bq_dataset_id                     = module.common_infra.bq_store_dataset_id
+  alloydb_cluster_name              = module.common_infra.alloydb_cluster_name
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 }
 
+
 module "doc_classifier_job" {
-  source     = "../../components/doc-classifier/terraform"
-  project_id = var.project_id
-  region     = var.region
-  # repository_region                 = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
-  # cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
+  source                            = "../../components/doc-classifier/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
 
 }
 

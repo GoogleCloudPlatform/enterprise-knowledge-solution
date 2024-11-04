@@ -13,12 +13,23 @@
 # limitations under the License.
 
 module "vpc" {
-  count        = var.create_vpc_network ? 1 : 0
-  source       = "github.com/terraform-google-modules/terraform-google-network?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
-  project_id   = module.project_services.project_id
+  count  = var.create_vpc_network ? 1 : 0
+  source = "github.com/terraform-google-modules/terraform-google-network?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
+
+  project_id   = var.project_id
   network_name = var.vpc_name
   routing_mode = "GLOBAL"
 
   subnets = []
 
+}
+
+output "vpc_name" {
+  value       = var.create_vpc_network ? module.vpc[0].network_name : var.vpc_name
+  description = "Name of the created VPC network"
+}
+
+output "vpc_id" {
+  value       = module.vpc[0].network_id
+  description = "Id of the created VPC network"
 }

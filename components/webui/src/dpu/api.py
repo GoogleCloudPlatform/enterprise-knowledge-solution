@@ -73,7 +73,7 @@ def generate_answer(
     preamble: str,
 ) -> dict:
 
-    logger.info("*** Executing Search ****")
+    # logger.info("*** Executing Search ****")
 
     client = search_service_client()
 
