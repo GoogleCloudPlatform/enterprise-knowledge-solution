@@ -42,7 +42,9 @@ class GoogleCloudClients:
     bq_client: Optional[bigquery.Client] = None
     bq_write_client: Optional[bigquery_storage_v1.BigQueryWriteClient] = None
     client_info = ClientInfo(user_agent="cloud-solutions/eks-doc-processors-v1")
-    gapic_client_info = GapicClientInfo(user_agent="cloud-solutions/eks-doc-processors-v1")
+    gapic_client_info = GapicClientInfo(
+        user_agent="cloud-solutions/eks-doc-processors-v1"
+    )
 
     @classmethod
     def get_storage_client(cls):
