@@ -41,17 +41,17 @@ def run() -> None:
     # required params via environment variables
     print("Reading environment variables for configuration")
     print(f"{os.environ=}")
-    processor_id = os.getenv("PROCESSOR_ID")
-    gcs_input_prefix = os.getenv("GCS_INPUT_PREFIX")
-    gcs_output_uri = os.getenv("GCS_OUTPUT_URI")
-    bigquery_metadata_table = os.getenv("BQ_TABLE")
+    processor_id = os.environ["PROCESSOR_ID"]
+    gcs_input_prefix = os.environ["GCS_INPUT_PREFIX"]
+    gcs_output_uri = os.environ["GCS_OUTPUT_URI"]
+    bigquery_metadata_table = os.environ["BQ_TABLE"]
     
     valid_processor_tuple = is_valid_processor_id(processor_id)
     if not valid_processor_tuple:
         raise ValueError(f"processor_id is missing or invalid. {processor_id=}")
     
     job_config = JobConfig(
-        run_id=os.getenv("RUN_ID", "no-run-id-specified"),
+        run_id=os.environ.get("RUN_ID", "no-run-id-specified"),
         gcs_input_prefix=gcs_input_prefix,
         gcs_output_uri=gcs_output_uri,
     )
@@ -60,7 +60,7 @@ def run() -> None:
         project=valid_processor_tuple[0],
         location=valid_processor_tuple[1],
         processor_id=valid_processor_tuple[2],
-        timeout=int(os.getenv("PROCESSOR_TIMEOUT", "600")),
+        timeout=int(os.environ.get("PROCESSOR_TIMEOUT", "600")),
     )
     bigquery_config = BigQueryConfig(
         general_output_table_id=bigquery_metadata_table,
@@ -69,8 +69,8 @@ def run() -> None:
         # alloydb primary instance is set by terraform, and already in the form of:
         # "projects/<PROJECT>/locations/<LOCATION>/clusters/<CLUSTER>/instances/<INSTANCE>"
         # If you override the environment variable, make sure to use the same format.
-        primary_instance=os.getenv("ALLOYDB_INSTANCE"),
-        database=os.getenv("ALLOYDB_DATABASE"),
+        primary_instance=os.environ["ALLOYDB_INSTANCE"],
+        database=os.environ["ALLOYDB_DATABASE"],
     )
     runner = SpecializedParserJobRunner(
         job_config=job_config,
