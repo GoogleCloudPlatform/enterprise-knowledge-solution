@@ -131,58 +131,6 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-control-p
   }
 }
 
-#resource "google_compute_network_firewall_policy_rule" "allow-composer-sql" {
-#  description     = "Allow internal traffic to reach the sql in tenant project"
-#  action          = "allow"
-#  direction       = "EGRESS"
-#  enable_logging  = true
-#  firewall_policy = google_compute_network_firewall_policy.policy.name
-#  priority        = 1005
-#  rule_name       = "allow-composer-sql"
-
-#  match {
-#    dest_ip_ranges = [var.composer_cidr.sql]
-#    layer4_configs {
-#    ip_protocol = "all"
-#   }
-#  }
-#}
-
-#resource "google_compute_network_firewall_policy_rule" "default-deny-egress-logger" {
-#  description     = "Logger"
-#  action          = "allow"
-#  direction       = "EGRESS"
-#  enable_logging  = true
-#  firewall_policy = google_compute_network_firewall_policy.policy.name
-#  priority        = 65529
-#  rule_name       = "default-deny-egress-logger"
-
-#  match {
-##    dest_ip_ranges = ["0.0.0.0/0"]
-#   layer4_configs {
-#     ip_protocol = "all"
-#   }
-# }
-#}
-
-resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
-  description     = "Catch-all deny egress rule to block traffic that has not been explicitly allowed"
-  action          = "deny"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
-  priority        = 65530
-  rule_name       = "default-deny-egress"
-
-  match {
-    dest_ip_ranges = ["0.0.0.0/0"]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-
 module "dns-private-zone-googleapis" {
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
