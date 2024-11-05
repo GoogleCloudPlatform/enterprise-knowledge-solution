@@ -55,7 +55,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.8/30"]
+    dest_ip_ranges = ["199.36.153.4/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -148,22 +148,22 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-sql" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "default-deny-egress-logger" {
-  description     = "Logger"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
-  priority        = 65529
-  rule_name       = "default-deny-egress-logger"
+#resource "google_compute_network_firewall_policy_rule" "default-deny-egress-logger" {
+#  description     = "Logger"
+#  action          = "allow"
+#  direction       = "EGRESS"
+#  enable_logging  = true
+#  firewall_policy = google_compute_network_firewall_policy.policy.name
+#  priority        = 65529
+#  rule_name       = "default-deny-egress-logger"
 
-  match {
-    dest_ip_ranges = ["0.0.0.0/0"]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
+#  match {
+##    dest_ip_ranges = ["0.0.0.0/0"]
+#   layer4_configs {
+#     ip_protocol = "all"
+#   }
+# }
+#}
 
 resource "google_compute_network_firewall_policy_rule" "default-deny-egress" {
   description     = "Catch-all deny egress rule to block traffic that has not been explicitly allowed"
@@ -281,6 +281,27 @@ module "dns-private-zone-gcr-io" {
   type       = "private"
   name       = "gcr-io"
   domain     = "gcr.io."
+
+  private_visibility_config_networks = [module.vpc[0].network_self_link]
+
+  recordsets = [
+    {
+      name = "*"
+      type = "CNAME"
+      ttl  = 300
+      records = [
+        "private.googleapis.com.",
+      ]
+    },
+  ]
+}
+
+module "dns-private-zone-catchall" {
+  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
+  project_id = var.project_id
+  type       = "private"
+  name       = "catchall"
+  domain     = "."
 
   private_visibility_config_networks = [module.vpc[0].network_self_link]
 
