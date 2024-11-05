@@ -333,7 +333,6 @@ google-api-core==2.20.0
     #   sqlalchemy-bigquery
 google-api-python-client==2.147.0
     # via
-    #   -r reqs/../components/invoice-parser/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
@@ -420,7 +419,6 @@ google-cloud-batch==0.17.28
     # via apache-airflow-providers-google
 google-cloud-bigquery==3.26.0
     # via
-    #   -r reqs/../components/invoice-parser/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
