@@ -14,6 +14,7 @@ source-roots = [
     "components/processing/libs/processor-msg/src",
     "components/processing/libs/processor-xlsx/src",
     "components/doc-classifier/src",
+    "components/specialized-parser/src",
     "components/webui/src",
 ]
 
@@ -35,6 +36,7 @@ include=[
     "components/processing/libs/processor-msg/src",
     "components/processing/libs/processor-xlsx/src",
     "components/doc-classifier/src",
+    "components/specialized-parser/src",
     "components/webui/src",
 ]
 
@@ -45,6 +47,7 @@ executionEnvironments = [
     "components/processing/libs/processor-base/src",
     "components/processing/libs/processor-msgx/src",
     "components/doc-classifier/src",
+    "components/specialized-parser/src",
     "components/webui/src",
     ] }
 ]

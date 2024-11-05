@@ -19,10 +19,10 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name     = "doc-processor"
-  form_parser_cloud_run_job_name    = "form-parser"
-  classifier_cloud_run_job_name     = "doc-classifier"
-  invoice_parser_cloud_run_job_name = "invice-parser"
+  processing_cloud_run_job_name         = "doc-processor"
+  form_parser_cloud_run_job_name        = "form-parser"
+  classifier_cloud_run_job_name         = "doc-classifier"
+  specialized_parser_cloud_run_job_name = "specialized-parser"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
@@ -106,13 +106,16 @@ module "doc_classifier_job" {
   classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
 }
 
-module "invoice_parser_job" {
-  source                            = "../../components/invoice-parser/terraform"
-  project_id                        = var.project_id
-  region                            = var.region
-  artifact_repo                     = module.common_infra.artifact_repo.name
-  invoice_parser_cloud_run_job_name = local.invoice_parser_cloud_run_job_name
-  bigquery_dataset_id               = module.common_infra.bq_store_dataset_id
+module "specialized_parser_job" {
+  source                                = "../../components/specialized-parser/terraform"
+  project_id                            = var.project_id
+  region                                = var.region
+  processors_location                   = var.docai_location
+  artifact_repo                         = module.common_infra.artifact_repo.name
+  specialized_parser_cloud_run_job_name = local.specialized_parser_cloud_run_job_name
+  bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
+  alloydb_cluster                       = module.common_infra.alloydb_cluster_name
+  alloydb_instance                      = module.common_infra.alloydb_primary_instance
 }
 
 module "dpu_workflow" {
@@ -122,17 +125,18 @@ module "dpu_workflow" {
   vpc_network_name = module.common_infra.vpc_network_name
   vpc_network_id   = module.common_infra.vpc_network_id
   composer_env_variables = {
-    DPU_OUTPUT_DATASET      = module.common_infra.bq_store_dataset_id
-    DPU_INPUT_BUCKET        = module.common_infra.gcs_input_bucket_name
-    DPU_PROCESS_BUCKET      = module.common_infra.gcs_process_bucket_name
-    DPU_REJECT_BUCKET       = module.common_infra.gcs_reject_bucket_name
-    DPU_REGION              = var.region
-    DPU_DATA_STORE_REGION   = var.vertex_ai_data_store_region
-    DOC_PROCESSOR_JOB_NAME  = module.processor.processing_cloud_run_job_name
-    DPU_DATA_STORE_ID       = google_discovery_engine_data_store.dpu_ds.data_store_id
-    FORMS_PARSER_JOB_NAME   = module.form_parser_processor.form_parser_cloud_run_job_name
-    DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
-    INVOICE_PARSER_JOB_NAME = module.invoice_parser_job.invoice_parser_cloud_run_job_name
+    DPU_OUTPUT_DATASET          = module.common_infra.bq_store_dataset_id
+    DPU_INPUT_BUCKET            = module.common_infra.gcs_input_bucket_name
+    DPU_PROCESS_BUCKET          = module.common_infra.gcs_process_bucket_name
+    DPU_REJECT_BUCKET           = module.common_infra.gcs_reject_bucket_name
+    DPU_REGION                  = var.region
+    DPU_DATA_STORE_REGION       = var.vertex_ai_data_store_region
+    DOC_PROCESSOR_JOB_NAME      = module.processor.processing_cloud_run_job_name
+    DPU_DATA_STORE_ID           = google_discovery_engine_data_store.dpu_ds.data_store_id
+    DOC_CLASSIFIER_JOB_NAME     = module.doc_classifier_job.classifier_cloud_run_job_name
+    SPECIALIZED_PARSER_JOB_NAME = module.specialized_parser_job.specialized_parser_cloud_run_job_name
+    SPECIALIZED_PROCESSORS_IDS_JSON  = module.specialized_parser_job.specialized_processors_ids_json
+    CUSTOM_CLASSIFIER_ID   = var.custom_classifier_id
   }
 }
 

@@ -57,3 +57,11 @@ output "vpc_network_name" {
 output "alloydb_cluster_name" {
   value = module.docs_results.cluster_name
 }
+
+output "alloydb_primary_instance" {
+  value = module.docs_results.primary_instance_id
+}
+
+output "alloydb_location" {
+  value = var.region
+}

@@ -14,7 +14,9 @@
 -e components/webui
     # via -r reqs/requirements_all.in
 aiofiles==23.2.1
-    # via gcloud-aio-storage
+    # via
+    #   gcloud-aio-storage
+    #   google-cloud-alloydb-connector
 aiohappyeyeballs==2.4.2
     # via aiohttp
 aiohttp==3.10.6
@@ -22,6 +24,7 @@ aiohttp==3.10.6
     #   apache-airflow-providers-http
     #   gcloud-aio-auth
     #   gcsfs
+    #   google-cloud-alloydb-connector
 aiosignal==1.3.1
     # via aiohttp
 alembic==1.13.3
@@ -83,6 +86,8 @@ asgiref==3.8.1
     #   apache-airflow
     #   apache-airflow-providers-google
     #   apache-airflow-providers-http
+asn1crypto==1.5.1
+    # via scramp
 astroid==3.3.4
     # via pylint
 attrs==24.2.0
@@ -158,6 +163,7 @@ cryptography==43.0.1
     # via
     #   apache-airflow
     #   gcloud-aio-auth
+    #   google-cloud-alloydb-connector
     #   msoffcrypto-tool
     #   pyjwt
     #   pyopenssl
@@ -332,6 +338,7 @@ google-api-core==2.20.0
 google-api-python-client==2.147.0
     # via
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
 google-auth==2.35.0
@@ -344,6 +351,7 @@ google-auth==2.35.0
     #   google-auth-httplib2
     #   google-auth-oauthlib
     #   google-cloud-aiplatform
+    #   google-cloud-alloydb-connector
     #   google-cloud-appengine-logging
     #   google-cloud-automl
     #   google-cloud-batch
@@ -403,6 +411,8 @@ google-cloud-aiplatform==1.68.0
     # via
     #   apache-airflow-providers-google
     #   processor-web-ui
+google-cloud-alloydb-connector==1.4.0
+    # via -r reqs/../components/specialized-parser/src/requirements.in
 google-cloud-appengine-logging==1.4.5
     # via google-cloud-logging
 google-cloud-audit-log==0.3.0
@@ -414,6 +424,7 @@ google-cloud-batch==0.17.28
 google-cloud-bigquery==3.26.0
     # via
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   google-cloud-aiplatform
     #   pandas-gbq
@@ -460,6 +471,7 @@ google-cloud-documentai==2.32.0
     # via
     #   -r reqs/../components/doc-classifier/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
 google-cloud-firestore==2.19.0
     # via
     #   firebase-admin
@@ -496,6 +508,7 @@ google-cloud-speech==2.27.0
     # via apache-airflow-providers-google
 google-cloud-storage==2.18.2
     # via
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
     #   gcsfs
@@ -796,6 +809,8 @@ pcodedmp==1.2.6
     # via oletools
 pendulum==3.0.0
     # via apache-airflow
+pg8000==1.31.2
+    # via google-cloud-alloydb-connector
 pillow==10.4.0
     # via streamlit
 platformdirs==4.3.6
@@ -862,6 +877,7 @@ protobuf==4.25.5
     #   google-analytics-admin
     #   google-api-core
     #   google-cloud-aiplatform
+    #   google-cloud-alloydb-connector
     #   google-cloud-appengine-logging
     #   google-cloud-audit-log
     #   google-cloud-automl
@@ -984,6 +1000,7 @@ python-dateutil==2.9.0.post0
     #   google-cloud-bigquery
     #   pandas
     #   pendulum
+    #   pg8000
     #   time-machine
 python-decouple==3.8
     # via streamlit-aggrid
@@ -1026,6 +1043,7 @@ requests==2.32.3
     #   connexion
     #   gcsfs
     #   google-api-core
+    #   google-cloud-alloydb-connector
     #   google-cloud-bigquery
     #   google-cloud-storage
     #   looker-sdk
@@ -1059,6 +1077,8 @@ rsa==4.9
     #   google-auth
 rtfde==0.1.2
     # via extract-msg
+scramp==1.4.5
+    # via pg8000
 setproctitle==1.3.3
     # via apache-airflow
 setuptools==75.1.0
@@ -1084,6 +1104,7 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==1.4.54
     # via
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   alembic
     #   apache-airflow
     #   flask-appbuilder

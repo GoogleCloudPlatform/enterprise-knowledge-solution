@@ -23,6 +23,7 @@ module "docs_results" {
   cluster_labels       = {}
   cluster_display_name = var.alloy_db_cluster_id
   psc_enabled          = true
+  # network_self_link    = replace(module.vpc.network_self_link, "https://www.googleapis.com/compute/v1/", "")
 
   primary_instance = {
     instance_id       = "${var.alloy_db_cluster_id}-primary"
@@ -31,7 +32,7 @@ module "docs_results" {
     database_flags = {
       # This flag enables authenticating using IAM, however, creating databases and tables from terraform is not
       # currently supported. This goes for managing users permissions over databases and tables as well.
-      # This means we will use throughout the example only the `public` built in database, which can be accessed any
+      # This means we will use throughout the example only the `public` built in database, which can be accessed by any
       # authenticated user.
       "alloydb.iam_authentication" = "true"
     }

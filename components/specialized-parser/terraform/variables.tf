@@ -27,13 +27,47 @@ variable "artifact_repo" {
   type        = string
 }
 
-variable "invoice_parser_cloud_run_job_name" {
-  description = "Invoice Parser job name"
+variable "specialized_parser_cloud_run_job_name" {
+  description = "Specialized Parser job name"
   type        = string
-  default     = "invoice-parser-job"
+  default     = "specialized-parser-job"
 }
 
 variable "bigquery_dataset_id" {
   description = "BigQuery Dataset id"
   type        = string
+}
+
+variable "alloydb_project" {
+  description = "AlloyDB Project"
+  type = string
+  default = ""  # We will default to var.project_id
+}
+
+variable "alloydb_location" {
+  description = "AlloyDB Location"
+  type = string
+  default = ""  # We will default to var.region
+}
+
+variable "alloydb_cluster" {
+  description = "AlloyDB Cluster"
+  type = string
+}
+
+variable "alloydb_instance" {
+  description = "AlloyDB Instance"
+  type = string
+}
+
+variable "alloydb_database" {
+  description = "AlloyDB Database"
+  type = string
+  default = "public"
+}
+
+variable "processors_location" {
+  description = "Location to setup Document AI processors"
+  type = string
+  default = "us"
 }
