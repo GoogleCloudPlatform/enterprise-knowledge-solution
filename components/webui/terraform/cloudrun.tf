@@ -106,6 +106,7 @@ module "eks_webui_lb" {
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
   ssl_policy                      = google_compute_ssl_policy.ssl-policy.self_link
+  https_redirect                  = true
   labels                          = local.eks_label
 
   backends = {

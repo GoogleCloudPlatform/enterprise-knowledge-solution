@@ -46,15 +46,15 @@ steps:
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
       - "GCLOUD_TF_DOWNLOAD=never"
 
-#  - id: cleanup
-#    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-#    args:
-#      - "-x"
-#      - "-c"
-#      - >-
-#        gcloud config unset auth/impersonate_service_account;
-#        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
-#    entrypoint: /bin/bash
+  - id: cleanup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        gcloud config unset auth/impersonate_service_account;
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+    entrypoint: /bin/bash
 
 tags:
   - "ci"
