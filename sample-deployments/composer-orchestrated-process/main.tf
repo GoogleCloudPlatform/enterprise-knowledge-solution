@@ -19,10 +19,10 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name     = "doc-processor"
-  form_parser_cloud_run_job_name    = "form-parser"
-  classifier_cloud_run_job_name     = "doc-classifier"
-  invoice_parser_cloud_run_job_name = "invice-parser"
+  processing_cloud_run_job_name         = "doc-processor"
+  form_parser_cloud_run_job_name        = "form-parser"
+  classifier_cloud_run_job_name         = "doc-classifier"
+  specialized_parser_cloud_run_job_name = "specialized-parser"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
@@ -115,14 +115,18 @@ module "doc_classifier_job" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
+}
 
-module "invoice_parser_job" {
-  source                            = "../../components/invoice-parser/terraform"
-  project_id                        = var.project_id
-  region                            = var.region
-  artifact_repo                     = module.common_infra.artifact_repo.name
-  invoice_parser_cloud_run_job_name = local.invoice_parser_cloud_run_job_name
-  bigquery_dataset_id               = module.common_infra.bq_store_dataset_id
+module "specialized_parser_job" {
+  source                                = "../../components/specialized-parser/terraform"
+  project_id                            = var.project_id
+  region                                = var.region
+  processors_location                   = var.docai_location
+  artifact_repo                         = module.common_infra.artifact_repo.name
+  specialized_parser_cloud_run_job_name = local.specialized_parser_cloud_run_job_name
+  bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
+  alloydb_cluster                       = module.common_infra.alloydb_cluster_name
+  alloydb_instance                      = module.common_infra.alloydb_primary_instance
 }
 
 module "dpu_workflow" {
@@ -144,7 +148,9 @@ module "dpu_workflow" {
     FORMS_PARSER_JOB_NAME   = module.form_parser_processor.form_parser_cloud_run_job_name
     DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
     DOC_REGISTRY_JOB_NAME   = module.doc_registry.doc_registry_service_cloud_run_job_name
-    INVOICE_PARSER_JOB_NAME = module.invoice_parser_job.invoice_parser_cloud_run_job_name
+    SPECIALIZED_PARSER_JOB_NAME = module.specialized_parser_job.specialized_parser_cloud_run_job_name
+    SPECIALIZED_PROCESSORS_IDS_JSON  = module.specialized_parser_job.specialized_processors_ids_json
+    CUSTOM_CLASSIFIER_ID   = var.custom_classifier_id
   }
 }
 

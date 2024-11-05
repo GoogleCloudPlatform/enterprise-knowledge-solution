@@ -13,8 +13,11 @@
 # limitations under the License.
 
 
-resource "google_bigquery_table" "invoice_values" {
+resource "google_bigquery_table" "processed_documents" {
   dataset_id = var.bigquery_dataset_id
-  table_id   = "invoice_values"
-  schema     = file("${path.module}/invoice_values.json")
+  table_id   = "prcessed_documents"
+  schema     = file("${path.module}/processed_documents.json")
+
+  # NOTE: For production use-cases, change this!
+  deletion_protection = false
 }

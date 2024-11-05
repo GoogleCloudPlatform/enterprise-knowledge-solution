@@ -15,14 +15,12 @@
 import logging
 import os
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Tuple, Set
 
 from google.cloud import documentai, storage
 
 
 class FolderNames(str, Enum):
-    PDF_FORMS_INPUT = "pdf-form/input/"
-    PDF_FORMS_OUTPUT = "pdf-form/output/"
     PDF_GENERAL = "pdf"
     CLASSIFICATION_RESULTS = "classified_pdfs_results"
 
@@ -33,6 +31,7 @@ def get_process_job_params(
     gcs_reject_bucket,
     mv_params,
     supported_files: Dict[str, str],
+    timeout: int = 600
 ):
     process_job_params = []
     supported_files_args = [f"--file-type={k}:{v}" for k, v in supported_files.items()]
@@ -61,7 +60,7 @@ def get_process_job_params(
                     }
                 ],
                 "task_count": 1,
-                "timeout": "300s",
+                "timeout": f"{timeout}s",
             }
         }
         process_job_params.append(job_param)
@@ -72,30 +71,45 @@ def __build_gcs_path__(bucket: str, folder: str, folder_name: FolderNames):
     return f"gs://{bucket}/{folder}/{folder_name.value}"
 
 
-def forms_parser_job_params(bq_table, process_bucket, process_folder):
+def specialized_parser_job_params(
+    possible_processors: Dict[str, str],
+    job_name: str,
+    run_id: str,
+    bq_table: dict,
+    process_bucket: str,
+    process_folder: str,
+    timeout: int = 600,
+):
     bq_table_id = (
         f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
     )
-    gcs_input_prefix = __build_gcs_path__(
-        process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT
-    )
-    gcs_output_prefix = __build_gcs_path__(
-        process_bucket, process_folder, FolderNames.PDF_FORMS_OUTPUT
-    )
-
-    return {
-        "container_overrides": [
-            {
-                "env": [
-                    {"name": "BQ_TABLE_ID", "value": bq_table_id},
-                    {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
-                    {"name": "GCS_OUTPUT_PREFIX", "value": gcs_output_prefix},
-                ]
+    parser_job_params = []
+    for label, processor_id in possible_processors.items():
+        # specialized_parser_job_name = f"{job_name}-{label}"
+        gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-{label}/input"
+        gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-{label}/output"
+        job_param = {
+            "overrides": {
+                "container_overrides": [
+                    {
+                        "name": job_name,
+                        "env": [
+                            {"name": "RUN_ID", "value": run_id},
+                            {"name": "PROCESSOR_ID", "value": processor_id},
+                            {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
+                            {"name": "GCS_OUTPUT_URI", "value": gcs_output_prefix},
+                            {"name": "BQ_TABLE", "value": bq_table_id},
+                        ],
+                        "clear_args": False,
+                    }
+                ],
+                "task_count": 1,
+                "timeout": f"{timeout}s",
             }
-        ],
-        "task_count": 1,
-        "timeout": "300s",
-    }
+        }
+        parser_job_params.append(job_param)
+    return parser_job_params
+    
 
 
 def get_doc_classifier_job_overrides(
@@ -134,12 +148,25 @@ def read_classifier_job_output(
     process_folder: str,
     known_labels: list[str],
     threshold: float = 0.7,
-) -> list:
+) -> Set[str]:
+    """
+    Method that will read the json output of the DocAI custom classifier, and move the classified files into their
+    proper location. This method also returns a set of labels that were detected, in order to enable filtering later
+    on which processors need to be activated.
+    Args:
+        process_bucket: the name of the processing bucket
+        process_folder: path in the bucket of the processing folder
+        known_labels: list of possible labels configured by the classifier
+        threshold: minimum threshold of confidence to be considered by the classifier in order to validate labels.
+
+    Returns: set of detected labels
+
+    """
 
     gcs_input_prefix = f"{process_folder}/{FolderNames.PDF_GENERAL.value}"
 
     storage_client = storage.Client()
-    classification_mv_params = []
+    found_labels = set()
 
     # Get List of Document Objects from the Output Bucket
     prefix = f"{process_folder}/{FolderNames.CLASSIFICATION_RESULTS.value}"
@@ -236,18 +263,14 @@ def read_classifier_job_output(
         # first one, since the labels were also sorted, so we will use
         # the highest confidence label.
         chosen_label = sorted_entities_type_but_only_above_threshold[0]
-        logging.info(f"{original_blob_path} was detected to be a '{chosen_label}'.")
+        found_labels.add(chosen_label)
+
         original_filename = os.path.basename(original_blob_path)
-        # prepare mv operation parameters, that will be used in the next step.
-        parameter_obj = {
-            "source_object": original_blob_path,
-            "destination_bucket": process_bucket,
-            "destination_object": f"{process_folder}/pdf-{chosen_label}/{original_filename}",
-        }
         source_blob = bucket.blob(original_blob_path)
         destination_blob = (
             f"{process_folder}/pdf-{chosen_label}/input/{original_filename}"
         )
+        logging.info(f"{original_blob_path} was detected to be a '{chosen_label}'. Moving to {destination_blob}")
         bucket.copy_blob(
             blob=source_blob,
             destination_bucket=bucket,
@@ -256,9 +279,8 @@ def read_classifier_job_output(
         logging.info(f"Copied {source_blob.name} to {destination_blob}")
         bucket.delete_blob(original_blob_path)
         logging.info(f"Deleted original file {original_blob_path}")
-        classification_mv_params.append(parameter_obj)
 
-    return classification_mv_params
+    return found_labels
 
 
 def get_doc_registry_duplicate_job_override(
