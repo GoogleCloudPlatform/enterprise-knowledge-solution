@@ -131,22 +131,22 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-control-p
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-composer-sql" {
-  description     = "Allow internal traffic to reach the sql in tenant project"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
-  priority        = 1005
-  rule_name       = "allow-composer-sql"
+#resource "google_compute_network_firewall_policy_rule" "allow-composer-sql" {
+#  description     = "Allow internal traffic to reach the sql in tenant project"
+#  action          = "allow"
+#  direction       = "EGRESS"
+#  enable_logging  = true
+#  firewall_policy = google_compute_network_firewall_policy.policy.name
+#  priority        = 1005
+#  rule_name       = "allow-composer-sql"
 
-  match {
-    dest_ip_ranges = [var.composer_cidr.sql]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
+#  match {
+#    dest_ip_ranges = [var.composer_cidr.sql]
+#    layer4_configs {
+#    ip_protocol = "all"
+#   }
+#  }
+#}
 
 #resource "google_compute_network_firewall_policy_rule" "default-deny-egress-logger" {
 #  description     = "Logger"
@@ -281,27 +281,6 @@ module "dns-private-zone-gcr-io" {
   type       = "private"
   name       = "gcr-io"
   domain     = "gcr.io."
-
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
-
-  recordsets = [
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-catchall" {
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "catchall"
-  domain     = "."
 
   private_visibility_config_networks = [module.vpc[0].network_self_link]
 
