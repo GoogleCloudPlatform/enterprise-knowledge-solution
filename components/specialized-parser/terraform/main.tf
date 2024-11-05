@@ -49,27 +49,78 @@ module "project_services" {
   ]
 }
 
-module "invoice_parser_account" {
+module "specialized_parser_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   prefix     = "eks"
   names      = [local.service_account_name]
   project_roles = [
     "${var.project_id}=>roles/documentai.apiUser",
+    "${var.project_id}=>roles/alloydb.databaseUser",
+    "${var.project_id}=>roles/alloydb.client",
+    "${var.project_id}=>roles/serviceusage.serviceUsageConsumer",
   ]
-  display_name = "Invoice Parser Account"
-  description  = "Account used to run the invoice parser jobs"
+  display_name = "Specialized Parser Account"
+  description  = "Account used to run the specialized parser jobs"
 }
 
-resource "google_cloud_run_v2_job" "invoice_parser_processor_job" {
-  name     = var.invoice_parser_cloud_run_job_name
-  location = var.region
+resource "google_alloydb_user" "specialized_parser_user" {
+  cluster   = var.alloydb_cluster
+  # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
+  user_id   = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
+  user_type = "ALLOYDB_IAM_USER"
+  database_roles = ["alloydbiamuser"]
+}
 
+
+resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
+  name     = var.specialized_parser_cloud_run_job_name
+  location = var.region
+  lifecycle {
+    ignore_changes = [terraform_labels, effective_labels]
+  }
   template {
     template {
-      service_account = module.invoice_parser_account.email
+      service_account = module.specialized_parser_account.email
       containers {
         image = local.image_name_and_tag
+        name = var.specialized_parser_cloud_run_job_name
+        # depends_on = ["alloydb-auth-proxy"]
+        env {
+          name = "ALLOYDB_INSTANCE"
+          value = var.alloydb_instance
+        }
+        env {
+          name = "ALLOYDB_DATABASE"
+          value = var.alloydb_database
+        }
+        env {
+          name = "ALLOYDB_USER"
+          value = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
+        }
+        env {
+          name = "PROCESSED_DOCS_BQ_PROJECT"
+          value = google_bigquery_table.processed_documents.project
+        }
+        env {
+          name = "PROCESSED_DOCS_BQ_DATASET"
+          value = google_bigquery_table.processed_documents.dataset_id
+        }
+        env {
+          name = "PROCESSED_DOCS_BQ_TABLE"
+          value = google_bigquery_table.processed_documents.table_id
+        }
+      }
+      containers {
+        name = "alloydb-auth-proxy"
+        image = "gcr.io/alloydb-connectors/alloydb-auth-proxy:latest"
+        args = [
+          var.alloydb_instance,
+          "--address", "0.0.0.0",
+          "--port", "5432",
+          "--auto-iam-authn",
+          "--psc"
+        ]
       }
     }
   }

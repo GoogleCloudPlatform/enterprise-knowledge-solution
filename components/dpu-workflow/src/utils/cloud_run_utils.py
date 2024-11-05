@@ -13,12 +13,10 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Tuple, Set
 
 
 class FolderNames(str, Enum):
-    PDF_FORMS_INPUT = "pdf-form/input/"
-    PDF_FORMS_OUTPUT = "pdf-form/output/"
     PDF_GENERAL = "pdf"
     CLASSIFICATION_RESULTS = "classified_pdfs_results"
 
@@ -29,6 +27,7 @@ def get_process_job_params(
     gcs_reject_bucket,
     mv_params,
     supported_files: Dict[str, str],
+    timeout: int = 600
 ):
     process_job_params = []
     supported_files_args = [f"--file-type={k}:{v}" for k, v in supported_files.items()]
@@ -57,7 +56,7 @@ def get_process_job_params(
                     }
                 ],
                 "task_count": 1,
-                "timeout": "300s",
+                "timeout": f"{timeout}s",
             }
         }
         process_job_params.append(job_param)
@@ -68,30 +67,45 @@ def __build_gcs_path__(bucket: str, folder: str, folder_name: FolderNames):
     return f"gs://{bucket}/{folder}/{folder_name.value}"
 
 
-def forms_parser_job_params(bq_table, process_bucket, process_folder):
+def specialized_parser_job_params(
+    possible_processors: Dict[str, str],
+    job_name: str,
+    run_id: str,
+    bq_table: dict,
+    process_bucket: str,
+    process_folder: str,
+    timeout: int = 600,
+):
     bq_table_id = (
         f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
     )
-    gcs_input_prefix = __build_gcs_path__(
-        process_bucket, process_folder, FolderNames.PDF_FORMS_INPUT
-    )
-    gcs_output_prefix = __build_gcs_path__(
-        process_bucket, process_folder, FolderNames.PDF_FORMS_OUTPUT
-    )
-
-    return {
-        "container_overrides": [
-            {
-                "env": [
-                    {"name": "BQ_TABLE_ID", "value": bq_table_id},
-                    {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
-                    {"name": "GCS_OUTPUT_PREFIX", "value": gcs_output_prefix},
-                ]
+    parser_job_params = []
+    for label, processor_id in possible_processors.items():
+        # specialized_parser_job_name = f"{job_name}-{label}"
+        gcs_input_prefix = f"gs://{process_bucket}/{process_folder}/pdf-{label}/input"
+        gcs_output_prefix = f"gs://{process_bucket}/{process_folder}/pdf-{label}/output"
+        job_param = {
+            "overrides": {
+                "container_overrides": [
+                    {
+                        "name": job_name,
+                        "env": [
+                            {"name": "RUN_ID", "value": run_id},
+                            {"name": "PROCESSOR_ID", "value": processor_id},
+                            {"name": "GCS_INPUT_PREFIX", "value": gcs_input_prefix},
+                            {"name": "GCS_OUTPUT_URI", "value": gcs_output_prefix},
+                            {"name": "BQ_TABLE", "value": bq_table_id},
+                        ],
+                        "clear_args": False,
+                    }
+                ],
+                "task_count": 1,
+                "timeout": f"{timeout}s",
             }
-        ],
-        "task_count": 1,
-        "timeout": "300s",
-    }
+        }
+        parser_job_params.append(job_param)
+    return parser_job_params
+    
 
 
 def get_doc_classifier_job_overrides(

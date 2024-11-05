@@ -14,6 +14,7 @@
 
 # pylint: disable=import-error
 
+import json
 import logging
 import os
 import sys
@@ -40,6 +41,10 @@ from airflow.providers.google.cloud.transfers.gcs_to_gcs import (  # type: ignor
 from airflow.utils.task_group import TaskGroup
 from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from utils import cloud_run_utils, datastore_utils, file_utils, gcs_utils
+from utils.docai_utils import is_valid_processor_id
+
+
+# pylint: disable=import-error
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -58,8 +63,13 @@ USER_AGENT = "cloud-solutions/eks-orchestrator-v1"
 # would be processed accordingly.
 # Also note, that labels will be matched case-insensitive and disregarding
 # trailing and leading whitespaces.
-KNOWN_LABELS_FOR_CLASSIFIER = ["form"]
+SPECIALIZED_PROCESSORS_IDS_JSON = {
+    k: v for k, v in
+    json.loads(os.environ["SPECIALIZED_PROCESSORS_IDS_JSON"]).items()
+    if is_valid_processor_id(v)
+}
 
+CUSTOM_CLASSIFIER = os.environ.get("CUSTOM_CLASSIFIER_ID", "")
 
 def get_supported_file_types(**context):
     file_type_to_processor = context["params"]["supported_files"]
@@ -161,16 +171,11 @@ def generate_mv_params(**context):
 
 
 def generate_classify_job_params_fn(**context):
-    classifier_params = context["params"]["classifier"]
-    if (
-        not classifier_params.get("project_id")
-        or not classifier_params.get("location")
-        or not classifier_params.get("processor_id")
-    ):
+    classifier_id = context["params"]["classifier"]
+    valid_tuple = is_valid_processor_id(classifier_id)
+    if not valid_tuple:
         logging.warning(
-            f"Not all required parameters for the classifier are "
-            f"provided (required `project_id`, `location` and "
-            f"`processor_id`). {classifier_params=}"
+            f"Classifier processor id is not specified or not valid. Skipping. {classifier_id=}"
         )
         raise AirflowSkipException()
     files_to_process = context["ti"].xcom_pull(
@@ -180,6 +185,7 @@ def generate_classify_job_params_fn(**context):
     if "pdf" not in files_to_process:
         logging.warning("No PDF files to classify, skipping the classify step.")
         raise AirflowSkipException()
+
     process_folder = context["ti"].xcom_pull(
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
@@ -188,9 +194,9 @@ def generate_classify_job_params_fn(**context):
     assert process_bucket is not None, "DPU_PROCESS_BUCKET is not set"
 
     return cloud_run_utils.get_doc_classifier_job_overrides(
-        classifier_project_id=classifier_params["project_id"],
-        classifier_location=classifier_params["location"],
-        classifier_processor_id=classifier_params["processor_id"],
+        classifier_project_id=valid_tuple[0],
+        classifier_location=valid_tuple[1],
+        classifier_processor_id=valid_tuple[2],
         process_folder=process_folder,
         process_bucket=process_bucket,
     )
@@ -204,7 +210,7 @@ def parse_doc_classifier_output(**context):
         key="process_folder",
     )
     parsed_output = gcs_utils.move_classifier_matched_files(
-        process_bucket, process_folder, "pdf", KNOWN_LABELS_FOR_CLASSIFIER
+        process_bucket, process_folder, "pdf", list(SPECIALIZED_PROCESSORS_IDS_JSON.keys())
     )
     return parsed_output
 
@@ -265,28 +271,33 @@ def generate_output_table_name(**context):
     context["ti"].xcom_push(key="output_table_name", value=output_table_name)
 
 
-def generate_form_process_job_params(**context):
+def generate_specialized_process_job_params(**context):
+    # get list of detected labels
+    detected_labels = context["ti"].xcom_pull(
+        task_ids="classify_pdfs.parse_doc_classifier_results_and_move_files", key="return_value",
+    )
+    # possible processors configured in the run
+    possible_processors = {x["label"]: x["doc-ai-processor-id"] for x in context["params"]["doc-ai-processors"] if x["label"] in detected_labels}
+
+    # get the run_id
+    logging.info(f"{context=}")
+    run_id = context['dag_run'].run_id
+
     # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
 
-    # Build GCS input and out prefix -
-    # gs://<process_bucket_name>/<process_folder>/pdf_forms/<input|output>
-    process_bucket = os.environ.get("DPU_PROCESS_BUCKET")
+    process_bucket = os.environ["DPU_PROCESS_BUCKET"]
     process_folder = context["ti"].xcom_pull(key="process_folder")
-
-    form_parser_job_params = cloud_run_utils.forms_parser_job_params(
-        bq_table,
-        process_bucket,
-        process_folder,
+    job_name = os.environ.get("SPECIALIZED_PARSER_JOB_NAME", "specialized-parser")
+    specialized_parser_job_params_list = cloud_run_utils.specialized_parser_job_params(
+        possible_processors=possible_processors,
+        job_name=job_name,
+        run_id=run_id,
+        bq_table=bq_table,
+        process_bucket=process_bucket,
+        process_folder=process_folder,
     )
-    return form_parser_job_params
-
-
-def generate_pdf_forms_folder(**context):
-    process_folder = context["ti"].xcom_pull(key="process_folder")
-    pdf_forms_folder = f"{process_folder}/pdf-form/input/"
-    context["ti"].xcom_push(key="pdf_forms_folder", value=pdf_forms_folder)
-
+    return specialized_parser_job_params_list
 
 with DAG(
     "run_docs_processing",
@@ -297,6 +308,19 @@ with DAG(
         "input_bucket": os.environ.get("DPU_INPUT_BUCKET"),
         "process_bucket": os.environ.get("DPU_PROCESS_BUCKET"),
         "input_folder": "",
+        "doc-ai-processors": Param(
+            [
+                {"label": k, "doc-ai-processor-id": v} for k, v in SPECIALIZED_PROCESSORS_IDS_JSON.items()
+            ],
+            type="array",
+            items={
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string"},
+                    "doc-ai-processor-id": {"type": "string"},
+                }
+            },
+        ),
         "supported_files": Param(
             [
                 {"file-suffix": "pdf", "processor": "txt-processor"},
@@ -321,20 +345,7 @@ with DAG(
                 "required": ["file-suffix", "processor"],
             },
         ),
-        "classifier": Param(
-            default={
-                "project_id": "",
-                "location": "",
-                "processor_id": "",
-            },
-            type="object",
-            properties={
-                "project_id": {"type": "string"},
-                "location": {"type": "string"},
-                "processor_id": {"type": "string"},
-            },
-            required=["project_id", "location", "processor_id"],
-        ),
+        "classifier": os.environ.get("CUSTOM_CLASSIFIER_ID", ""),
     },
 ) as dag:
 
@@ -465,7 +476,7 @@ with DAG(
 
         create_output_table = BigQueryCreateEmptyTableOperator(
             task_id="create_output_table",
-            dataset_id=os.environ.get("DPU_OUTPUT_DATASET"),
+            dataset_id=os.environ["DPU_OUTPUT_DATASET"],
             # pyright: ignore[reportArgumentType]
             table_id="{{ ti.xcom_pull("
             "task_ids='prep_for_processing.create_output_table_name', "
@@ -498,15 +509,15 @@ with DAG(
         )
 
         execute_doc_classifier = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"),
+            project_id=os.environ["GCP_PROJECT"],
             # pyright: ignore[reportArgumentType]
-            region=os.environ.get("DPU_REGION"),
+            region=os.environ["DPU_REGION"],
             # pyright: ignore[reportArgumentType]
             task_id="execute_doc_classifier",
-            job_name=os.environ.get("DOC_CLASSIFIER_JOB_NAME"),
+            job_name=os.environ["DOC_CLASSIFIER_JOB_NAME"],
             # pyright: ignore[reportArgumentType]
             deferrable=False,
-            overrides="{{ ti.xcom_pull("
+            overrides="{{ ti.xcom_pull("  # pyright: ignore [reportArgumentType]
             "task_ids='classify_pdfs.generate_classify_job_params' "
             ", key='return_value') }}",
             # pyright: ignore[reportArgumentType]
@@ -544,7 +555,7 @@ with DAG(
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
         )
-
+        
         generate_update_doc_registry_job_params = PythonOperator(
             task_id="generate_update_doc_registry_job_params",
             python_callable=generate_update_doc_registry_job_params_fn,
@@ -563,29 +574,25 @@ with DAG(
             ", key='return_value') }}",
         )
 
-    with TaskGroup(group_id="forms_processing") as forms_processing:
-        create_form_process_job_params = PythonOperator(
-            task_id="create_form_process_job_params",
-            python_callable=generate_form_process_job_params,
+    with TaskGroup(group_id="specialized_processing") as specialized_processing:
+        create_specialized_process_job_params = PythonOperator(
+            task_id="create_specialized_process_job_params",
+            python_callable=generate_specialized_process_job_params,
             provide_context=True,
         )
 
-        execute_forms_parser = CloudRunExecuteJobOperator(
+        execute_specialized_parser = CloudRunExecuteJobOperator.partial(
             # Calling os.environ[] instead of using the .get method to verify we
             # have set environment variables, not allowing None values.
             project_id=os.environ["GCP_PROJECT"],
             region=os.environ["DPU_REGION"],
-            task_id="execute_forms_parser",
-            job_name=os.environ["FORMS_PARSER_JOB_NAME"],
+            task_id="execute_specialized_parser",
+            job_name=os.environ["SPECIALIZED_PARSER_JOB_NAME"],
             deferrable=False,
-            overrides=(
-                "{{ ti.xcom_pull(task_ids='forms_processing.create_form_process_job_params', key='return_value') }}"
-            ),
-            # pyright: ignore[reportArgumentType]
-        )
+        ).expand_kwargs(create_specialized_process_job_params.output)
 
-        import_forms_to_data_store = PythonOperator(
-            task_id="import_forms_to_data_store",
+        import_specialized_to_data_store = PythonOperator(
+            task_id="import_specialized_to_data_store",
             python_callable=data_store_import_docs,
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
@@ -623,8 +630,7 @@ with DAG(
         >> create_output_table
     )
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
-        # We then want to see if there are any forms, since those will be
-        # handled differently.
+        # We then want to see if there are any documents we should treat with specialized/custom parsers from DocAI.
         create_output_table
         >> generate_classify_job_params
         >> execute_doc_classifier
@@ -632,16 +638,16 @@ with DAG(
         >> classified_docs_moved_or_skipped
     )
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
-        # Continue to process forms, depending on move_forms executed
+        # Continue to process specialized documents, depending on parse_doc_classifier_results_and_move_files executed
         # successfully. This doesn't have to wait for general processing.
         parse_doc_classifier_results_and_move_files
-        >> create_form_process_job_params
-        >> execute_forms_parser
-        >> import_forms_to_data_store
+        >> create_specialized_process_job_params
+        >> execute_specialized_parser
+        >> import_specialized_to_data_store
     )
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
-        # General document processing has to wait for the forms to
-        # move/skipped, since we don't want to process the forms using this job.
+        # General document processing has to wait for the specialized to
+        # move/skipped, since we don't want to process the specialized documents using this job.
         classified_docs_moved_or_skipped
         >> create_process_job_params
         >> execute_doc_processors

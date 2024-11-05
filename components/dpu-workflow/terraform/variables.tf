@@ -132,7 +132,7 @@ variable "composer_worker_max_count" {
 variable "composer_environment_size" {
   description = "Size for the Composer environment"
   type        = string
-  default     = "ENVIRONMENT_SIZE_SMALL"
+  default     = "ENVIRONMENT_SIZE_MEDIUM"
 }
 
 variable "enable_private_ip" {

@@ -10,7 +10,9 @@
     #   processor-msg
     # via -r reqs/requirements_all.in
 aiofiles==23.2.1
-    # via gcloud-aio-storage
+    # via
+    #   gcloud-aio-storage
+    #   google-cloud-alloydb-connector
 aiohappyeyeballs==2.4.2
     # via aiohttp
 aiohttp==3.10.6
@@ -331,8 +333,8 @@ google-api-core==2.20.0
     #   sqlalchemy-bigquery
 google-api-python-client==2.147.0
     # via
-    #   -r reqs/../components/invoice-parser/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
 google-auth==2.35.0
@@ -405,8 +407,8 @@ google-cloud-aiplatform==1.68.0
     # via
     #   apache-airflow-providers-google
     #   processor-web-ui
-google-cloud-alloydb-connector==0.4.1
-    # via -r reqs/../components/invoice-parser/src/requirements.in
+google-cloud-alloydb-connector==1.4.0
+    # via -r reqs/../components/specialized-parser/src/requirements.in
 google-cloud-appengine-logging==1.4.5
     # via google-cloud-logging
 google-cloud-audit-log==0.3.0
@@ -417,8 +419,8 @@ google-cloud-batch==0.17.28
     # via apache-airflow-providers-google
 google-cloud-bigquery==3.26.0
     # via
-    #   -r reqs/../components/invoice-parser/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   google-cloud-aiplatform
     #   pandas-gbq
@@ -465,6 +467,7 @@ google-cloud-documentai==2.32.0
     # via
     #   -r reqs/../components/doc-classifier/src/requirements.in
     #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
 google-cloud-firestore==2.19.0
     # via
     #   firebase-admin
@@ -501,6 +504,7 @@ google-cloud-speech==2.27.0
     # via apache-airflow-providers-google
 google-cloud-storage==2.18.2
     # via
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
     #   gcsfs
@@ -1096,6 +1100,7 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==1.4.54
     # via
+    #   -r reqs/../components/specialized-parser/src/requirements.in
     #   alembic
     #   apache-airflow
     #   flask-appbuilder
