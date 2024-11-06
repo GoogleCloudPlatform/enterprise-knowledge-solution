@@ -133,6 +133,7 @@ module "dpu_workflow" {
     DPU_DATA_STORE_ID       = google_discovery_engine_data_store.dpu_ds.data_store_id
     FORMS_PARSER_JOB_NAME   = module.form_parser_processor.form_parser_cloud_run_job_name
     DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
+    DOC_REGISTRY_JOB_NAME   = module.doc_registry.doc_registry_service_cloud_run_job_name
   }
 }
 
@@ -181,4 +182,11 @@ resource "local_file" "env_file" {
     agent_builder_data_store_id = google_discovery_engine_data_store.dpu_ds.data_store_id
     agent_builder_search_id     = google_discovery_engine_search_engine.basic.engine_id
   })
+}
+
+module "doc_registry" {
+  source        = "../../components/doc-registry/terraform"
+  project_id    = var.project_id
+  region        = var.region
+  artifact_repo = module.common_infra.artifact_repo.name
 }

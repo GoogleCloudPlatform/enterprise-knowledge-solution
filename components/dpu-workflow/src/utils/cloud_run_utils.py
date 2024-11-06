@@ -259,3 +259,54 @@ def read_classifier_job_output(
         classification_mv_params.append(parameter_obj)
 
     return classification_mv_params
+
+
+def get_doc_registry_duplicate_job_override(
+    input_folder: str,
+    output_folder: str,
+    doc_registry_table: str = "",
+    timeout_in_seconds: int = 3000,
+):
+    params: Dict[str, Any] = {
+        "container_overrides": [
+            {
+                "env": [
+                    {"name": "GCS_INPUT_FILE_BUCKET", "value": input_folder},
+                    {"name": "GCS_IO_URI", "value": output_folder},
+                ]
+            }
+        ],
+        "task_count": 1,
+        "timeout": f"{timeout_in_seconds}s",
+    }
+    if doc_registry_table:
+        params["container_overrides"][0]["env"].append(
+            {"name": "BQ_DOC_REGISTRY_TABLE", "value": doc_registry_table}
+        )
+    return params
+
+
+def get_doc_registry_update_job_override(
+    input_bq_table: str,
+    output_folder: str,
+    doc_registry_table: str = "",
+    timeout_in_seconds: int = 3000,
+):
+    params: Dict[str, Any] = {
+        "container_overrides": [
+            {
+                "env": [
+                    {"name": "ADD_DOCS", "value": "true"},
+                    {"name": "BQ_INGESTED_DOC_TABLE", "value": input_bq_table},
+                    {"name": "GCS_IO_URI", "value": output_folder},
+                ]
+            }
+        ],
+        "task_count": 1,
+        "timeout": f"{timeout_in_seconds}s",
+    }
+    if doc_registry_table:
+        params["container_overrides"][0]["env"].append(
+            {"name": "BQ_DOC_REGISTRY_TABLE", "value": doc_registry_table}
+        )
+    return params

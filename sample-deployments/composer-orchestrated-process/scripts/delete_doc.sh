@@ -108,6 +108,8 @@ if [ -z "$PROJECT_ID" ]; then
   PROJECT_ID=$(gcloud config get-value project)
 fi
 
+BQ_DOC_REG_TABLE="docs_registry.docs_registry"
+
 if [ "$MODE" = "single" ]; then
   # Confirmation prompt
   read -r -p "You are about to delete document with ID '$DOC_ID' from project '$PROJECT_ID'. Are you sure? [y/N] " response
@@ -128,6 +130,9 @@ if [ "$MODE" = "single" ]; then
   # EXECUTE THE FOLLOWING bq COMMAND to Delete document meta-data from BigQuery Table
   bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
     "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+
+  bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+    "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
 
   # EXECUTE THE FOLLOWING bq COMMAND to Delete the BigQuery Table containing the document meta-data
   # BQ_TABLE="${BQ_TABLE/\./:}"
@@ -180,6 +185,9 @@ elif [ "$MODE" = "batch" ]; then
 
       bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
         "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+
+      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+        "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
 
       echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
     done <<<"$RESULTS"
