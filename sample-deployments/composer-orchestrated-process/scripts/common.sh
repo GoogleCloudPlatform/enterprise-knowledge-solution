@@ -195,7 +195,7 @@ enable_role() {
 
 # enable all roles bundled into a persona, based on a textfile listing the roles
 enable_persona_roles() {
-  local __principal="$1"
+  local __principal=$1
   local __arrayfile=$2
   readarray -t roles_array <$__arrayfile
   for i in "${roles_array[@]}"; do
