@@ -49,7 +49,7 @@ create_service_account_and_enable_impersonation
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:""${SERVICE_ACCOUNT_ID}"""
-enable_persona_roles "serviceAccount:${SERVICE_ACCOUNT_ID}" "persona_roles_DEPLOYER.txt"
+enable_persona_roles "serviceAccount:${SERVICE_ACCOUNT_ID}" "persona_roles_DEPLOYER.txt" "DEPLOYER"
 section_close
 
 section_open "Set Application Default Credentials to be used by Terraform"
