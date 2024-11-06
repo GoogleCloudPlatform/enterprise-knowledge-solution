@@ -342,7 +342,7 @@ if __name__ == "__main__":
         else:
             logging.info(f"{BQ_INGESTED_DOC_TABLE=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
             add_new_documents_to_registry(
-                BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI # type: ignore
+                BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI  # type: ignore
             )
         logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:
