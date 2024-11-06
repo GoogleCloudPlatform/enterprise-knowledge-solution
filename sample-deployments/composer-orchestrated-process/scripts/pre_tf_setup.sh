@@ -45,6 +45,7 @@ create_oauth_consent_config
 section_close
 
 section_open "Create deployer service account and enable $ACTIVE_PRINCIPAL to use service account impersonation "
+section_open "Create deployer service account and enable $ACTIVE_PRINCIPAL to use service account impersonation "
 create_service_account_and_enable_impersonation
 section_close
 
@@ -53,5 +54,6 @@ enable_persona_roles "serviceAccount:${SERVICE_ACCOUNT_ID}" "persona_roles_deplo
 section_close
 
 section_open "Set Application Default Credentials to be used by Terraform"
+set_adc
 set_adc
 section_close

@@ -1261,12 +1261,12 @@ smmap==5.0.1 \
     # via
     #   -c reqs/constraints.txt
     #   gitdb
-streamlit==1.38.0 \
-    --hash=sha256:0653ecfe86fef0f1608e3e082aef7eb335d8713f6f31e9c3b19486d1c67d7c41 \
-    --hash=sha256:c4bf36b3ef871499ed4594574834583113f93f077dd3035d516d295786f2ad63
+streamlit==1.39.0 \
+    --hash=sha256:a359fc54ed568b35b055ff1d453c320735539ad12e264365a36458aef55a5fba \
+    --hash=sha256:fef9de7983c4ee65c08e85607d7ffccb56b00482b1041fa62f90e4815d39df3a
     # via
-    #   -c reqs/constraints.txt
-    #   processor-web-ui (components/webui/pyproject.toml)
+    #   -c ../../reqs/constraints.txt
+    #   processor-web-ui (pyproject.toml)
     #   streamlit-aggrid
     #   streamlit-antd-components
     #   streamlit-modal

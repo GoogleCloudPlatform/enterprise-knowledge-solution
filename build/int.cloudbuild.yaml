@@ -44,7 +44,7 @@ steps:
       - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
       - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
-  #      - "GCLOUD_TF_DOWNLOAD=always"
+      - "GCLOUD_TF_DOWNLOAD=never"
 
   - id: cleanup
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"

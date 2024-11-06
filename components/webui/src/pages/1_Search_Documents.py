@@ -21,29 +21,30 @@ logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccess
 # Put into a single place
 SAMPLE_QUERIES = """
 ```
-    When was Form S-1 submitted by CHROMOCELL THERAPEUTICS CORPORATION?
+    Create a table showing 2021 and 2022 annual revenue
+    of RYDE, and INTJ? Summarize the results.
 ```
 ```
-    How does Maxim Group LLC work with CHROMOCELL THERAPEUTICS CORPORATION?
+    How many shares are in Helix's offering?
 ```
 ```
-    How can we automate our document processing workflow to save time and reduce errors?
+    When was Form S-1 submitted by
+    CHROMOCELL THERAPEUTICS CORPORATION?
 ```
 ```
-    How can we automate our document processing workflow to save time and reduce errors? Answer in hindi.
+    How does Maxim Group LLC work with
+    CHROMOCELL THERAPEUTICS CORPORATION?
 ```
 ```
-    How can we automate our document processing workflow to save time and reduce errors? Generate answer in spanish.
+    How can we automate our document processing workflow to
+    save time and reduce errors? Generate answer in English.
 ```
 ```
-    समय बचाने और त्रुटियों को कम करने के लिए हम अपने दस्तावेज़ प्रसंस्करण वर्कफ़्लो को कैसे स्वचालित कर सकते हैं?
-    अंग्रेज़ी में उत्तर दें.
+    How can we automate our document processing workflow to
+    save time and reduce errors? Generate answer in Spanish.
 ```
 ```
     How many shares are offered by Ryde Group Ltd?
-```
-```
-    Create a table to list 2021 and 2022 Revenue of Ryde Group Ltd. and Intelligent Group Limited.
 ```
 """
 
@@ -135,11 +136,23 @@ with st.container():
     with example_col:
         st.write("")
         with st.popover("Examples"):
-            st.markdown(SAMPLE_QUERIES)
+            st.markdown(SAMPLE_QUERIES, unsafe_allow_html=True)
+
 
 # Render answer if there's a summary returned in the response
 if st.session_state.answer:
-    st.text_area(":blue[Summary Response: ]", value=st.session_state.answer, height=140)
+
+    # st.text_area(":blue[Summary Response: ]", value=st.session_state.answer, height=240)
+    st.write(":blue[Summary Response: ]")
+    ans = st.session_state.answer
+    # printable_ans = (
+    #     f'<div style=\'font-size:1rem; font-family:"Source Sans Pro", sans-serif; '
+    #     f"color:blue;'>{ans}</div>"
+    # )
+    # st.text_area(":blue[Summary Response: ]", value=ans, height=240)
+    # st.html(printable_ans)
+    st.markdown(ans.format())
+
 
 # Render list of other documents
 if st.session_state.sources:
