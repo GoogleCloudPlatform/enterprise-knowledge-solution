@@ -8,13 +8,14 @@ roles/compute.networkAdmin
 roles/compute.securityAdmin
 roles/container.clusterAdmin
 roles/discoveryengine.admin
+roles/dns.admin
 roles/documentai.admin
 roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
 roles/resourcemanager.projectIamAdmin
-roles/run.developer
+roles/run.admin
 roles/logging.logWriter
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin
