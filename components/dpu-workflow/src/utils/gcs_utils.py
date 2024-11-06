@@ -66,7 +66,7 @@ class MoveDoc:
 
 class BucketRegistry:
     storage_client: Optional[storage.Client] = None
-    bucket_dict = {}
+    bucket_dict: dict = {}
     client_info = ClientInfo(user_agent="cloud-solutions/eks-doc-processors-v1")
 
     @classmethod

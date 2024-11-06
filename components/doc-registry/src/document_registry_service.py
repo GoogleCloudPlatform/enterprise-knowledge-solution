@@ -126,7 +126,7 @@ class GCSFolder:
         crc32_int = GCSFolder.base64_to_int(blob.crc32c)
         bucket_name = blob.bucket.name
         folder, doc_name = GCSFolder.extract_folder_doc_name(blob.name)
-        return RegistryDocument(None, bucket_name, folder, doc_name, crc32_int)
+        return RegistryDocument("", bucket_name, folder, doc_name, crc32_int)
 
     @staticmethod
     def base64_to_int(base64_str: str) -> int:
@@ -342,7 +342,7 @@ if __name__ == "__main__":
         else:
             logging.info(f"{BQ_INGESTED_DOC_TABLE=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
             add_new_documents_to_registry(
-                BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI
+                BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI # type: ignore
             )
         logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:

@@ -267,7 +267,7 @@ def get_doc_registry_duplicate_job_override(
     doc_registry_table: str = "",
     timeout_in_seconds: int = 3000,
 ):
-    params = {
+    params: Dict[str, Any] = {
         "container_overrides": [
             {
                 "env": [
@@ -292,7 +292,7 @@ def get_doc_registry_update_job_override(
     doc_registry_table: str = "",
     timeout_in_seconds: int = 3000,
 ):
-    params = {
+    params: Dict[str, Any] = {
         "container_overrides": [
             {
                 "env": [
