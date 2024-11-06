@@ -115,7 +115,7 @@ check_mandatory_variable() {
   unset _VARIABLE_VALUE
 }
 
-check_and_set_persona(){
+check_and_set_persona() {
   __persona_name=$1
   __persona_value="${!__persona_name:-}"
 
@@ -124,7 +124,7 @@ check_and_set_persona(){
     echo "$__persona_name is not set, skipping the role grants for this persona"
   else
     # pass the principal and and filename of roles
-    enable_persona_roles $__persona_value "persona_roles_$__persona_name.txt"
+    enable_persona_roles "$__persona_value" "persona_roles_$__persona_name.txt"
   fi
 }
 
@@ -197,7 +197,7 @@ enable_role() {
 enable_persona_roles() {
   local __principal=$1
   local __arrayfile=$2
-  readarray -t roles_array <$__arrayfile
+  readarray -t roles_array <"$__arrayfile"
   for i in "${roles_array[@]}"; do
     enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
   done
