@@ -75,24 +75,6 @@ module "dpu-subnet" {
   }
 }
 
-data "google_compute_default_service_account" "default" {
-  project = module.project_services.project_id
-}
-
-# Grant default compute engine view access to cloud storage
-resource "google_project_iam_member" "gce_gcs_access" {
-  project = module.project_services.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-# Grant default compute engine view access to artifact registry
-resource "google_project_iam_member" "gce_ar_access" {
-  project = module.project_services.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-
-
 resource "google_composer_environment" "composer_env" {
   project = module.project_services.project_id
   name    = local.env_name
@@ -120,11 +102,6 @@ resource "google_composer_environment" "composer_env" {
       }
     }
   }
-
-  depends_on = [
-    google_project_iam_member.gce_gcs_access,
-    google_project_iam_member.gce_ar_access
-  ]
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
