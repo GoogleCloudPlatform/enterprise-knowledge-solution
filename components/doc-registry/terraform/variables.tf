@@ -45,3 +45,8 @@ variable "artifact_repo" {
   type        = string
   default     = ""
 }
+
+variable "cloud_build_service_account_email" {
+  description = "the user-managed service account configured for Cloud Build"
+  type        = string
+}

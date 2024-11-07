@@ -25,7 +25,7 @@ locals {
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud" {
+module "gcloud_build_doc_registry" {
   source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
@@ -33,6 +33,8 @@ module "gcloud" {
       --pack image=${local.image_name_and_tag} \
       --project ${var.project_id} \
       --region ${var.region}
+      --default-buckets-behavior=regional-user-owned-bucket \
+      --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
   EOT
   enabled               = true
 

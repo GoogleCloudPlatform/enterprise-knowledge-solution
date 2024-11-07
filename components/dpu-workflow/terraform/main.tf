@@ -37,6 +37,11 @@ module "project_services" {
   }]
 }
 
+resource "google_project_default_service_accounts" "disable_default_service_accounts" {
+  project = var.project_id
+  action  = "DISABLE"
+}
+
 module "composer_service_account" {
   source = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
 
