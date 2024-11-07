@@ -115,8 +115,8 @@ check_mandatory_variable() {
 }
 
 check_and_set_persona() {
-  __persona_name=$1
-  __persona_value="${!__persona_name:-}"
+  local __persona_name=$1
+  local __persona_value="${!__persona_name:-}"
   if [ -z "${__persona_value}" ]; then
     echo "$__persona_name is not set, skipping the role grants for this persona"
   else

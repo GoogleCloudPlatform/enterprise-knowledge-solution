@@ -38,5 +38,5 @@ export READER="<YOUR_GROUP, like "group:eks-readers@example.com">"
 
 ```bash
 cd <PATH_TO_REPOSITORY>/sample_deployments/composer-orchestrated_process
-scripts/grant_persona_roles.sh
+scripts/apply_persona_roles.sh
 ```
