@@ -28,6 +28,7 @@ module "project_services" {
     "bigquery.googleapis.com",
     "alloydb.googleapis.com",
     "servicenetworking.googleapis.com",
+    "dns.googleapis.com"
   ]
 }
 

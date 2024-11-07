@@ -37,6 +37,11 @@ module "project_services" {
   }]
 }
 
+resource "google_project_default_service_accounts" "disable_default_service_accounts" {
+  project = var.project_id
+  action  = "DISABLE"
+}
+
 module "composer_service_account" {
   source = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
 
@@ -56,42 +61,25 @@ module "dpu-subnet" {
 
   subnets = [{
     subnet_name           = "composer-subnet"
-    subnet_ip             = "10.10.10.0/24"
+    subnet_ip             = var.composer_cidr.subnet_primary
     subnet_region         = var.region
     subnet_private_access = "true"
+    subnet_flow_logs      = "true"
   }]
 
   secondary_ranges = {
     composer-subnet = [
       {
         range_name    = local.cluster_secondary_range_name
-        ip_cidr_range = "10.154.0.0/17"
+        ip_cidr_range = var.composer_cidr.cluster_secondary_range
       },
       {
         range_name    = local.services_secondary_range_name
-        ip_cidr_range = "10.154.128.0/22"
+        ip_cidr_range = var.composer_cidr.services_secondary_range
       },
     ]
   }
 }
-
-data "google_compute_default_service_account" "default" {
-  project = module.project_services.project_id
-}
-
-# Grant default compute engine view access to cloud storage
-resource "google_project_iam_member" "gce_gcs_access" {
-  project = module.project_services.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-# Grant default compute engine view access to artifact registry
-resource "google_project_iam_member" "gce_ar_access" {
-  project = module.project_services.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-
 
 resource "google_composer_environment" "composer_env" {
   project = module.project_services.project_id
@@ -120,11 +108,6 @@ resource "google_composer_environment" "composer_env" {
       }
     }
   }
-
-  depends_on = [
-    google_project_iam_member.gce_gcs_access,
-    google_project_iam_member.gce_ar_access
-  ]
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {

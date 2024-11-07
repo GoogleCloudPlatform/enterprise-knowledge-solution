@@ -8,6 +8,7 @@ roles/compute.networkAdmin
 roles/compute.securityAdmin
 roles/container.clusterAdmin
 roles/discoveryengine.admin
+roles/dns.admin
 roles/documentai.admin
 roles/iam.serviceAccountAdmin
 roles/iam.serviceAccountUser

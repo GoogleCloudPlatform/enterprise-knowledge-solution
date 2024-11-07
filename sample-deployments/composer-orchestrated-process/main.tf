@@ -34,6 +34,7 @@ module "common_infra" {
   create_vpc_network = var.create_vpc_network
   vpc_name           = var.vpc_name
   vpc_id             = var.vpc_id
+  composer_cidr      = var.composer_cidr
 }
 
 module "project_services" {
@@ -122,6 +123,7 @@ module "dpu_workflow" {
   project_id       = var.project_id
   vpc_network_name = module.common_infra.vpc_network_name
   vpc_network_id   = module.common_infra.vpc_network_id
+  composer_cidr    = var.composer_cidr
   composer_env_variables = {
     DPU_OUTPUT_DATASET      = module.common_infra.bq_store_dataset_id
     DPU_INPUT_BUCKET        = module.common_infra.gcs_input_bucket_name
@@ -185,8 +187,9 @@ resource "local_file" "env_file" {
 }
 
 module "doc_registry" {
-  source        = "../../components/doc-registry/terraform"
-  project_id    = var.project_id
-  region        = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
+  source                            = "../../components/doc-registry/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 }

@@ -48,8 +48,7 @@ module "project_services" {
       "api" : "pubsub.googleapis.com",
       # PubSub publish to Cloud Run
       "roles" : [
-        #"roles/iam.serviceAccountUser",
-        "roles/iam.serviceAccountTokenCreator",
+        "roles/iam.serviceAccountUser",
       ],
     }
   ]
