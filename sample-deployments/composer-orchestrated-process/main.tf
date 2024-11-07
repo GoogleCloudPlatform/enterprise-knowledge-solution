@@ -185,8 +185,9 @@ resource "local_file" "env_file" {
 }
 
 module "doc_registry" {
-  source        = "../../components/doc-registry/terraform"
-  project_id    = var.project_id
-  region        = var.region
-  artifact_repo = module.common_infra.artifact_repo.name
+  source                            = "../../components/doc-registry/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 }
