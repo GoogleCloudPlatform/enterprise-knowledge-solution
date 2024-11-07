@@ -80,3 +80,14 @@ variable "composer_sa_roles" {
     "roles/discoveryengine.editor",
   ]
 }
+
+variable "composer_cidr" {
+  description = "CIDR ranges for configuring Cloud Composer"
+  type = object({
+    subnet_primary           = string
+    cluster_secondary_range  = string
+    services_secondary_range = string
+    control_plane            = string
+    sql                      = string
+  })
+}

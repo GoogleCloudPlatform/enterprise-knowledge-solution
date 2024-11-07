@@ -66,3 +66,21 @@ variable "webui_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)
 }
+
+variable "composer_cidr" {
+  description = "CIDR ranges for configuring Cloud Composer"
+  type = object({
+    subnet_primary           = string
+    cluster_secondary_range  = string
+    services_secondary_range = string
+    control_plane            = string
+    sql                      = string
+  })
+  default = {
+    subnet_primary           = "10.10.10.0/24"
+    cluster_secondary_range  = "10.154.0.0/17"
+    services_secondary_range = "10.154.128.0/22"
+    control_plane            = "172.31.245.0/24"
+    sql                      = "10.0.0.0/12"
+  }
+}
