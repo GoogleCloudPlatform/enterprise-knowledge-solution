@@ -15,7 +15,7 @@ roles/iam.serviceAccountUser
 roles/iap.admin
 roles/logging.configWriter
 roles/resourcemanager.projectIamAdmin
-roles/run.developer
+roles/run.admin
 roles/logging.logWriter
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin

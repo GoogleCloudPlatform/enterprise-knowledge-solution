@@ -28,9 +28,9 @@ check_exec_version "terraform"
 section_close
 
 section_open "Check and set mandatory environment variables"
-check_environment_variable "PROJECT_ID" "the Google Cloud project where resources are created"
-check_environment_variable "REGION" "the Google Cloud region where resources are created"
-check_environment_variable "IAP_ADMIN_ACCOUNT" "the user or group configured as the contact for IAP consent screen"
+check_mandatory_variable "PROJECT_ID" "the Google Cloud project where resources are created"
+check_mandatory_variable "REGION" "the Google Cloud region where resources are created"
+check_mandatory_variable "IAP_ADMIN_ACCOUNT" "the user or group configured as the contact for IAP consent screen"
 set_active_principal
 gcloud config unset billing/quota_project
 gcloud config set project "${PROJECT_ID}"
@@ -49,7 +49,7 @@ create_service_account_and_enable_impersonation
 section_close
 
 section_open "Enable all the required IAM roles for deployer service account, serviceAccount:""${SERVICE_ACCOUNT_ID}"""
-enable_deployer_roles "${SERVICE_ACCOUNT_ID}"
+enable_persona_roles "serviceAccount:${SERVICE_ACCOUNT_ID}" "persona_roles_DEPLOYER.txt" "DEPLOYER"
 section_close
 
 section_open "Set Application Default Credentials to be used by Terraform"

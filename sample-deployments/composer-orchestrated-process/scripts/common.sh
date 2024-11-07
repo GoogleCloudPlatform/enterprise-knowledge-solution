@@ -59,7 +59,6 @@ set_active_principal() {
   else
     ACTIVE_PRINCIPAL="user:${__active_principal}"
   fi
-  unset __active_principal
 }
 
 create_oauth_consent_config() {
@@ -102,7 +101,7 @@ check_exec_version() {
   unset EXECUTABLE_NAME
 }
 
-check_environment_variable() {
+check_mandatory_variable() {
   _VARIABLE_NAME=$1
   _ERROR_MESSAGE=$2
   _VARIABLE_VALUE="${!_VARIABLE_NAME:-}"
@@ -113,6 +112,17 @@ check_environment_variable() {
   unset _VARIABLE_NAME
   unset _ERROR_MESSAGE
   unset _VARIABLE_VALUE
+}
+
+check_and_set_persona() {
+  local __persona_name=$1
+  local __persona_value="${!__persona_name:-}"
+  if [ -z "${__persona_value}" ]; then
+    echo "$__persona_name is not set, skipping the role grants for this persona"
+  else
+    # pass the principal and and filename of roles
+    enable_persona_roles "$__persona_value" "persona_roles_$__persona_name.txt" "$__persona_name"
+  fi
 }
 
 create_service_account_and_enable_impersonation() {
@@ -152,7 +162,6 @@ check_api_enabled() {
   else
     echo "${__api_endpoint} api is enabled"
   fi
-  unset __api_endpoint
 }
 
 # shell script function to enable api
@@ -160,7 +169,6 @@ enable_api() {
   local __api_endpoint=$1
   gcloud services enable "$__api_endpoint" --project="$PROJECT_ID"
   check_api_enabled "$__api_endpoint"
-  unset __api_endpoint
 }
 
 # enable all apis in the array
@@ -176,18 +184,29 @@ enable_role() {
   local __role=$1 __principal=$2 __resource=$3
   echo "granting IAM Role $__role to $__principal at resource $__resource "
   gcloud projects add-iam-policy-binding "$PROJECT_ID" --role="$__role" --member="$__principal" 1>/dev/null
-  unset __role
-  unset __principal
 }
 
-# enable all roles in the roles array for service account used to deploy terraform resources
-enable_deployer_roles() {
-  local __principal="serviceAccount:$1"
-  readarray -t roles_array <project_roles.txt
+# enable all roles bundled into a persona, based on a textfile listing the roles
+enable_persona_roles() {
+  local __principal=$1
+  local __arrayfile=$2
+  local __persona_name=$3
+  readarray -t roles_array <"$__arrayfile"
   for i in "${roles_array[@]}"; do
-    enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
+    if [ "$__persona_name" == "READER" ] && [ "$i" == "roles/storage.objectViewer" ]; then
+      #Most roles for most persona are project-level, but READER requires one bucket-level role.
+      if [ -z ${PROCESSING_BUCKET+x} ]; then
+        echo "Bucket-level roles will be assigned to the value returned by the'terraform output gcs_process-Bucket_name'. If this script fails, manually set PROCESSING_BUCKET=<YOUR_BUCKET> and try again."
+        PROCESSING_BUCKET=$(terraform output gcs_process_bucket_name | tr -d '"')
+      fi
+      echo "granting IAM Role $i to $__principal at bucket gs://$PROCESSING_BUCKET"
+      gcloud storage buckets add-iam-policy-binding gs://"$PROCESSING_BUCKET" --member="$__principal" --role="$i" 1>/dev/null
+
+    else
+      #most roles for most persona use only project-level roles
+      enable_role "${i/\$\{PROJECT_ID\}/"$PROJECT_ID"}" "$__principal" "projects/$PROJECT_ID"
+    fi
   done
-  unset __principal
 }
 
 set_adc() {

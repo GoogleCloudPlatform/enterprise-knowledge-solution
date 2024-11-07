@@ -100,7 +100,7 @@ To deploy this solution, perform the follow steps:
 
     - Validate software dependencies
     - Enable the required APIs defined in `project_apis.txt`.
-    - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `project_roles.txt`.
+    - Enable the required IAM roles on the service account you'll use to deploy terraform resources, defined in `persona_roles_DEPLOYER.txt`.
     - Setup the OAuth consent screen (brand) required for IAP. While most infrastructure resrouces are created through terraform, we recommend bootstrapping this resource with a user identity rather than a service account to avoid issues related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
     - Enables the required IAM roles used for underlying Cloud Build processes
     - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with the credentials of your service account to be used by Terraform.
