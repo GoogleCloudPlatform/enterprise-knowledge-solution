@@ -83,11 +83,12 @@ class BucketRegistry:
             cls.bucket_dict[bucket_name] = cls.get_storage_client().bucket(bucket_name)
         return cls.bucket_dict[bucket_name]
 
+
 class ClassifierResultEntity:
     def __init__(self, entity: dict):
-        self.confidence = entity['confidence']
-        self.id = entity['id']
-        self.type = entity['type']
+        self.confidence = entity["confidence"]
+        self.id = entity["id"]
+        self.type = entity["type"]
 
     def __str__(self):
         return json.dumps(self.__dict__)
@@ -95,21 +96,22 @@ class ClassifierResultEntity:
     def is_match(self, match_types: list[str], threshold_score: float):
         return (
             any(match_type.lower() == self.type.lower() for match_type in match_types)
-            and self.confidence > threshold_score)
+            and self.confidence > threshold_score
+        )
+
 
 class FormClassifierResult:
 
-    OBJ_ARRAY_END_IDENTIFIER: bytes = b'}]'
-    OBJ_TERMINATION_CHAR: bytes = b'}'
+    OBJ_ARRAY_END_IDENTIFIER: bytes = b"}]"
+    OBJ_TERMINATION_CHAR: bytes = b"}"
     CONTENT_TYPE_JSON: str = "application/json"
 
     @staticmethod
     def transform_docai_entity_to_obj(entity):
-        return ClassifierResultEntity({
-            'confidence': entity.confidence,
-            'id': entity.id,
-            'type': entity.type
-        })
+        return ClassifierResultEntity(
+            {"confidence": entity.confidence, "id": entity.id, "type": entity.type}
+        )
+
     @staticmethod
     def is_json(blob):
         is_json = blob.content_type == FormClassifierResult.CONTENT_TYPE_JSON
@@ -120,7 +122,15 @@ class FormClassifierResult:
             )
         return is_json
 
-    def __init__(self, bucket_name: str, processing_prefix: str, input_file_type: str, result_folder_prefix: str, result_content_keywords: list[bytes], partial_read_length: int = 127):
+    def __init__(
+        self,
+        bucket_name: str,
+        processing_prefix: str,
+        input_file_type: str,
+        result_folder_prefix: str,
+        result_content_keywords: list[bytes],
+        partial_read_length: int = 127,
+    ):
         self.bucket_name = bucket_name
         self.processing_prefix = processing_prefix
         self.input_file_type = input_file_type
@@ -129,33 +139,50 @@ class FormClassifierResult:
         self.partial_read_length = partial_read_length
         self.results = {}
 
-
     def derive_input_blob_name(self, result_blob_name: str):
-        result_doc = GCSDoc(f'{self.bucket_name}/{result_blob_name}')
-        input_doc_name = r'-'.join(result_doc.get_doc_name().split(r'-')[:-1])
-        return f'{self.processing_prefix}/{self.input_file_type}/{input_doc_name}.{self.input_file_type}'
+        result_doc = GCSDoc(f"{self.bucket_name}/{result_blob_name}")
+        input_doc_name = r"-".join(result_doc.get_doc_name().split(r"-")[:-1])
+        return f"{self.processing_prefix}/{self.input_file_type}/{input_doc_name}.{self.input_file_type}"
 
     def extract_classifier_result(self, blob):
         try:
-            download_str = blob.download_as_string(start=0, end=self.partial_read_length)
-            if (FormClassifierResult.OBJ_ARRAY_END_IDENTIFIER in download_str
-                and all(keyword.lower() in download_str.lower() for keyword in self.content_keywords)):
-                result_obj_str = download_str[:download_str.index(FormClassifierResult.OBJ_ARRAY_END_IDENTIFIER)+2]+FormClassifierResult.OBJ_TERMINATION_CHAR
+            download_str = blob.download_as_string(
+                start=0, end=self.partial_read_length
+            )
+            if FormClassifierResult.OBJ_ARRAY_END_IDENTIFIER in download_str and all(
+                keyword.lower() in download_str.lower()
+                for keyword in self.content_keywords
+            ):
+                result_obj_str = (
+                    download_str[
+                        : download_str.index(
+                            FormClassifierResult.OBJ_ARRAY_END_IDENTIFIER
+                        )
+                        + 2
+                    ]
+                    + FormClassifierResult.OBJ_TERMINATION_CHAR
+                )
                 result_obj = json.loads(result_obj_str)
-                return [ClassifierResultEntity(ent) for ent in result_obj['entities']]
+                return [ClassifierResultEntity(ent) for ent in result_obj["entities"]]
         except Exception as e:
-            logging.info(f'Fail to extract classifier result using partial download for file: {blob.name}, with error: {e},'
-                         f' fall back to download the complete file and use DocAI library to deserialize the result')
+            logging.info(
+                f"Fail to extract classifier result using partial download for file: {blob.name}, with error: {e},"
+                f" fall back to download the complete file and use DocAI library to deserialize the result"
+            )
         document = documentai.Document.from_json(
             blob.download_as_bytes(), ignore_unknown_fields=True
         )
-        return [FormClassifierResult.transform_docai_entity_to_obj(e) for e in document.entities]
+        return [
+            FormClassifierResult.transform_docai_entity_to_obj(e)
+            for e in document.entities
+        ]
 
     def load_results(self):
         blobs = BucketRegistry.get_bucket(self.bucket_name).list_blobs(
-            prefix=f'{self.processing_prefix}/{self.result_folder_prefix}',
-            match_glob="**/*.json")
-        results= {}
+            prefix=f"{self.processing_prefix}/{self.result_folder_prefix}",
+            match_glob="**/*.json",
+        )
+        results = {}
 
         for blob in blobs:
             if not FormClassifierResult.is_json(blob):
@@ -181,17 +208,32 @@ def move_classifier_matched_file(
     known_labels: list[str],
     threshold: float = 0.7,
 ):
-    input_file_type = 'pdf'
-    classifier_results = FormClassifierResult(process_bucket, process_folder, input_file_type, 'classified_pdfs_results', [b'entities',b'form'])
+    input_file_type = "pdf"
+    classifier_results = FormClassifierResult(
+        process_bucket,
+        process_folder,
+        input_file_type,
+        "classified_pdfs_results",
+        [b"entities", b"form"]
+    )
     for blob_path in classifier_results.get_results():
         matched_entries = sorted(
-            filter(lambda e: e.is_match(known_labels, threshold), classifier_results.results[blob_path]),
+            filter(
+                lambda e: e.is_match(known_labels, threshold),
+                classifier_results.results[blob_path]
+            ),
             key=lambda ent: ent.confidence,
-            reverse=True)
+            reverse=True,
+        )
         if matched_entries:
-            move_doc = MoveDoc(f'{process_bucket}/{blob_path}', f'{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}')
+            move_doc = MoveDoc(
+                f"{process_bucket}/{blob_path}",
+                f"{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}",
+            )
             # TODO: implement move_doc.move() and add logging and correct return value for the following workflow steps
-            print(f'MOVE: {move_doc.source_doc.bucket_name}/{move_doc.source_doc.blob_name} => {move_doc.dest_doc.bucket_name}/{move_doc.dest_doc.blob_name}')
+            print(
+                f'MOVE: {move_doc.source_doc.bucket_name}/{move_doc.source_doc.blob_name} => {move_doc.dest_doc.bucket_name}/{move_doc.dest_doc.blob_name}'
+            )
 
 
 def move_duplicated_files(
