@@ -246,9 +246,9 @@ entrypoints==0.4 \
     # via
     #   -c reqs/constraints.txt
     #   altair
-firebase-admin==6.5.0 \
-    --hash=sha256:e716dde1447f0a1cd1523be76ff872df33c4e1a3c079564ace033b2ad60bcc4f \
-    --hash=sha256:fe34ee3ca0e625c5156b3931ca4b4b69b5fc344dbe51bba9706ff674ce277898
+firebase-admin==6.6.0 \
+    --hash=sha256:4a55af17e0b4e3de05ba43ad25d92af29b48263622a913faea66e9c8ba50aeef \
+    --hash=sha256:9ce851ae71038acaaeffdcfc09b175dadc3b2e5aa8a0b65760e21bb10253b684
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
