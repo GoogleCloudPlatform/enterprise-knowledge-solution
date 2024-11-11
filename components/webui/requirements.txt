@@ -26,9 +26,9 @@ blinker==1.8.2 \
     # via
     #   -c reqs/constraints.txt
     #   streamlit
-cachecontrol==0.14.0 \
-    --hash=sha256:7db1195b41c81f8274a7bbd97c956f44e8348265a1bc7641c37dfebc39f0c938 \
-    --hash=sha256:f5bf3f0620c38db2e5122c0726bdebb0d16869de966ea6a2befe92470b740ea0
+cachecontrol==0.14.1 \
+    --hash=sha256:06ef916a1e4eb7dba9948cdfc9c76e749db2e02104a9a1277e8b642591a0f717 \
+    --hash=sha256:65e3abd62b06382ce3894df60dde9e0deb92aeb734724f68fa4f3b91e97206b9
     # via
     #   -c reqs/constraints.txt
     #   firebase-admin
