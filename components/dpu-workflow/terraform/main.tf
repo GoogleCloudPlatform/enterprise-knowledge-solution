@@ -97,6 +97,26 @@ resource "google_composer_environment" "composer_env" {
       env_variables = var.composer_env_variables
       pypi_packages = var.composer_additional_pypi_packages
     }
+    workloads_config {
+      scheduler {
+        cpu        = var.composer_scheduler_cpu
+        memory_gb  = var.composer_scheduler_memory
+        storage_gb = var.composer_scheduler_storage
+        count      = var.composer_scheduler_count
+      }
+      web_server {
+        cpu        = var.composer_web_server_cpu
+        memory_gb  = var.composer_web_server_memory
+        storage_gb = var.composer_web_server_storage
+      }
+      worker {
+        cpu        = var.composer_worker_cpu
+        memory_gb  = var.composer_worker_memory
+        storage_gb = var.composer_worker_storage
+        min_count  = var.composer_worker_min_count
+        max_count  = var.composer_worker_max_count
+      }
+    }
     environment_size = var.composer_environment_size
     node_config {
       network         = var.vpc_network_id
