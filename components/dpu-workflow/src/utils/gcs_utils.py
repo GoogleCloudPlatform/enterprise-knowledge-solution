@@ -64,6 +64,10 @@ class MoveDoc:
                 f"{self.dest_doc.blob_name}.json"
             ).upload_from_string(self.move_info, content_type="application/json")
         source_bucket.delete_blob(self.source_doc.blob_name)
+        logging.info(
+            f"Moved {self.source_doc.bucket_name}/{self.source_doc.blob_name} "
+            f"to {self.dest_doc.bucket_name}/{self.dest_doc.blob_name}"
+        )
 
 
 class BucketRegistry:
@@ -129,7 +133,7 @@ class FormClassifierResult:
         input_file_type: str,
         result_folder_prefix: str,
         result_content_keywords: list[bytes],
-        partial_read_length: int = 127,
+        partial_read_length: int = 128,
     ):
         self.bucket_name = bucket_name
         self.processing_prefix = processing_prefix
@@ -145,6 +149,27 @@ class FormClassifierResult:
         return f"{self.processing_prefix}/{self.input_file_type}/{input_doc_name}.{self.input_file_type}"
 
     def extract_classifier_result(self, blob):
+        """
+        Extracts classifier results from the classifier output JSON file Cloud Storage bucket.
+
+        This function efficiently extracts classifier results for the JSON file.
+        To optimize performance, it first attempts to partially download the file
+        (up to `self.partial_read_length` bytes) since classifier results are typically located
+        at the beginning of the file.
+
+        It checks for the presence of specific keywords ('entities', 'form', '}]')
+        to ensure the partial download contains the complete result set. If successful,
+        it parses the downloaded string and returns the extracted entities.
+
+        If partial download fails or encounters errors, it falls back to downloading 
+        the entire file and uses the DocAI library for parsing.
+        Args:
+            blob: The blob object containing the classifier result JSON file.
+   
+        Returns:
+            A list of `ClassifierResultEntity` objects representing the extracted entities.
+        """
+
         try:
             download_str = blob.download_as_string(
                 start=0, end=self.partial_read_length
@@ -202,38 +227,45 @@ class FormClassifierResult:
         return self.results
 
 
-def move_classifier_matched_file(
+def move_classifier_matched_files(
     process_bucket: str,
     process_folder: str,
+    input_file_type: str,
     known_labels: list[str],
+    classifier_result_folder: str = "classified_pdfs_results",
+    result_content_keywords: list[bytes] = [b"entities", b"form"],
     threshold: float = 0.7,
 ):
-    input_file_type = "pdf"
     classifier_results = FormClassifierResult(
         process_bucket,
         process_folder,
         input_file_type,
-        "classified_pdfs_results",
-        [b"entities", b"form"]
+        classifier_result_folder,
+        result_content_keywords,
     )
+    classification_mv_params = []
     for blob_path in classifier_results.get_results():
         matched_entries = sorted(
             filter(
                 lambda e: e.is_match(known_labels, threshold),
-                classifier_results.results[blob_path]
+                classifier_results.results[blob_path],
             ),
             key=lambda ent: ent.confidence,
             reverse=True,
         )
         if matched_entries:
+            logging.info(f"Doc: {blob_path} is classified as {matched_entries[0].type}")
             move_doc = MoveDoc(
                 f"{process_bucket}/{blob_path}",
-                f"{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}",
+                f"{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}/input",
             )
-            # TODO: implement move_doc.move() and add logging and correct return value for the following workflow steps
-            print(
-                f'MOVE: {move_doc.source_doc.bucket_name}/{move_doc.source_doc.blob_name} => {move_doc.dest_doc.bucket_name}/{move_doc.dest_doc.blob_name}'
-            )
+            move_doc.move()
+            classification_mv_params.append({
+                "source_object": blob_path,
+                "destination_bucket": move_doc.dest_doc.bucket_name,
+                "destination_object": move_doc.dest_doc.blob_name,
+            })
+    return classification_mv_params
 
 
 def move_duplicated_files(

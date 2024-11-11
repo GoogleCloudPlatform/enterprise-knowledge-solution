@@ -203,10 +203,9 @@ def parse_doc_classifier_output(**context):
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
     )
-    parsed_output = cloud_run_utils.read_classifier_job_output(
-        process_bucket, process_folder, KNOWN_LABELS_FOR_CLASSIFIER
+    parsed_output = gcs_utils.move_classifier_matched_files(
+        process_bucket, process_folder, "pdf", KNOWN_LABELS_FOR_CLASSIFIER
     )
-    # context["ti"].xcom_push(key="classifier_output", value=parsed_output)
     return parsed_output
 
 
