@@ -14,7 +14,6 @@
 
 import json
 import logging
-
 from typing import Optional
 
 from google.api_core.client_info import ClientInfo
@@ -141,7 +140,7 @@ class FormClassifierResult:
         self.result_folder_prefix = result_folder_prefix
         self.content_keywords = result_content_keywords
         self.partial_read_length = partial_read_length
-        self.results = {}
+        self.results: dict = {}
 
     def derive_input_blob_name(self, result_blob_name: str):
         result_doc = GCSDoc(f"{self.bucket_name}/{result_blob_name}")
@@ -161,11 +160,11 @@ class FormClassifierResult:
         to ensure the partial download contains the complete result set. If successful,
         it parses the downloaded string and returns the extracted entities.
 
-        If partial download fails or encounters errors, it falls back to downloading 
+        If partial download fails or encounters errors, it falls back to downloading
         the entire file and uses the DocAI library for parsing.
         Args:
             blob: The blob object containing the classifier result JSON file.
-   
+
         Returns:
             A list of `ClassifierResultEntity` objects representing the extracted entities.
         """
@@ -260,11 +259,13 @@ def move_classifier_matched_files(
                 f"{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}/input",
             )
             move_doc.move()
-            classification_mv_params.append({
-                "source_object": blob_path,
-                "destination_bucket": move_doc.dest_doc.bucket_name,
-                "destination_object": move_doc.dest_doc.blob_name,
-            })
+            classification_mv_params.append(
+                {
+                    "source_object": blob_path,
+                    "destination_bucket": move_doc.dest_doc.bucket_name,
+                    "destination_object": move_doc.dest_doc.blob_name,
+                }
+            )
     return classification_mv_params
 
 
