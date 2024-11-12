@@ -57,6 +57,12 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   content_config              = "CONTENT_REQUIRED"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+
+  document_processing_config {
+    default_parsing_config {
+      digital_parsing_config {}
+    }
+  }
 }
 
 resource "google_discovery_engine_search_engine" "basic" {
@@ -85,17 +91,6 @@ module "processor" {
   processing_cloud_run_job_name     = local.processing_cloud_run_job_name
 }
 
-module "form_parser_processor" {
-  source                         = "../../components/processing/form_parser/deployment"
-  project_id                     = var.project_id
-  region                         = var.region
-  location                       = var.docai_location
-  gcs_input_prefix               = module.common_infra.gcs_process_bucket_name
-  gcs_output_prefix              = module.common_infra.gcs_process_bucket_name
-  form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
-  alloydb_cluster_name           = module.common_infra.alloydb_cluster_name
-}
-
 module "doc_classifier_job" {
   source     = "../../components/doc-classifier/terraform"
   project_id = var.project_id
@@ -116,6 +111,8 @@ module "specialized_parser_job" {
   bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
   alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
+  network = module.common_infra.vpc_network_name
+  subnet = "composer-subnet"
 }
 
 module "dpu_workflow" {
@@ -174,8 +171,8 @@ resource "local_file" "env_file" {
     processing_cloud_run_job_name = local.processing_cloud_run_job_name
     processing_service_account    = module.processor.doc_processor_service_account
 
-    form_parser_cloud_run_job_name = local.form_parser_cloud_run_job_name
-    form_parser_service_account    = module.form_parser_processor.form_parser_service_account
+    specialized_parser_cloud_run_job_name = module.specialized_parser_job.specialized_parser_cloud_run_job_name
+    specialized_parser_service_account    = module.specialized_parser_job.specialized_parser_service_account
 
     classifier_cloud_run_job_name = local.classifier_cloud_run_job_name
     classifier_service_account    = module.doc_classifier_job.classifier_service_account

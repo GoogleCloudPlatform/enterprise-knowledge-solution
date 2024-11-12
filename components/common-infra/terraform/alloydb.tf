@@ -13,6 +13,36 @@
 # limitations under the License.
 
 
+resource "google_vpc_access_connector" "vpc_connector" {
+  name         = "alloy-db-vpc-connector"
+  region       = var.region
+  network      = module.vpc.network_id
+  ip_cidr_range = "10.8.0.0/28"
+}
+
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "private-ip-address"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = module.vpc.network_id
+}
+
+resource "google_service_networking_connection" "default" {
+  network                 = module.vpc.network_id
+  service                 = "servicenetworking.googleapis.com"
+  # reserved_peering_ranges = []
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
+}
+
+resource "google_compute_network_peering_routes_config" "peering_routes" {
+  peering = google_service_networking_connection.default.peering
+  network = module.vpc.network_name
+
+  import_custom_routes = true
+  export_custom_routes = true
+}
+
 module "docs_results" {
   source = "github.com/GoogleCloudPlatform/terraform-google-alloy-db?ref=fa1d5faf54b56abfe410f5c29483e365d48ec1a3" #commit hash for version 3.2.0
 
@@ -22,8 +52,9 @@ module "docs_results" {
   cluster_location     = var.region
   cluster_labels       = {}
   cluster_display_name = var.alloy_db_cluster_id
-  psc_enabled          = true
-  # network_self_link    = replace(module.vpc.network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  psc_enabled          = false
+  network_self_link    = replace(module.vpc.network_self_link, "https://www.googleapis.com/compute/v1/", "")
+
 
   primary_instance = {
     instance_id       = "${var.alloy_db_cluster_id}-primary"
@@ -37,4 +68,45 @@ module "docs_results" {
       "alloydb.iam_authentication" = "true"
     }
   }
+
+  depends_on = [google_service_networking_connection.default]
+}
+
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  project       = var.project_id
+  name          = "psc-endpoint-subnet"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = var.region
+  network       = module.vpc.network_id
+}
+
+
+module "docs_results_psc" {
+  source = "github.com/GoogleCloudPlatform/terraform-google-alloy-db?ref=fa1d5faf54b56abfe410f5c29483e365d48ec1a3" #commit hash for version 3.2.0
+
+  project_id = module.project_services.project_id
+
+  cluster_id           = "${var.alloy_db_cluster_id}-psc"
+  cluster_location     = var.region
+  cluster_labels       = {}
+  cluster_display_name = "${var.alloy_db_cluster_id}-psc"
+  psc_enabled          = true
+  # network_self_link    = replace(module.vpc.network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  psc_allowed_consumer_projects = [data.google_project.project.number]
+
+  primary_instance = {
+    instance_id       = "${var.alloy_db_cluster_id}-psc-primary"
+    instance_type     = "PRIMARY"
+    machine_cpu_count = 2
+    database_flags = {
+      # This flag enables authenticating using IAM, however, creating databases and tables from terraform is not
+      # currently supported. This goes for managing users permissions over databases and tables as well.
+      # This means we will use throughout the example only the `public` built in database, which can be accessed by any
+      # authenticated user.
+      "alloydb.iam_authentication" = "true"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.default]
 }
