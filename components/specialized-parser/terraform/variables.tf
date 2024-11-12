@@ -63,7 +63,7 @@ variable "alloydb_instance" {
 variable "alloydb_database" {
   description = "AlloyDB Database"
   type = string
-  default = "public"
+  default = "postgres"
 }
 
 variable "processors_location" {
@@ -71,3 +71,14 @@ variable "processors_location" {
   type = string
   default = "us"
 }
+
+variable "network" {
+  description = "Name of the VPC network"
+  type = string
+}
+
+variable "subnet" {
+  description = "Name of the VPC subnet"
+  type = string
+}
+
