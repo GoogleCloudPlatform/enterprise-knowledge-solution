@@ -27,7 +27,7 @@ from configs import ProcessorConfig, AlloyDBConfig, JobConfig, BigQueryConfig
 FilenamesPair = namedtuple("FilenamesPair", "original_filename txt_filename")
 
 
-PROCESSED_DOCUMENTS_TABLE_NAME = "processed_documents"
+PROCESSED_DOCUMENTS_TABLE_NAME = "eks.processed_documents"
 
 
 @dataclass
