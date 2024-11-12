@@ -9,6 +9,7 @@ from typing import List
 from typing import Tuple
 
 import sqlalchemy
+import pg8000
 from google.api_core.client_info import ClientInfo
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import GoogleAPICallError, RetryError
@@ -16,7 +17,7 @@ from google.api_core.gapic_v1.client_info import ClientInfo
 from google.api_core.operation import Operation
 from google.cloud import bigquery
 from google.cloud import documentai, storage
-from google.cloud.alloydb.connector import Connector
+from google.cloud.alloydb.connector import Connector, IPTypes
 from google.cloud.documentai_v1 import BatchProcessMetadata
 from google.cloud.exceptions import InternalServerError
 from sqlalchemy.engine import Engine
@@ -86,26 +87,42 @@ class SpecializedParserJobRunner:
         print("Done")
 
     @staticmethod
-    def create_connection_pool(alloydb_config: AlloyDBConfig) ->  Engine:
-        connector = Connector()
+    def create_connection_pool(alloydb_config: AlloyDBConfig, refresh_strategy: str = "lazy") ->  Engine:
+        connector = Connector(refresh_strategy=refresh_strategy)
 
-        def getconn():
+        def getconn() -> pg8000.dbapi.Connection:  # pyright: ignore [reportAttributeAccessIssue]
             conn = connector.connect(
-                alloydb_config.primary_instance,
-                "pg8000",
+                instance_uri=alloydb_config.primary_instance,
+                driver="pg8000",
                 db=alloydb_config.database,
                 enable_iam_auth=True,
                 user=os.environ["ALLOYDB_USER"],
+                ip_type=IPTypes.PRIVATE,
             )
             return conn
 
         # Not sure why the return type is reported to be MockConnection, when all documentation points for it to be of
         # type Engine. Suppressing error of assignment type, for the moment.
-        pool: Engine = sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
+        engine: Engine = sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
             "postgresql+pg8000://",
             creator=getconn,
         )
-        return pool
+        #
+        # engine: Engine = sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
+        #     # Equivalent URL:
+        #     # postgresql+pg8000://<db_user>:<db_pass>@<INSTANCE_HOST>:<db_port>/<db_name>
+        #     sqlalchemy.engine.url.URL.create(
+        #         drivername="postgresql+pg8000",
+        #         username=os.environ["ALLOYDB_USER"],
+        #         # password=db_pass,
+        #         host="10.125.224.5",
+        #         port=5432,
+        #         database=os.environ["ALLOYDB_DATABASE"],
+        #     ),
+        #     # ...
+        # )
+        engine.dialect.description_encoding = None
+        return engine
 
     def verify_alloydb_table(self) -> None:
         """
@@ -113,7 +130,7 @@ class SpecializedParserJobRunner:
         """
         with self.alloydb_connection_pool.connect() as db_conn:
             db_conn.execute(f"""
-            CREATE TABLE IF NOT EXISTS `{PROCESSED_DOCUMENTS_TABLE_NAME}` (
+            CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
                 original_filename VARCHAR (2048) NOT NULL PRIMARY KEY,
                 results_file VARCHAR (2048) NULL,
                 run_id VARCHAR (255) NULL,

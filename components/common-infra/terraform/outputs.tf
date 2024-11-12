@@ -61,6 +61,14 @@ output "alloydb_cluster_name" {
 output "alloydb_primary_instance" {
   value = module.docs_results.primary_instance_id
 }
+#
+# output "alloydb_cluster_name" {
+#   value = module.docs_results_psc.cluster_name
+# }
+#
+# output "alloydb_primary_instance" {
+#   value = module.docs_results_psc.primary_instance_id
+# }
 
 output "alloydb_location" {
   value = var.region
