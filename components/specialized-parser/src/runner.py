@@ -5,7 +5,7 @@ import re
 import uuid
 from collections import namedtuple
 from dataclasses import dataclass, asdict
-from typing import List
+from typing import List, Dict
 from typing import Tuple
 
 import sqlalchemy
@@ -32,6 +32,7 @@ PROCESSED_DOCUMENTS_TABLE_NAME = "eks.processed_documents"
 
 @dataclass
 class ProcessedDocument:
+    id: str
     original_filename: str
     results_file: str
     run_id: str
@@ -81,7 +82,7 @@ class SpecializedParserJobRunner:
             print("Writing results to GCS")
             bucket_name, csv_blob_name = self.write_results_to_gcs(parsed_results)
             print("Writing results to AlloyDB")
-            self.write_results_to_alloydb(bucket_name, csv_blob_name)
+            self.write_results_to_alloydb_with_inserts(parsed_results)
             print("Writing results to BigQuery")
             self.write_results_to_bigquery(bucket_name, csv_blob_name)
         print("Done")
@@ -107,20 +108,7 @@ class SpecializedParserJobRunner:
             "postgresql+pg8000://",
             creator=getconn,
         )
-        #
-        # engine: Engine = sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
-        #     # Equivalent URL:
-        #     # postgresql+pg8000://<db_user>:<db_pass>@<INSTANCE_HOST>:<db_port>/<db_name>
-        #     sqlalchemy.engine.url.URL.create(
-        #         drivername="postgresql+pg8000",
-        #         username=os.environ["ALLOYDB_USER"],
-        #         # password=db_pass,
-        #         host="10.125.224.5",
-        #         port=5432,
-        #         database=os.environ["ALLOYDB_DATABASE"],
-        #     ),
-        #     # ...
-        # )
+
         engine.dialect.description_encoding = None
         return engine
 
@@ -128,11 +116,17 @@ class SpecializedParserJobRunner:
         """
         Verify AlloyDB table exists to save results from the processor.
         """
+        user = os.environ["ALLOYDB_USER"]
         with self.alloydb_connection_pool.connect() as db_conn:
+            db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
+            db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user}"')
+            db_conn.execute(f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"')
+            db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
             db_conn.execute(f"""
             CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
-                original_filename VARCHAR (2048) NOT NULL PRIMARY KEY,
-                results_file VARCHAR (2048) NULL,
+                id VARCHAR (255) NOT NULL PRIMARY KEY,
+                original_filename VARCHAR (2048) NOT NULL,
+                results_file VARCHAR (2048) NOT NULL,
                 run_id VARCHAR (255) NULL,
                 entities JSONB NULL
             )
@@ -153,7 +147,11 @@ class SpecializedParserJobRunner:
         )
         output_config = documentai.DocumentOutputConfig(gcs_output_config=gcs_output_config)
 
-        processor_name = self.processor_config.processor_id
+        processor_name = client.processor_path(
+            self.processor_config.project,
+            self.processor_config.location,
+            self.processor_config.processor_id
+        )
         request = documentai.BatchProcessRequest(
             name=processor_name,
             input_documents=input_config,
@@ -184,7 +182,7 @@ class SpecializedParserJobRunner:
 
     def read_and_parse_batch_results(self, individual_process_statuses: List[
         BatchProcessMetadata.IndividualProcessStatus]) -> Tuple[List[ProcessedDocument], List[FilenamesPair]]:
-        output_documents: List[ProcessedDocument] = []
+        output_documents: Dict[str, ProcessedDocument] = {}
         output_pairs: List[FilenamesPair] = []
         for process in individual_process_statuses:
             matches = re.match(r"gs://(.*?)/(.*)", process.output_gcs_destination)
@@ -201,6 +199,9 @@ class SpecializedParserJobRunner:
             txt_bucket = self.storage_client.bucket(output_bucket)
             for blob in output_blobs:
                 # Document AI should only output JSON files to GCS
+                if blob.name in output_documents:
+                    print(f"Already parsed {blob.name}. Skipping.")
+                    continue
                 if blob.content_type != "application/json":
                     print(
                         f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
@@ -214,7 +215,7 @@ class SpecializedParserJobRunner:
                 )
 
                 original_filename = (blob.name.rsplit("-", 1)[0]).rsplit("/", 1)[1]
-                original_file_path = f"{self.job_config.gcs_input_prefix}{original_filename}.pdf"
+                original_file_path = f"{self.job_config.gcs_input_prefix}/{original_filename}.pdf"
                 txt_filename = blob.name.replace(".json", ".txt")
                 txt_blob = txt_bucket.blob(txt_filename)
                 txt_blob.upload_from_string(document.text)
@@ -222,14 +223,20 @@ class SpecializedParserJobRunner:
                 print(f"Text file {txt_file_path} created successfully")
                 output_pairs.append(FilenamesPair(original_filename=original_file_path, txt_filename=txt_file_path))
                 if document.entities:
-                    output_documents.append(ProcessedDocument(
+                    # Since json.dumps(document.entities, indent=None) throws an error ("TypeError: Object of type
+                    # RepeatedComposite is not JSON serializable")
+                    # We will convert the document to dict, and then use the entities key
+                    entities = documentai.Document.to_dict(document)["entities"]  # pyright: ignore [reportIndexIssue]
+                    id = str(uuid.uuid4())
+                    output_documents[blob.name] = ProcessedDocument(
+                        id=id,
                         original_filename=original_file_path,
                         run_id=self.job_config.run_id,
                         results_file=f"gs://{output_bucket}/{blob.name}",
-                        entities=json.dumps(document.entities, indent=None)
-                    ))
+                        entities=json.dumps(entities, indent=None)
+                    )
 
-        return output_documents, output_pairs
+        return list(output_documents.values()), output_pairs
 
     def write_results_to_gcs(self, parsed_results: List[ProcessedDocument]) -> Tuple[str, str]:
         bucket_name, output_folder = self.get_bucket_name(self.job_config.gcs_output_uri)
@@ -244,6 +251,7 @@ class SpecializedParserJobRunner:
             )
             writer.writeheader()
             writer.writerows(data_dicts)
+
         return bucket_name, str(blob.name)
 
     @staticmethod
@@ -259,14 +267,35 @@ class SpecializedParserJobRunner:
             print("No bucket name found in the given string.")
             raise ValueError(f"Could not extract bucket from {gcs_uri}")
 
-    def write_results_to_alloydb(self, bucket_name: str, csv_blob_name: str):
+    def divide_chunks(self, l, n):
+        # looping till length l
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
+    def write_results_to_alloydb_with_inserts(self, parsed_results: List[ProcessedDocument]):
         print(
-            f"Copying data to AlloyDB table from CSV gs://{bucket_name}/{csv_blob_name}"
+            f"Inserting data to AlloyDB; ({len(parsed_results)} rows)"
+        )
+        with self.alloydb_connection_pool.connect() as conn:
+            for chunk in self.divide_chunks(parsed_results, 50):
+                rows = [f"('{x.id}', '{x.original_filename}', '{x.results_file}', '{x.run_id}', '{x.entities}')" for x in
+                        chunk]
+
+                sql = f"""
+                    INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
+                    VALUES
+                    {",".join(rows)}
+                """
+                conn.execute(sql)
+
+    def write_results_to_alloydb(self, local_filename: str):
+        print(
+            f"Copying data to AlloyDB table from CSV {local_filename}"
         )
         with self.alloydb_connection_pool.connect() as conn:
             sql = f"""
-                COPY `{PROCESSED_DOCUMENTS_TABLE_NAME}`
-                FROM 'gs://{bucket_name}/{csv_blob_name}'
+                COPY {PROCESSED_DOCUMENTS_TABLE_NAME}
+                FROM '{local_filename}'
                 WITH (
                     FORMAT CSV,
                     HEADER true
@@ -286,7 +315,15 @@ class SpecializedParserJobRunner:
         job_config = bigquery.LoadJobConfig(
             write_disposition="WRITE_APPEND",  # Append data to the table
             source_format=bigquery.SourceFormat.CSV,
-            autodetect=True,  # Automatically detect schema
+            autodetect=False,
+            skip_leading_rows=1,
+            schema=[
+                bigquery.SchemaField("id", "STRING"),
+                bigquery.SchemaField("original_filename", "STRING"),
+                bigquery.SchemaField("results_file", "STRING"),
+                bigquery.SchemaField("run_id", "STRING"),
+                bigquery.SchemaField("entities", "JSON"),
+            ],
         )
 
         # Construct the URI for the CSV file in GCS.

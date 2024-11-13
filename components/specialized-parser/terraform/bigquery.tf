@@ -21,3 +21,11 @@ resource "google_bigquery_table" "processed_documents" {
   # NOTE: For production use-cases, change this!
   deletion_protection = false
 }
+
+resource "google_bigquery_table_iam_member" "member" {
+  project = google_bigquery_table.processed_documents.project
+  dataset_id = google_bigquery_table.processed_documents.dataset_id
+  table_id = google_bigquery_table.processed_documents.table_id
+  role = "roles/bigquery.dataOwner"
+  member = module.specialized_parser_account.iam_email
+}
