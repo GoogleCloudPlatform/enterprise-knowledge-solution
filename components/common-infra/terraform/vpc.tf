@@ -25,12 +25,23 @@ module "vpc" {
 
 }
 
+data "google_compute_network" "provided_vpc" {
+  count = var.create_vpc_network ? 0 : 1
+  name  = var.vpc_name
+}
+
+locals {
+  vpc_network_id        = var.create_vpc_network ? module.vpc[0].network_id : data.google_compute_network.provided_vpc[0].id
+  vpc_network_self_link = var.create_vpc_network ? module.vpc[0].network_self_link : data.google_compute_network.provided_vpc[0].self_link
+  vpc_network_name      = var.create_vpc_network ? module.vpc[0].network_name : data.google_compute_network.provided_vpc[0].name
+}
+
 resource "google_dns_policy" "dns-policy" {
   name           = "dns-policy"
   enable_logging = true
 
   networks {
-    network_url = module.vpc[0].network_id
+    network_url = local.vpc_network_id
   }
 }
 
@@ -41,7 +52,7 @@ resource "google_compute_network_firewall_policy" "policy" {
 
 resource "google_compute_network_firewall_policy_association" "association" {
   name              = "association"
-  attachment_target = module.vpc[0].network_id
+  attachment_target = local.vpc_network_id
   firewall_policy   = google_compute_network_firewall_policy.policy.name
 }
 
@@ -138,7 +149,7 @@ module "dns-private-zone-googleapis" {
   name       = "googleapis-com"
   domain     = "googleapis.com."
 
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
+  private_visibility_config_networks = [local.vpc_network_self_link]
 
   recordsets = [
     {
@@ -167,7 +178,7 @@ module "dns-private-zone-composer1" {
   name       = "composer-cloud-google-com"
   domain     = "composer.cloud.google.com."
 
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
+  private_visibility_config_networks = [local.vpc_network_self_link]
 
   recordsets = [
     {
@@ -188,7 +199,7 @@ module "dns-private-zone-composer2" {
   name       = "composer-googleusercontent-com"
   domain     = "composer.googleusercontent.com."
 
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
+  private_visibility_config_networks = [local.vpc_network_self_link]
 
   recordsets = [
     {
@@ -209,7 +220,7 @@ module "dns-private-zone-pkg-dev" {
   name       = "pkg-dev"
   domain     = "pkg.dev."
 
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
+  private_visibility_config_networks = [local.vpc_network_self_link]
 
   recordsets = [
     {
@@ -230,7 +241,7 @@ module "dns-private-zone-gcr-io" {
   name       = "gcr-io"
   domain     = "gcr.io."
 
-  private_visibility_config_networks = [module.vpc[0].network_self_link]
+  private_visibility_config_networks = [local.vpc_network_self_link]
 
   recordsets = [
     {
