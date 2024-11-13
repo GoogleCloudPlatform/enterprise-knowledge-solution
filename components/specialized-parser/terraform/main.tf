@@ -15,6 +15,12 @@
 # Enable APIs
 # See github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
+locals {
+  alloydb_username = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
+  alloydb_cluster_name_split = split("/", var.alloydb_cluster)
+  alloydb_cluster_name = element(local.alloydb_cluster_name_split, length(local.alloydb_cluster_name_split) - 1)
+}
+
 module "project_services" {
   source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
@@ -59,18 +65,42 @@ module "specialized_parser_account" {
     "${var.project_id}=>roles/alloydb.databaseUser",
     "${var.project_id}=>roles/alloydb.client",
     "${var.project_id}=>roles/serviceusage.serviceUsageConsumer",
+    "${var.project_id}=>roles/documentai.editor",
+    "${var.project_id}=>roles/bigquery.dataEditor",
+    "${var.project_id}=>roles/bigquery.jobUser",
+    "${var.project_id}=>roles/storage.admin",
   ]
   display_name = "Specialized Parser Account"
   description  = "Account used to run the specialized parser jobs"
 }
 
 resource "google_alloydb_user" "specialized_parser_user" {
-  cluster   = var.alloydb_cluster
+  cluster = var.alloydb_cluster
   # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
-  user_id   = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
-  user_type = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser"]
+  user_id        = local.alloydb_username
+  user_type      = "ALLOYDB_IAM_USER"
+  database_roles = ["alloydbsuperuser", "alloydbiamuser"]
 }
+
+# See github.com/terraform-google-modules/terraform-google-gcloud
+module "set_superuser" {
+  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
+  create_cmd_entrypoint = "gcloud"
+  create_cmd_body       = <<-EOT
+    alloydb users set-superuser ${local.alloydb_username} \
+      --cluster=${local.alloydb_cluster_name} \
+      --superuser=true \
+      --project=${var.project_id} \
+      --region=${var.region}
+  EOT
+  enabled               = true
+
+  module_depends_on = [google_alloydb_user.specialized_parser_user]
+
+  skip_download = true
+
+}
+
 
 resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
   name     = var.specialized_parser_cloud_run_job_name
@@ -83,43 +113,43 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
       service_account = module.specialized_parser_account.email
       vpc_access {
         network_interfaces {
-          network = var.network
+          network    = var.network
           subnetwork = var.subnet
         }
         egress = "PRIVATE_RANGES_ONLY"
       }
       containers {
         image = local.image_name_and_tag
-        name = var.specialized_parser_cloud_run_job_name
+        name  = var.specialized_parser_cloud_run_job_name
         resources {
           limits = {
-            cpu = "2"
+            cpu    = "2"
             memory = "2048Mi"
           }
         }
         # depends_on = ["alloydb-auth-proxy"]
         env {
-          name = "ALLOYDB_INSTANCE"
+          name  = "ALLOYDB_INSTANCE"
           value = var.alloydb_instance
         }
         env {
-          name = "ALLOYDB_DATABASE"
+          name  = "ALLOYDB_DATABASE"
           value = var.alloydb_database
         }
         env {
-          name = "ALLOYDB_USER"
+          name  = "ALLOYDB_USER"
           value = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
         }
         env {
-          name = "PROCESSED_DOCS_BQ_PROJECT"
+          name  = "PROCESSED_DOCS_BQ_PROJECT"
           value = google_bigquery_table.processed_documents.project
         }
         env {
-          name = "PROCESSED_DOCS_BQ_DATASET"
+          name  = "PROCESSED_DOCS_BQ_DATASET"
           value = google_bigquery_table.processed_documents.dataset_id
         }
         env {
-          name = "PROCESSED_DOCS_BQ_TABLE"
+          name  = "PROCESSED_DOCS_BQ_TABLE"
           value = google_bigquery_table.processed_documents.table_id
         }
         # env {
