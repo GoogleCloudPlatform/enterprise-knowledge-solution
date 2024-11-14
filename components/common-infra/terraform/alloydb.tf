@@ -16,7 +16,7 @@
 resource "google_vpc_access_connector" "vpc_connector" {
   name         = "alloy-db-vpc-connector"
   region       = var.region
-  network      = module.vpc.network_id
+  network      = module.vpc[0].network_id
   ip_cidr_range = "10.8.0.0/28"
 }
 
@@ -25,11 +25,11 @@ resource "google_compute_global_address" "private_ip_address" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = module.vpc.network_id
+  network       = module.vpc[0].network_id
 }
 
 resource "google_service_networking_connection" "default" {
-  network                 = module.vpc.network_id
+  network                 = module.vpc[0].network_id
   service                 = "servicenetworking.googleapis.com"
   # reserved_peering_ranges = []
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
@@ -37,7 +37,7 @@ resource "google_service_networking_connection" "default" {
 
 resource "google_compute_network_peering_routes_config" "peering_routes" {
   peering = google_service_networking_connection.default.peering
-  network = module.vpc.network_name
+  network = module.vpc[0].network_name
 
   import_custom_routes = true
   export_custom_routes = true
@@ -53,7 +53,7 @@ module "docs_results" {
   cluster_labels       = {}
   cluster_display_name = var.alloy_db_cluster_id
   psc_enabled          = false
-  network_self_link    = replace(module.vpc.network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  network_self_link    = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
 
 
   primary_instance = {
@@ -70,4 +70,11 @@ module "docs_results" {
   }
 
   depends_on = [google_service_networking_connection.default]
+}
+
+resource "time_sleep" "wait_for_alloydb_ready_state" {
+  create_duration = "600s"
+  depends_on = [
+    module.docs_results
+  ]
 }

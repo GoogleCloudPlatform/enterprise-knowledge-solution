@@ -20,7 +20,6 @@ provider "google" {
 
 locals {
   processing_cloud_run_job_name         = "doc-processor"
-  form_parser_cloud_run_job_name        = "form-parser"
   classifier_cloud_run_job_name         = "doc-classifier"
   specialized_parser_cloud_run_job_name = "specialized-parser"
   dpu_label = {
