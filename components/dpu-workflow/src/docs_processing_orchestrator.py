@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# pylint: disable=import-error
-
 import json
 import logging
 import os
@@ -209,10 +206,10 @@ def parse_doc_classifier_output(**context):
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
     )
-    parsed_output = gcs_utils.move_classifier_matched_files(
-        process_bucket, process_folder, "pdf", list(SPECIALIZED_PROCESSORS_IDS_JSON.keys())
+    detected_labels = cloud_run_utils.read_classifier_job_output(
+        process_bucket, process_folder, list(SPECIALIZED_PROCESSORS_IDS_JSON.keys())
     )
-    return parsed_output
+    return detected_labels
 
 
 def data_store_import_docs(**context):
@@ -298,7 +295,6 @@ def generate_specialized_process_job_params(**context):
         process_folder=process_folder,
     )
     return specialized_parser_job_params_list
-
 
 with DAG(
     "run_docs_processing",
@@ -659,3 +655,4 @@ with DAG(
         generate_update_doc_registry_job_params
         >> update_doc_registry
     )
+
