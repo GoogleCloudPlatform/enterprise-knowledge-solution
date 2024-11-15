@@ -25,7 +25,7 @@ output "specialized_parser_service_account" {
 output "specialized_processors_ids_json" {
   description = "JSON encoded string of all supported labels as keys and the corresponding processor id for each as values."
   value = jsonencode({
-    "invoice"=google_document_ai_processor.eks-invoice-processor.id
-    "form"=google_document_ai_processor.eks-form-processor.id
+    "invoice" = google_document_ai_processor.eks-invoice-processor.id
+    "form"    = google_document_ai_processor.eks-form-processor.id
   })
 }

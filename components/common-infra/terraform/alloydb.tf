@@ -14,9 +14,9 @@
 
 
 resource "google_vpc_access_connector" "vpc_connector" {
-  name         = "alloy-db-vpc-connector"
-  region       = var.region
-  network      = module.vpc[0].network_id
+  name          = "alloy-db-vpc-connector"
+  region        = var.region
+  network       = module.vpc[0].network_id
   ip_cidr_range = "10.8.0.0/28"
   min_instances = 2
   max_instances = 3
@@ -31,8 +31,8 @@ resource "google_compute_global_address" "private_ip_address" {
 }
 
 resource "google_service_networking_connection" "default" {
-  network                 = module.vpc[0].network_id
-  service                 = "servicenetworking.googleapis.com"
+  network = module.vpc[0].network_id
+  service = "servicenetworking.googleapis.com"
   # reserved_peering_ranges = []
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }

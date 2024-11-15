@@ -16,25 +16,25 @@ import os
 import re
 from typing import Optional, Tuple
 
-from configs import JobConfig, ProcessorConfig, AlloyDBConfig, BigQueryConfig
+from configs import AlloyDBConfig, BigQueryConfig, JobConfig, ProcessorConfig
 from runner import SpecializedParserJobRunner
 
 
 def is_valid_processor_id(processor_id: str) -> Optional[Tuple[str, str, str]]:
-  """
-  Validates a GCP DocumentAI processor ID.
+    """
+    Validates a GCP DocumentAI processor ID.
 
-  Args:
-    processor_id: The processor ID string to validate.
+    Args:
+      processor_id: The processor ID string to validate.
 
-  Returns:
-    Tuple (project_id, location, processor_id) if the processor ID is valid, False otherwise.
-  """
-  pattern = r"^projects\/([a-z][a-z0-9\-]{4,28}[a-z0-9])\/locations\/(us|eu)\/processors\/([a-zA-Z0-9_-]+)$"
-  match = re.match(pattern, processor_id)
-  if not match:
-      return None
-  return match.group(1), match.group(2), match.group(3)
+    Returns:
+      Tuple (project_id, location, processor_id) if the processor ID is valid, False otherwise.
+    """
+    pattern = r"^projects\/([a-z][a-z0-9\-]{4,28}[a-z0-9])\/locations\/(us|eu)\/processors\/([a-zA-Z0-9_-]+)$"
+    match = re.match(pattern, processor_id)
+    if not match:
+        return None
+    return match.group(1), match.group(2), match.group(3)
 
 
 def run() -> None:
@@ -45,17 +45,17 @@ def run() -> None:
     gcs_input_prefix = os.environ["GCS_INPUT_PREFIX"]
     gcs_output_uri = os.environ["GCS_OUTPUT_URI"]
     bigquery_metadata_table = os.environ["BQ_TABLE"]
-    
+
     valid_processor_tuple = is_valid_processor_id(processor_id)
     if not valid_processor_tuple:
         raise ValueError(f"processor_id is missing or invalid. {processor_id=}")
-    
+
     job_config = JobConfig(
         run_id=os.environ.get("RUN_ID", "no-run-id-specified"),
         gcs_input_prefix=gcs_input_prefix,
         gcs_output_uri=gcs_output_uri,
     )
-    
+
     processor_config = ProcessorConfig(
         project=valid_processor_tuple[0],
         location=valid_processor_tuple[1],
@@ -79,6 +79,7 @@ def run() -> None:
         bigquery_config=bigquery_config,
     )
     runner.run()
+
 
 if __name__ == "__main__":
     run()

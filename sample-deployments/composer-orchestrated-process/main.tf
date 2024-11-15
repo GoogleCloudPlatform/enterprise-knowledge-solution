@@ -110,8 +110,8 @@ module "specialized_parser_job" {
   bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
   alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
-  network = module.common_infra.vpc_network_name
-  subnet = "cloud-run-subnet"
+  network                               = module.common_infra.vpc_network_name
+  subnet                                = "cloud-run-subnet"
 }
 
 module "dpu_workflow" {
@@ -122,19 +122,19 @@ module "dpu_workflow" {
   vpc_network_id   = module.common_infra.vpc_network_id
   composer_cidr    = var.composer_cidr
   composer_env_variables = {
-    DPU_OUTPUT_DATASET      = module.common_infra.bq_store_dataset_id
-    DPU_INPUT_BUCKET        = module.common_infra.gcs_input_bucket_name
-    DPU_PROCESS_BUCKET      = module.common_infra.gcs_process_bucket_name
-    DPU_REJECT_BUCKET       = module.common_infra.gcs_reject_bucket_name
-    DPU_REGION              = var.region
-    DPU_DATA_STORE_REGION   = var.vertex_ai_data_store_region
-    DOC_PROCESSOR_JOB_NAME  = module.processor.processing_cloud_run_job_name
-    DPU_DATA_STORE_ID       = google_discovery_engine_data_store.dpu_ds.data_store_id
-    DOC_CLASSIFIER_JOB_NAME = module.doc_classifier_job.classifier_cloud_run_job_name
-    DOC_REGISTRY_JOB_NAME   = module.doc_registry.doc_registry_service_cloud_run_job_name
-    SPECIALIZED_PARSER_JOB_NAME = module.specialized_parser_job.specialized_parser_cloud_run_job_name
-    SPECIALIZED_PROCESSORS_IDS_JSON  = module.specialized_parser_job.specialized_processors_ids_json
-    CUSTOM_CLASSIFIER_ID   = var.custom_classifier_id
+    DPU_OUTPUT_DATASET              = module.common_infra.bq_store_dataset_id
+    DPU_INPUT_BUCKET                = module.common_infra.gcs_input_bucket_name
+    DPU_PROCESS_BUCKET              = module.common_infra.gcs_process_bucket_name
+    DPU_REJECT_BUCKET               = module.common_infra.gcs_reject_bucket_name
+    DPU_REGION                      = var.region
+    DPU_DATA_STORE_REGION           = var.vertex_ai_data_store_region
+    DOC_PROCESSOR_JOB_NAME          = module.processor.processing_cloud_run_job_name
+    DPU_DATA_STORE_ID               = google_discovery_engine_data_store.dpu_ds.data_store_id
+    DOC_CLASSIFIER_JOB_NAME         = module.doc_classifier_job.classifier_cloud_run_job_name
+    DOC_REGISTRY_JOB_NAME           = module.doc_registry.doc_registry_service_cloud_run_job_name
+    SPECIALIZED_PARSER_JOB_NAME     = module.specialized_parser_job.specialized_parser_cloud_run_job_name
+    SPECIALIZED_PROCESSORS_IDS_JSON = module.specialized_parser_job.specialized_processors_ids_json
+    CUSTOM_CLASSIFIER_ID            = var.custom_classifier_id
   }
 }
 

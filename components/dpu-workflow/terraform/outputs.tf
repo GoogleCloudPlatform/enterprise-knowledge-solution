@@ -24,6 +24,6 @@ output "composer_uri" {
 
 output "composer_location" {
   description = "Cloud Composer Location"
-  value = google_composer_environment.composer_env.region
+  value       = google_composer_environment.composer_env.region
 }
 

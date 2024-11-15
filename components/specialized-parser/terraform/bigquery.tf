@@ -23,9 +23,9 @@ resource "google_bigquery_table" "processed_documents" {
 }
 
 resource "google_bigquery_table_iam_member" "member" {
-  project = google_bigquery_table.processed_documents.project
+  project    = google_bigquery_table.processed_documents.project
   dataset_id = google_bigquery_table.processed_documents.dataset_id
-  table_id = google_bigquery_table.processed_documents.table_id
-  role = "roles/bigquery.dataOwner"
-  member = module.specialized_parser_account.iam_email
+  table_id   = google_bigquery_table.processed_documents.table_id
+  role       = "roles/bigquery.dataOwner"
+  member     = module.specialized_parser_account.iam_email
 }

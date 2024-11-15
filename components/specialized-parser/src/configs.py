@@ -7,6 +7,7 @@ class JobConfig:
     gcs_output_uri: str
     run_id: str
 
+
 @dataclass
 class ProcessorConfig:
     project: str
@@ -14,10 +15,12 @@ class ProcessorConfig:
     processor_id: str
     timeout: int
 
+
 @dataclass
 class AlloyDBConfig:
     primary_instance: str
     database: str
+
 
 @dataclass
 class BigQueryConfig:

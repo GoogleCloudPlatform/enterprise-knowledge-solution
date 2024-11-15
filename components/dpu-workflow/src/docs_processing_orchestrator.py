@@ -40,7 +40,6 @@ from airflow.utils.trigger_rule import TriggerRule  # type: ignore
 from utils import cloud_run_utils, datastore_utils, file_utils, gcs_utils
 from utils.docai_utils import is_valid_processor_id
 
-
 # pylint: disable=import-error
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -61,12 +60,13 @@ USER_AGENT = "cloud-solutions/eks-orchestrator-v1"
 # Also note, that labels will be matched case-insensitive and disregarding
 # trailing and leading whitespaces.
 SPECIALIZED_PROCESSORS_IDS_JSON = {
-    k: v for k, v in
-    json.loads(os.environ["SPECIALIZED_PROCESSORS_IDS_JSON"]).items()
+    k: v
+    for k, v in json.loads(os.environ["SPECIALIZED_PROCESSORS_IDS_JSON"]).items()
     if is_valid_processor_id(v)
 }
 
 CUSTOM_CLASSIFIER = os.environ.get("CUSTOM_CLASSIFIER_ID", "")
+
 
 def get_supported_file_types(**context):
     file_type_to_processor = context["params"]["supported_files"]
@@ -207,9 +207,10 @@ def parse_doc_classifier_output(**context):
         key="process_folder",
     )
     detected_labels = gcs_utils.move_classifier_matched_files(
-        process_bucket, process_folder, "pdf", list(
-            SPECIALIZED_PROCESSORS_IDS_JSON.keys()
-        )
+        process_bucket,
+        process_folder,
+        "pdf",
+        list(SPECIALIZED_PROCESSORS_IDS_JSON.keys()),
     )
     return detected_labels
 
@@ -273,14 +274,19 @@ def generate_output_table_name(**context):
 def generate_specialized_process_job_params(**context):
     # get list of detected labels
     detected_labels = context["ti"].xcom_pull(
-        task_ids="classify_pdfs.parse_doc_classifier_results_and_move_files", key="return_value",
+        task_ids="classify_pdfs.parse_doc_classifier_results_and_move_files",
+        key="return_value",
     )
     # possible processors configured in the run
-    possible_processors = {x["label"]: x["doc-ai-processor-id"] for x in context["params"]["doc-ai-processors"] if x["label"] in detected_labels}
+    possible_processors = {
+        x["label"]: x["doc-ai-processor-id"]
+        for x in context["params"]["doc-ai-processors"]
+        if x["label"] in detected_labels
+    }
 
     # get the run_id
     logging.info(f"{context=}")
-    run_id = context['dag_run'].run_id
+    run_id = context["dag_run"].run_id
 
     # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
@@ -298,6 +304,7 @@ def generate_specialized_process_job_params(**context):
     )
     return specialized_parser_job_params_list
 
+
 with DAG(
     "run_docs_processing",
     default_args=default_args,
@@ -309,7 +316,8 @@ with DAG(
         "input_folder": "",
         "doc-ai-processors": Param(
             [
-                {"label": k, "doc-ai-processor-id": v} for k, v in SPECIALIZED_PROCESSORS_IDS_JSON.items()
+                {"label": k, "doc-ai-processor-id": v}
+                for k, v in SPECIALIZED_PROCESSORS_IDS_JSON.items()
             ],
             type="array",
             items={
@@ -317,7 +325,7 @@ with DAG(
                 "properties": {
                     "label": {"type": "string"},
                     "doc-ai-processor-id": {"type": "string"},
-                }
+                },
             },
         ),
         "supported_files": Param(
@@ -554,7 +562,7 @@ with DAG(
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
         )
-        
+
         generate_update_doc_registry_job_params = PythonOperator(
             task_id="generate_update_doc_registry_job_params",
             python_callable=generate_update_doc_registry_job_params_fn,
@@ -657,4 +665,3 @@ with DAG(
         generate_update_doc_registry_job_params
         >> update_doc_registry
     )
-

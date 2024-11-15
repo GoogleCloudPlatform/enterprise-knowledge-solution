@@ -16,9 +16,9 @@
 # See github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
 locals {
-  alloydb_username = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
+  alloydb_username           = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
   alloydb_cluster_name_split = split("/", var.alloydb_cluster)
-  alloydb_cluster_name = element(local.alloydb_cluster_name_split, length(local.alloydb_cluster_name_split) - 1)
+  alloydb_cluster_name       = element(local.alloydb_cluster_name_split, length(local.alloydb_cluster_name_split) - 1)
 }
 
 module "project_services" {
@@ -145,7 +145,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
           value = var.alloydb_database
         }
         env {
-          name = "ALLOYDB_USER"
+          name  = "ALLOYDB_USER"
           value = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
         }
         env {

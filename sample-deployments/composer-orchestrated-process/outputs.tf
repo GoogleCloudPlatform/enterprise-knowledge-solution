@@ -44,15 +44,15 @@ output "webui_dns_config" {
 
 output "classifier_processor_id" {
   description = "The DocAI Custom Classifier processor id"
-  value = var.custom_classifier_id
+  value       = var.custom_classifier_id
 }
 
 output "specialized_processors_ids_json" {
   description = "JSON encoded string of all supported labels as keys and the corresponding processor id for each as values."
-  value = jsondecode(module.specialized_parser_job.specialized_processors_ids_json)
+  value       = jsondecode(module.specialized_parser_job.specialized_processors_ids_json)
 }
 
 output "composer_location" {
   description = "Location of Cloud Composer"
-  value = module.dpu_workflow.composer_location
+  value       = module.dpu_workflow.composer_location
 }

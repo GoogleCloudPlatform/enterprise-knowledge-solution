@@ -40,50 +40,50 @@ variable "bigquery_dataset_id" {
 
 variable "alloydb_project" {
   description = "AlloyDB Project"
-  type = string
-  default = ""  # We will default to var.project_id
+  type        = string
+  default     = "" # We will default to var.project_id
 }
 
 variable "alloydb_location" {
   description = "AlloyDB Location"
-  type = string
-  default = ""  # We will default to var.region
+  type        = string
+  default     = "" # We will default to var.region
 }
 
 variable "alloydb_cluster" {
   description = "AlloyDB Cluster"
-  type = string
+  type        = string
 }
 
 variable "alloydb_instance" {
   description = "AlloyDB Instance"
-  type = string
+  type        = string
 }
 
 variable "alloydb_database" {
   description = "AlloyDB Database"
-  type = string
-  default = "postgres"
+  type        = string
+  default     = "postgres"
 }
 
 variable "processors_location" {
   description = "Location to setup Document AI processors"
-  type = string
-  default = "us"
+  type        = string
+  default     = "us"
 }
 
 variable "network" {
   description = "Name of the VPC network to use"
-  type = string
+  type        = string
 }
 
 variable "subnet" {
   description = "Name of the VPC subnet to create"
-  type = string
+  type        = string
 }
 
 variable "subnet_range" {
   description = "Range of the VPC subnet to create"
-  type = string
-  default = "10.2.0.0/28"
+  type        = string
+  default     = "10.2.0.0/28"
 }

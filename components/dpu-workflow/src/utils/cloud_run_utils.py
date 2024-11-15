@@ -27,7 +27,7 @@ def get_process_job_params(
     gcs_reject_bucket,
     mv_params,
     supported_files: Dict[str, str],
-    timeout: int = 600
+    timeout: int = 600,
 ):
     process_job_params = []
     supported_files_args = [f"--file-type={k}:{v}" for k, v in supported_files.items()]
@@ -105,7 +105,6 @@ def specialized_parser_job_params(
         }
         parser_job_params.append(job_param)
     return parser_job_params
-    
 
 
 def get_doc_classifier_job_overrides(
