@@ -88,13 +88,6 @@ To deploy this solution, perform the follow steps:
         export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform."
         ```
 
-    1.  (Optional) By default, this repository creates a new VPC network. If you want to use an existing VPC network instead, additional set the optional environment variables:
-
-        ```sh
-        create_vpc_network = false
-        vpc_name = "<the name of your existing VPC>"
-        ```
-
 1.  Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
 
     - Validate software dependencies
@@ -127,6 +120,15 @@ To deploy this solution, perform the follow steps:
     webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
     iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])
     ```
+
+    1.  (Optional) By default, this repository creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring optional terraform variables.
+
+        ```sh
+        create_vpc_network = false # default is true
+        vpc_name = # The name of your existing vpc, (e.g., "myvpc")
+        ```
+
+        If using an existing VPC, you should validate that your existing vpc has firewall policies and DNS zones that enable the traffic pathways defined in [vpc.tf](enterprise-knowledge-solution/components/common-infra/terraform/vpc.tf), and grant Compute Network User on your shared VPC to the deployer service account.
 
 1.  Review the proposed changes, and apply them:
 
