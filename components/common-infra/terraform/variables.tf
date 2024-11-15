@@ -39,12 +39,6 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "id of vpc network"
-  default     = ""
-}
-
 variable "alloy_db_cluster_id" {
   description = "AlloyDB Cluster ID"
   type        = string

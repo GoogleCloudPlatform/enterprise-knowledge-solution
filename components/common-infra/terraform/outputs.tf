@@ -47,11 +47,11 @@ output "bq_store_dataset_id" {
 }
 
 output "vpc_network_id" {
-  value = var.create_vpc_network ? module.vpc[0].network_id : var.vpc_id
+  value = local.vpc_network_id
 }
 
 output "vpc_network_name" {
-  value = var.create_vpc_network ? module.vpc[0].network_name : var.vpc_name
+  value = local.vpc_network_name
 }
 
 output "alloydb_cluster_name" {
