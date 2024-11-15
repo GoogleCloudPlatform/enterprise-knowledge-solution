@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple
 import pg8000
 import sqlalchemy
 from configs import AlloyDBConfig, BigQueryConfig, JobConfig, ProcessorConfig
-from google.api_core.client_info import ClientInfo
+from google.api_core.client_info import ClientInfo as bg_ClientInfo
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import GoogleAPICallError, RetryError
 from google.api_core.gapic_v1.client_info import ClientInfo
@@ -56,7 +56,9 @@ class SpecializedParserJobRunner:
         self.storage_client = storage.Client(
             client_info=ClientInfo(user_agent=USER_AGENT)
         )
-        self.bq_client = bigquery.Client(client_info=ClientInfo(user_agent=USER_AGENT))
+        self.bq_client = bigquery.Client(
+            client_info=bg_ClientInfo(user_agent=USER_AGENT)
+        )
 
     def run(self):
         print("Verifying AlloyDB output table")
@@ -276,7 +278,8 @@ class SpecializedParserJobRunner:
         blob = bucket.blob(f"{output_folder}/processor_results.csv")
         data_dicts = [asdict(d) for d in parsed_results]
         with blob.open("w") as f:
-            # not sure why pyright detects `f` as an invalid argument type for csv.DictWriter as an error - this actually works
+            # not sure why pyright detects `f` as an invalid argument type for csv.DictWriter
+            # as an error - this actually works
             writer = csv.DictWriter(
                 f,  # pyright: ignore [reportArgumentType]
                 fieldnames=data_dicts[0].keys(),
@@ -299,10 +302,10 @@ class SpecializedParserJobRunner:
             print("No bucket name found in the given string.")
             raise ValueError(f"Could not extract bucket from {gcs_uri}")
 
-    def divide_chunks(self, l, n):
+    def divide_chunks(self, list_to_chunk: list, size_of_chunk: int):
         # looping till length l
-        for i in range(0, len(l), n):
-            yield l[i : i + n]
+        for i in range(0, len(list_to_chunk), size_of_chunk):
+            yield list_to_chunk[i : i + size_of_chunk]
 
     def write_results_to_alloydb_with_inserts(
         self, parsed_results: List[ProcessedDocument]

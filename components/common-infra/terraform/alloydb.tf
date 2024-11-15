@@ -50,11 +50,11 @@ module "docs_results" {
 
   project_id = module.project_services.project_id
 
-  cluster_id           = var.alloy_db_cluster_id
-  cluster_location     = var.region
-  cluster_labels       = {}
-  psc_enabled          = false
-  network_self_link    = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  cluster_id        = var.alloy_db_cluster_id
+  cluster_location  = var.region
+  cluster_labels    = {}
+  psc_enabled       = false
+  network_self_link = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
 
 
   primary_instance = {

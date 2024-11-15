@@ -16,6 +16,7 @@
 # See github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
 locals {
+  # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
   alloydb_username           = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
   alloydb_cluster_name_split = split("/", var.alloydb_cluster)
   alloydb_cluster_name       = element(local.alloydb_cluster_name_split, length(local.alloydb_cluster_name_split) - 1)
@@ -75,8 +76,7 @@ module "specialized_parser_account" {
 }
 
 resource "google_alloydb_user" "specialized_parser_user" {
-  cluster = var.alloydb_cluster
-  # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
+  cluster        = var.alloydb_cluster
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser", "alloydbsuperuser"]
@@ -133,7 +133,6 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
             memory = "2048Mi"
           }
         }
-        # depends_on = ["alloydb-auth-proxy"]
         env {
           name  = "ALLOYDB_INSTANCE"
           value = var.alloydb_instance

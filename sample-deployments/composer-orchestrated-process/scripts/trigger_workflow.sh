@@ -23,8 +23,8 @@ function trigger_dag() {
   json_config=$(
     cat <<EOF
   {
-    "input_bucket": "$(echo $outputs | jq -r '.gcs_input_bucket_name.value')",
-    "process_bucket": "$(echo $outputs | jq -r '.gcs_process_bucket_name.value')",
+    "input_bucket": "$(echo "$outputs" | jq -r ".gcs_input_bucket_name.value")",
+    "process_bucket": "$(echo "$outputs" | jq -r ".gcs_process_bucket_name.value")",
     "input_folder": null,
     "supported_files": [
         {
@@ -60,12 +60,12 @@ function trigger_dag() {
             "processor": "txt-processor"
         }
     ],
-    "classifier": "$(echo $outputs | jq -r '.classifier_processor_id.value')",
-    "doc-ai-processors" : $(echo $outputs | jq -r ".specialized_processors_ids_json.value | to_entries | map({label: .key, \"doc-ai-processor-id\": .value})")
+    "classifier": "$(echo "$outputs" | jq -r ".classifier_processor_id.value")",
+    "doc-ai-processors" : $(echo "$outputs" | jq -r ".specialized_processors_ids_json.value | to_entries | map({label: .key, \"doc-ai-processor-id\": .value})")
 }
 EOF
   )
-  gcloud composer environments run dpu-composer --location "$(echo $outputs | jq -r '.composer_location.value')" dags trigger -- -c "${json_config}" run_docs_processing
+  gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit

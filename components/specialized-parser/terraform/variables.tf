@@ -38,18 +38,6 @@ variable "bigquery_dataset_id" {
   type        = string
 }
 
-variable "alloydb_project" {
-  description = "AlloyDB Project"
-  type        = string
-  default     = "" # We will default to var.project_id
-}
-
-variable "alloydb_location" {
-  description = "AlloyDB Location"
-  type        = string
-  default     = "" # We will default to var.region
-}
-
 variable "alloydb_cluster" {
   description = "AlloyDB Cluster"
   type        = string
