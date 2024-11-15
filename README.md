@@ -284,4 +284,7 @@ To classify documents, you must [create a custom document classifier in the Goog
 
 - The output labels of the classifier **MUST** match the configured labels in the composer DAG configuration `doc-ai-processors`. Out of the box, the solution supports `form` and `invoice` labels. Any other label would cause the flow to treat the document as a generic document and will process it without extracting structured data from the document.
 
-- If you configure the classifier identifier (in the `projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>` form) in the terraform variable `customer_classifier`, terraform will push the classifier ID to composer as a default argument.
+- After training the custom classifier, set the classifier ID to composer as a default argument. Add the following variable to your Terraform variables file and run `terraform apply` again.
+  ```bash
+  custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
+  ```

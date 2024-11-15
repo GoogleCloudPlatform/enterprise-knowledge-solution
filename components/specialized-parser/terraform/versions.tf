@@ -23,6 +23,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "cloud-solutions/dpu-solution-v1.0.0"
+    module_name = "cloud-solutions/eks-docai-v1"
   }
 }

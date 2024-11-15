@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 import re
 import uuid
@@ -61,31 +62,31 @@ class SpecializedParserJobRunner:
         )
 
     def run(self):
-        print("Verifying AlloyDB output table")
+        logging.info("Verifying AlloyDB output table")
         self.verify_alloydb_table()
-        print("Starting Batch Processor operation")
+        logging.info("Starting Batch Processor operation")
         batch_operation = self.call_batch_processor()
-        print("Waiting for Batch operation to finish")
+        logging.info("Waiting for Batch operation to finish")
         individual_process_statuses = self.wait_for_completion_and_verify_success(
             batch_operation
         )
-        print(f"Parsing results from {self.job_config.gcs_output_uri}")
+        logging.info(f"Parsing results from {self.job_config.gcs_output_uri}")
         parsed_results, filename_pairs = self.read_and_parse_batch_results(
             individual_process_statuses,
         )
 
-        print("Writing metadata to bigquery")
+        logging.info("Writing metadata to bigquery")
         self.write_metadata_to_bigquery(filename_pairs)
         if not parsed_results:
-            print("No parsed results from processor - only metadata")
+            logging.info("No parsed results from processor - only metadata")
         else:
-            print("Writing results to GCS")
+            logging.info("Writing results to GCS")
             bucket_name, csv_blob_name = self.write_results_to_gcs(parsed_results)
-            print("Writing results to AlloyDB")
+            logging.info("Writing results to AlloyDB")
             self.write_results_to_alloydb_with_inserts(parsed_results)
-            print("Writing results to BigQuery")
+            logging.info("Writing results to BigQuery")
             self.write_results_to_bigquery(bucket_name, csv_blob_name)
-        print("Done")
+        logging.info("Done")
 
     @staticmethod
     def create_connection_pool(
@@ -174,27 +175,27 @@ class SpecializedParserJobRunner:
             document_output_config=output_config,
         )
         operation: Operation = client.batch_process_documents(request)
-        print(f"Started batch process; {operation.metadata=};")
+        logging.info(f"Started batch process")
         return operation
 
     def wait_for_completion_and_verify_success(
         self, batch_operation: Operation
     ) -> List[BatchProcessMetadata.IndividualProcessStatus]:
         try:
-            print(
+            logging.info(
                 f"Waiting for operation {batch_operation.operation.name} to complete..."
             )
             batch_operation.result(timeout=self.processor_config.timeout)
         # Catch exception when operation doesn't finish before timeout
         except (RetryError, InternalServerError, GoogleAPICallError) as e:
-            print(e.message)
+            logging.error(e.message)
             raise e
-        print("Batch Process Finished. Checking Status")
+        logging.info("Batch Process Finished. Checking Status")
         metadata = documentai.BatchProcessMetadata(batch_operation.metadata)
 
         if metadata.state != documentai.BatchProcessMetadata.State.SUCCEEDED:
             raise ValueError(f"Batch Process Failed: {metadata.state_message}")
-        print("Batch process has succeeded")
+        logging.info("Batch process has succeeded")
 
         return list(metadata.individual_process_statuses)
 
@@ -207,8 +208,8 @@ class SpecializedParserJobRunner:
         for process in individual_process_statuses:
             matches = re.match(r"gs://(.*?)/(.*)", process.output_gcs_destination)
             if not matches:
-                print(
-                    "Could not parse output GCS destination:",
+                logging.info(
+                    "Could not parse output GCS destination: %s",
                     process.output_gcs_destination,
                 )
                 continue
@@ -222,10 +223,10 @@ class SpecializedParserJobRunner:
             for blob in output_blobs:
                 # Document AI should only output JSON files to GCS
                 if blob.name in output_documents:
-                    print(f"Already parsed {blob.name}. Skipping.")
+                    logging.info(f"Already parsed {blob.name}. Skipping.")
                     continue
                 if blob.content_type != "application/json":
-                    print(
+                    logging.info(
                         f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
                     )
                     continue
@@ -244,7 +245,7 @@ class SpecializedParserJobRunner:
                 txt_blob = txt_bucket.blob(txt_filename)
                 txt_blob.upload_from_string(document.text)
                 txt_file_path = f"gs://{output_bucket}/{txt_filename}"
-                print(f"Text file {txt_file_path} created successfully")
+                logging.info(f"Text file {txt_file_path} created successfully")
                 output_pairs.append(
                     FilenamesPair(
                         original_filename=original_file_path, txt_filename=txt_file_path
@@ -296,10 +297,9 @@ class SpecializedParserJobRunner:
         if match:
             bucket_name = match.group(1)
             output_folder = match.group(2)
-            print(f"{bucket_name=}; {output_folder=}")
             return bucket_name, output_folder
         else:
-            print("No bucket name found in the given string.")
+            logging.info("No bucket name found in the given string. %s", gcs_uri)
             raise ValueError(f"Could not extract bucket from {gcs_uri}")
 
     def divide_chunks(self, list_to_chunk: list, size_of_chunk: int):
@@ -310,7 +310,7 @@ class SpecializedParserJobRunner:
     def write_results_to_alloydb_with_inserts(
         self, parsed_results: List[ProcessedDocument]
     ):
-        print(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
+        logging.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
         with self.alloydb_connection_pool.connect() as conn:
             for chunk in self.divide_chunks(parsed_results, 50):
                 rows = [
@@ -326,7 +326,7 @@ class SpecializedParserJobRunner:
                 conn.execute(sql)
 
     def write_results_to_alloydb(self, local_filename: str):
-        print(f"Copying data to AlloyDB table from CSV {local_filename}")
+        logging.info(f"Copying data to AlloyDB table from CSV {local_filename}")
         with self.alloydb_connection_pool.connect() as conn:
             sql = f"""
                 COPY {PROCESSED_DOCUMENTS_TABLE_NAME}
@@ -381,7 +381,7 @@ class SpecializedParserJobRunner:
                 f"Encountered errors while inserting rows in BigQuery: {errors}"
             )
 
-        print("New rows have been added in Big Query table.")
+        logging.info("New rows have been added in Big Query table.")
 
     def build_bq_metadata_row(self, pair: FilenamesPair) -> dict:
         """Program that builds metadata for each processed file"""
