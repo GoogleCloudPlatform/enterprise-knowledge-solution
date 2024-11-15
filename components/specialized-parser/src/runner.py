@@ -175,7 +175,7 @@ class SpecializedParserJobRunner:
             document_output_config=output_config,
         )
         operation: Operation = client.batch_process_documents(request)
-        logging.info(f"Started batch process")
+        logging.info("Started batch process")
         return operation
 
     def wait_for_completion_and_verify_success(
