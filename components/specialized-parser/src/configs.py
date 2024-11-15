@@ -20,6 +20,7 @@ class ProcessorConfig:
 class AlloyDBConfig:
     primary_instance: str
     database: str
+    user: str
 
 
 @dataclass

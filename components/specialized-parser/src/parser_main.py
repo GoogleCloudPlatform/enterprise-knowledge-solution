@@ -71,6 +71,7 @@ def run() -> None:
         # If you override the environment variable, make sure to use the same format.
         primary_instance=os.environ["ALLOYDB_INSTANCE"],
         database=os.environ["ALLOYDB_DATABASE"],
+        user=os.environ["ALLOYDB_USER"],
     )
     runner = SpecializedParserJobRunner(
         job_config=job_config,

@@ -102,7 +102,7 @@ class SpecializedParserJobRunner:
                 driver="pg8000",
                 db=alloydb_config.database,
                 enable_iam_auth=True,
-                user=os.environ["ALLOYDB_USER"],
+                user=alloydb_config.user,
                 ip_type=IPTypes.PRIVATE,
             )
             return conn
