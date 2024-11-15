@@ -110,7 +110,7 @@ resource "google_composer_environment" "composer_env" {
         storage_gb = var.composer_web_server_storage
       }
       worker {
-        cpu = var.composer_worker_cpu
+        cpu        = var.composer_worker_cpu
         memory_gb  = var.composer_worker_memory
         storage_gb = var.composer_worker_storage
         min_count  = var.composer_worker_min_count

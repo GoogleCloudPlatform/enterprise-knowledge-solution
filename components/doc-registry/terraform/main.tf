@@ -86,6 +86,13 @@ resource "google_cloud_run_v2_job" "doc-registry-service-job" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [
+      effective_labels["goog-packaged-solution"],
+      terraform_labels["goog-packaged-solution"],
+      labels["goog-packaged-solution"]
+    ]
+  }
   depends_on = [
     module.gcloud_build_doc_registry.wait
   ]
