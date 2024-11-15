@@ -18,6 +18,8 @@ resource "google_vpc_access_connector" "vpc_connector" {
   region       = var.region
   network      = module.vpc[0].network_id
   ip_cidr_range = "10.8.0.0/28"
+  min_instances = 2
+  max_instances = 3
 }
 
 resource "google_compute_global_address" "private_ip_address" {

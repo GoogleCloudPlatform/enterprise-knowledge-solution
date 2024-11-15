@@ -73,12 +73,17 @@ variable "processors_location" {
 }
 
 variable "network" {
-  description = "Name of the VPC network"
+  description = "Name of the VPC network to use"
   type = string
 }
 
 variable "subnet" {
-  description = "Name of the VPC subnet"
+  description = "Name of the VPC subnet to create"
   type = string
 }
 
+variable "subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type = string
+  default = "10.2.0.0/28"
+}

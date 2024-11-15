@@ -101,6 +101,14 @@ module "set_superuser" {
 
 }
 
+resource "google_compute_subnetwork" "cloud-run-subnet" {
+  name          = var.subnet
+  ip_cidr_range = var.subnet_range
+  region        = var.region
+  network       = var.network
+}
+
+
 
 resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
   name     = var.specialized_parser_cloud_run_job_name
@@ -114,7 +122,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
       vpc_access {
         network_interfaces {
           network    = var.network
-          subnetwork = var.subnet
+          subnetwork = google_compute_subnetwork.cloud-run-subnet.name
         }
         egress = "PRIVATE_RANGES_ONLY"
       }
@@ -137,7 +145,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
           value = var.alloydb_database
         }
         env {
-          name  = "ALLOYDB_USER"
+          name = "ALLOYDB_USER"
           value = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
         }
         env {
@@ -152,40 +160,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
           name  = "PROCESSED_DOCS_BQ_TABLE"
           value = google_bigquery_table.processed_documents.table_id
         }
-        # env {
-        #     name = "RUN_ID"
-        #     value = "manual__2024-11-05T09:47:34+00:00"
-        # }
-        # env {
-        #     name = "PROCESSOR_ID"
-        #     value = "projects/dpu-1002/locations/us/processors/534f968cccf5f2b2"
-        # }
-        # env {
-        #     name = "GCS_INPUT_PREFIX"
-        #     value = "gs://dpu-process-dpu-1002/docs-processing-05-11-2024-rllop1c0/pdf-form/input"
-        # }
-        # env {
-        #     name = "GCS_OUTPUT_URI"
-        #     value = "gs://dpu-process-dpu-1002/docs-processing-05-11-2024-rllop1c0/pdf-form/output"
-        # }
-        # env {
-        #     name = "BQ_TABLE"
-        #     value = "dpu-1002.docs_store.docs_processing_05_11_2024_rllop1c0"
-        # }
       }
-      # containers {
-      #   name = "alloydb-auth-proxy"
-      #   image = "gcr.io/alloydb-connectors/alloydb-auth-proxy:latest"
-      #   args = [
-      #     var.alloydb_instance,
-      #     "--address", "0.0.0.0",
-      #     "--port", "5432",
-      #     "--auto-iam-authn",
-      #     "--psc"
-      #   ]
-      # }
-
-
     }
   }
 }
