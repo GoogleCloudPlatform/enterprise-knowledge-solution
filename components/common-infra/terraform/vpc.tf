@@ -37,6 +37,7 @@ locals {
 }
 
 resource "google_dns_policy" "dns-policy" {
+  count          = var.create_vpc_network ? 1 : 0
   name           = "dns-policy"
   enable_logging = true
 
@@ -46,22 +47,25 @@ resource "google_dns_policy" "dns-policy" {
 }
 
 resource "google_compute_network_firewall_policy" "policy" {
+  count       = var.create_vpc_network ? 1 : 0
   name        = "network-firewall-policy"
   description = "firewall policy to enable EKS functionality"
 }
 
 resource "google_compute_network_firewall_policy_association" "association" {
+  count             = var.create_vpc_network ? 1 : 0
   name              = "association"
   attachment_target = local.vpc_network_id
-  firewall_policy   = google_compute_network_firewall_policy.policy.name
+  firewall_policy   = google_compute_network_firewall_policy.policy[0].name
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
+  count           = var.create_vpc_network ? 1 : 0
   description     = "Allow private HTTPS access to google apis on the private VIP"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1000
   rule_name       = "allow-google-apis-private-vip"
 
@@ -75,11 +79,12 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
+  count           = var.create_vpc_network ? 1 : 0
   description     = "Allow internal traffic within the composer subnet"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1001
   rule_name       = "allow-subnet-internal"
 
@@ -92,11 +97,12 @@ resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
+  count           = var.create_vpc_network ? 1 : 0
   description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1002
   rule_name       = "allow-composer-cluster-secondary-range"
 
@@ -109,11 +115,12 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-s
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
+  count           = var.create_vpc_network ? 1 : 0
   description     = "Allow internal traffic to reach services on the secondary subnet range"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1003
   rule_name       = "allow-composer-services-secondary-range"
 
@@ -126,11 +133,12 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-services-
 }
 
 resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
+  count           = var.create_vpc_network ? 1 : 0
   description     = "Allow internal traffic to reach the composer control plane"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy.name
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1004
   rule_name       = "allow-composer-control-plane"
 
@@ -143,6 +151,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-control-p
 }
 
 module "dns-private-zone-googleapis" {
+  count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
@@ -172,6 +181,7 @@ module "dns-private-zone-googleapis" {
 }
 
 module "dns-private-zone-composer1" {
+  count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
@@ -193,6 +203,7 @@ module "dns-private-zone-composer1" {
 }
 
 module "dns-private-zone-composer2" {
+  count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
@@ -214,6 +225,7 @@ module "dns-private-zone-composer2" {
 }
 
 module "dns-private-zone-pkg-dev" {
+  count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
@@ -235,6 +247,7 @@ module "dns-private-zone-pkg-dev" {
 }
 
 module "dns-private-zone-gcr-io" {
+  count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
   project_id = var.project_id
   type       = "private"
