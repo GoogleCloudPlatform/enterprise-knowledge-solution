@@ -22,3 +22,8 @@ output "composer_uri" {
   value       = google_composer_environment.composer_env.config[0].airflow_uri
 }
 
+output "composer_location" {
+  description = "Cloud Composer Location"
+  value       = google_composer_environment.composer_env.region
+}
+

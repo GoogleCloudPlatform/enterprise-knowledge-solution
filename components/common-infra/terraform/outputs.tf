@@ -58,6 +58,14 @@ output "alloydb_cluster_name" {
   value = module.docs_results.cluster_name
 }
 
+output "alloydb_primary_instance" {
+  value = module.docs_results.primary_instance_id
+}
+
+output "alloydb_location" {
+  value = var.region
+}
+
 output "alloydb_cluster_ready" {
   description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules "
   value       = true

@@ -213,13 +213,7 @@ After successfully completing the steps in thge previous section Deployment Guid
    - Leave the default parameters as they are and click the "Trigger" button to initiate the workflow.
    - Set the `classifier` parameter per your environment, with the following structure:
 
-   ```json
-   {
-     "location": "<CLASSIFER_LOCATION>",
-     "processor_id": "<CLASSIFIER_ID>",
-     "project_id": "<PROJECT_ID>"
-   }
-   ```
+   `projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>`
 
    All these parameters are available from the Cloud Console, in the classifier overview page.
 
@@ -288,3 +282,10 @@ To classify documents, you must [create a custom document classifier in the Goog
 - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
 
 - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
+
+- The output labels of the classifier **MUST** match the configured labels in the composer DAG configuration `doc-ai-processors`. Out of the box, the solution supports `form` and `invoice` labels. Any other label would cause the flow to treat the document as a generic document and will process it without extracting structured data from the document.
+
+- After training the custom classifier, set the classifier ID to composer as a default argument. Add the following variable to your Terraform variables file and run `terraform apply` again.
+  ```bash
+  custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
+  ```

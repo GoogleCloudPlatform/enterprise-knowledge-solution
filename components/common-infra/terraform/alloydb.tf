@@ -13,16 +13,49 @@
 # limitations under the License.
 
 
+resource "google_vpc_access_connector" "vpc_connector" {
+  project       = module.project_services.project_id
+  name          = "alloy-db-vpc-connector"
+  region        = var.region
+  network       = module.vpc[0].network_id
+  ip_cidr_range = "10.8.0.0/28"
+  min_instances = 2
+  max_instances = 3
+}
+
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "private-ip-address"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = module.vpc[0].network_id
+}
+
+resource "google_service_networking_connection" "default" {
+  network                 = module.vpc[0].network_id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
+}
+
+resource "google_compute_network_peering_routes_config" "peering_routes" {
+  peering = google_service_networking_connection.default.peering
+  network = module.vpc[0].network_name
+
+  import_custom_routes = true
+  export_custom_routes = true
+}
+
 module "docs_results" {
   source = "github.com/GoogleCloudPlatform/terraform-google-alloy-db?ref=fa1d5faf54b56abfe410f5c29483e365d48ec1a3" #commit hash for version 3.2.0
 
   project_id = module.project_services.project_id
 
-  cluster_id           = var.alloy_db_cluster_id
-  cluster_location     = var.region
-  cluster_labels       = {}
-  cluster_display_name = var.alloy_db_cluster_id
-  psc_enabled          = true
+  cluster_id        = var.alloy_db_cluster_id
+  cluster_location  = var.region
+  cluster_labels    = {}
+  psc_enabled       = false
+  network_self_link = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
+
 
   primary_instance = {
     instance_id       = "${var.alloy_db_cluster_id}-primary"
@@ -31,13 +64,14 @@ module "docs_results" {
     database_flags = {
       # This flag enables authenticating using IAM, however, creating databases and tables from terraform is not
       # currently supported. This goes for managing users permissions over databases and tables as well.
-      # This means we will use throughout the example only the `public` built in database, which can be accessed any
+      # This means we will use throughout the example only the `public` built in database, which can be accessed by any
       # authenticated user.
       "alloydb.iam_authentication" = "true"
     }
   }
-}
 
+  depends_on = [google_service_networking_connection.default]
+}
 
 resource "time_sleep" "wait_for_alloydb_ready_state" {
   create_duration = "600s"

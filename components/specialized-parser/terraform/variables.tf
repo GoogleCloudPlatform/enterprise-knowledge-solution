@@ -13,72 +13,67 @@
 # limitations under the License.
 
 variable "project_id" {
-  description = "Google Cloud project where infracture resource such as BigQuery dataset and Artifact repository are deployed"
+  description = "Google Cloud project where infrastructure resource are deployed"
   type        = string
 }
 
 variable "region" {
   description = "Google Cloud region where compute services are located."
   type        = string
-  default     = "us-central1"
-}
-
-variable "location" {
-  description = "Google Cloud region where compute services are located."
-  type        = string
-  default     = "us"
-}
-
-variable "docai_form_processor_name" {
-  description = "Google Cloud region where compute services are located."
-  type        = string
-  default     = "dpu-docai-form-processor-2"
-}
-
-variable "dpu_run_service_account" {
-  description = "Value of the Service Account Id for Cloud Run Job running DocAI Form Parser"
-  type        = string
-  default     = "dpu-form-parser-sa"
-}
-
-variable "dpu_run_service_account_display_name" {
-  description = "Value of the Service Account name for Cloud Run Job running DocAI Form Parser"
-  type        = string
-  default     = "service account name for Cloud Run Job running DocAI Form Parser"
-}
-
-variable "form_parser_cloud_run_job_name" {
-  description = "Google Cloud region where compute services are located."
-  type        = string
-  default     = "dpu-form-parser"
-}
-
-variable "gcs_output_prefix" {
-  description = "Google Cloud region where compute services are located."
-  type        = string
-  default     = "gs://doc-ai-processor/output-forms/"
-}
-
-variable "gcs_input_prefix" {
-  description = "Google Cloud region where compute services are located."
-  type        = string
-  default     = "gs://doc-ai-processor/input-forms/"
-}
-
-variable "alloydb_cluster_name" {
-  description = "Name of the AlloyDB cluster to save the parsed forms results"
-  type        = string
-}
-
-variable "bq_dataset_id" {
-  description = "The BigQuery Dataset ID to hold the parsed results of forms"
-  type        = string
 }
 
 variable "artifact_repo" {
   description = "Docker registry"
   type        = string
-  default     = ""
+}
+
+variable "specialized_parser_cloud_run_job_name" {
+  description = "Specialized Parser job name"
+  type        = string
+  default     = "specialized-parser-job"
+}
+
+variable "bigquery_dataset_id" {
+  description = "BigQuery Dataset id"
+  type        = string
+}
+
+variable "alloydb_cluster" {
+  description = "AlloyDB Cluster"
+  type        = string
+}
+
+variable "alloydb_instance" {
+  description = "AlloyDB Instance"
+  type        = string
+}
+
+variable "alloydb_database" {
+  description = "AlloyDB Database"
+  type        = string
+  default     = "postgres"
+}
+
+variable "processors_location" {
+  description = "Location to setup Document AI processors"
+  type        = string
+  default     = "us"
+}
+
+variable "network" {
+  description = "Name of the VPC network to use"
+  type        = string
+}
+
+variable "subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+}
+
+variable "subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
 }
 
 variable "cloud_build_service_account_email" {

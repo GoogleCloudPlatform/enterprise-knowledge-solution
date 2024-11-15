@@ -17,12 +17,14 @@
 # Just a small helper to your developers - a small bash function to trigger the DAG from the command line:
 
 function trigger_dag() {
+  # read terraform state
+  outputs=$(terraform output -json)
 
   json_config=$(
     cat <<EOF
   {
-    "input_bucket": "docs-input-${PROJECT_ID}",
-    "process_bucket": "dpu-process-${PROJECT_ID}",
+    "input_bucket": "$(echo "$outputs" | jq -r ".gcs_input_bucket_name.value")",
+    "process_bucket": "$(echo "$outputs" | jq -r ".gcs_process_bucket_name.value")",
     "input_folder": null,
     "supported_files": [
         {
@@ -58,16 +60,12 @@ function trigger_dag() {
             "processor": "txt-processor"
         }
     ],
-    "classifier": {
-        "location": "${DOC_AI_REGION}",
-        "processor_id": "${DOC_AI_PROCESSOR_ID}",
-        "project_id": "${DOC_AI_PROJECT_ID}"
-    }
+    "classifier": "$(echo "$outputs" | jq -r ".classifier_processor_id.value")",
+    "doc-ai-processors" : $(echo "$outputs" | jq -r ".specialized_processors_ids_json.value | to_entries | map({label: .key, \"doc-ai-processor-id\": .value})")
 }
 EOF
   )
-  # echo ${json_config}
-  gcloud composer environments run dpu-composer --location "${COMPOSER_LOCATION}" dags trigger -- -c "${json_config}" run_docs_processing
+  gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit
@@ -75,46 +73,6 @@ set -o nounset
 
 # shellcheck source=/dev/null
 . scripts/common.sh
-
-# Check if PROJECT_ID is set, otherwise prompt for input
-if [[ -z "${PROJECT_ID:-}" ]]; then
-  read -r -p "Enter PROJECT_ID: " PROJECT_ID
-else
-  echo "PROJECT_ID is set to: $PROJECT_ID"
-fi
-[[ -z "$PROJECT_ID" ]] && echo "PROJECT_ID is required." && exit 1
-
-# Check if DOC_AI_PROJECT_ID is set, otherwise prompt for input
-if [[ -z "${DOC_AI_PROJECT_ID:-}" ]]; then
-  read -r -p "Enter DOC_AI_PROJECT_ID: " DOC_AI_PROJECT_ID
-else
-  echo "DOC_AI_PROJECT_ID is set to: $DOC_AI_PROJECT_ID"
-fi
-[[ -z "$DOC_AI_PROJECT_ID" ]] && echo "DOC_AI_PROJECT_ID is required." && exit 1
-
-# Check if DOC_AI_REGION is set, otherwise prompt for input
-if [[ -z "${DOC_AI_REGION:-}" ]]; then
-  read -r -p "Enter DOC_AI_REGION: " DOC_AI_REGION
-else
-  echo "DOC_AI_REGION is set to: $DOC_AI_REGION"
-fi
-[[ -z "$DOC_AI_REGION" ]] && echo "DOC_AI_REGION is required." && exit 1
-
-# Check if Composer Location is set, otherwise prompt for input
-if [[ -z "${COMPOSER_LOCATION:-}" ]]; then
-  read -r -p "Enter Composer Location: " COMPOSER_LOCATION
-else
-  echo "Composer Location is set to: $COMPOSER_LOCATION"
-fi
-[[ -z "$COMPOSER_LOCATION" ]] && echo "Composer Location is required." && exit 1
-
-# Check if DOC_AI_PROCESSOR_ID is set, otherwise prompt for input
-if [[ -z "${DOC_AI_PROCESSOR_ID:-}" ]]; then
-  read -r -p "Enter DOC_AI_PROCESSOR_ID: " DOC_AI_PROCESSOR_ID
-else
-  echo "DOC_AI_PROCESSOR_ID is set to: $DOC_AI_PROCESSOR_ID"
-fi
-[[ -z "$DOC_AI_PROCESSOR_ID" ]] && echo "DOC_AI_PROCESSOR_ID is required." && exit 1
 
 section_open "Trigger DAG"
 trigger_dag
