@@ -111,7 +111,7 @@ module "specialized_parser_job" {
   alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
   network = module.common_infra.vpc_network_name
-  subnet = "composer-subnet"
+  subnet = "cloud-run-subnet"
 }
 
 module "dpu_workflow" {
