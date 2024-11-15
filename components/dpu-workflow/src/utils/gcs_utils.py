@@ -14,7 +14,7 @@
 
 import json
 import logging
-from typing import Optional
+from typing import Optional, Set
 
 from google.api_core.client_info import ClientInfo
 from google.cloud import documentai, storage
@@ -234,7 +234,7 @@ def move_classifier_matched_files(
     classifier_result_folder: str = "classified_pdfs_results",
     result_content_keywords: list[bytes] = [b"entities", b"form"],
     threshold: float = 0.7,
-):
+) -> Set[str]:
     classifier_results = FormClassifierResult(
         process_bucket,
         process_folder,
@@ -242,7 +242,7 @@ def move_classifier_matched_files(
         classifier_result_folder,
         result_content_keywords,
     )
-    classification_mv_params = []
+    detected_labels = set()
     for blob_path in classifier_results.get_results():
         matched_entries = sorted(
             filter(
@@ -254,19 +254,13 @@ def move_classifier_matched_files(
         )
         if matched_entries:
             logging.info(f"Doc: {blob_path} is classified as {matched_entries[0].type}")
+            detected_labels.add(matched_entries[0].type.lower())
             move_doc = MoveDoc(
                 f"{process_bucket}/{blob_path}",
                 f"{process_bucket}/{process_folder}/{input_file_type}-{matched_entries[0].type.lower()}/input",
             )
             move_doc.move()
-            classification_mv_params.append(
-                {
-                    "source_object": blob_path,
-                    "destination_bucket": move_doc.dest_doc.bucket_name,
-                    "destination_object": move_doc.dest_doc.blob_name,
-                }
-            )
-    return classification_mv_params
+    return detected_labels
 
 
 def move_duplicated_files(

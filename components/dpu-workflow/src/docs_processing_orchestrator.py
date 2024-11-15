@@ -206,8 +206,10 @@ def parse_doc_classifier_output(**context):
         task_ids="initial_load_from_input_bucket.create_process_folder",
         key="process_folder",
     )
-    detected_labels = cloud_run_utils.read_classifier_job_output(
-        process_bucket, process_folder, list(SPECIALIZED_PROCESSORS_IDS_JSON.keys())
+    detected_labels = gcs_utils.move_classifier_matched_files(
+        process_bucket, process_folder, "pdf", list(
+            SPECIALIZED_PROCESSORS_IDS_JSON.keys()
+        )
     )
     return detected_labels
 
