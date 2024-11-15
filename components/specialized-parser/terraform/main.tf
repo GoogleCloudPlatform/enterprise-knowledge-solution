@@ -102,10 +102,11 @@ module "set_superuser" {
 }
 
 resource "google_compute_subnetwork" "cloud-run-subnet" {
-  name          = var.subnet
-  ip_cidr_range = var.subnet_range
-  region        = var.region
-  network       = var.network
+  name                     = var.subnet
+  ip_cidr_range            = var.subnet_range
+  region                   = var.region
+  network                  = var.network
+  private_ip_google_access = true
 }
 
 

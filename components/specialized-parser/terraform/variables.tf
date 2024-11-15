@@ -85,7 +85,7 @@ variable "subnet" {
 variable "subnet_range" {
   description = "Range of the VPC subnet to create"
   type        = string
-  default     = "10.2.0.0/28"
+  default     = "10.2.0.0/24"
 }
 
 variable "cloud_build_service_account_email" {
