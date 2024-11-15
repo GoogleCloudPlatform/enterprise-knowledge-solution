@@ -79,6 +79,8 @@ resource "google_alloydb_user" "specialized_parser_user" {
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser", "alloydbsuperuser"]
+
+  depends_on = [var.alloydb_cluster_ready]
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
