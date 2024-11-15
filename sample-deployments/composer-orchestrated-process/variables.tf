@@ -56,12 +56,6 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "id of vpc network"
-  default     = ""
-}
-
 variable "webui_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)

@@ -93,7 +93,6 @@ To deploy this solution, perform the follow steps:
         ```sh
         create_vpc_network = false
         vpc_name = "<the name of your existing VPC>"
-        vpc_id = "<the ID of your existing VPC>"
         ```
 
 1.  Run the following script to setup your environment and your cloud project for running terraform. This script configures the following:
