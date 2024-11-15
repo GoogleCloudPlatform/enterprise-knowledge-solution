@@ -112,6 +112,7 @@ module "specialized_parser_job" {
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
   network                               = module.common_infra.vpc_network_name
   subnet                                = "cloud-run-subnet"
+  cloud_build_service_account_email     = module.common_infra.cloud_build_service_account.email
 }
 
 module "dpu_workflow" {

@@ -14,6 +14,7 @@
 
 
 resource "google_vpc_access_connector" "vpc_connector" {
+  project       = module.project_services.project_id
   name          = "alloy-db-vpc-connector"
   region        = var.region
   network       = module.vpc[0].network_id
@@ -53,7 +54,6 @@ module "docs_results" {
   cluster_id           = var.alloy_db_cluster_id
   cluster_location     = var.region
   cluster_labels       = {}
-  cluster_display_name = var.alloy_db_cluster_id
   psc_enabled          = false
   network_self_link    = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
 

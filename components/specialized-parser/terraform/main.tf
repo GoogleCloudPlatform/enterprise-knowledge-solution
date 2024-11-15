@@ -79,7 +79,7 @@ resource "google_alloydb_user" "specialized_parser_user" {
   # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbsuperuser", "alloydbiamuser"]
+  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
@@ -113,9 +113,6 @@ resource "google_compute_subnetwork" "cloud-run-subnet" {
 resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
   name     = var.specialized_parser_cloud_run_job_name
   location = var.region
-  lifecycle {
-    ignore_changes = [terraform_labels, effective_labels]
-  }
   template {
     template {
       service_account = module.specialized_parser_account.email
@@ -162,5 +159,12 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
         }
       }
     }
+  }
+  lifecycle {
+    ignore_changes = [
+      effective_labels["goog-packaged-solution"],
+      terraform_labels["goog-packaged-solution"],
+      labels["goog-packaged-solution"]
+    ]
   }
 }

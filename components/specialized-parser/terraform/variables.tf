@@ -87,3 +87,8 @@ variable "subnet_range" {
   type        = string
   default     = "10.2.0.0/28"
 }
+
+variable "cloud_build_service_account_email" {
+  description = "the user-managed service account configured for Cloud Build"
+  type        = string
+}
