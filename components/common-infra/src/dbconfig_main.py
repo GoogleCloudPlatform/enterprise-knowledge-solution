@@ -94,7 +94,7 @@ def run() -> None:
         alloydb_config=AlloyDBConfig(
             primary_instance=os.environ["ALLOYDB_INSTANCE"],
             database=os.environ["ALLOYDB_DATABASE"],
-            user=os.environ["ALLOYDB_USER"],
+            user=os.environ["ALLOYDB_USER_CONFIG"],
         )
     )
     runner.run()
