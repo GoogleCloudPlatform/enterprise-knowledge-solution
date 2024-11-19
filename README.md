@@ -291,12 +291,15 @@ To classify documents, you must [create a custom document classifier in the Goog
   ```
 
 ### Connecto to your AlloyDB instance
+
 The AlloyDB instance created as part of this solution, is deployed with no access outside the VPC. Furthermore, the data currently is saved within a new schema, `eks`, which is only available to the owning service account `eks-specialized-parser`.
 
 To view and interact with the data saved in AlloyDB, you must connect to your AlloyDB and grant permissions to another user that can be authenticated by you.
 
 One way to do this is to create a "Bastion" VM in your VPC, and use it to connect to your AlloyDB instance:
+
 1. Create a new VM inside your VPC:
+
 ```bash
 gcloud compute instances create alloydb-bastion \
     --project=<PROJECT_ID> \
@@ -315,27 +318,37 @@ gcloud compute instances create alloydb-bastion \
     --labels=goog-ec-src=vm_add-gcloud \
     --reservation-affinity=any
 ```
+
 2. Create a firewall rule to alloy SSH connections to that VM
+
 ```bash
 gcloud compute firewall-rules create --network=NETWORK default-allow-ssh --allow=tcp:22
 ```
+
 3. Connect via SSH to the new alloydb-bastion
+
 ```bash
 gcloud compute ssh alloydb-bastion --zone=<REGION>-a
 ```
+
 4. Install the `postgresql-client-15` package to install the `psql` CLI
+
 ```bash
 sudo apt-get update
 sudo apt install postgresql-client-15 -y
 ```
+
 5. use the following command to connect to AlloyDB: (You can get the primary IP address from the cloud console)
+
 ```bash
 PGPASSWORD=$(gcloud auth print-access-token) psql \
   -h <ALLOY_DB_PRIMARY_INSTANCE_PRIVATE_IP> \
   -U eks-specialized-parser@<PROJECT_ID>.iam \
   -d postgres
 ```
+
 6. Grant permissions to another user on the schema `eks`, usually the user is `postgres` which is already built in:
+
 ```sql
 GRANT ALL ON SCHEMA eks to postgres;
 ```
