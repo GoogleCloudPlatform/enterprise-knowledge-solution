@@ -114,6 +114,15 @@ resource "google_alloydb_user" "schema_setup_user" {
   depends_on = [time_sleep.wait_for_alloydb_ready_state]
 }
 
+resource "google_alloydb_user" "specialized_parser_user" {
+  cluster        = module.docs_results.cluster_name
+  user_id        = "eks-${var.specialized_parser_cloud_run_job_name}@${var.project_id}.iam"
+  user_type      = "ALLOYDB_IAM_USER"
+  database_roles = ["alloydbiamuser"]
+
+  depends_on = [time_sleep.wait_for_alloydb_ready_state]
+}
+
 resource "google_cloud_run_v2_job" "configure_schema_processor_job" {
   name     = var.configure_schema_cloud_run_job_name
   location = var.region
@@ -150,7 +159,7 @@ resource "google_cloud_run_v2_job" "configure_schema_processor_job" {
         }
         env {
           name  = "ALLOYDB_USER_SPECIALIZED_PARSER"
-          value = "eks-${var.specialized_parser_cloud_run_job_name}@${var.project_id}.iam"
+          value = google_alloydb_user.specialized_parser_user.user_id
         }
       }
     }

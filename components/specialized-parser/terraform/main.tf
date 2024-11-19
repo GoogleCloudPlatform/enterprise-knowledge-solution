@@ -15,10 +15,6 @@
 # Enable APIs
 # See github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
-locals {
-  # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
-  alloydb_username = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
-}
 
 module "project_services" {
   source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
@@ -71,19 +67,6 @@ module "specialized_parser_account" {
   display_name = "Specialized Parser Account"
   description  = "Account used to run the specialized parser jobs"
 }
-
-resource "google_alloydb_user" "specialized_parser_user" {
-  cluster        = var.alloydb_cluster
-  user_id        = local.alloydb_username
-  user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser"]
-
-  depends_on = [var.alloydb_cluster_ready]
-}
-
-
-
-
 
 resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
   name     = var.specialized_parser_cloud_run_job_name
