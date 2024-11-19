@@ -162,7 +162,7 @@ terraform apply
 
 ## Usage Guide
 
-After successfully completing the steps in thge previous section Deployment Guide, you can test the entire EKS workflow.
+After successfully completing the steps in the previous section Deployment Guide, you can test the entire EKS workflow.
 
 ### Upload Documents
 
@@ -289,3 +289,53 @@ To classify documents, you must [create a custom document classifier in the Goog
   ```bash
   custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
   ```
+
+### Connecto to your AlloyDB instance
+The AlloyDB instance created as part of this solution, is deployed with no access outside the VPC. Furthermore, the data currently is saved within a new schema, `eks`, which is only available to the owning service account `eks-specialized-parser`.
+
+To view and interact with the data saved in AlloyDB, you must connect to your AlloyDB and grant permissions to another user that can be authenticated by you.
+
+One way to do this is to create a "Bastion" VM in your VPC, and use it to connect to your AlloyDB instance:
+1. Create a new VM inside your VPC:
+```bash
+gcloud compute instances create alloydb-bastion \
+    --project=<PROJECT_ID> \
+    --zone=<REGION>-a \
+    --machine-type=e2-medium \
+    --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=cloud-run-subnet \
+    --metadata=enable-oslogin=true \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account=eks-specialized-parser@<PROJECT_ID>.iam.gserviceaccount.com \
+    --scopes=https://www.googleapis.com/auth/cloud-platform \
+    --create-disk=auto-delete=yes,boot=yes,device-name=alloydb-bastion,image=projects/debian-cloud/global/images/debian-12-bookworm-v20241112,mode=rw,size=10,type=pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --labels=goog-ec-src=vm_add-gcloud \
+    --reservation-affinity=any
+```
+2. Create a firewall rule to alloy SSH connections to that VM
+```bash
+gcloud compute firewall-rules create --network=NETWORK default-allow-ssh --allow=tcp:22
+```
+3. Connect via SSH to the new alloydb-bastion
+```bash
+gcloud compute ssh alloydb-bastion --zone=<REGION>-a
+```
+4. Install the `postgresql-client-15` package to install the `psql` CLI
+```bash
+sudo apt-get update
+sudo apt install postgresql-client-15 -y
+```
+5. use the following command to connect to AlloyDB: (You can get the primary IP address from the cloud console)
+```bash
+PGPASSWORD=$(gcloud auth print-access-token) psql \
+  -h <ALLOY_DB_PRIMARY_INSTANCE_PRIVATE_IP> \
+  -U eks-specialized-parser@<PROJECT_ID>.iam \
+  -d postgres
+```
+6. Grant permissions to another user on the schema `eks`:
+```sql
+GRANT ALL ON SCHEMA eks to <USER>;
+```
