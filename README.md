@@ -335,7 +335,7 @@ PGPASSWORD=$(gcloud auth print-access-token) psql \
   -U eks-specialized-parser@<PROJECT_ID>.iam \
   -d postgres
 ```
-6. Grant permissions to another user on the schema `eks`:
+6. Grant permissions to another user on the schema `eks`, usually the user is `postgres` which is already built in:
 ```sql
-GRANT ALL ON SCHEMA eks to <USER>;
+GRANT ALL ON SCHEMA eks to postgres;
 ```
