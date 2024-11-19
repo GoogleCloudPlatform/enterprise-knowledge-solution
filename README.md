@@ -347,7 +347,7 @@ PGPASSWORD=$(gcloud auth print-access-token) psql \
   -d postgres
 ```
 
-6. Grant permissions to another user on the schema `eks`, usually the user is `postgres` which is already built in:
+6. Grant permissions to another user on the schema `eks`, usually the user is `postgres` which is already built-in:
 
 ```sql
 GRANT ALL ON SCHEMA eks to postgres;
