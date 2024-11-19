@@ -30,7 +30,6 @@ variable "artifact_repo" {
 variable "specialized_parser_cloud_run_job_name" {
   description = "Specialized Parser job name"
   type        = string
-  default     = "specialized-parser-job"
 }
 
 variable "bigquery_dataset_id" {

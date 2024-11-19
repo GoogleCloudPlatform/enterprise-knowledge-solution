@@ -97,14 +97,9 @@ module "configure_schema_account" {
   prefix     = "eks"
   names      = [local.service_account_name]
   project_roles = [
-    "${var.project_id}=>roles/documentai.apiUser",
     "${var.project_id}=>roles/alloydb.databaseUser",
     "${var.project_id}=>roles/alloydb.client",
     "${var.project_id}=>roles/serviceusage.serviceUsageConsumer",
-    "${var.project_id}=>roles/documentai.editor",
-    "${var.project_id}=>roles/bigquery.dataEditor",
-    "${var.project_id}=>roles/bigquery.jobUser",
-    "${var.project_id}=>roles/storage.admin",
   ]
   display_name = "AlloyDB db configuration Account"
   description  = "Account used to run configure the schema and db roles in AlloyDB"
@@ -150,8 +145,12 @@ resource "google_cloud_run_v2_job" "configure_schema_processor_job" {
           value = var.alloydb_database
         }
         env {
-          name  = "ALLOYDB_USER"
+          name  = "ALLOYDB_USER_CONFIG"
           value = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
+        }
+        env {
+          name  = "ALLOYDB_USER_SPECIALIZED_PARSER"
+          value = "eks-${var.specialized_parser_cloud_run_job_name}@${var.project_id}.iam"
         }
       }
     }

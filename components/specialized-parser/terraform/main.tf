@@ -17,9 +17,7 @@
 # The modules/project_services
 locals {
   # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
-  alloydb_username           = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
-  alloydb_cluster_name_split = split("/", var.alloydb_cluster)
-  alloydb_cluster_name       = element(local.alloydb_cluster_name_split, length(local.alloydb_cluster_name_split) - 1)
+  alloydb_username = replace(module.specialized_parser_account.email, ".gserviceaccount.com", "")
 }
 
 module "project_services" {
@@ -59,7 +57,7 @@ module "specialized_parser_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   prefix     = "eks"
-  names      = [local.service_account_name]
+  names      = [var.specialized_parser_cloud_run_job_name]
   project_roles = [
     "${var.project_id}=>roles/documentai.apiUser",
     "${var.project_id}=>roles/alloydb.databaseUser",

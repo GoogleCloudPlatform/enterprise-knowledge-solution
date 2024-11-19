@@ -12,18 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
+from dataclasses import dataclass
+
 import pg8000
 import sqlalchemy
-from dataclasses import dataclass
-from google.api_core.client_info import ClientInfo as bg_ClientInfo
-from google.api_core.client_options import ClientOptions
-from google.api_core.exceptions import GoogleAPICallError, RetryError
-from google.api_core.gapic_v1.client_info import ClientInfo
-from google.api_core.operation import Operation
 from google.cloud.alloydb.connector import Connector, IPTypes
-from google.cloud.exceptions import InternalServerError
 from sqlalchemy.engine import Engine
 
 
@@ -34,7 +29,7 @@ class AlloyDBConfig:
     user: str
 
 
-class SpecializedParserJobRunner:
+class DbConfigJobRunner:
     def __init__(
         self,
         alloydb_config: AlloyDBConfig,
@@ -65,8 +60,6 @@ class SpecializedParserJobRunner:
             )
             return conn
 
-        # Not sure why the return type is reported to be MockConnection, when all documentation points for it to be of
-        # type Engine. Suppressing error of assignment type, for the moment.
         engine: Engine = (
             sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
                 "postgresql+pg8000://",
@@ -81,31 +74,28 @@ class SpecializedParserJobRunner:
         """
         Verify AlloyDB table exists to save results from the processor.
         """
-        user = os.environ["ALLOYDB_USER"]
+        user_specialized_parser = os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"]
         with self.alloydb_connection_pool.connect() as db_conn:
-            db_conn.execute("CREATE SCHEMA IF NOT EXISTS derp")
-            db_conn.execute(f'GRANT ALL ON SCHEMA derp TO "{user}"')
+            db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
+            db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user_specialized_parser}"')
             db_conn.execute(
-                f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA derp TO "{user}"'
+                f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user_specialized_parser}"'
             )
-            db_conn.execute(f'GRANT USAGE ON SCHEMA derp TO "{user}"')
+            db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user_specialized_parser}"')
+
+            db_conn.execute("GRANT ALL ON SCHEMA eks TO postgres")
+            db_conn.execute(
+                "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO postgres"
+            )
 
 
 def run() -> None:
-    # required params via environment variables
-    print("Reading environment variables for configuration")
-    print(f"{os.environ=}")
-
-    alloydb_config = AlloyDBConfig(
-        # alloydb primary instance is set by terraform, and already in the form of:
-        # "projects/<PROJECT>/locations/<LOCATION>/clusters/<CLUSTER>/instances/<INSTANCE>"
-        # If you override the environment variable, make sure to use the same format.
-        primary_instance=os.environ["ALLOYDB_INSTANCE"],
-        database=os.environ["ALLOYDB_DATABASE"],
-        user=os.environ["ALLOYDB_USER"],
-    )
-    runner = SpecializedParserJobRunner(
-        alloydb_config=alloydb_config,
+    runner = DbConfigJobRunner(
+        alloydb_config=AlloyDBConfig(
+            primary_instance=os.environ["ALLOYDB_INSTANCE"],
+            database=os.environ["ALLOYDB_DATABASE"],
+            user=os.environ["ALLOYDB_USER"],
+        )
     )
     runner.run()
 

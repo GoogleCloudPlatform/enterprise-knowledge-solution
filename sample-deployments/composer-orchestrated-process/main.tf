@@ -107,7 +107,7 @@ module "specialized_parser_job" {
   region                                = var.region
   processors_location                   = var.docai_location
   artifact_repo                         = module.common_infra.artifact_repo.name
-  specialized_parser_cloud_run_job_name = local.specialized_parser_cloud_run_job_name
+  specialized_parser_cloud_run_job_name = module.common_infra.specialized_parser_cloud_run_job_name
   bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
   alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   alloydb_cluster_ready                 = module.common_infra.alloydb_cluster_ready

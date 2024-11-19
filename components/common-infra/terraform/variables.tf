@@ -79,3 +79,9 @@ variable "alloydb_database" {
   type        = string
   default     = "postgres"
 }
+
+variable "specialized_parser_cloud_run_job_name" {
+  description = "Specialized Parser job name"
+  type        = string
+  default     = "specialized-parser-job"
+}
