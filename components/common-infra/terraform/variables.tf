@@ -55,3 +55,27 @@ variable "composer_cidr" {
     sql                      = string
   })
 }
+
+variable "configure_schema_cloud_run_job_name" {
+  description = "Configure db schemas and permissions in AlloyDB"
+  type        = string
+  default     = "configure-db-schema"
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+  default     = "cloudrun-to-alloydb-connector-subnet"
+}
+
+variable "serverless_connector_subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
+}
+
+variable "alloydb_database" {
+  description = "AlloyDB Database"
+  type        = string
+  default     = "postgres"
+}

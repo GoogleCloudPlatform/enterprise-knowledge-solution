@@ -71,3 +71,8 @@ output "alloydb_cluster_ready" {
   value       = true
   depends_on  = [time_sleep.wait_for_alloydb_ready_state]
 }
+
+output "serverless_connector_subnet" {
+  description = "the subnet used by Cloud Run for private access to alloydb"
+  value       = google_compute_subnetwork.serverless_connector_subnet.name
+}

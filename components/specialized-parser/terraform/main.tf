@@ -78,42 +78,12 @@ resource "google_alloydb_user" "specialized_parser_user" {
   cluster        = var.alloydb_cluster
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
+  database_roles = ["alloydbiamuser"]
 
   depends_on = [var.alloydb_cluster_ready]
 }
 
-# See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud_set_superuser" {
-  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
-  create_cmd_entrypoint = "gcloud"
-  create_cmd_body       = <<-EOT
-    alloydb users set-superuser ${local.alloydb_username} \
-      --cluster=${local.alloydb_cluster_name} \
-      --superuser=true \
-      --project=${var.project_id} \
-      --region=${var.region}
-  EOT
-  enabled               = true
 
-  module_depends_on = [google_alloydb_user.specialized_parser_user]
-
-  skip_download = true
-
-}
-
-resource "google_compute_subnetwork" "cloud-run-subnet" {
-  name                     = var.subnet
-  ip_cidr_range            = var.subnet_range
-  region                   = var.region
-  network                  = var.network
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_10_MIN"
-    flow_sampling        = 0.5
-    metadata             = "INCLUDE_ALL_METADATA"
-  }
-}
 
 
 
@@ -126,7 +96,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
       vpc_access {
         network_interfaces {
           network    = var.network
-          subnetwork = google_compute_subnetwork.cloud-run-subnet.name
+          subnetwork = var.serverless_connector_subnet
         }
         egress = "PRIVATE_RANGES_ONLY"
       }
