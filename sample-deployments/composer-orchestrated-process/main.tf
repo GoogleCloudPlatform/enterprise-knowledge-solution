@@ -108,7 +108,6 @@ module "specialized_parser_job" {
   artifact_repo                         = module.common_infra.artifact_repo.name
   specialized_parser_cloud_run_job_name = module.common_infra.specialized_parser_cloud_run_job_name
   bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
-  alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
   network                               = module.common_infra.vpc_network_name
   serverless_connector_subnet           = module.common_infra.serverless_connector_subnet
