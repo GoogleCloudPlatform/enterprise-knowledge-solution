@@ -290,7 +290,7 @@ To classify documents, you must [create a custom document classifier in the Goog
   custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
   ```
 
-### Connecto to your AlloyDB instance
+### Connect to your AlloyDB instance
 
 The AlloyDB instance created as part of this solution, is deployed with no access outside the VPC. Furthermore, the data currently is saved within a new schema, `eks`, which is only available to the owning service account `eks-specialized-parser`.
 
