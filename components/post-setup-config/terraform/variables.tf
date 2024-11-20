@@ -60,12 +60,6 @@ variable "alloydb_primary_instance" {
   type        = string
 }
 
-variable "specialized_parser_cloud_run_job_name" {
-  description = "Specialized Parser job name"
-  type        = string
-  default     = "specialized-parser-job"
-}
-
 variable "alloydb_cluster_ready" {
   description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules, and must be passed as a variable into this module (instead of depends_on) because the gcloud submodule has errors related to `depends_on` block. See: https://github.com/kingman/tf-dont-do-depends-on-module-demo/blob/main/demo-flow/README.md"
   type        = bool
