@@ -173,6 +173,16 @@ resource "google_cloud_run_v2_job" "configure_schema_processor_job" {
   }
 }
 
+module "gcloud_trigger_job_to_configure_alloydb_schema" {
+  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
+  create_cmd_entrypoint = "gcloud"
+  create_cmd_body       = <<-EOT
+    run jobs execute ${google_cloud_run_v2_job.configure_schema_processor_job.name} \
+      --region ${var.region}
+  EOT
+  enabled               = true
+}
+
 resource "time_sleep" "wait_for_alloydb_ready_state" {
   create_duration = "600s"
   depends_on = [
