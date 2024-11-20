@@ -74,19 +74,16 @@ class DbConfigJobRunner:
         """
         Verify AlloyDB table exists to save results from the processor.
         """
-        user_specialized_parser = os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"]
+        users = [os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"], "postgres"]
         with self.alloydb_connection_pool.connect() as db_conn:
             db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
-            db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user_specialized_parser}"')
-            db_conn.execute(
-                f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user_specialized_parser}"'
-            )
-            db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user_specialized_parser}"')
+            for user in users:
+                db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user}"')
+                db_conn.execute(
+                    f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"'
+                )
+                db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
 
-            db_conn.execute("GRANT ALL ON SCHEMA eks TO postgres")
-            db_conn.execute(
-                "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO postgres"
-            )
 
 
 def run() -> None:
