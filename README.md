@@ -354,4 +354,3 @@ GRANT ALL ON SCHEMA eks to postgres;
 ```
 
 7. After finishing work with the AlloyDB, remember to shut down the bastion VM, to avoid security risks.
-
