@@ -123,14 +123,7 @@ class SpecializedParserJobRunner:
         """
         Verify AlloyDB table exists to save results from the processor.
         """
-        user = os.environ["ALLOYDB_USER"]
         with self.alloydb_connection_pool.connect() as db_conn:
-            db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
-            db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user}"')
-            db_conn.execute(
-                f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"'
-            )
-            db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
             db_conn.execute(
                 f"""
             CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (

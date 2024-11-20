@@ -29,3 +29,8 @@ output "specialized_processors_ids_json" {
     "form"    = google_document_ai_processor.eks-form-processor.id
   })
 }
+
+output "specialized_parser_db_user" {
+  description = "The AlloyDB db role associated with the service account identity of the specializer parser Cloud Run job"
+  value       = google_alloydb_user.specialized_parser_user.user_id
+}

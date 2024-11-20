@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 resource "google_vpc_access_connector" "vpc_connector" {
   project       = module.project_services.project_id
   name          = "alloy-db-vpc-connector"
@@ -21,6 +20,19 @@ resource "google_vpc_access_connector" "vpc_connector" {
   ip_cidr_range = "10.8.0.0/28"
   min_instances = 2
   max_instances = 3
+}
+
+resource "google_compute_subnetwork" "serverless_connector_subnet" {
+  name                     = var.serverless_connector_subnet
+  ip_cidr_range            = var.serverless_connector_subnet_range
+  region                   = var.region
+  network                  = local.vpc_network_name
+  private_ip_google_access = true
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_global_address" "private_ip_address" {
@@ -79,3 +91,7 @@ resource "time_sleep" "wait_for_alloydb_ready_state" {
     module.docs_results
   ]
 }
+
+
+
+

@@ -84,3 +84,15 @@ variable "composer_cidr" {
     sql                      = "10.0.0.0/12"
   }
 }
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+  default     = "cloudrun-to-alloydb-connector-subnet"
+}
+
+variable "serverless_connector_subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
+}
