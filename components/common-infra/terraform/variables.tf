@@ -67,10 +67,3 @@ variable "serverless_connector_subnet_range" {
   type        = string
   default     = "10.2.0.0/24"
 }
-
-
-variable "specialized_parser_cloud_run_job_name" {
-  description = "Specialized Parser job name"
-  type        = string
-  default     = "specialized-parser-job"
-}

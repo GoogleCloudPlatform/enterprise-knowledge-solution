@@ -76,8 +76,3 @@ output "serverless_connector_subnet" {
   description = "the subnet used by Cloud Run for private access to alloydb"
   value       = google_compute_subnetwork.serverless_connector_subnet.name
 }
-
-output "specialized_parser_cloud_run_job_name" {
-  description = "Specialized Parser job name"
-  value       = var.specialized_parser_cloud_run_job_name
-}
