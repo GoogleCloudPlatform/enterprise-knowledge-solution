@@ -16,7 +16,7 @@
 locals {
   cloud_build_fileset      = fileset(path.module, "../src/**/*")
   cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : filesha512("${path.module}/${f}")]))
-  image_name_and_tag       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.docker-repo.repository_id}/${var.configure_schema_cloud_run_job_name}:latest"
+  image_name_and_tag       = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.configure_schema_cloud_run_job_name}:latest"
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
@@ -29,7 +29,7 @@ module "gcloud_build_job_to_configure_alloydb_schema" {
       --project ${var.project_id} \
       --region ${var.region} \
       --default-buckets-behavior=regional-user-owned-bucket \
-      --service-account "projects/${var.project_id}/serviceAccounts/${module.cloud_build_account.email}"
+      --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
   EOT
   enabled               = true
 

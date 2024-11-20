@@ -85,7 +85,6 @@ class DbConfigJobRunner:
                 db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
 
 
-
 def run() -> None:
     runner = DbConfigJobRunner(
         alloydb_config=AlloyDBConfig(

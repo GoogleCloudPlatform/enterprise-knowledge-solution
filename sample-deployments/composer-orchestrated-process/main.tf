@@ -109,8 +109,10 @@ module "specialized_parser_job" {
   specialized_parser_cloud_run_job_name = module.common_infra.specialized_parser_cloud_run_job_name
   bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
   alloydb_instance                      = module.common_infra.alloydb_primary_instance
+  alloydb_cluster                       = module.common_infra.alloydb_cluster_name
   network                               = module.common_infra.vpc_network_name
   serverless_connector_subnet           = module.common_infra.serverless_connector_subnet
+  alloydb_cluster_ready                 = module.common_infra.alloydb_cluster_ready
   cloud_build_service_account_email     = module.common_infra.cloud_build_service_account.email
 }
 
@@ -191,4 +193,18 @@ module "doc_registry" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+}
+
+module "post-setup-config" {
+  source                            = "../../components/post-setup-config/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
+  alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  specialized_parser_db_user        = module.specialized_parser_job.specialized_parser_db_user
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
+  vpc_network_name                  = module.common_infra.vpc_network_name
 }

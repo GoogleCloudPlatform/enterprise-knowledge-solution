@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-locals {
-  # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
-  alloydb_username     = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
-  service_account_name = var.configure_schema_cloud_run_job_name
-}
-
 resource "google_vpc_access_connector" "vpc_connector" {
   project       = module.project_services.project_id
   name          = "alloy-db-vpc-connector"
@@ -91,101 +85,13 @@ module "docs_results" {
   depends_on = [google_service_networking_connection.default]
 }
 
-module "configure_schema_account" {
-  source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
-  project_id = var.project_id
-  prefix     = "eks"
-  names      = [local.service_account_name]
-  project_roles = [
-    "${var.project_id}=>roles/alloydb.databaseUser",
-    "${var.project_id}=>roles/alloydb.client",
-    "${var.project_id}=>roles/serviceusage.serviceUsageConsumer",
-  ]
-  display_name = "AlloyDB db configuration Account"
-  description  = "Account used to run configure the schema and db roles in AlloyDB"
-}
-
-resource "google_alloydb_user" "schema_setup_user" {
-  cluster        = module.docs_results.cluster_name
-  user_id        = local.alloydb_username
-  user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
-
-  depends_on = [time_sleep.wait_for_alloydb_ready_state]
-}
-
-resource "google_alloydb_user" "specialized_parser_user" {
-  cluster        = module.docs_results.cluster_name
-  user_id        = "eks-${var.specialized_parser_cloud_run_job_name}@${var.project_id}.iam"
-  user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser"]
-
-  depends_on = [time_sleep.wait_for_alloydb_ready_state]
-}
-
-resource "google_cloud_run_v2_job" "configure_schema_processor_job" {
-  name     = var.configure_schema_cloud_run_job_name
-  location = var.region
-  template {
-    template {
-      service_account = module.configure_schema_account.email
-      vpc_access {
-        network_interfaces {
-          network    = local.vpc_network_name
-          subnetwork = google_compute_subnetwork.serverless_connector_subnet.name
-        }
-        egress = "PRIVATE_RANGES_ONLY"
-      }
-      containers {
-        image = local.image_name_and_tag
-        name  = var.configure_schema_cloud_run_job_name
-        resources {
-          limits = {
-            cpu    = "2"
-            memory = "2048Mi"
-          }
-        }
-        env {
-          name  = "ALLOYDB_INSTANCE"
-          value = module.docs_results.primary_instance_id
-        }
-        env {
-          name  = "ALLOYDB_DATABASE"
-          value = var.alloydb_database
-        }
-        env {
-          name  = "ALLOYDB_USER_CONFIG"
-          value = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
-        }
-        env {
-          name  = "ALLOYDB_USER_SPECIALIZED_PARSER"
-          value = google_alloydb_user.specialized_parser_user.user_id
-        }
-      }
-    }
-  }
-  lifecycle {
-    ignore_changes = [
-      effective_labels["goog-packaged-solution"],
-      terraform_labels["goog-packaged-solution"],
-      labels["goog-packaged-solution"]
-    ]
-  }
-}
-
-module "gcloud_trigger_job_to_configure_alloydb_schema" {
-  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
-  create_cmd_entrypoint = "gcloud"
-  create_cmd_body       = <<-EOT
-    run jobs execute ${google_cloud_run_v2_job.configure_schema_processor_job.name} \
-      --region ${var.region}
-  EOT
-  enabled               = true
-}
-
 resource "time_sleep" "wait_for_alloydb_ready_state" {
   create_duration = "600s"
   depends_on = [
     module.docs_results
   ]
 }
+
+
+
+
