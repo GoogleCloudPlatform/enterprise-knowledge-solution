@@ -12,15 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 resource "google_vpc_access_connector" "vpc_connector" {
   project       = module.project_services.project_id
   name          = "alloy-db-vpc-connector"
   region        = var.region
-  network       = module.vpc[0].network_id
+  network       = local.vpc_network_id
   ip_cidr_range = "10.8.0.0/28"
   min_instances = 2
   max_instances = 3
+}
+
+resource "google_compute_subnetwork" "serverless_connector_subnet" {
+  name                     = var.serverless_connector_subnet
+  ip_cidr_range            = var.serverless_connector_subnet_range
+  region                   = var.region
+  network                  = local.vpc_network_name
+  private_ip_google_access = true
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_global_address" "private_ip_address" {
@@ -28,18 +40,18 @@ resource "google_compute_global_address" "private_ip_address" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = module.vpc[0].network_id
+  network       = local.vpc_network_id
 }
 
 resource "google_service_networking_connection" "default" {
-  network                 = module.vpc[0].network_id
+  network                 = local.vpc_network_id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
 
 resource "google_compute_network_peering_routes_config" "peering_routes" {
   peering = google_service_networking_connection.default.peering
-  network = module.vpc[0].network_name
+  network = local.vpc_network_name
 
   import_custom_routes = true
   export_custom_routes = true
@@ -54,7 +66,7 @@ module "docs_results" {
   cluster_location  = var.region
   cluster_labels    = {}
   psc_enabled       = false
-  network_self_link = replace(module.vpc[0].network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  network_self_link = replace(local.vpc_network_self_link, "https://www.googleapis.com/compute/v1/", "")
 
 
   primary_instance = {
@@ -79,3 +91,7 @@ resource "time_sleep" "wait_for_alloydb_ready_state" {
     module.docs_results
   ]
 }
+
+
+
+

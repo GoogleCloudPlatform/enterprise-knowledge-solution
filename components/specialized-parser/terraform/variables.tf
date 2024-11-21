@@ -65,15 +65,9 @@ variable "network" {
   type        = string
 }
 
-variable "subnet" {
+variable "serverless_connector_subnet" {
   description = "Name of the VPC subnet to create"
   type        = string
-}
-
-variable "subnet_range" {
-  description = "Range of the VPC subnet to create"
-  type        = string
-  default     = "10.2.0.0/24"
 }
 
 variable "cloud_build_service_account_email" {

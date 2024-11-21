@@ -47,11 +47,11 @@ output "bq_store_dataset_id" {
 }
 
 output "vpc_network_id" {
-  value = var.create_vpc_network ? module.vpc[0].network_id : var.vpc_id
+  value = local.vpc_network_id
 }
 
 output "vpc_network_name" {
-  value = var.create_vpc_network ? module.vpc[0].network_name : var.vpc_name
+  value = local.vpc_network_name
 }
 
 output "alloydb_cluster_name" {
@@ -70,4 +70,9 @@ output "alloydb_cluster_ready" {
   description = "creating the alloydb resource in terraform does not guarantee it's in the ready state, so subsequent steps fail. This resource exists to force a sleep_timer that is referencable from other modules "
   value       = true
   depends_on  = [time_sleep.wait_for_alloydb_ready_state]
+}
+
+output "serverless_connector_subnet" {
+  description = "the subnet used by Cloud Run for private access to alloydb"
+  value       = google_compute_subnetwork.serverless_connector_subnet.name
 }

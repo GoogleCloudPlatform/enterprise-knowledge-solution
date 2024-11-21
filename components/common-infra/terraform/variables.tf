@@ -39,12 +39,6 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "id of vpc network"
-  default     = ""
-}
-
 variable "alloy_db_cluster_id" {
   description = "AlloyDB Cluster ID"
   type        = string
@@ -60,4 +54,16 @@ variable "composer_cidr" {
     control_plane            = string
     sql                      = string
   })
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+  default     = "cloudrun-to-alloydb-connector-subnet"
+}
+
+variable "serverless_connector_subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
 }

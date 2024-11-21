@@ -56,12 +56,6 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "id of vpc network"
-  default     = ""
-}
-
 variable "webui_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)
@@ -89,4 +83,16 @@ variable "composer_cidr" {
     control_plane            = "172.31.245.0/24"
     sql                      = "10.0.0.0/12"
   }
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+  default     = "cloudrun-to-alloydb-connector-subnet"
+}
+
+variable "serverless_connector_subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
 }

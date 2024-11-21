@@ -16,11 +16,11 @@
 locals {
   cloud_build_fileset      = fileset(path.module, "../src/**/*")
   cloud_build_content_hash = sha512(join("", [for f in local.cloud_build_fileset : filesha512("${path.module}/${f}")]))
-  image_name_and_tag       = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.specialized_parser_cloud_run_job_name}:latest"
+  image_name_and_tag       = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.configure_schema_cloud_run_job_name}:latest"
 }
 
 # See github.com/terraform-google-modules/terraform-google-gcloud
-module "gcloud_build_specialized_parser" {
+module "gcloud_build_job_to_configure_alloydb_schema" {
   source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT

@@ -19,22 +19,22 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name         = "doc-processor"
-  classifier_cloud_run_job_name         = "doc-classifier"
-  specialized_parser_cloud_run_job_name = "specialized-parser"
+  processing_cloud_run_job_name = "doc-processor"
+  classifier_cloud_run_job_name = "doc-classifier"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }
 }
 
 module "common_infra" {
-  source             = "../../components/common-infra/terraform"
-  project_id         = var.project_id
-  region             = var.region
-  create_vpc_network = var.create_vpc_network
-  vpc_name           = var.vpc_name
-  vpc_id             = var.vpc_id
-  composer_cidr      = var.composer_cidr
+  source                            = "../../components/common-infra/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  create_vpc_network                = var.create_vpc_network
+  vpc_name                          = var.vpc_name
+  serverless_connector_subnet       = var.serverless_connector_subnet
+  serverless_connector_subnet_range = var.serverless_connector_subnet_range
+  composer_cidr                     = var.composer_cidr
 }
 
 module "project_services" {
@@ -101,19 +101,18 @@ module "doc_classifier_job" {
 }
 
 module "specialized_parser_job" {
-  source                                = "../../components/specialized-parser/terraform"
-  project_id                            = var.project_id
-  region                                = var.region
-  processors_location                   = var.docai_location
-  artifact_repo                         = module.common_infra.artifact_repo.name
-  specialized_parser_cloud_run_job_name = local.specialized_parser_cloud_run_job_name
-  bigquery_dataset_id                   = module.common_infra.bq_store_dataset_id
-  alloydb_cluster                       = module.common_infra.alloydb_cluster_name
-  alloydb_cluster_ready                 = module.common_infra.alloydb_cluster_ready
-  alloydb_instance                      = module.common_infra.alloydb_primary_instance
-  network                               = module.common_infra.vpc_network_name
-  subnet                                = "cloud-run-subnet"
-  cloud_build_service_account_email     = module.common_infra.cloud_build_service_account.email
+  source                            = "../../components/specialized-parser/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  processors_location               = var.docai_location
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  bigquery_dataset_id               = module.common_infra.bq_store_dataset_id
+  alloydb_instance                  = module.common_infra.alloydb_primary_instance
+  alloydb_cluster                   = module.common_infra.alloydb_cluster_name
+  network                           = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 }
 
 module "dpu_workflow" {
@@ -193,4 +192,18 @@ module "doc_registry" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+}
+
+module "post-setup-config" {
+  source                            = "../../components/post-setup-config/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
+  alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  specialized_parser_db_user        = module.specialized_parser_job.specialized_parser_db_user
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
+  vpc_network_name                  = module.common_infra.vpc_network_name
 }
