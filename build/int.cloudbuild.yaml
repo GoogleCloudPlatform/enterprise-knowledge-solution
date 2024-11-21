@@ -36,9 +36,12 @@ steps:
       - >-
         cd /workspace/build/test ;
         export PROJECT_ID=${_TEST_PROJECT_ID};
+        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${DEPLOYER_SA}
+        gcloud config set auth/impersonate_service_account=${DEPLOYER_SA}
         go test -v -run ./ -timeout 90m --tags=e2e
     entrypoint: /bin/bash
     env:
+      - "DEPLOYER_SA=deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
       - "REGION=${_REGION}"
       - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
       - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
