@@ -37,7 +37,7 @@ steps:
         cd /workspace/build/test ;
         export PROJECT_ID=${_TEST_PROJECT_ID};
         export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
-        gcloud config set auth/impersonate_service_account=${_DEPLOYER_SA};
+        gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
         go test -v -run ./ -timeout 90m --tags=e2e
     entrypoint: /bin/bash
     env:
