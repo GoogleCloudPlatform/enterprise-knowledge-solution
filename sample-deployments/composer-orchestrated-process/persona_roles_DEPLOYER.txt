@@ -4,6 +4,7 @@ roles/artifactregistry.admin
 roles/bigquery.dataOwner
 roles/cloudbuild.builds.builder
 roles/composer.admin
+roles/compute.loadBalancerAdmin
 roles/compute.networkAdmin
 roles/compute.securityAdmin
 roles/container.clusterAdmin
@@ -20,3 +21,4 @@ roles/logging.logWriter
 roles/servicedirectory.admin
 roles/serviceusage.serviceUsageAdmin
 roles/storage.admin
+roles/vpcaccess.admin
