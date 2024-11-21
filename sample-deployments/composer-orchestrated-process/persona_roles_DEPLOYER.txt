@@ -4,7 +4,7 @@ roles/artifactregistry.admin
 roles/bigquery.dataOwner
 roles/cloudbuild.builds.builder
 roles/composer.admin
-roles/compute.loadBalancerAdmin)
+roles/compute.loadBalancerAdmin
 roles/compute.networkAdmin
 roles/compute.securityAdmin
 roles/container.clusterAdmin
