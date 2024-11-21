@@ -21,30 +21,33 @@ logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccess
 # Put into a single place
 SAMPLE_QUERIES = """
 ```
+    Generate a Table to summarize the Quarterly Revenue 
+of Google Cloud in 2024, 2023, and 2022.
+```
+```
+    How many shares the Intelligent Group Limited offers
+in their IPO filing?
+```
+```
     Create a table showing 2021 and 2022 annual revenue
-    of RYDE, and INTJ? Summarize the results.
+of RYDE, and INTJ? Summarize the results.
 ```
 ```
-    How many shares are in Helix's offering?
+    Summarize the outage in Denver.
 ```
 ```
-    When was Form S-1 submitted by
-    CHROMOCELL THERAPEUTICS CORPORATION?
+    How long was the outage duration in Denver?
 ```
 ```
-    How does Maxim Group LLC work with
-    CHROMOCELL THERAPEUTICS CORPORATION?
+    List the incident number, owner,  RCA analyst, data,   
+root cause, and resolution for ticket #: T010101?
 ```
 ```
-    How can we automate our document processing workflow to
-    save time and reduce errors? Generate answer in English.
+    Who is Sally Walker?
 ```
 ```
-    How can we automate our document processing workflow to
-    save time and reduce errors? Generate answer in Spanish.
-```
-```
-    How many shares are offered by Ryde Group Ltd?
+    Display a CPT1 Code for the clinical laboratory
+service: "Cell enumeration phys interp"?
 ```
 """
 
@@ -145,13 +148,18 @@ if st.session_state.answer:
     # st.text_area(":blue[Summary Response: ]", value=st.session_state.answer, height=240)
     st.write(":blue[Summary Response: ]")
     ans = st.session_state.answer
-    # printable_ans = (
-    #     f'<div style=\'font-size:1rem; font-family:"Source Sans Pro", sans-serif; '
-    #     f"color:blue;'>{ans}</div>"
-    # )
-    # st.text_area(":blue[Summary Response: ]", value=ans, height=240)
-    # st.html(printable_ans)
-    st.markdown(ans.format())
+    printable_ans = (
+        f'<div style=\'font-size:1rem; font-family:"Arial", sans-serif; word-wrap: break-word;'
+        f"color:blue;'>{ans}</div>"
+    )
+    #st.text_area(":blue[Summary Response: ]", value=ans, height=240)
+    
+    tab1, tab2 = st.tabs(["Markdown", "Text"])
+
+    with tab1:
+        st.markdown(ans.format())
+    with tab2:
+        st.html(printable_ans.format())
 
 
 # Render list of other documents
