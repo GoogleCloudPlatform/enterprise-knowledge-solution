@@ -1,14 +1,15 @@
 # Common Infra module
 
 The module provisions the common resources required by the Enterprise Knowledge Solution (EKS), which includes the following:
-| Name | Description |
-|------|-------------|
-| BigQuery `docs_store` Dataset | A dataset where the parsed document metadata are store and used as input to Agent Build Data Store |
-| Google Cloud Storage `docs-input` Bucket | Storage bucket for users of EKS to drop document for ingestion to the solutions |
-| Google Cloud Storage `dpu-process` Bucket | Storage bucket used by document processing workflow to store the ingested documents |
-| Google Cloud Storage `dpu-reject` Bucket | Storage bucket used by document processing workflow to store the documents which have been failed to parse |
-| Artifact Registry `dpu-docker-repo` | Container repository for hosting of custom containers userd by EKS |
-| VPC Network `dpu-network` | Common VPC network for the EKS solution |
+
+| Name                                      | Description                                                                                                |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| BigQuery `docs_store` Dataset             | A dataset where the parsed document metadata are store and used as input to Agent Build Data Store         |
+| Google Cloud Storage `docs-input` Bucket  | Storage bucket for users of EKS to drop document for ingestion to the solutions                            |
+| Google Cloud Storage `dpu-process` Bucket | Storage bucket used by document processing workflow to store the ingested documents                        |
+| Google Cloud Storage `dpu-reject` Bucket  | Storage bucket used by document processing workflow to store the documents which have been failed to parse |
+| Artifact Registry `dpu-docker-repo`       | Container repository for hosting of custom containers userd by EKS                                         |
+| VPC Network `dpu-network`                 | Common VPC network for the EKS solution                                                                    |
 
 ## Inputs
 
