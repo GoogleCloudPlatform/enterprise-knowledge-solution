@@ -1,0 +1,27 @@
+---
+extends: default
+
+locale: "en_US.UTF-8"
+
+rules:
+  braces:
+    max-spaces-inside: 1
+    max-spaces-inside-empty: 0
+    min-spaces-inside: 1
+    min-spaces-inside-empty: 0
+  colons:
+    max-spaces-after: 1
+  comments:
+    # As required by prettier
+    min-spaces-from-content: 1
+  comments-indentation:
+    level: error
+  document-start:
+    level: error
+  empty-values: enable
+  line-length:
+    allow-non-breakable-inline-mappings: true
+    max: 250
+  octal-values: enable
+  truthy:
+    level: error

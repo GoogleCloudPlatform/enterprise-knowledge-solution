@@ -1,6 +1,6 @@
 .gitignore
 .DS_Store
-local_dev/** 
+local_dev/**
 
 # Python
 **/__pycache__/**
@@ -10,9 +10,9 @@ local_dev/**
 **/terraform.tfstate*
 **/terraform.tfvars
 **/.terraform.tfstate*
+**/backend.tf
 **/.terraform/**
 **/.terraform.lock.hcl
-dp.md
 **/samples/
 
 # Generated files
@@ -21,11 +21,20 @@ dp.md
 # Egg info directories
 **/*.egg-info/**
 sample-deployments/composer-orchestrated-process/dp.notes
+sample-deployments/composer-orchestrated-process/env.sh
 
 # Cloud SDK credentials
 **/.credentials/**
 sample-deployments/composer-orchestrated-process/terraform.tfvars.dp
 sample-deployments/composer-orchestrated-process/terraform.tfvars.go_demos
-sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh
 .gitignore
-sample-deployments/composer-orchestrated-process/env.sh
+components/doc-classifier/terraform/build/cloudbuild.yaml
+
+# Linting and formatting
+super-linter-output
+super-linter.log
+.external_modules/*
+.mypy_cache/*
+
+# integration testing
+**/.test-data/*

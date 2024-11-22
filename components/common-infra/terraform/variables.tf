@@ -28,19 +28,42 @@ variable "bq_store_dataset" {
 }
 
 variable "create_vpc_network" {
-  type = bool
+  type        = bool
   description = "configuration to manage vpc creation"
-  default = true
+  default     = true
 }
 
 variable "vpc_name" {
-  type = string
+  type        = string
   description = "name of vpc network"
-  default = "dpu-network"
+  default     = "dpu-network"
 }
 
-variable "vpc_id" {
-  type = string
-  description = "id of vpc network"
-  default = ""
+variable "alloy_db_cluster_id" {
+  description = "AlloyDB Cluster ID"
+  type        = string
+  default     = "eks-docs-results"
+}
+
+variable "composer_cidr" {
+  description = "CIDR ranges for configuring Cloud Composer"
+  type = object({
+    subnet_primary           = string
+    cluster_secondary_range  = string
+    services_secondary_range = string
+    control_plane            = string
+    sql                      = string
+  })
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+  default     = "cloudrun-to-alloydb-connector-subnet"
+}
+
+variable "serverless_connector_subnet_range" {
+  description = "Range of the VPC subnet to create"
+  type        = string
+  default     = "10.2.0.0/24"
 }

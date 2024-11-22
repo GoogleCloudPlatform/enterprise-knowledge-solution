@@ -15,7 +15,6 @@
 
 import proto
 
-
 __protobuf__ = proto.module(package="")
 
 

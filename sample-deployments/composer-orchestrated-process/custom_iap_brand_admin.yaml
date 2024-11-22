@@ -1,0 +1,13 @@
+---
+title: "Custom IAP brand Admin"
+description: "Custom role for configuring the OAuth consent screen (brand) required by IAP"
+stage: "BETA"
+includedPermissions:
+  - clientauthconfig.brands.list
+  - clientauthconfig.brands.create
+  - clientauthconfig.brands.get
+  - clientauthconfig.clients.create
+  - clientauthconfig.clients.listWithSecrets
+  - clientauthconfig.clients.getWithSecret
+  - clientauthconfig.clients.delete
+  - clientauthconfig.clients.update

@@ -22,18 +22,17 @@ variable "region" {
   description = "Google Cloud region where app engine is located "
 }
 
-variable "application_title" {
-  description = "Document Processing and Understanding App"
-}
-variable "iap_admin_account" {
-  description = "Account used for manage Oath brand and IAP"
-  type        = string
-}
-
 variable "artifact_repo" {
-  description = "artifact registry"
+  description = "Docker registry"
+  type        = string
+  default     = ""
 }
 
+variable "cloud_build_service_account_email" {
+  description = "IAM service account email used for cloud build."
+  type        = string
+  default     = ""
+}
 
 variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
@@ -55,22 +54,12 @@ variable "agent_builder_search_id" {
   type        = string
 }
 
-variable "vpc_network_name" {
-  type        = string
-  description = "The name of the network where subnets will be created"
-}
-
-variable "vpc_network_id" {
-  type        = string
-  description = "ID of the network where subnets will be created"
-}
-
-variable "gcs_object_store" {
-  type        = string
-  description = "GCS bucket for objects viewed through webui"
-}
-
-variable "app_engine_service_name" {
+variable "webui_service_name" {
   type        = string
   description = "The App Engine service name for the webui"
+}
+
+variable "lb_ssl_certificate_domains" {
+  description = "Custom domain pointing to the WebUI app, DNS configured"
+  type        = list(string)
 }

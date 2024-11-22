@@ -1,0 +1,20 @@
+---
+# Options reference: https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+baseline: .github/linters/.checkov.baseline
+
+# scan for terraform rules only. Dockerfile checks introduce too many fixes not relevant for our scenario
+framework: terraform
+
+# Report skipped baseline checks in the output
+output-baseline-as-skipped: true
+
+# don't download external modules, causes false positives with GITLEAKS which detects an example api key in the TF module for service accounts
+download-external-modules: false
+
+# CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_82 disable checks for CMEK/CSEK on resources, not relevant to the sample repo, but relevant for production
+# CKV_GCP_121 disable check for BQ deletion protection. This is too disruptive for development, but relevant for production
+# CKV_GCP_62 Access and Storage Logging is the legacy feature, no longer recommended
+skip-check: CKV2_GCP_22,CKV_GCP_84,CKV_GCP_80,CKV_GCP_121,CKV_GCP_82,CKV_GCP_62
+
+skip-path: /tmp/*

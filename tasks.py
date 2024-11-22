@@ -13,15 +13,13 @@
 # limitations under the License.
 
 
-import os
 import glob
-
-from invoke import task, Collection
-from uv import find_uv_bin
+import os
 
 import components.processing.tasks
 import components.webui.tasks
-
+from invoke import Collection, task
+from uv import find_uv_bin
 
 # Find the base directory for invoke
 BASE_DIR = os.path.dirname(__file__)
@@ -68,7 +66,7 @@ def lock(c, upgrade=False, upgrade_package="", quiet=True):
     c.run(
         f'"{find_uv_bin()}" pip compile '
         f"{opt_quiet} {opt_upgrade} {opt_upgrade_package} "
-        f'"{REQ_ALL_IN}" -o "{REQS_ALL}"'
+        f'"{os.path.relpath(REQ_ALL_IN, os.getcwd())}" -o "{os.path.relpath(REQS_ALL, os.getcwd())}"'
     )
 
     # Generate a constraints file
@@ -76,24 +74,26 @@ def lock(c, upgrade=False, upgrade_package="", quiet=True):
     c.run(f'cat "{REQS_ALL}" | grep -v "^-e " > "{CONSTRAINTS}"')
 
     # Gather all requirements
-    reqs_in = list(glob.glob(
-        os.path.join(BASE_DIR, "**", "pyproject.toml"),
-        recursive=True))
-    reqs_in += list(glob.glob(
-        os.path.join(BASE_DIR, "**", "requirements.in"),
-        recursive=True))
+    reqs_in = list(
+        glob.glob(os.path.join(BASE_DIR, "**", "pyproject.toml"), recursive=True)
+    )
+    reqs_in += list(
+        glob.glob(os.path.join(BASE_DIR, "**", "requirements.in"), recursive=True)
+    )
 
     # Re-generate the requirements.txt for specific deployments
     # (honouring consolidated requirements)
+    REL_CONSTRAINTS = os.path.relpath(CONSTRAINTS, os.getcwd())
     for req_in in reqs_in:
         req_txt = os.path.join(os.path.dirname(req_in), "requirements.txt")
         if os.path.exists(req_txt):
             c.run(
                 f'"{find_uv_bin()}" pip compile {opt_quiet} --generate-hashes '
-                f'-c "{CONSTRAINTS}" "{req_in}" | '
+                f'-c "{REL_CONSTRAINTS}" "{os.path.relpath(req_in, os.getcwd())}" | '
                 'grep -v "\\${PROJECT_ROOT}" >'
                 f'"{req_txt}"'
             )
+
 
 #
 # Build collection from all available tasks

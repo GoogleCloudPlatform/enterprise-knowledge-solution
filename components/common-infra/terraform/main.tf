@@ -18,8 +18,7 @@ locals {
   }
 }
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -27,6 +26,10 @@ module "project_services" {
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
     "bigquery.googleapis.com",
+    "alloydb.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "dns.googleapis.com",
+    "vpcaccess.googleapis.com"
   ]
 }
 
@@ -37,4 +40,31 @@ resource "google_artifact_registry_repository" "docker-repo" {
   repository_id = "dpu-docker-repo"
   description   = "Docker containers"
   labels        = local.dpu_label
+}
+
+module "cloud_build_account" {
+  source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
+  project_id = var.project_id
+  names      = ["cloud-build"]
+  project_roles = [
+    "${var.project_id}=>roles/logging.logWriter",
+    "${var.project_id}=>roles/storage.admin",
+    "${var.project_id}=>roles/artifactregistry.writer",
+    "${var.project_id}=>roles/run.developer",
+    "${var.project_id}=>roles/iam.serviceAccountUser",
+  ]
+  display_name = "Cloud Build Service Account"
+  description  = "specific custom service account for Cloud Build"
+}
+
+
+# Propagation time for change of access policy typically takes 2 minutes
+# according to https://cloud.google.com/iam/docs/access-change-propagation
+# this wait make sure the policy changes are propagated before proceeding
+# with the build
+resource "time_sleep" "wait_for_policy_propagation" {
+  create_duration = "120s"
+  depends_on = [
+    module.cloud_build_account
+  ]
 }

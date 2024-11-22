@@ -108,6 +108,8 @@ if [ -z "$PROJECT_ID" ]; then
   PROJECT_ID=$(gcloud config get-value project)
 fi
 
+BQ_DOC_REG_TABLE="docs_registry.docs_registry"
+
 if [ "$MODE" = "single" ]; then
   # Confirmation prompt
   read -r -p "You are about to delete document with ID '$DOC_ID' from project '$PROJECT_ID'. Are you sure? [y/N] " response
@@ -117,7 +119,7 @@ if [ "$MODE" = "single" ]; then
   fi
 
   # Construct Agent Builder Datastore deletion URI
-  DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
+  DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
 
   # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
   curl -X DELETE \
@@ -128,6 +130,9 @@ if [ "$MODE" = "single" ]; then
   # EXECUTE THE FOLLOWING bq COMMAND to Delete document meta-data from BigQuery Table
   bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
     "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+
+  bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+    "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
 
   # EXECUTE THE FOLLOWING bq COMMAND to Delete the BigQuery Table containing the document meta-data
   # BQ_TABLE="${BQ_TABLE/\./:}"
@@ -171,7 +176,7 @@ elif [ "$MODE" = "batch" ]; then
       DOC_ID=$(echo "$line" | awk '{print $1}')
       DOC_URI=$(echo "$line" | awk '{$1 = ""; sub(/^ /, "", $0); print $0}')
 
-      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/dpu-doc-store/branches/default_branch/documents/${DOC_ID}"
+      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
 
       curl -X DELETE \
         -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
@@ -180,6 +185,9 @@ elif [ "$MODE" = "batch" ]; then
 
       bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
         "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
+
+      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
+        "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
 
       echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
     done <<<"$RESULTS"

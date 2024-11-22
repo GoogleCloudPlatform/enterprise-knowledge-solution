@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "web_ui_uri" {
-  description = "App Engine URI"
-  value       = google_app_engine_application.app.default_hostname
+output "dns_configuration" {
+  value = "${join(",", var.lb_ssl_certificate_domains)} => ${module.eks_webui_lb.external_ip}"
 }

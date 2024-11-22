@@ -17,7 +17,6 @@ import os
 
 from invoke import task
 
-
 # Find the base directory for invoke
 BASE_DIR = os.path.dirname(__file__)
 ROOT_DIR = os.path.join(BASE_DIR, "../../")
@@ -35,7 +34,7 @@ def cloud_run_remote_build(c):
             "gcloud builds submit "
             f"--region {os.getenv('REGION')} "
             f"--project {os.getenv('PROJECT_ID')} "
-            "--config \"components/processing/deployments/cloud_run/build/cloudbuild.yaml\" .",
+            '--config "components/processing/terraform/build/cloudbuild.yaml" .',
             pty=True,
         )
 
@@ -52,7 +51,7 @@ def cloud_run_local_deploy(c):
         f"{os.getenv('REPOSITORY_REGION')}-docker.pkg.dev/"
         f"{os.getenv('PROJECT_ID')}/{os.getenv('ARTIFACT_REPO_NAME')}"
     )
-    job_name = os.getenv("CLOUD_RUN_JOB_NAME")
+    job_name = os.getenv("PROCESSING_CLOUD_RUN_JOB_NAME")
     image = f"{repo}/{job_name}:latest"
 
     with c.cd(BASE_DIR):
@@ -62,7 +61,7 @@ def cloud_run_local_deploy(c):
             f"--build-context libs=libs "
             f"--build-context reqs={ROOT_DIR}/reqs "
             f"-t {image} "
-            f"deployments/cloud_run/build",
+            f"terraform/build",
             pty=True,
         )
         c.run(
@@ -126,9 +125,10 @@ def process(
 
     It will operate on GCS or local files as specified.
     """
+    import logging
+
     from processors.base.gcsio import GCSPath
     from processors.msg.main_processor import process_all_objects
-    import logging
 
     logging.basicConfig(format="%(asctime)s %(name)s: %(message)s")
     logging.getLogger("processors").setLevel(logging.DEBUG if debug else logging.INFO)

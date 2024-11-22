@@ -41,7 +41,7 @@ variable "region" {
 variable "composer_version" {
   description = "Version of Cloud Composer"
   type        = string
-  default     = "composer-2.8.1-airflow-2.7.3"
+  default     = "composer-2.9.9-airflow-2.9.3"
 }
 
 variable "composer_env_variables" {
@@ -57,10 +57,82 @@ variable "composer_additional_pypi_packages" {
   }
 }
 
+variable "composer_scheduler_cpu" {
+  description = "The number of CPUs for a scheduler, in vCPU units."
+  type        = number
+  default     = 1
+}
+
+variable "composer_scheduler_memory" {
+  description = "The amount of memory for a scheduler, in GB."
+  type        = number
+  default     = 2
+}
+
+variable "composer_scheduler_storage" {
+  description = "The disk size for a scheduler, in GB."
+  type        = number
+  default     = 1
+}
+
+variable "composer_scheduler_count" {
+  description = "The number of schedulers."
+  type        = number
+  default     = 1
+}
+
+variable "composer_web_server_cpu" {
+  description = "The number of CPUs for a web_server, in vCPU units."
+  type        = number
+  default     = 1
+}
+
+variable "composer_web_server_memory" {
+  description = "The amount of memory for a web_server, in GB."
+  type        = number
+  default     = 2
+}
+
+variable "composer_web_server_storage" {
+  description = "The disk size for a web_server, in GB."
+  type        = number
+  default     = 1
+}
+
+variable "composer_worker_cpu" {
+  description = "The number of CPUs for a worker, in vCPU units."
+  type        = number
+  default     = 1
+}
+
+variable "composer_worker_memory" {
+  description = "The amount of memory for a worker, in GB."
+  type        = number
+  default     = 4
+}
+
+variable "composer_worker_storage" {
+  description = "The disk size for a worker, in GB."
+  type        = number
+  default     = 2
+}
+
+variable "composer_worker_min_count" {
+  description = "The minimum number of Airflow workers."
+  type        = number
+  default     = 1
+}
+
+variable "composer_worker_max_count" {
+  description = "The maximum number of Airflow workers."
+  type        = number
+  default     = 3
+}
+
 variable "composer_environment_size" {
   description = "Size for the Composer environment"
   type        = string
-  default     = "ENVIRONMENT_SIZE_SMALL"
+  default     = "ENVIRONMENT_SIZE_MEDIUM"
 }
 
 variable "enable_private_ip" {
@@ -78,6 +150,16 @@ variable "composer_sa_roles" {
     "roles/bigquery.dataEditor",
     "roles/run.developer",
     "roles/discoveryengine.editor",
-    "roles/documentai.apiUser"
   ]
+}
+
+variable "composer_cidr" {
+  description = "CIDR ranges for configuring Cloud Composer"
+  type = object({
+    subnet_primary           = string
+    cluster_secondary_range  = string
+    services_secondary_range = string
+    control_plane            = string
+    sql                      = string
+  })
 }

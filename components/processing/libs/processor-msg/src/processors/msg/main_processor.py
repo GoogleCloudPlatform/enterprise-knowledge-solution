@@ -13,33 +13,39 @@
 # limitations under the License.
 
 
-import logging
 import json
+import logging
+from enum import Enum
+from typing import Dict, Optional
+
+from processors.base.gcsio import GCSPath
+from processors.base.result_writer import BigQueryWriter, DocumentMetadata
 from processors.msg.msg_processor import msg_processor
 from processors.xlsx import xlsx_processor
 from processors.zip.unzip_processor import unzip_processor
-from processors.base.gcsio import GCSPath
-from processors.base.result_writer import DocumentMetadata, BigQueryWriter
-from typing import Dict, Optional, Callable
-
 
 logger = logging.getLogger(__name__)
 
 
-def find_processor(source: GCSPath) -> Optional[Callable[[GCSPath, GCSPath], Dict]]:
-    if source.suffix == ".msg":
-        return msg_processor
-    elif source.suffix == ".zip":
-        return unzip_processor
-    elif source.suffix in (".xlsx", ".xlsm"):
-        return xlsx_processor
+class Processors(str, Enum):
+    TXT = "txt-processor"
+    MSG = "msg-processor"
+    ZIP = "zip-processor"
+    XLSX = "xlsx-processor"
 
-    return None
+
+PROCESSOR_NAMES_TO_CALLABLE = {
+    Processors.TXT.value: None,  # Special case - handled inline within code
+    Processors.MSG.value: msg_processor,
+    Processors.ZIP.value: unzip_processor,
+    Processors.XLSX.value: xlsx_processor,
+}
 
 
 def process_all_objects(
     source_dir: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
     write_json=True,
     write_bigquery: str = "",
 ):
@@ -53,14 +59,24 @@ def process_all_objects(
         process_object(
             obj,
             reject_dir,
+            supported_files,
             write_json=write_json,
             bq_writer=writer,
         )
 
 
 def move_rejected_file(source: GCSPath, reject_dir: GCSPath, error_msg: str):
-    source.move(GCSPath(reject_dir, source.name))
-    json_err_msg = GCSPath(reject_dir, source.name + ".json")
+    # Remove the first two elements which is the:
+    # - job run folder
+    # - document type
+    # Remove the last element which is the file name.
+    # Ends with array of relative folders in between
+    relative_folders = source.path.split("/")[2:-1]
+    relative_folders_str = "/".join(relative_folders)
+    source.move(GCSPath(str(reject_dir) + f"{relative_folders_str}", source.name))
+    json_err_msg = GCSPath(
+        str(reject_dir) + f"{relative_folders_str}", source.name + ".json"
+    )
     json_err_msg.write_text(
         json.dumps(
             {"error_msg": error_msg},
@@ -82,74 +98,85 @@ def reject_oversized_file(
     return False
 
 
-
 def process_recursive(
     source: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
 ) -> list[dict]:
 
     result = {
-        'objid': '',
-        'uri': str(source),
-        'mimetype': source.mimetype,
-        'metadata': {},
-        'status': 'UNPROCESSED',
+        "objid": "",
+        "uri": str(source),
+        "mimetype": source.mimetype,
+        "metadata": {},
+        "status": "UNPROCESSED",
     }
     results = [result]
 
-    if source.suffix in (".txt", ".html", ".pdf", ".docx"):
+    if not supported_files.get(source.suffix, False):
+        result["status"] = "Not indexed or expanded"
+        result["metadata"]["reason"] = f"file of type {source.suffix} not " f"supported"
+        return results
+    processor_name = supported_files[source.suffix]
+
+    if processor_name == Processors.TXT.value:
 
         # current file size limit of 100MB in Data Store
         if reject_oversized_file(source, reject_dir, 100):
-            result['status'] = 'Rejected -- over 100MB'
+            result["status"] = "Rejected -- over 100MB"
             return results
 
         # current file size limit of 2.5MB for TXT in Data Store
         if source.suffix == ".txt" and reject_oversized_file(source, reject_dir, 2.5):
-            result['status'] = 'Rejected -- over 2.5MB and text'
+            result["status"] = "Rejected -- over 2.5MB and text"
             return results
 
-        result['objid'] = source.hash
-        result['status'] = 'Indexed'
+        result["objid"] = source.hash
+        result["status"] = "Indexed"
         return results
 
-    # Find processor, if any, for generating outputs for this object
-    processor = find_processor(source)
-    if not processor:
-        result['status'] = 'Not indexed or expanded'
+    # the one special case is txt-processor, that will return None, but this
+    # should have been handled above - beware of changes to the order of
+    # operations here.
+    processor = PROCESSOR_NAMES_TO_CALLABLE.get(processor_name)
+    if processor is None:
+        result["status"] = "Not indexed or expanded"
+        result["metadata"]["reason"] = (
+            f"file type {source.suffix} is mapped "
+            f"to a processor {processor_name} that "
+            f"is not mapped to a callable"
+        )
         return results
 
     # Attempt to use it.
     output = GCSPath(str(source) + ".out")
     if output.exists():
         logger.info("Output directory already exists... what is going on?")
-        result['status'] = 'Output directory already exists'
+        result["status"] = "Output directory already exists"
         return results
 
     try:
         # Generate outputs and find more metadata
         metadata = processor(source, output)
         if metadata is None:
-            result['status'] = 'Processor returned no data'
+            result["status"] = "Processor returned no data"
             return results
 
-        result['status'] = 'Expanded'
-        result['metadata'] = metadata
+        result["status"] = "Expanded"
+        result["metadata"] = metadata
 
     except Exception as e:
         logger.error(f"error running processor: {e}")
         logger.exception(e)
 
         # Move the failed to process doc to the reject folder
-        move_rejected_file(
-            source, reject_dir, f"Doc processor fail with error: {e}"
-        )
-        result['status'] = f'Processor failed with error {e}'
+        move_rejected_file(source, reject_dir, f"Doc processor fail with error: {e}")
+        result["status"] = f"Processor failed with error {e}"
         return results
 
     # Return with the children
     for child in list(output.list()):
-        results.extend(process_recursive(child, reject_dir))
+        results.extend(process_recursive(child, reject_dir, supported_files))
 
     return results
 
@@ -157,40 +184,39 @@ def process_recursive(
 def process_object(
     source: GCSPath,
     reject_dir: GCSPath,
+    supported_files: Dict[str, str],
     write_json=True,
     bq_writer: Optional[BigQueryWriter] = None,
 ):
 
-    logger.info(f'Processing {source}...')
+    logger.info(f"Processing {source}...")
 
     # Extract everything
-    objs = process_recursive(source, reject_dir)
+    objs = process_recursive(source, reject_dir, supported_files)
 
-    logger.debug(f'Objects: {objs}')
+    logger.debug(f"Objects: {objs}")
 
     # Create a object map with a subset of the data
-    obj_keys = ['uri', 'objid', 'status', 'mimetype']
+    obj_keys = ["uri", "objid", "status", "mimetype"]
     obj_map = []
     for obj in objs:
-        obj_map.append(dict((
-          (k, obj[k]) for k in obj_keys
-        )))
-    logger.debug(f'Object map: {obj_map}')
+        obj_map.append(dict(((k, obj[k]) for k in obj_keys)))
+    logger.debug(f"Object map: {obj_map}")
 
     for obj in objs:
 
-        # Skip if no 'objid' (not to be indexed)
-        if not obj['objid']:
+        # Skip if no "objid" (not to be indexed)
+        if not obj["objid"]:
             continue
 
         # Object metadata
         obj_metadata = {
             # Map of all related objects
-            'objs': obj_map,
+            "objs": obj_map,
             # Metadata for this one object
-            'metadata': obj['metadata'],
+            "metadata": obj["metadata"],
             # Status of processing
-            'status': obj['status'],
+            "status": obj["status"],
         }
 
         # Write to BigQuery if necessary
@@ -198,11 +224,11 @@ def process_object(
             bq_writer.write_results(
                 [
                     DocumentMetadata(
-                        id=obj['objid'],
+                        id=obj["objid"],
                         jsonData=json.dumps(obj_metadata, default=str),
                         content=DocumentMetadata.Content(
-                            mimeType=obj['mimetype'],
-                            uri=obj['uri'],
+                            mimeType=obj["mimetype"],
+                            uri=obj["uri"],
                         ),
                     )
                 ]
@@ -210,15 +236,15 @@ def process_object(
 
         # Write to JSON
         if write_json:
-            json_metadata = GCSPath(str(obj['uri']) + ".json")
+            json_metadata = GCSPath(str(obj["uri"]) + ".json")
             json_metadata.write_text(
                 json.dumps(
                     {
-                        "id": obj['objid'],
+                        "id": obj["objid"],
                         "structData": obj_metadata,
                         "content": {
-                            "mimeType": obj['mimetype'],
-                            "uri": obj['uri'],
+                            "mimeType": obj["mimetype"],
+                            "uri": obj["uri"],
                         },
                     },
                     default=str,

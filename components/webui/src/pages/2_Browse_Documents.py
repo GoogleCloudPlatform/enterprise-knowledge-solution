@@ -13,12 +13,13 @@
 # limitations under the License.
 
 import os
+import pathlib
+
 import pandas as pd  # type: ignore
 import streamlit as st  # type: ignore
-from st_aggrid import GridOptionsBuilder, AgGrid, ColumnsAutoSizeMode  # type: ignore
-from dpu.components import show_agent_document, LOGO
 from dpu.api import fetch_all_agent_docs
-import pathlib
+from dpu.components import LOGO, show_agent_document
+from st_aggrid import AgGrid, ColumnsAutoSizeMode, GridOptionsBuilder  # type: ignore
 
 logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -41,29 +42,30 @@ df = pd.DataFrame(fetch_all_agent_docs())
 
 if len(df) > 0:
 
-  # Extract bucket and path
-  df['bucket'] = df['uri'].str.extract(r'gs://([^/]*)/')
-  df['path'] = df['uri'].str.extract(r'gs://[^/]*/(.*)$')
+    # Extract bucket and path
+    df["bucket"] = df["uri"].str.extract(r"gs://([^/]*)/")
+    df["path"] = df["uri"].str.extract(r"gs://[^/]*/(.*)$")
 
-  # Extract parent and name from the path
-  df['name'] = df['path'].apply(lambda p: pathlib.Path(p).name)
-  common_prefix = os.path.commonprefix(
-      df['path'].apply(lambda p: pathlib.Path(p).parent).to_list())
-  df['full_name' ] = df['path'].apply(lambda p: p[len(common_prefix):])
+    # Extract parent and name from the path
+    df["name"] = df["path"].apply(lambda p: pathlib.Path(p).name)
+    common_prefix = os.path.commonprefix(
+        df["path"].apply(lambda p: pathlib.Path(p).parent).to_list()
+    )
+    df["full_name"] = df["path"].apply(lambda p: p[len(common_prefix) :])
 
-  gb = GridOptionsBuilder()
-  gb.configure_column("name", header_name="Name", flex=0)
-  gb.configure_column("full_name", header_name="Full Name", flex=1)
-  gb.configure_selection()
-  gb.configure_pagination()
-  gridOptions = gb.build()
+    gb = GridOptionsBuilder()
+    gb.configure_column("name", header_name="Name", flex=0)
+    gb.configure_column("full_name", header_name="Full Name", flex=1)
+    gb.configure_selection()
+    gb.configure_pagination()
+    gridOptions = gb.build()
 
-  data = AgGrid(
-      df,
-      gridOptions=gridOptions,
-      columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW,
-      allow_unsafe_jscode=True,
-  )
+    data = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW,
+        allow_unsafe_jscode=True,
+    )
 
-  if data["selected_rows"] is not None and len(data["selected_rows"]) > 0:
-      show_agent_document(data["selected_rows"].iloc[0]['id'])
+    if data["selected_rows"] is not None and len(data["selected_rows"]) > 0:
+        show_agent_document(data["selected_rows"].iloc[0]["id"])

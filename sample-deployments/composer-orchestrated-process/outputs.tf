@@ -37,7 +37,22 @@ output "agent_app_uri" {
   value       = "https://console.cloud.google.com/gen-app-builder/locations/${var.vertex_ai_data_store_region}/engines/${google_discovery_engine_search_engine.basic.engine_id}/preview/search?project=${var.project_id}"
 }
 
-output "web_ui_uri" {
-  description = "EKS Web UI URI"
-  value       = var.deploy_ui ? "https://${module.dpu_ui[0].web_ui_uri}/" : ""
+output "webui_dns_config" {
+  description = "DNS Record for WebUI"
+  value       = module.dpu_ui.dns_configuration
+}
+
+output "classifier_processor_id" {
+  description = "The DocAI Custom Classifier processor id"
+  value       = var.custom_classifier_id
+}
+
+output "specialized_processors_ids_json" {
+  description = "JSON encoded string of all supported labels as keys and the corresponding processor id for each as values."
+  value       = jsondecode(module.specialized_parser_job.specialized_processors_ids_json)
+}
+
+output "composer_location" {
+  description = "Location of Cloud Composer"
+  value       = module.dpu_workflow.composer_location
 }

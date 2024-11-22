@@ -23,8 +23,7 @@ locals {
 }
 
 module "project_services" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.5.0"
+  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
@@ -38,9 +37,13 @@ module "project_services" {
   }]
 }
 
+resource "google_project_default_service_accounts" "disable_default_service_accounts" {
+  project = var.project_id
+  action  = "DISABLE"
+}
+
 module "composer_service_account" {
-  source  = "terraform-google-modules/service-accounts/google"
-  version = "~> 4.2"
+  source = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
 
   project_id = module.project_services.project_id
   prefix     = local.env_name
@@ -50,51 +53,33 @@ module "composer_service_account" {
   project_roles = local.composer_sa_roles
 }
 
-module "vpc" {
-  source  = "terraform-google-modules/network/google//modules/subnets"
-  version = "~> 9.1"
+module "dpu-subnet" {
+  source = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
 
   project_id   = module.project_services.project_id
   network_name = var.vpc_network_name
 
   subnets = [{
     subnet_name           = "composer-subnet"
-    subnet_ip             = "10.10.10.0/24"
+    subnet_ip             = var.composer_cidr.subnet_primary
     subnet_region         = var.region
     subnet_private_access = "true"
+    subnet_flow_logs      = "true"
   }]
 
   secondary_ranges = {
     composer-subnet = [
       {
         range_name    = local.cluster_secondary_range_name
-        ip_cidr_range = "10.154.0.0/17"
+        ip_cidr_range = var.composer_cidr.cluster_secondary_range
       },
       {
         range_name    = local.services_secondary_range_name
-        ip_cidr_range = "10.154.128.0/22"
+        ip_cidr_range = var.composer_cidr.services_secondary_range
       },
     ]
   }
 }
-
-data "google_compute_default_service_account" "default" {
-  project = module.project_services.project_id
-}
-
-# Grant default compute engine view access to cloud storage
-resource "google_project_iam_member" "gce_gcs_access" {
-  project = module.project_services.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-# Grant default compute engine view access to artifact registry
-resource "google_project_iam_member" "gce_ar_access" {
-  project = module.project_services.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
-}
-
 
 resource "google_composer_environment" "composer_env" {
   project = module.project_services.project_id
@@ -112,10 +97,30 @@ resource "google_composer_environment" "composer_env" {
       env_variables = var.composer_env_variables
       pypi_packages = var.composer_additional_pypi_packages
     }
+    workloads_config {
+      scheduler {
+        cpu        = var.composer_scheduler_cpu
+        memory_gb  = var.composer_scheduler_memory
+        storage_gb = var.composer_scheduler_storage
+        count      = var.composer_scheduler_count
+      }
+      web_server {
+        cpu        = var.composer_web_server_cpu
+        memory_gb  = var.composer_web_server_memory
+        storage_gb = var.composer_web_server_storage
+      }
+      worker {
+        cpu        = var.composer_worker_cpu
+        memory_gb  = var.composer_worker_memory
+        storage_gb = var.composer_worker_storage
+        min_count  = var.composer_worker_min_count
+        max_count  = var.composer_worker_max_count
+      }
+    }
     environment_size = var.composer_environment_size
     node_config {
       network         = var.vpc_network_id
-      subnetwork      = module.vpc.subnets["${var.region}/composer-subnet"].id
+      subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
       service_account = module.composer_service_account.email
       ip_allocation_policy {
         cluster_secondary_range_name  = local.cluster_secondary_range_name
@@ -123,26 +128,12 @@ resource "google_composer_environment" "composer_env" {
       }
     }
   }
-
-  depends_on = [
-    google_project_iam_member.gce_gcs_access,
-    google_project_iam_member.gce_ar_access
-  ]
-}
-
-locals {
-  workflow_orchestrator_dag_file = "docs_processing_orchestrator.py"
-  pdf_classifier_file            = "pdf_classifier.py"
 }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
-  name   = "dags/${local.workflow_orchestrator_dag_file}"
-  bucket = google_composer_environment.composer_env.storage_config.0.bucket
-  source = "${path.module}/../src/${local.workflow_orchestrator_dag_file}"
-}
-
-resource "google_storage_bucket_object" "pdf_classifier" {
-  name   = "dags/${local.pdf_classifier_file}"
-  bucket = google_composer_environment.composer_env.storage_config.0.bucket
-  source = "${path.module}/../src/${local.pdf_classifier_file}"
+  for_each       = fileset("${path.module}/../src", "**/*.py")
+  name           = "dags/${each.value}"
+  bucket         = google_composer_environment.composer_env.storage_config[0].bucket
+  source         = "${path.module}/../src/${each.value}"
+  detect_md5hash = "true"
 }

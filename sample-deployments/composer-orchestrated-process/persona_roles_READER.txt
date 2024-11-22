@@ -1,0 +1,3 @@
+roles/discoveryengine.user
+roles/iap.httpsResourceAccessor
+roles/storage.objectViewer

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import zipfile
 import logging
+import zipfile
 from typing import Dict
 
 from processors.base.gcsio import GCSPath
