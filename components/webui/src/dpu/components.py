@@ -38,7 +38,6 @@ PREAMBLE = (
     "I want to find information from the documents stored in the data store. "
     "The files and attachments in the data store contain information required "
     "to answer the questions.\n"
-    "\n"
     "Generate answers based on the information in the documents available "
     "in the data store. Be factual. "
     "Return only the top two to three sources in the search results. "
@@ -158,7 +157,7 @@ def show_gcs_object(
                     mime=content_type,
                     help="Download document",
                 )
-        tab_iframe, tab_markdown = st.tabs(["Raw", "Markdown"])
+        tab_iframe, tab_markdown = st.tabs(["Text/PDF", "Markdown"])
         with tab_iframe:
             if content_type == "application/octet-stream":
                 st.markdown("Not available for application/octet-stream")
