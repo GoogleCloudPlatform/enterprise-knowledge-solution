@@ -13,9 +13,9 @@ aiofiles==23.2.1
     # via
     #   gcloud-aio-storage
     #   google-cloud-alloydb-connector
-aiohappyeyeballs==2.4.2
+aiohappyeyeballs==2.4.3
     # via aiohttp
-aiohttp==3.10.6
+aiohttp==3.10.11
     # via
     #   apache-airflow-providers-http
     #   gcloud-aio-auth
@@ -23,7 +23,7 @@ aiohttp==3.10.6
     #   google-cloud-alloydb-connector
 aiosignal==1.3.1
     # via aiohttp
-alembic==1.13.3
+alembic==1.14.0
     # via
     #   apache-airflow
     #   sqlalchemy-spanner
@@ -33,9 +33,9 @@ altair==4.2.2
     #   streamlit-aggrid
 annotated-types==0.7.0
     # via pydantic
-anyio==4.6.0
+anyio==4.6.2.post1
     # via httpx
-apache-airflow==2.10.2
+apache-airflow==2.10.3
     # via
     #   -r reqs/../components/dpu-workflow/requirements.in
     #   apache-airflow-providers-common-compat
@@ -48,34 +48,35 @@ apache-airflow==2.10.2
     #   apache-airflow-providers-imap
     #   apache-airflow-providers-smtp
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-common-compat==1.2.0
+apache-airflow-providers-common-compat==1.2.2
     # via
     #   apache-airflow
+    #   apache-airflow-providers-fab
     #   apache-airflow-providers-google
-apache-airflow-providers-common-io==1.4.1
+apache-airflow-providers-common-io==1.4.2
     # via apache-airflow
-apache-airflow-providers-common-sql==1.17.0
+apache-airflow-providers-common-sql==1.20.0
     # via
     #   apache-airflow
     #   apache-airflow-providers-google
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-fab==1.4.0
+apache-airflow-providers-fab==1.5.1
     # via apache-airflow
 apache-airflow-providers-ftp==3.11.1
     # via apache-airflow
-apache-airflow-providers-google==10.23.0
+apache-airflow-providers-google==10.26.0
     # via -r reqs/../components/dpu-workflow/requirements.in
-apache-airflow-providers-http==4.13.1
+apache-airflow-providers-http==4.13.3
     # via apache-airflow
 apache-airflow-providers-imap==3.7.0
     # via apache-airflow
-apache-airflow-providers-smtp==1.8.0
+apache-airflow-providers-smtp==1.8.1
     # via apache-airflow
-apache-airflow-providers-sqlite==3.9.0
+apache-airflow-providers-sqlite==3.9.1
     # via apache-airflow
-apispec==6.6.1
+apispec==6.7.1
     # via flask-appbuilder
-argcomplete==3.5.0
+argcomplete==3.5.1
     # via apache-airflow
 asgiref==3.8.1
     # via
@@ -84,7 +85,7 @@ asgiref==3.8.1
     #   apache-airflow-providers-http
 asn1crypto==1.5.1
     # via scramp
-astroid==3.3.4
+astroid==3.3.5
     # via pylint
 attrs==24.2.0
     # via
@@ -100,11 +101,11 @@ backoff==2.2.1
     # via gcloud-aio-auth
 beautifulsoup4==4.12.3
     # via extract-msg
-blinker==1.8.2
+blinker==1.9.0
     # via
     #   apache-airflow
     #   streamlit
-cachecontrol==0.14.0
+cachecontrol==0.14.1
     # via firebase-admin
 cachelib==0.9.0
     # via
@@ -129,7 +130,7 @@ chardet==5.2.0
     # via
     #   gcloud-aio-auth
     #   pyexcel
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via
@@ -143,7 +144,7 @@ colorama==0.4.6
     # via flask-appbuilder
 colorclass==2.2.2
     # via oletools
-colorlog==6.8.2
+colorlog==6.9.0
     # via apache-airflow
 compressed-rtf==1.0.6
     # via extract-msg
@@ -153,9 +154,9 @@ connexion==2.14.2
     # via apache-airflow
 cron-descriptor==1.4.5
     # via apache-airflow
-croniter==3.0.3
+croniter==5.0.1
     # via apache-airflow
-cryptography==43.0.1
+cryptography==43.0.3
     # via
     #   apache-airflow
     #   gcloud-aio-auth
@@ -163,11 +164,11 @@ cryptography==43.0.1
     #   msoffcrypto-tool
     #   pyjwt
     #   pyopenssl
-db-dtypes==1.3.0
+db-dtypes==1.3.1
     # via pandas-gbq
 decorator==5.1.1
     # via gcsfs
-deprecated==1.2.14
+deprecated==1.2.15
     # via
     #   apache-airflow
     #   limits
@@ -177,19 +178,17 @@ deprecated==1.2.14
     #   opentelemetry-semantic-conventions
 deprecation==2.1.0
     # via streamlit-modal
-dill==0.3.8
+dill==0.3.9
     # via
     #   apache-airflow
     #   apache-airflow-providers-google
     #   pylint
-distlib==0.3.8
+distlib==0.3.9
     # via virtualenv
-dnspython==2.6.1
+dnspython==2.7.0
     # via email-validator
 docstring-parser==0.16
     # via google-cloud-aiplatform
-docutils==0.21.2
-    # via python-daemon
 easygui==0.98.3
     # via oletools
 ebcdic==1.1.1
@@ -198,17 +197,17 @@ email-validator==2.2.0
     # via flask-appbuilder
 entrypoints==0.4
     # via altair
-et-xmlfile==1.1.0
+et-xmlfile==2.0.0
     # via openpyxl
-extract-msg==0.49.0
+extract-msg==0.52.0
     # via processor-msg
-faker==30.0.0
+faker==33.0.0
     # via
     #   processor-msg
     #   processor-xlsx
 filelock==3.16.1
     # via virtualenv
-firebase-admin==6.5.0
+firebase-admin==6.6.0
     # via processor-web-ui
 flask==2.2.5
     # via
@@ -224,13 +223,13 @@ flask==2.2.5
     #   flask-session
     #   flask-sqlalchemy
     #   flask-wtf
-flask-appbuilder==4.5.0
+flask-appbuilder==4.5.2
     # via apache-airflow-providers-fab
 flask-babel==2.0.0
     # via flask-appbuilder
 flask-caching==2.3.0
     # via apache-airflow
-flask-jwt-extended==4.6.0
+flask-jwt-extended==4.7.1
     # via flask-appbuilder
 flask-limiter==3.8.0
     # via flask-appbuilder
@@ -242,17 +241,16 @@ flask-session==0.5.0
     # via apache-airflow
 flask-sqlalchemy==2.5.1
     # via flask-appbuilder
-flask-wtf==1.2.1
+flask-wtf==1.2.2
     # via
     #   apache-airflow
     #   flask-appbuilder
-frozenlist==1.4.1
+frozenlist==1.5.0
     # via
     #   aiohttp
     #   aiosignal
-fsspec==2024.9.0
+fsspec==2024.10.0
     # via
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
     #   apache-airflow
     #   gcsfs
     #   universal-pathlib
@@ -265,19 +263,17 @@ gcloud-aio-bigquery==7.1.0
     # via apache-airflow-providers-google
 gcloud-aio-storage==9.3.0
     # via apache-airflow-providers-google
-gcsfs==2024.9.0.post1
-    # via
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
-    #   apache-airflow-providers-google
+gcsfs==2024.10.0
+    # via apache-airflow-providers-google
 gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
     # via streamlit
-google-ads==25.0.0
+google-ads==25.1.0
     # via apache-airflow-providers-google
-google-analytics-admin==0.23.0
+google-analytics-admin==0.23.2
     # via apache-airflow-providers-google
-google-api-core==2.20.0
+google-api-core==2.23.0
     # via
     #   apache-airflow-providers-google
     #   firebase-admin
@@ -331,13 +327,13 @@ google-api-core==2.20.0
     #   pandas-gbq
     #   processor-web-ui
     #   sqlalchemy-bigquery
-google-api-python-client==2.147.0
+google-api-python-client==2.154.0
     # via
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/post-setup-config/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
-google-auth==2.35.0
+google-auth==2.36.0
     # via
     #   apache-airflow-providers-google
     #   gcsfs
@@ -403,40 +399,44 @@ google-auth-oauthlib==1.2.1
     #   google-ads
     #   pandas-gbq
     #   pydata-google-auth
-google-cloud-aiplatform==1.68.0
+google-cloud-aiplatform==1.73.0
     # via
     #   apache-airflow-providers-google
     #   processor-web-ui
-google-cloud-alloydb-connector==1.4.0
-    # via -r reqs/../components/specialized-parser/src/requirements.in
-google-cloud-appengine-logging==1.4.5
+google-cloud-alloydb-connector==1.5.0
+    # via
+    #   -r reqs/../components/post-setup-config/src/requirements.in
+    #   -r reqs/../components/specialized-parser/src/requirements.in
+google-cloud-appengine-logging==1.5.0
     # via google-cloud-logging
 google-cloud-audit-log==0.3.0
     # via google-cloud-logging
-google-cloud-automl==2.13.5
+google-cloud-automl==2.14.1
     # via apache-airflow-providers-google
-google-cloud-batch==0.17.28
+google-cloud-batch==0.17.31
     # via apache-airflow-providers-google
-google-cloud-bigquery==3.26.0
+google-cloud-bigquery==3.27.0
     # via
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
+    #   -r reqs/../components/doc-registry/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   google-cloud-aiplatform
     #   pandas-gbq
     #   processor-base
     #   sqlalchemy-bigquery
-google-cloud-bigquery-datatransfer==3.15.7
+google-cloud-bigquery-datatransfer==3.17.1
     # via apache-airflow-providers-google
-google-cloud-bigquery-storage==2.26.0
-    # via processor-base
-google-cloud-bigtable==2.26.0
+google-cloud-bigquery-storage==2.27.0
+    # via
+    #   -r reqs/../components/doc-registry/src/requirements.in
+    #   processor-base
+google-cloud-bigtable==2.27.0
     # via apache-airflow-providers-google
-google-cloud-build==3.25.0
+google-cloud-build==3.27.1
     # via apache-airflow-providers-google
-google-cloud-compute==1.19.2
+google-cloud-compute==1.22.0
     # via apache-airflow-providers-google
-google-cloud-container==2.51.0
+google-cloud-container==2.54.0
     # via apache-airflow-providers-google
 google-cloud-core==2.4.1
     # via
@@ -447,63 +447,63 @@ google-cloud-core==2.4.1
     #   google-cloud-spanner
     #   google-cloud-storage
     #   google-cloud-translate
-google-cloud-datacatalog==3.20.1
+google-cloud-datacatalog==3.23.0
     # via apache-airflow-providers-google
-google-cloud-dataflow-client==0.8.12
+google-cloud-dataflow-client==0.8.14
     # via apache-airflow-providers-google
-google-cloud-dataform==0.5.11
+google-cloud-dataform==0.5.13
     # via apache-airflow-providers-google
-google-cloud-dataplex==2.2.2
+google-cloud-dataplex==2.4.0
     # via apache-airflow-providers-google
-google-cloud-dataproc==5.12.0
+google-cloud-dataproc==5.15.1
     # via apache-airflow-providers-google
-google-cloud-dataproc-metastore==1.15.5
+google-cloud-dataproc-metastore==1.16.1
     # via apache-airflow-providers-google
-google-cloud-discoveryengine==0.12.2
+google-cloud-discoveryengine==0.13.4
     # via processor-web-ui
-google-cloud-dlp==3.23.0
+google-cloud-dlp==3.25.1
     # via apache-airflow-providers-google
-google-cloud-documentai==2.32.0
+google-cloud-documentai==3.0.1
     # via
     #   -r reqs/../components/doc-classifier/src/requirements.in
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
 google-cloud-firestore==2.19.0
     # via
     #   firebase-admin
     #   processor-web-ui
-google-cloud-kms==3.0.0
+google-cloud-kms==3.1.1
     # via apache-airflow-providers-google
-google-cloud-language==2.14.0
+google-cloud-language==2.15.1
     # via apache-airflow-providers-google
-google-cloud-logging==3.11.2
+google-cloud-logging==3.11.3
     # via apache-airflow-providers-google
-google-cloud-memcache==1.9.5
+google-cloud-memcache==1.10.1
     # via apache-airflow-providers-google
-google-cloud-monitoring==2.22.2
+google-cloud-monitoring==2.23.1
     # via apache-airflow-providers-google
-google-cloud-orchestration-airflow==1.14.0
+google-cloud-orchestration-airflow==1.15.1
     # via apache-airflow-providers-google
-google-cloud-os-login==2.14.6
+google-cloud-os-login==2.15.1
     # via apache-airflow-providers-google
-google-cloud-pubsub==2.23.1
+google-cloud-pubsub==2.27.1
     # via apache-airflow-providers-google
-google-cloud-redis==2.15.5
+google-cloud-redis==2.16.1
     # via apache-airflow-providers-google
-google-cloud-resource-manager==1.12.5
+google-cloud-resource-manager==1.13.1
     # via google-cloud-aiplatform
-google-cloud-run==0.10.8
+google-cloud-run==0.10.13
     # via apache-airflow-providers-google
-google-cloud-secret-manager==2.20.2
+google-cloud-secret-manager==2.21.1
     # via apache-airflow-providers-google
-google-cloud-spanner==3.49.1
+google-cloud-spanner==3.50.1
     # via
     #   apache-airflow-providers-google
     #   sqlalchemy-spanner
-google-cloud-speech==2.27.0
+google-cloud-speech==2.28.1
     # via apache-airflow-providers-google
 google-cloud-storage==2.18.2
     # via
+    #   -r reqs/../components/doc-registry/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   apache-airflow-providers-google
     #   firebase-admin
@@ -511,19 +511,19 @@ google-cloud-storage==2.18.2
     #   google-cloud-aiplatform
     #   processor-base
     #   processor-web-ui
-google-cloud-storage-transfer==1.12.0
+google-cloud-storage-transfer==1.13.1
     # via apache-airflow-providers-google
-google-cloud-tasks==2.16.5
+google-cloud-tasks==2.17.1
     # via apache-airflow-providers-google
-google-cloud-texttospeech==2.17.2
+google-cloud-texttospeech==2.21.1
     # via apache-airflow-providers-google
-google-cloud-translate==3.16.0
+google-cloud-translate==3.18.0
     # via apache-airflow-providers-google
-google-cloud-videointelligence==2.13.5
+google-cloud-videointelligence==2.14.1
     # via apache-airflow-providers-google
-google-cloud-vision==3.7.4
+google-cloud-vision==3.8.1
     # via apache-airflow-providers-google
-google-cloud-workflows==1.14.5
+google-cloud-workflows==1.15.1
     # via apache-airflow-providers-google
 google-crc32c==1.6.0
     # via
@@ -538,7 +538,7 @@ google-resumable-media==2.7.2
     # via
     #   google-cloud-bigquery
     #   google-cloud-storage
-googleapis-common-protos==1.65.0
+googleapis-common-protos==1.66.0
     # via
     #   google-ads
     #   google-api-core
@@ -569,7 +569,7 @@ grpc-google-iam-v1==0.13.1
     #   google-cloud-translate
 grpc-interceptor==0.15.4
     # via google-cloud-spanner
-grpcio==1.66.1
+grpcio==1.68.0
     # via
     #   google-ads
     #   google-api-core
@@ -582,7 +582,7 @@ grpcio==1.66.1
     #   opentelemetry-exporter-otlp-proto-grpc
 grpcio-gcp==0.2.2
     # via apache-airflow-providers-google
-grpcio-status==1.62.3
+grpcio-status==1.68.0
     # via
     #   google-ads
     #   google-api-core
@@ -591,7 +591,7 @@ gunicorn==23.0.0
     # via apache-airflow
 h11==0.14.0
     # via httpcore
-httpcore==1.0.5
+httpcore==1.0.7
     # via httpx
 httplib2==0.22.0
     # via
@@ -601,7 +601,7 @@ httpx==0.27.2
     # via
     #   apache-airflow
     #   apache-airflow-providers-google
-identify==2.6.1
+identify==2.6.2
     # via pre-commit
 idna==3.10
     # via
@@ -610,12 +610,10 @@ idna==3.10
     #   httpx
     #   requests
     #   yarl
-immutabledict==4.2.0
+immutabledict==4.2.1
     # via apache-airflow-providers-google
-importlib-metadata==8.4.0
-    # via
-    #   apache-airflow
-    #   opentelemetry-api
+importlib-metadata==8.5.0
+    # via opentelemetry-api
 importlib-resources==6.4.5
     # via limits
 inflection==0.5.1
@@ -650,7 +648,7 @@ jsonschema==4.23.0
     #   apache-airflow
     #   connexion
     #   flask-appbuilder
-jsonschema-specifications==2023.12.1
+jsonschema-specifications==2024.10.1
     # via jsonschema
 lark==1.1.9
     # via rtfde
@@ -668,23 +666,23 @@ lockfile==0.12.2
     # via
     #   apache-airflow
     #   python-daemon
-looker-sdk==24.16.2
+looker-sdk==24.20.0
     # via apache-airflow-providers-google
-mako==1.3.5
+mako==1.3.6
     # via alembic
 markdown-it-py==3.0.0
     # via
     #   apache-airflow
     #   mdit-py-plugins
     #   rich
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via
     #   apache-airflow
     #   jinja2
     #   mako
     #   werkzeug
     #   wtforms
-marshmallow==3.22.0
+marshmallow==3.23.1
     # via
     #   flask-appbuilder
     #   marshmallow-oneofschema
@@ -721,7 +719,6 @@ numpy==1.26.4
     #   db-dtypes
     #   pandas
     #   pandas-gbq
-    #   pyarrow
     #   pydeck
     #   shapely
     #   streamlit
@@ -740,38 +737,40 @@ openpyxl==3.0.10
     # via
     #   processor-xlsx
     #   pyexcel-xlsx
-opentelemetry-api==1.27.0
+opentelemetry-api==1.28.2
     # via
     #   apache-airflow
     #   google-cloud-logging
+    #   google-cloud-pubsub
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-opentelemetry-exporter-otlp==1.27.0
+opentelemetry-exporter-otlp==1.28.2
     # via apache-airflow
-opentelemetry-exporter-otlp-proto-common==1.27.0
+opentelemetry-exporter-otlp-proto-common==1.28.2
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-exporter-otlp-proto-grpc==1.27.0
+opentelemetry-exporter-otlp-proto-grpc==1.28.2
     # via opentelemetry-exporter-otlp
-opentelemetry-exporter-otlp-proto-http==1.27.0
+opentelemetry-exporter-otlp-proto-http==1.28.2
     # via opentelemetry-exporter-otlp
-opentelemetry-proto==1.27.0
+opentelemetry-proto==1.28.2
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-sdk==1.27.0
+opentelemetry-sdk==1.28.2
     # via
+    #   google-cloud-pubsub
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-semantic-conventions==0.48b0
+opentelemetry-semantic-conventions==0.49b2
     # via opentelemetry-sdk
 ordered-set==4.1.0
     # via flask-limiter
-packaging==24.1
+packaging==24.2
     # via
     #   apache-airflow
     #   apispec
@@ -789,7 +788,6 @@ packaging==24.1
     #   streamlit
 pandas==2.1.4
     # via
-    #   -r reqs/../components/processing/form_parser/src/requirements.in
     #   altair
     #   apache-airflow-providers-google
     #   db-dtypes
@@ -797,7 +795,7 @@ pandas==2.1.4
     #   processor-web-ui
     #   streamlit
     #   streamlit-aggrid
-pandas-gbq==0.23.2
+pandas-gbq==0.24.0
     # via apache-airflow-providers-google
 pathspec==0.12.1
     # via apache-airflow
@@ -807,7 +805,7 @@ pendulum==3.0.0
     # via apache-airflow
 pg8000==1.31.2
     # via google-cloud-alloydb-connector
-pillow==10.4.0
+pillow==11.0.0
     # via streamlit
 platformdirs==4.3.6
     # via
@@ -815,12 +813,15 @@ platformdirs==4.3.6
     #   virtualenv
 pluggy==1.5.0
     # via apache-airflow
-pre-commit==3.8.0
+pre-commit==4.0.1
     # via -r reqs/requirements_dev.in
 prison==0.2.1
     # via flask-appbuilder
-proto-plus==1.24.0
+propcache==0.2.0
+    # via yarl
+proto-plus==1.25.0
     # via
+    #   -r reqs/../components/doc-registry/src/requirements.in
     #   apache-airflow-providers-google
     #   google-ads
     #   google-analytics-admin
@@ -867,7 +868,7 @@ proto-plus==1.24.0
     #   google-cloud-vision
     #   google-cloud-workflows
     #   processor-base
-protobuf==4.25.5
+protobuf==5.28.3
     # via
     #   google-ads
     #   google-analytics-admin
@@ -922,10 +923,11 @@ protobuf==4.25.5
     #   processor-web-ui
     #   proto-plus
     #   streamlit
-psutil==6.0.0
+psutil==6.1.0
     # via apache-airflow
-pyarrow==17.0.0
+pyarrow==18.0.0
     # via
+    #   apache-airflow-providers-google
     #   db-dtypes
     #   pandas-gbq
     #   streamlit
@@ -939,16 +941,16 @@ pyasn1-modules==0.4.0
     #   google-auth
 pycparser==2.22
     # via cffi
-pydantic==2.9.2
+pydantic==2.10.1
     # via
     #   google-cloud-aiplatform
     #   processor-base
     #   pydantic-settings
-pydantic-core==2.23.4
+pydantic-core==2.27.1
     # via pydantic
-pydantic-settings==2.5.2
+pydantic-settings==2.6.1
     # via processor-base
-pydata-google-auth==1.8.2
+pydata-google-auth==1.9.0
     # via pandas-gbq
 pydeck==0.9.1
     # via streamlit
@@ -956,7 +958,7 @@ pyexcel==0.6.7
     # via
     #   processor-xlsx
     #   pyexcel-text
-pyexcel-io==0.6.6
+pyexcel-io==0.6.7
     # via
     #   pyexcel
     #   pyexcel-xlsx
@@ -968,7 +970,7 @@ pygments==2.18.0
     # via
     #   apache-airflow
     #   rich
-pyjwt==2.9.0
+pyjwt==2.10.0
     # via
     #   apache-airflow
     #   firebase-admin
@@ -979,13 +981,13 @@ pylint==3.3.1
     # via -r reqs/requirements_dev.in
 pyopenssl==24.2.1
     # via apache-airflow-providers-google
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via
     #   httplib2
     #   oletools
-pyright==1.1.382.post0
+pyright==1.1.389
     # via -r reqs/requirements_dev.in
-python-daemon==3.0.1
+python-daemon==3.1.0
     # via apache-airflow
 python-dateutil==2.9.0.post0
     # via
@@ -1055,15 +1057,15 @@ requests-toolbelt==1.0.0
     #   apache-airflow-providers-http
 rfc3339-validator==0.1.4
     # via apache-airflow
-rich==13.8.1
+rich==13.9.4
     # via
     #   apache-airflow
     #   flask-limiter
     #   rich-argparse
     #   streamlit
-rich-argparse==1.5.2
+rich-argparse==1.6.0
     # via apache-airflow
-rpds-py==0.20.0
+rpds-py==0.21.0
     # via
     #   jsonschema
     #   referencing
@@ -1075,9 +1077,9 @@ rtfde==0.1.2
     # via extract-msg
 scramp==1.4.5
     # via pg8000
-setproctitle==1.3.3
+setproctitle==1.3.4
     # via apache-airflow
-setuptools==75.1.0
+setuptools==75.6.0
     # via
     #   pandas-gbq
     #   pydata-google-auth
@@ -1100,6 +1102,7 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==1.4.54
     # via
+    #   -r reqs/../components/post-setup-config/src/requirements.in
     #   -r reqs/../components/specialized-parser/src/requirements.in
     #   alembic
     #   apache-airflow
@@ -1110,7 +1113,7 @@ sqlalchemy==1.4.54
     #   sqlalchemy-jsonfield
     #   sqlalchemy-spanner
     #   sqlalchemy-utils
-sqlalchemy-bigquery==1.11.0
+sqlalchemy-bigquery==1.12.0
     # via apache-airflow-providers-google
 sqlalchemy-jsonfield==1.0.2
     # via apache-airflow
@@ -1118,11 +1121,11 @@ sqlalchemy-spanner==1.7.0
     # via apache-airflow-providers-google
 sqlalchemy-utils==0.41.2
     # via flask-appbuilder
-sqlparse==0.5.1
+sqlparse==0.5.2
     # via
     #   apache-airflow-providers-common-sql
     #   google-cloud-spanner
-streamlit==1.39.0
+streamlit==1.40.1
     # via
     #   processor-web-ui
     #   streamlit-aggrid
@@ -1138,32 +1141,33 @@ tabulate==0.9.0
     # via
     #   apache-airflow
     #   pyexcel-text
-tenacity==8.5.0
+tenacity==9.0.0
     # via
     #   apache-airflow
     #   apache-airflow-providers-google
     #   streamlit
-termcolor==2.4.0
+termcolor==2.5.0
     # via apache-airflow
 text-unidecode==1.3
     # via python-slugify
 texttable==1.7.0
     # via pyexcel
-time-machine==2.15.0
+time-machine==2.16.0
     # via pendulum
 toml==0.10.2
     # via streamlit
 tomlkit==0.13.2
     # via pylint
-toolz==0.12.1
+toolz==1.0.0
     # via altair
-tornado==6.4.1
+tornado==6.4.2
     # via streamlit
-types-protobuf==5.28.0.20240924
+types-protobuf==5.28.3.20241030
     # via -r reqs/requirements_dev.in
 typing-extensions==4.12.2
     # via
     #   alembic
+    #   faker
     #   flask-limiter
     #   limits
     #   looker-sdk
@@ -1180,19 +1184,17 @@ tzlocal==5.2
     # via extract-msg
 uc-micro-py==1.0.3
     # via linkify-it-py
-unicodecsv==0.14.1
-    # via apache-airflow
 universal-pathlib==0.2.5
     # via apache-airflow
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.2.3
     # via requests
-uv==0.4.16
+uv==0.5.4
     # via -r reqs/requirements_bootstrap.in
-virtualenv==20.26.5
+virtualenv==20.27.1
     # via pre-commit
-watchdog==4.0.2
+watchdog==6.0.0
     # via streamlit
 werkzeug==2.2.3
     # via
@@ -1202,17 +1204,17 @@ werkzeug==2.2.3
     #   flask-appbuilder
     #   flask-jwt-extended
     #   flask-login
-wirerope==0.4.7
+wirerope==0.4.8
     # via methodtools
 wkhtmltopdf==0.2
     # via processor-msg
-wrapt==1.16.0
+wrapt==1.17.0
     # via deprecated
-wtforms==3.1.2
+wtforms==3.2.1
     # via
     #   flask-appbuilder
     #   flask-wtf
-yarl==1.13.0
+yarl==1.18.0
     # via aiohttp
-zipp==3.20.2
+zipp==3.21.0
     # via importlib-metadata
