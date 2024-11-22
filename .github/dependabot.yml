@@ -24,8 +24,4 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"
-    directory: "/components"
-    schedule:
-      interval: "weekly"
 version: 2
