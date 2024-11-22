@@ -15,6 +15,7 @@
 import streamlit as st  # type: ignore
 from dpu.api import generate_answer
 from dpu.components import LOGO, PREAMBLE, choose_source_id, show_agent_document
+from dpu.components import LOGO, PREAMBLE, choose_source_id, show_agent_document
 
 logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -85,6 +86,14 @@ if "chosen_row" not in st.session_state:
     st.session_state["chosen_row"] = None
 if "preamble" not in st.session_state:
     st.session_state["preamble"] = PREAMBLE
+if "answer" not in st.session_state:
+    st.session_state["answer"] = ""
+if "sources" not in st.session_state:
+    st.session_state["sources"] = []
+if "chosen_row" not in st.session_state:
+    st.session_state["chosen_row"] = None
+if "preamble" not in st.session_state:
+    st.session_state["preamble"] = PREAMBLE
 
 #
 # Form
@@ -103,13 +112,23 @@ my_js = """ const textArea = document.querySelector('.textarea-test')
     textArea.style.height = "auto"
     textArea.style.height = '${textArea.scrollHeight}px';
     }) """
+if "preamble" not in st.session_state:
+    st.session_state["preamble"] = PREAMBLE
+
+my_js = """ const textArea = document.querySelector('.textarea-test')
+    textArea.addEventListener('input',(e)=>{
+    textArea.style.height = "auto"
+    textArea.style.height = '${textArea.scrollHeight}px';
+    }) """
 
 # Render the question
 with st.container():
 
     def update_preamble():
         logger.info(f"preamble update: {st.session_state.preamble_new}")
+        logger.info(f"preamble update: {st.session_state.preamble_new}")
         st.session_state.preamble = st.session_state.preamble_new
+
 
     preamble_new = st.text_area(
         ":blue[Change the :orange[***search context***] below:]",
@@ -118,9 +137,13 @@ with st.container():
         key="preamble_new",
         on_change=update_preamble,
         height=140,
+        height=140,
     )
 
     def question_change():
+        result = generate_answer(
+            st.session_state.question, preamble=st.session_state["preamble"]
+        )
         result = generate_answer(
             st.session_state.question, preamble=st.session_state["preamble"]
         )
@@ -141,7 +164,10 @@ with st.container():
         with st.popover("Examples"):
             st.markdown(SAMPLE_QUERIES, unsafe_allow_html=True)
 
+            st.markdown(SAMPLE_QUERIES, unsafe_allow_html=True)
 
+
+# Render answer if there's a summary returned in the response
 # Render answer if there's a summary returned in the response
 if st.session_state.answer:
 
@@ -164,6 +190,14 @@ if st.session_state.answer:
 
 # Render list of other documents
 if st.session_state.sources:
+    st.session_state["source_id"] = choose_source_id(
+        st.session_state.sources, "Search Results"
+    )
+
+# Render the selected document or reference
+if "source_id" in st.session_state and st.session_state.source_id:
+    logger.info(f"source_id: {st.session_state.source_id}")
+    show_agent_document(st.session_state.source_id)
     st.session_state["source_id"] = choose_source_id(
         st.session_state.sources, "Search Results"
     )
