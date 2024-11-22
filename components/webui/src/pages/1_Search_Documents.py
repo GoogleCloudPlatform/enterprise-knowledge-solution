@@ -21,7 +21,7 @@ logger = st.logger.get_logger(__name__)  # pyright: ignore[reportAttributeAccess
 # Put into a single place
 SAMPLE_QUERIES = """
 ```
-    Generate a Table to summarize the Quarterly Revenue 
+    Generate a Table to summarize the Quarterly Revenue
 of Google Cloud in 2024, 2023, and 2022.
 ```
 ```
@@ -39,7 +39,7 @@ of RYDE, and INTJ? Summarize the results.
     How long was the outage duration in Denver?
 ```
 ```
-    List the incident number, owner,  RCA analyst, data,   
+    List the incident number, owner,  RCA analyst, data,
 root cause, and resolution for ticket #: T010101?
 ```
 ```
@@ -152,8 +152,8 @@ if st.session_state.answer:
         f'<div style=\'font-size:1rem; font-family:"Arial", sans-serif; word-wrap: break-word;'
         f"color:blue;'>{ans}</div>"
     )
-    #st.text_area(":blue[Summary Response: ]", value=ans, height=240)
-    
+    # st.text_area(":blue[Summary Response: ]", value=ans, height=240)
+
     tab1, tab2 = st.tabs(["Markdown", "Text"])
 
     with tab1:
