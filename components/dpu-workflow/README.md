@@ -12,12 +12,13 @@ The orchestrator carries out the following task for the processing of the ingest
 ## Resource Created
 
 Following resource are provsioned and created when the module are applied through terraform:
-| Name | Description |
-|------|-------------|
-| VPC Subnet | A VPC subnet in the common EKS VPC network. The VPC subnet has secondary IP ranges dedicated the the Cloud Composer environment |
-| Cloud Composer environmet `dpu-composer` | A Cloud Composer environment for execution of the document workflow orchestrator |
-| Document Workflow DAG | The document workflow DAG source code deployed in to the Cloud Composer DAG bucket, ready for EKS users to run |
-| Workflow Service Account | Dedicated service accout used in the workflow execution with the neccessary access right needed to GCS bucket, BigQuery dataset, Cloud Run and Vertex AI Agent builder |
+
+| Name                                     | Description                                                                                                                                                            |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VPC Subnet                               | A VPC subnet in the common EKS VPC network. The VPC subnet has secondary IP ranges dedicated the the Cloud Composer environment                                        |
+| Cloud Composer environmet `dpu-composer` | A Cloud Composer environment for execution of the document workflow orchestrator                                                                                       |
+| Document Workflow DAG                    | The document workflow DAG source code deployed in to the Cloud Composer DAG bucket, ready for EKS users to run                                                         |
+| Workflow Service Account                 | Dedicated service accout used in the workflow execution with the neccessary access right needed to GCS bucket, BigQuery dataset, Cloud Run and Vertex AI Agent builder |
 
 ## Inputs
 
