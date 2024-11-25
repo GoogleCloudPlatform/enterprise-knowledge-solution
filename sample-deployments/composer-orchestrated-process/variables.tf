@@ -32,12 +32,6 @@ variable "iap_access_domains" {
   type        = list(string)
 }
 
-variable "webui_service_name" {
-  type        = string
-  description = "Specify the WebUI App Engine service name, use the default value when doing initial deployment. Change the default value after the initial deployment and re-apply terraform"
-  default     = "default"
-}
-
 variable "docai_location" {
   description = "Google Cloud region where compute services are located."
   type        = string
