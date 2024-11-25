@@ -82,6 +82,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   depends_on = [
     module.gcloud_build_app.wait
   ]
+  deletion_protection = false
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
@@ -90,6 +91,9 @@ resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
   region                = var.region
   cloud_run {
     service = google_cloud_run_v2_service.eks_webui.name
+  }
+  lifecycle {
+    replace_triggered_by = [google_cloud_run_v2_service.eks_webui]
   }
 }
 
