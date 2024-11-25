@@ -86,7 +86,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
-  name                  = "eks-webui-neg"
+  name                  = "${var.webui_service_name}-neg"
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
@@ -105,7 +105,7 @@ resource "google_compute_ssl_policy" "ssl-policy" {
 
 module "eks_webui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
-  name                            = "eks-webui-lb"
+  name                            = "${var.webui_service_name}-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
