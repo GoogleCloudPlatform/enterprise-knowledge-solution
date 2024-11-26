@@ -21,6 +21,7 @@ locals {
 resource "google_cloud_run_v2_job" "configure_db_schema_job" {
   name     = var.configure_schema_cloud_run_job_name
   location = var.region
+  depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
   template {
     template {
       service_account = module.configure_schema_account.email
@@ -77,11 +78,7 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
   EOT
   enabled               = true
 
-  depends_on = [google_cloud_run_v2_job.configure_db_schema_job]
-
-  create_cmd_triggers = {
-    source_contents_hash = local.cloud_build_content_hash
-  }
+  module_depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
 }
 
 
