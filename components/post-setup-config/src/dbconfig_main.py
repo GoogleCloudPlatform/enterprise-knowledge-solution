@@ -72,17 +72,20 @@ class DbConfigJobRunner:
 
     def create_alloydb_schema_and_permissions(self) -> None:
         """
-        Verify AlloyDB table exists to save results from the processor.
+        Create schemas and permissions in the alloydb cluster.
         """
         users = [os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"], "postgres"]
+
+        sql_commands = "CREATE SCHEMA IF NOT EXISTS eks; CREATE EXTENSION IF NOT EXISTS pgaudit;"
+        for user in users:
+            sql_commands += f' GRANT ALL ON SCHEMA eks TO "{user}";'
+            sql_commands += f' GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}";'
+            sql_commands += f' GRANT USAGE ON SCHEMA eks TO "{user}";'
+
         with self.alloydb_connection_pool.connect() as db_conn:
-            db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
-            for user in users:
-                db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user}"')
-                db_conn.execute(
-                    f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"'
-                )
-                db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
+            # Execute all commands in a single transaction
+            with db_conn.begin():
+                db_conn.execute(sql_commands)
 
 
 def run() -> None:

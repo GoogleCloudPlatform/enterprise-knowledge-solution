@@ -74,11 +74,10 @@ module "docs_results" {
     instance_type     = "PRIMARY"
     machine_cpu_count = 2
     database_flags = {
-      # This flag enables authenticating using IAM, however, creating databases and tables from terraform is not
-      # currently supported. This goes for managing users permissions over databases and tables as well.
-      # This means we will use throughout the example only the `public` built in database, which can be accessed by any
-      # authenticated user.
-      "alloydb.iam_authentication" = "true"
+      "alloydb.iam_authentication"  = "true",
+      "alloydb.enable_pgaudit"     = "on",
+      "password.enforce_complexity" = "on",
+      "password.min_pass_length"    = "10"
     }
   }
 
