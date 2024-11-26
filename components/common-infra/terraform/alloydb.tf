@@ -75,7 +75,7 @@ module "docs_results" {
     machine_cpu_count = 2
     database_flags = {
       "alloydb.iam_authentication"  = "true",
-      "alloydb.enable_pgaudit"     = "on",
+      "alloydb.enable_pgaudit"      = "on",
       "password.enforce_complexity" = "on",
       "password.min_pass_length"    = "10"
     }

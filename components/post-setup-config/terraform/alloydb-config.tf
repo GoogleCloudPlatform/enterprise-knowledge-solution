@@ -66,7 +66,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       labels["goog-packaged-solution"]
     ]
   }
-  depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
+  depends_on          = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
   deletion_protection = false
 }
 
@@ -79,10 +79,8 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
       --project ${var.project_id}
   EOT
   enabled               = true
-  module_depends_on = [module.gcloud_build_job_to_configure_alloydb_schema]
+  module_depends_on     = [module.gcloud_build_job_to_configure_alloydb_schema]
 }
-
-
 
 module "configure_schema_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
