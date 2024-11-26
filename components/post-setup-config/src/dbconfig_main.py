@@ -83,6 +83,7 @@ class DbConfigJobRunner:
                     f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"'
                 )
                 db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
+                db_conn.execute(f'ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO "{user}')
 
 
 def run() -> None:

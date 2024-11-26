@@ -60,6 +60,7 @@ module "doc_classifier_account" {
   prefix     = "eks"
   names      = [local.service_account_name]
   project_roles = [
+    "${var.project_id}=>roles/storage.objectUser",
     "${var.project_id}=>roles/documentai.apiUser",
   ]
   display_name = "Doc Classifier Account"
