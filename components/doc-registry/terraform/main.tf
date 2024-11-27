@@ -96,4 +96,5 @@ resource "google_cloud_run_v2_job" "doc-registry-service-job" {
   depends_on = [
     module.gcloud_build_doc_registry.wait
   ]
+  deletion_protection = false
 }

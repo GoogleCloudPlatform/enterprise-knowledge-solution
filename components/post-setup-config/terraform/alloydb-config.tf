@@ -66,6 +66,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       labels["goog-packaged-solution"]
     ]
   }
+  deletion_protection = false
 }
 
 module "gcloud_trigger_job_to_configure_alloydb_schema" {

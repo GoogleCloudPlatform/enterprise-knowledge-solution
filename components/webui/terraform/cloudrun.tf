@@ -37,7 +37,6 @@ resource "null_resource" "deployment_trigger" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  #ts:maxseverity=None ts does not handle the `replace_triggered_by` argument, but its necessary
   lifecycle {
     replace_triggered_by = [null_resource.deployment_trigger]
   }
@@ -78,10 +77,10 @@ resource "google_cloud_run_v2_service" "eks_webui" {
     }
     service_account = module.cloud_run_web_account.email
   }
-
   depends_on = [
     module.gcloud_build_app.wait
   ]
+  deletion_protection = false
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
