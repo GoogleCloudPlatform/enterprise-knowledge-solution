@@ -66,7 +66,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       labels["goog-packaged-solution"]
     ]
   }
-  depends_on = [ module.gcloud_build_job_to_configure_alloydb_schema.wait ]
+  depends_on          = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
   deletion_protection = false
 }
 

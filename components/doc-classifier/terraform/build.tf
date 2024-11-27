@@ -14,7 +14,7 @@
 
 
 locals {
-  classifier_cloud_build_content_hash = sha512(
+  cloud_build_content_hash = sha512(
     join("", [
       for f in fileset(path.module, "../src/**") :
       filesha512("${path.module}/${f}")
@@ -41,6 +41,6 @@ module "gcloud_build_doc_classifier" {
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.cloud_build_content_hashh
+    source_contents_hash = local.cloud_build_content_hash
   }
 }

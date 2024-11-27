@@ -15,7 +15,7 @@
 
 locals {
   image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.doc_registry_service_cloud_run_job_name}:latest"
-  doc_registry_service_cloud_build_content_hash = sha512(
+  cloud_build_content_hash = sha512(
     join("", [
       for f in fileset(path.module, "../src/**") :
       filesha512("${path.module}/${f}")
