@@ -125,16 +125,17 @@ class SpecializedParserJobRunner:
         """
         with self.alloydb_connection_pool.connect() as db_conn:
             db_conn.execute(
-                f"""
+                sqlalchemy.text(f"""
             CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
                 id VARCHAR (255) NOT NULL PRIMARY KEY,
                 original_filename VARCHAR (2048) NOT NULL,
                 results_file VARCHAR (2048) NOT NULL,
                 run_id VARCHAR (255) NULL,
                 entities JSONB NULL
-            )
+            );
+            ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;
             """
-            )
+            ))
 
     def call_batch_processor(self) -> Operation:
         opts = ClientOptions(

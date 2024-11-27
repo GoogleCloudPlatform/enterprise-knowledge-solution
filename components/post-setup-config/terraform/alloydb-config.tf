@@ -79,7 +79,11 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
       --project ${var.project_id}
   EOT
   enabled               = true
-  module_depends_on     = [module.gcloud_build_job_to_configure_alloydb_schema]
+  module_depends_on     = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
+
+  create_cmd_triggers = {
+    source_contents_hash = local.cloud_build_content_hash
+  }
 }
 
 module "configure_schema_account" {
