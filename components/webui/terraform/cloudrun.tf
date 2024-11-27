@@ -37,9 +37,6 @@ resource "null_resource" "deployment_trigger" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  lifecycle {
-    replace_triggered_by = [null_resource.deployment_trigger]
-  }
   name     = var.webui_service_name
   location = var.region
   ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
@@ -76,6 +73,9 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       }
     }
     service_account = module.cloud_run_web_account.email
+  }
+  lifecycle {
+    replace_triggered_by = [null_resource.deployment_trigger]
   }
   depends_on = [
     module.gcloud_build_app.wait
