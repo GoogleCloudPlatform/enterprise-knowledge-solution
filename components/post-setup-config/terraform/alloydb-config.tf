@@ -73,7 +73,8 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
     run jobs execute ${google_cloud_run_v2_job.configure_db_schema_job.name} \
-      --region ${var.region}
+      --region ${var.region} \
+      --project ${var.project_id}
   EOT
   enabled               = true
 }
