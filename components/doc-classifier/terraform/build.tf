@@ -41,6 +41,6 @@ module "gcloud_build_doc_classifier" {
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.classifier_cloud_build_content_hash
+    source_contents_hash = local.cloud_build_content_hashh
   }
 }

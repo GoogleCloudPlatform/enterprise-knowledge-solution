@@ -39,6 +39,6 @@ module "gcloud_build_doc_registry" {
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.doc_registry_service_cloud_build_content_hash
+    source_contents_hash = local.cloud_build_content_hash
   }
 }
