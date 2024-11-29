@@ -30,15 +30,17 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
 with Connector() as connector:
     pool = init_connection_pool(connector)
     with pool.connect() as db_conn:
+        db_conn.execute(sqlalchemy.text('DROP SCHEMA eks'))
+        db_conn.execute(sqlalchemy.text('DROP SCHEMA eks'))
+        db_conn.execute(sqlalchemy.text('DROP ROLE eks_users'))
         result = db_conn.execute(
             sqlalchemy.text(
                 "SELECT * FROM pg_catalog.pg_roles WHERE rolname = ""'eks_users'")
         ).fetchall()  # pyright: ignore [reportOptionalMemberAccess]
         result = [row for row in result]
-        print(result)
         has_rows = len(result)
         if not has_rows:
-            db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users'))
+            db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users NOINHERIT'))
 
 # Build query
 sql_commands = ""
@@ -46,7 +48,6 @@ sql_commands += " CREATE EXTENSION IF NOT EXISTS pgaudit;"
 users = [os.environ["ALLOYDB_USER_CONFIG"], os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"], "postgres"]
 
 sql_commands += " GRANT ALL ON DATABASE postgres TO eks_users;"
-sql_commands += " SET ROLE eks_users;"
 
 sql_commands += " CREATE SCHEMA IF NOT EXISTS eks AUTHORIZATION eks_users;"
 sql_commands += " ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO eks_users;"
@@ -59,4 +60,5 @@ with Connector() as connector:
     pool = init_connection_pool(connector)
     # interact with AlloyDB database using connection pool
     with pool.connect() as db_conn:
-        db_conn.execute(sqlalchemy.text(sql_commands))
+        for cmd in sql_commands.split(";"):
+            db_conn.execute(sqlalchemy.text(cmd.strip()))
