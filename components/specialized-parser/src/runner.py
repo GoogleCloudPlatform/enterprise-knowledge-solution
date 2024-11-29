@@ -6,7 +6,6 @@ import re
 import uuid
 from collections import namedtuple
 from dataclasses import asdict, dataclass
-from idlelib.pyparse import trans
 from typing import Dict, List, Tuple
 
 import pg8000
@@ -125,7 +124,6 @@ class SpecializedParserJobRunner:
         Verify AlloyDB table exists to save results from the processor.
         """
         with self.alloydb_connection_pool.connect() as db_conn:
-            db_conn.execute("SET ROLE 'eks_users';")
             db_conn.execute(
                 sqlalchemy.text(f"""
         CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
@@ -307,7 +305,6 @@ class SpecializedParserJobRunner:
     ):
         logging.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
         with self.alloydb_connection_pool.connect() as conn:
-            conn.execute("SET ROLE 'eks_users';")
             for chunk in self.divide_chunks(parsed_results, 50):
                 rows = [
                     f"('{x.id}', '{x.original_filename}', '{x.results_file}', '{x.run_id}', '{x.entities}')"
@@ -324,7 +321,6 @@ class SpecializedParserJobRunner:
     def write_results_to_alloydb(self, local_filename: str):
         logging.info(f"Copying data to AlloyDB table from CSV {local_filename}")
         with self.alloydb_connection_pool.connect() as conn:
-            conn.execute("SET ROLE 'eks_users';")
             sql = f"""
                 COPY {PROCESSED_DOCUMENTS_TABLE_NAME}
                 FROM '{local_filename}'

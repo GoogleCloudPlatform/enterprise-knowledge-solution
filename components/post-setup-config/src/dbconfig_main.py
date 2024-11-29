@@ -35,7 +35,8 @@ with Connector() as connector:
         db_conn.execute(sqlalchemy.text('DROP ROLE eks_users'))
         result = db_conn.execute(
             sqlalchemy.text(
-                "SELECT * FROM pg_catalog.pg_roles WHERE rolname = ""'eks_users'")
+                "SELECT * FROM pg_catalog.pg_roles WHERE rolname = " "'eks_users'"
+            )
         ).fetchall()  # pyright: ignore [reportOptionalMemberAccess]
         result = [row for row in result]
         has_rows = len(result)
@@ -45,12 +46,18 @@ with Connector() as connector:
 # Build query
 sql_commands = ""
 sql_commands += " CREATE EXTENSION IF NOT EXISTS pgaudit;"
-users = [os.environ["ALLOYDB_USER_CONFIG"], os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"], "postgres"]
+users = [
+    os.environ["ALLOYDB_USER_CONFIG"],
+    os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
+    "postgres",
+]
 
 sql_commands += " GRANT ALL ON DATABASE postgres TO eks_users;"
 
 sql_commands += " CREATE SCHEMA IF NOT EXISTS eks AUTHORIZATION eks_users;"
-sql_commands += " ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO eks_users;"
+sql_commands += (
+    " ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO eks_users;"
+)
 for user in users:
     sql_commands += f' GRANT eks_users to "{user}";'
     sql_commands += f' GRANT ALL ON SCHEMA eks TO "{user}";'
