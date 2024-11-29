@@ -25,14 +25,16 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
     )
     return pool
 
+users = [
+    os.environ["ALLOYDB_USER_CONFIG"],
+    os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
+    "postgres",
+]
 
 # Create role if not exists
 with Connector() as connector:
     pool = init_connection_pool(connector)
     with pool.connect() as db_conn:
-        db_conn.execute(sqlalchemy.text('DROP SCHEMA eks'))
-        db_conn.execute(sqlalchemy.text('DROP SCHEMA eks'))
-        db_conn.execute(sqlalchemy.text('DROP ROLE eks_users'))
         result = db_conn.execute(
             sqlalchemy.text(
                 "SELECT * FROM pg_catalog.pg_roles WHERE rolname = " "'eks_users'"
@@ -41,16 +43,13 @@ with Connector() as connector:
         result = [row for row in result]
         has_rows = len(result)
         if not has_rows:
-            db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users NOINHERIT'))
+            db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users'))
+        for user in users:
+            db_conn.execute(sqlalchemy.text(f'GRANT eks_users to "{user}";'))
 
 # Build query
 sql_commands = ""
 sql_commands += " CREATE EXTENSION IF NOT EXISTS pgaudit;"
-users = [
-    os.environ["ALLOYDB_USER_CONFIG"],
-    os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
-    "postgres",
-]
 
 sql_commands += " GRANT ALL ON DATABASE postgres TO eks_users;"
 
@@ -59,7 +58,6 @@ sql_commands += (
     " ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO eks_users;"
 )
 for user in users:
-    sql_commands += f' GRANT eks_users to "{user}";'
     sql_commands += f' GRANT ALL ON SCHEMA eks TO "{user}";'
 
 # initialize Connector as context manager
