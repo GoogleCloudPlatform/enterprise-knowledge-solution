@@ -15,7 +15,7 @@
 
 locals {
   image_name_and_tag = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.doc_registry_service_cloud_run_job_name}:latest"
-  doc_registry_service_cloud_build_content_hash = sha512(
+  cloud_build_content_hash = sha512(
     join("", [
       for f in fileset(path.module, "../src/**") :
       filesha512("${path.module}/${f}")
@@ -33,12 +33,12 @@ module "gcloud_build_doc_registry" {
       --pack image=${local.image_name_and_tag} \
       --project ${var.project_id} \
       --region ${var.region} \
-      --default-buckets-behavior=regional-user-owned-bucket \
+      --default-buckets-behavior regional-user-owned-bucket \
       --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
   EOT
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.doc_registry_service_cloud_build_content_hash
+    source_contents_hash = local.cloud_build_content_hash
   }
 }

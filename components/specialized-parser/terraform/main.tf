@@ -137,4 +137,5 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
       labels["goog-packaged-solution"]
     ]
   }
+  deletion_protection = false
 }

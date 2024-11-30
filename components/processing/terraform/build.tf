@@ -49,7 +49,7 @@ module "gcloud_build_processing" {
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_cloud_run.filename} \
-      --default-buckets-behavior=regional-user-owned-bucket \
+      --default-buckets-behavior regional-user-owned-bucket \
       --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
   EOT
   enabled               = true

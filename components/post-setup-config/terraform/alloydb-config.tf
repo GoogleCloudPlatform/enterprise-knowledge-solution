@@ -66,6 +66,8 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       labels["goog-packaged-solution"]
     ]
   }
+  depends_on          = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
+  deletion_protection = false
 }
 
 module "gcloud_trigger_job_to_configure_alloydb_schema" {
@@ -73,9 +75,15 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = <<-EOT
     run jobs execute ${google_cloud_run_v2_job.configure_db_schema_job.name} \
-      --region ${var.region}
+      --region ${var.region} \
+      --project ${var.project_id}
   EOT
   enabled               = true
+
+  create_cmd_triggers = {
+    source_contents_hash = local.cloud_build_content_hash
+  }
+  module_depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
 }
 
 
