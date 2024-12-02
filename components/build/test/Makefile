@@ -14,7 +14,11 @@
 
 test-e2e:	## Run the end-to-end test
 	@echo "Running E2E test..."
-	@go test -v -run ./ -timeout 30m --tags=e2e
+	@go test -v -run ./ -timeout 90m --tags=e2e
+
+functional-workflows: ## upload documents, trigger workflows, and check the results
+    @echo "running functional test..."
+	@go test -v -run ./ -timeout 60m --tags=functional
 
 .PHONY: help
 .DEFAULT_GOAL := help

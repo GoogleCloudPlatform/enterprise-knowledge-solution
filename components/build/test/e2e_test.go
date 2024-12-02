@@ -35,6 +35,7 @@ type TestConfig struct {
 	VertexAiDataStoreRegion string `env:"VERTEX_AI_DATA_STORE_REGION,required"`
 	IapAccessDomains        string `env:"IAP_ACCESS_DOMAINS,required"`
 	WebUiDomains            string `env:"WEB_UI_DOMAINS,required"`
+	CustomClassifierId      string `env:"CUSTOM_CLASSIFIER_ID, required"`
 }
 
 func TestE2e(t *testing.T) {
@@ -62,6 +63,7 @@ func TestE2e(t *testing.T) {
 				"webui_domains":               config.WebUiDomains,
 				"docai_location":              config.DocAiLocation,
 				"vertex_ai_data_store_region": config.VertexAiDataStoreRegion,
+				"custom_classifier_id":        config.CustomClassifierId
 			},
 			NoColor: true,
 		}
