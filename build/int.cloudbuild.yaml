@@ -1,6 +1,5 @@
 ---
 timeout: 7200s
-
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
@@ -21,7 +20,6 @@ timeout: 7200s
         /workspace/sample-deployments-composer-orchestrated-process/scripts/trigger_workflow.sh ;
         go test -v -run ./ -timeout 60m --tags=functional ;
         # scripts/delete_doc.sh ;
-
     env:
       - "PROJECT_ID=${PROJECT_ID}"
 
