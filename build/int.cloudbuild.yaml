@@ -47,6 +47,31 @@ steps:
       - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
       - "GCLOUD_TF_DOWNLOAD=never"
+      - "CUSTOM_CLASSIFIER_ID={_CUSTOM_CLASSIFIER_ID}"
+
+  - id: functional
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        cd /workspace/build/test ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/GoogleQuarterlyResults/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test0_Demo_PDFs/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test1_Text_Only_PDFs/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test2_PDFs_With_Forms/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test3_XLS/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/TEST5_DOCX_Files/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test4_MSG/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test6_EDI_TXT/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Zebra/* gs://docs-input-${_TEST_PROJECT_ID}/ ;
+        /workspace/sample-deployments-composer-orchestrated-process/scripts/trigger_workflow.sh ;
+        go test -v -run ./ -timeout 60m --tags=functional ;
+        # scripts/delete_doc.sh ;
+
+    env:
+      - "PROJECT_ID=${PROJECT_ID}"
 
   - id: cleanup
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
@@ -79,5 +104,6 @@ substitutions:
   # _IAP_ACCESS_DOMAINS
   # _IAP_SUPPORT_EMAIL
   # _WEB_UI_DOMAINS
+  # _CUSTOM_CLASSIFIER_ID
   # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
   # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}
