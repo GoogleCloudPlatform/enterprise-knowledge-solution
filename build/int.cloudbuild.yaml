@@ -22,6 +22,7 @@ steps:
         /workspace/sample-deployments-composer-orchestrated-process/scripts/trigger_workflow.sh;
         go test -v -run ./ -timeout 60m --tags=functional;
         # scripts/delete_doc.sh ;
+    entrypoint: /bin/bash
     env:
       - "PROJECT_ID=${PROJECT_ID}"
 
