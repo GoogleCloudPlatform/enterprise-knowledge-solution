@@ -19,7 +19,7 @@ steps:
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test4_MSG/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test6_EDI_TXT/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Zebra/* gs://docs-input-${_TEST_PROJECT_ID}/;
-        /workspace/sample-deployments-composer-orchestrated-process/scripts/trigger_workflow.sh;
+        /workspace/sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         go test -v -run ./ -timeout 60m --tags=functional;
         # scripts/delete_doc.sh ;
     entrypoint: /bin/bash
