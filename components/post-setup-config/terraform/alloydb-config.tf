@@ -104,7 +104,7 @@ resource "google_alloydb_user" "schema_setup_user" {
   cluster        = var.alloy_db_cluster_id
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
+  database_roles = ["alloydbiamuser", "alloydbsuperuser", "eks_users"]
 
   depends_on = [var.alloydb_cluster_ready]
 }

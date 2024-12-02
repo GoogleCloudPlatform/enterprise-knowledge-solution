@@ -348,19 +348,17 @@ class SpecializedParserJobRunner:
         self, parsed_results: List[ProcessedDocument]
     ):
         logger.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
+        sql = sqlalchemy.text(f"""
+            INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
+            (id, original_filename, results_file, run_id, entities) VALUES
+            (:id, :original_filename, :results_file, :run_id, :entities)
+        """)
         with self.alloydb_connection_pool.connect() as conn:
             for chunk in self.divide_chunks(parsed_results, 50):
-                rows = [
-                    f"('{x.id}', '{x.original_filename}', '{x.results_file}', '{x.run_id}', '{x.entities}')"
-                    for x in chunk
-                ]
+                # convert to tuples
+                rows = [asdict(x) for x in chunk]
 
-                sql = f"""
-                    INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
-                    VALUES
-                    {",".join(rows)}
-                """
-                conn.execute(sqlalchemy.text(sql))
+                conn.execute(sql, *rows)
                 conn.close()
 
     def write_results_to_alloydb(self, local_filename: str):

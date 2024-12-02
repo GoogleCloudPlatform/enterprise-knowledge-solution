@@ -58,7 +58,7 @@ resource "google_alloydb_user" "specialized_parser_user" {
   cluster        = var.alloydb_cluster
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser"]
+  database_roles = ["alloydbiamuser", "eks_users"]
   depends_on     = [var.alloydb_cluster_ready]
 }
 
