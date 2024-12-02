@@ -590,6 +590,7 @@ with DAG(
     with TaskGroup(group_id="document_registry_update") as document_registry_update:
         generate_update_doc_registry_job_params = PythonOperator(
             task_id="generate_update_doc_registry_job_params",
+            trigger_rule=TriggerRule.ALL_DONE,
             python_callable=generate_update_doc_registry_job_params_fn,
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
@@ -602,7 +603,7 @@ with DAG(
             job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
             deferrable=False,
             overrides="{{ ti.xcom_pull("
-            "task_ids='general_processing.generate_update_doc_registry_job_params' "
+            "task_ids='document_registry_update.generate_update_doc_registry_job_params' "
             ", key='return_value') }}",
         )
 
