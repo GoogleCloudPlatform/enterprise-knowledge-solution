@@ -9,5 +9,3 @@ gcloud builds submit . --project=$PROJECT_ID
 ```
 
 1. Define a tag value for the new build, and ensure that `BUILDER_IMAGE_TAG` in [/build/int.cloudbuild.yaml](/build/int.cloudbuild.yaml) uses the correct tag value.
-
-# derp

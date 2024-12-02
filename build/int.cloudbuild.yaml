@@ -81,4 +81,3 @@ substitutions:
   # _WEB_UI_DOMAINS
   # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
   # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}
-# derp

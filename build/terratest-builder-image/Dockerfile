@@ -21,5 +21,3 @@ RUN wget -nv https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-c
 
 # make gcloud available on PATH
 ENV PATH=$PATH:/go/google-cloud-sdk/bin
-
-# derp

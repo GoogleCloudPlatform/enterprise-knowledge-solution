@@ -6,4 +6,3 @@ steps:
     automapSubstitutions: true
 images:
   - "us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder"
-# derp
