@@ -1,6 +1,6 @@
 ---
 timeout: 7200s
-
+steps:
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
@@ -23,7 +23,7 @@ timeout: 7200s
         # scripts/delete_doc.sh ;
 
     env:
-      - "PROJECT_ID=${PROJECT_ID}"
+      - "PROJECT_ID=${_PROJECT_ID}"
 
 tags:
   - "ci"
@@ -33,13 +33,15 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  ##_TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
-  _TEST_PROJECT_ID: "eks-int-fbd0b2f"
-  _DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
-  _REGION: "us-central1"
-  _DOC_AI_LOCATION: "us"
-  _VERTEX_AI_DATA_STORE_REGION: "us"
-  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
+  _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
+  ##_DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
+  ##_REGION: "us-central1"
+  ##_DOC_AI_LOCATION: "us"
+  ##_VERTEX_AI_DATA_STORE_REGION: "us"
+  ##_PROJECT_ID: "eks-cicd-orchestrator"
+  _PROJECT_ID: "efe-eks-longterm"
+  ## remove hardcoded reference to PROJECT_ID, and changes to undrescore.  (Trigger passes "PROJECT_ID" but to manually declare it here it must be "_PROJECT_ID")
+  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${_PROJECT_ID}/ci/test-builder"
   _BUILDER_IMAGE_TAG: "1.0.0"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
