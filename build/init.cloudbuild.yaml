@@ -8,7 +8,7 @@ steps:
       - "-e"
       - "-x"
       - "-c"
-      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';' as
+      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
         sleep 10 ;
         trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
