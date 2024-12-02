@@ -63,7 +63,7 @@ func TestE2e(t *testing.T) {
 				"webui_domains":               config.WebUiDomains,
 				"docai_location":              config.DocAiLocation,
 				"vertex_ai_data_store_region": config.VertexAiDataStoreRegion,
-				"custom_classifier_id":        config.CustomClassifierId
+				"custom_classifier_id":        config.CustomClassifierId,
 			},
 			NoColor: true,
 		}
