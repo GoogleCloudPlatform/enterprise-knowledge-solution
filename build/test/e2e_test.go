@@ -79,7 +79,7 @@ func TestE2e(t *testing.T) {
 
 	test_structure.RunTestStage(t, "migrate-tfstate", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, terraformDir)
-		terraformOptions["MigrateState"] = true
+		terraformOptions.MigrateState = true
 		terraform.InitE(t, terraformOptions)
 	})
 }
