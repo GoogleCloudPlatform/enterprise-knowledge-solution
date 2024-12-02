@@ -658,10 +658,11 @@ with DAG(
         classified_docs_moved_or_skipped
         >> create_process_job_params
         >> execute_doc_processors
-        >> [import_docs_to_data_store, generate_update_doc_registry_job_params]
+        >> import_docs_to_data_store
     )
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # update the document registry with the newly ingested documents
-        generate_update_doc_registry_job_params
+        [execute_doc_processors, execute_specialized_parser]
+        >> generate_update_doc_registry_job_params
         >> update_doc_registry
     )
