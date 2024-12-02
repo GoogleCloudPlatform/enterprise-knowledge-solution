@@ -12,6 +12,7 @@ from typing import Dict, List, Tuple
 
 import pg8000
 import sqlalchemy
+from configs import AlloyDBConfig, BigQueryConfig, JobConfig, ProcessorConfig
 from google.api_core.client_info import ClientInfo as bg_ClientInfo
 from google.api_core.client_options import ClientOptions
 from google.api_core.exceptions import GoogleAPICallError, RetryError
@@ -23,15 +24,13 @@ from google.cloud.documentai_v1 import BatchProcessMetadata
 from google.cloud.exceptions import InternalServerError
 from sqlalchemy.engine import Engine
 
-from configs import AlloyDBConfig, BigQueryConfig, JobConfig, ProcessorConfig
-
 logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "simple": {
             "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
-            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
         }
     },
     "handlers": {
@@ -39,7 +38,7 @@ logging_config = {
             "class": "logging.StreamHandler",
             "level": "INFO",
             "formatter": "simple",
-            "stream": "ext://sys.stdout"
+            "stream": "ext://sys.stdout",
         }
     },
     "loggers": {
@@ -47,7 +46,7 @@ logging_config = {
             "level": "DEBUG",
             "handlers": [
                 "console",
-            ]
+            ],
         }
     },
 }
@@ -55,7 +54,6 @@ logging_config = {
 logging.config.dictConfig(logging_config)
 logging.basicConfig(level="INFO")
 logger = logging.getLogger(__name__)
-
 
 
 FilenamesPair = namedtuple("FilenamesPair", "original_filename txt_filename")
@@ -162,15 +160,22 @@ class SpecializedParserJobRunner:
         """
         with self.alloydb_connection_pool.connect() as db_conn:
             db_conn.execute(
-                sqlalchemy.text(f"""
+                sqlalchemy.text(
+                    f"""
                 CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
                     id VARCHAR (255) NOT NULL PRIMARY KEY,
                     original_filename VARCHAR (2048) NOT NULL,
                     results_file VARCHAR (2048) NOT NULL,
                     run_id VARCHAR (255) NULL,
                     entities JSONB NULL
-                );"""))
-            db_conn.execute(sqlalchemy.text(f"ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;"))
+                );"""
+                )
+            )
+            db_conn.execute(
+                sqlalchemy.text(
+                    f"ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;"
+                )
+            )
             db_conn.close()
 
     def call_batch_processor(self) -> Operation:
@@ -285,7 +290,9 @@ class SpecializedParserJobRunner:
                     # Since json.dumps(document.entities, indent=None) throws an error ("TypeError: Object of type
                     # RepeatedComposite is not JSON serializable")
                     # We will convert the document to dict, and then use the entities key
-                    entities = documentai.Document.to_dict(document)[  # pyright: ignore [reportIndexIssue]
+                    entities = documentai.Document.to_dict(
+                        document
+                    )[  # pyright: ignore [reportIndexIssue]
                         "entities"
                     ]
                     id = str(uuid.uuid4())

@@ -11,7 +11,7 @@ logging_config = {
     "formatters": {
         "simple": {
             "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
-            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
         }
     },
     "handlers": {
@@ -19,7 +19,7 @@ logging_config = {
             "class": "logging.StreamHandler",
             "level": "INFO",
             "formatter": "simple",
-            "stream": "ext://sys.stdout"
+            "stream": "ext://sys.stdout",
         }
     },
     "loggers": {
@@ -27,7 +27,7 @@ logging_config = {
             "level": "DEBUG",
             "handlers": [
                 "console",
-            ]
+            ],
         }
     },
 }
@@ -35,6 +35,7 @@ logging_config = {
 logging.config.dictConfig(logging_config)
 logging.basicConfig(level="INFO")
 logger = logging.getLogger(__name__)
+
 
 # helper function to return SQLAlchemy connection pool
 def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
@@ -57,6 +58,7 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
     )
     return pool
 
+
 users = [
     os.environ["ALLOYDB_USER_CONFIG"],
     os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
@@ -77,7 +79,7 @@ with Connector() as connector:
         has_rows = len(result)
         if not has_rows:
             logger.info("No eks_users role exists. Creating...")
-            db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users'))
+            db_conn.execute(sqlalchemy.text("CREATE ROLE eks_users"))
         for user in users:
             logger.info(f"Granting eks_users to '{user}'")
             db_conn.execute(sqlalchemy.text(f'GRANT eks_users to "{user}";'))
