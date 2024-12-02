@@ -9,7 +9,7 @@ steps:
       - "-c"
       - >-
         ls;
-        cd /workspace/build/test;
+
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/GoogleQuarterlyResults/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test0_Demo_PDFs/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test1_Text_Only_PDFs/* gs://docs-input-${_TEST_PROJECT_ID}/;
@@ -19,8 +19,10 @@ steps:
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test4_MSG/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Test6_EDI_TXT/* gs://docs-input-${_TEST_PROJECT_ID}/;
         gcloud storage cp gs://$PROJECT_ID-testdocs/EKS_Test_Scenarios/Zebra/* gs://docs-input-${_TEST_PROJECT_ID}/;
-        /workspace/sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
+        cd /workspace/sample-deployments/composer-orchestrated-process/;
+        ./scripts/trigger_workflow.sh;
         go test -v -run ./ -timeout 60m --tags=functional;
+        cd /workspace/build/test;
         # scripts/delete_doc.sh ;
     entrypoint: /bin/bash
     env:
