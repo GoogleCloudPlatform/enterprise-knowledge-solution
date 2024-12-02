@@ -1,5 +1,6 @@
 ---
 timeout: 7200s
+steps:
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
