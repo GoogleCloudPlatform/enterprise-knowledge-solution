@@ -348,11 +348,13 @@ class SpecializedParserJobRunner:
         self, parsed_results: List[ProcessedDocument]
     ):
         logger.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
-        sql = sqlalchemy.text(f"""
+        sql = sqlalchemy.text(
+            f"""
             INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
             (id, original_filename, results_file, run_id, entities) VALUES
             (:id, :original_filename, :results_file, :run_id, :entities)
-        """)
+        """
+        )
         with self.alloydb_connection_pool.connect() as conn:
             for chunk in self.divide_chunks(parsed_results, 50):
                 # convert to tuples
