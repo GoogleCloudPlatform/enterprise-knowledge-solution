@@ -563,24 +563,6 @@ with DAG(
             provide_context=True,
         )
 
-        generate_update_doc_registry_job_params = PythonOperator(
-            task_id="generate_update_doc_registry_job_params",
-            python_callable=generate_update_doc_registry_job_params_fn,
-            execution_timeout=timedelta(seconds=3600),
-            provide_context=True,
-        )
-
-        update_doc_registry = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"),
-            region=os.environ.get("DPU_REGION"),
-            task_id="update_doc_registry",
-            job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
-            deferrable=False,
-            overrides="{{ ti.xcom_pull("
-            "task_ids='general_processing.generate_update_doc_registry_job_params' "
-            ", key='return_value') }}",
-        )
-
     with TaskGroup(group_id="specialized_processing") as specialized_processing:
         create_specialized_process_job_params = PythonOperator(
             task_id="create_specialized_process_job_params",
@@ -603,6 +585,25 @@ with DAG(
             python_callable=data_store_import_docs,
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
+        )
+
+    with TaskGroup(group_id="document_registry_update") as document_registry_update:
+        generate_update_doc_registry_job_params = PythonOperator(
+            task_id="generate_update_doc_registry_job_params",
+            python_callable=generate_update_doc_registry_job_params_fn,
+            execution_timeout=timedelta(seconds=3600),
+            provide_context=True,
+        )
+
+        update_doc_registry = CloudRunExecuteJobOperator(
+            project_id=os.environ.get("GCP_PROJECT"),
+            region=os.environ.get("DPU_REGION"),
+            task_id="update_doc_registry",
+            job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
+            deferrable=False,
+            overrides="{{ ti.xcom_pull("
+            "task_ids='general_processing.generate_update_doc_registry_job_params' "
+            ", key='return_value') }}",
         )
 
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
