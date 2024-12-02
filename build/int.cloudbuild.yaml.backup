@@ -1,6 +1,54 @@
 ---
 timeout: 7200s
 steps:
+  - id: prepare
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    entrypoint: /bin/bash
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+        gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
+        sleep 10 ;
+        trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
+        gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
+
+  - id: pre_tf_setup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+        cd sample-deployments/composer-orchestrated-process;
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        scripts/pre_tf_setup.sh;
+    env:
+      - "REGION=${_REGION}"
+      - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
+
+  - id: terratest
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        cd /workspace/build/test ;
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
+        gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
+        go test -v -run ./ -timeout 90m --tags=e2e
+    entrypoint: /bin/bash
+    env:
+      - "REGION=${_REGION}"
+      - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
+      - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
+      - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
+      - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
+      - "GCLOUD_TF_DOWNLOAD=never"
+      - "CUSTOM_CLASSIFIER_ID={_CUSTOM_CLASSIFIER_ID}"
+
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
@@ -23,7 +71,17 @@ steps:
         # scripts/delete_doc.sh ;
 
     env:
-      - "PROJECT_ID=${_PROJECT_ID}"
+      - "PROJECT_ID=${PROJECT_ID}"
+
+  - id: cleanup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        gcloud config unset auth/impersonate_service_account;
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+    entrypoint: /bin/bash
 
 tags:
   - "ci"
@@ -34,14 +92,11 @@ options:
 
 substitutions:
   _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
-  ##_DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
-  ##_REGION: "us-central1"
-  ##_DOC_AI_LOCATION: "us"
-  ##_VERTEX_AI_DATA_STORE_REGION: "us"
-  ##_PROJECT_ID: "eks-cicd-orchestrator"
-  _PROJECT_ID: "efe-eks-longterm"
-  ## remove hardcoded reference to PROJECT_ID, and changes to undrescore.  (Trigger passes "PROJECT_ID" but to manually declare it here it must be "_PROJECT_ID")
-  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${_PROJECT_ID}/ci/test-builder"
+  _DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
+  _REGION: "us-central1"
+  _DOC_AI_LOCATION: "us"
+  _VERTEX_AI_DATA_STORE_REGION: "us"
+  _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
   _BUILDER_IMAGE_TAG: "1.0.0"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
