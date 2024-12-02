@@ -133,7 +133,7 @@ class SpecializedParserJobRunner:
             run_id VARCHAR (255) NULL,
             entities JSONB NULL
         );"""))
-            db_conn.execute(f"ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;")
+            db_conn.execute(sqlalchemy.text(f"ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;"))
             db_conn.close()
 
     def call_batch_processor(self) -> Operation:
@@ -248,9 +248,9 @@ class SpecializedParserJobRunner:
                     # Since json.dumps(document.entities, indent=None) throws an error ("TypeError: Object of type
                     # RepeatedComposite is not JSON serializable")
                     # We will convert the document to dict, and then use the entities key
-                    entities = documentai.Document.to_dict(document)[
+                    entities = documentai.Document.to_dict(document)[  # pyright: ignore [reportIndexIssue]
                         "entities"
-                    ]  # pyright: ignore [reportIndexIssue]
+                    ]
                     id = str(uuid.uuid4())
                     output_documents[blob.name] = ProcessedDocument(
                         id=id,
@@ -317,6 +317,7 @@ class SpecializedParserJobRunner:
                     {",".join(rows)}
                 """
                 conn.execute(sqlalchemy.text(sql))
+                conn.close()
 
     def write_results_to_alloydb(self, local_filename: str):
         logging.info(f"Copying data to AlloyDB table from CSV {local_filename}")
@@ -330,6 +331,7 @@ class SpecializedParserJobRunner:
                 )
             """
             conn.execute(sqlalchemy.text(sql))
+            conn.close()
 
     def write_results_to_bigquery(self, bucket_name: str, csv_blob_name: str):
         # Construct the full table ID.

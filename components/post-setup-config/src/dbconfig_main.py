@@ -31,6 +31,7 @@ users = [
     "postgres",
 ]
 
+print("Setting up for eks.")
 # Create role if not exists
 with Connector() as connector:
     pool = init_connection_pool(connector)
@@ -43,8 +44,10 @@ with Connector() as connector:
         result = [row for row in result]
         has_rows = len(result)
         if not has_rows:
+            print("No eks_users role exists. Creating...")
             db_conn.execute(sqlalchemy.text('CREATE ROLE eks_users'))
         for user in users:
+            print(f"Granting eks_users to '{user}'")
             db_conn.execute(sqlalchemy.text(f'GRANT eks_users to "{user}";'))
 
 # Build query
@@ -66,4 +69,5 @@ with Connector() as connector:
     # interact with AlloyDB database using connection pool
     with pool.connect() as db_conn:
         for cmd in sql_commands.split(";"):
+            print(sqlalchemy.text(cmd.strip()))
             db_conn.execute(sqlalchemy.text(cmd.strip()))
