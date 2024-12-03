@@ -37,10 +37,6 @@ resource "null_resource" "deployment_trigger" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  #ts:maxseverity=None ts does not handle the `replace_triggered_by` argument, but its necessary
-  lifecycle {
-    replace_triggered_by = [null_resource.deployment_trigger]
-  }
   name     = var.webui_service_name
   location = var.region
   ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
@@ -49,7 +45,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       max_instance_count = 2
     }
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${local.ui_service_name}:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.webui_service_name}:latest"
       ports {
         container_port = 8080
       }
@@ -78,18 +74,24 @@ resource "google_cloud_run_v2_service" "eks_webui" {
     }
     service_account = module.cloud_run_web_account.email
   }
-
+  lifecycle {
+    replace_triggered_by = [null_resource.deployment_trigger]
+  }
   depends_on = [
     module.gcloud_build_app.wait
   ]
+  deletion_protection = false
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
-  name                  = "eks-webui-neg"
+  name                  = "${var.webui_service_name}-neg"
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
     service = google_cloud_run_v2_service.eks_webui.name
+  }
+  lifecycle {
+    replace_triggered_by = [google_cloud_run_v2_service.eks_webui]
   }
 }
 
@@ -101,7 +103,7 @@ resource "google_compute_ssl_policy" "ssl-policy" {
 
 module "eks_webui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
-  name                            = "eks-webui-lb"
+  name                            = "${var.webui_service_name}-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true

@@ -19,19 +19,17 @@ variable "project_id" {
 
 variable "region" {
   type        = string
-  description = "Google Cloud region where app engine is located "
+  description = "Google Cloud region where resources are located "
 }
 
 variable "artifact_repo" {
   description = "Docker registry"
   type        = string
-  default     = ""
 }
 
 variable "cloud_build_service_account_email" {
   description = "IAM service account email used for cloud build."
   type        = string
-  default     = ""
 }
 
 variable "iap_access_domains" {
@@ -56,7 +54,8 @@ variable "agent_builder_search_id" {
 
 variable "webui_service_name" {
   type        = string
-  description = "The App Engine service name for the webui"
+  description = "The service name for the webui"
+  default     = "eks-ui"
 }
 
 variable "lb_ssl_certificate_domains" {

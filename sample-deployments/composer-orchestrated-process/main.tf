@@ -150,7 +150,6 @@ module "dpu_ui" {
   vertex_ai_data_store_region       = var.vertex_ai_data_store_region
   agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
-  webui_service_name                = var.webui_service_name
   lb_ssl_certificate_domains        = var.webui_domains
 }
 

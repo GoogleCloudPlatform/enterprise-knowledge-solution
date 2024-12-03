@@ -88,4 +88,5 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
       labels["goog-packaged-solution"]
     ]
   }
+  deletion_protection = false
 }

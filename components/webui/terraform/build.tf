@@ -13,7 +13,6 @@
 # limitations under the License.
 
 locals {
-  ui_service_name     = "eks-ui"
   cloud_build_fileset = setunion(fileset(path.module, "../src/**"), fileset(path.module, "build/Dockerfile"), fileset(path.module, "../requirements.txt"), fileset(path.module, "build/cloudbuild.yaml"))
   cloud_build_content_hash = sha512(join(",", [
   for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
@@ -24,7 +23,7 @@ resource "local_file" "cloudbuild_config" {
   content = templatefile("${path.module}/build/cloudbuild.yaml.template", {
     project_id            = var.project_id,
     build_service_account = var.cloud_build_service_account_email,
-    image_tag             = "${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${local.ui_service_name}"
+    image_tag             = "${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${var.webui_service_name}"
   })
 }
 
@@ -39,7 +38,7 @@ module "gcloud_build_app" {
       --project ${var.project_id} \
       --region ${var.region} \
       --config ${local_file.cloudbuild_config.filename} \
-      --default-buckets-behavior=regional-user-owned-bucket \
+      --default-buckets-behavior regional-user-owned-bucket \
       --service-account "projects/${var.project_id}/serviceAccounts/${var.cloud_build_service_account_email}"
 
   EOT
