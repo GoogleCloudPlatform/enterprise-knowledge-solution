@@ -59,7 +59,8 @@ resource "google_alloydb_user" "specialized_parser_user" {
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser"]
-  depends_on     = [var.alloydb_cluster_ready]
+
+  depends_on = [var.alloydb_cluster_ready]
   lifecycle {
     ignore_changes = [database_roles]
   }
@@ -67,7 +68,8 @@ resource "google_alloydb_user" "specialized_parser_user" {
 
 resource "terraform_data" "dbrole_deployment_trigger" {
   # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)
-  input = google_alloydb_user.specialized_parser_user
+  input            = google_alloydb_user.specialized_parser_user
+  triggers_replace = google_alloydb_user.specialized_parser_user.database_roles
 }
 
 

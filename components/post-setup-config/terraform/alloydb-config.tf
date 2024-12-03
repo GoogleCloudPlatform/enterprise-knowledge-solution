@@ -81,8 +81,9 @@ module "gcloud_trigger_job_to_configure_alloydb_schema" {
   enabled               = true
 
   create_cmd_triggers = {
-    source_contents_hash = local.cloud_build_content_hash,
-    db_role_content_hash = var.db_role_content_hash
+    source_contents_hash                    = local.cloud_build_content_hash,
+    db_role_content_hash_specialized_parser = var.db_role_content_hash,
+    db_role_content_hash_schema_setup_user  = sha512(terraform_data.dbrole_deployment_trigger2.id)
   }
   module_depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
 }
@@ -105,7 +106,16 @@ resource "google_alloydb_user" "schema_setup_user" {
   cluster        = var.alloy_db_cluster_id
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser", "alloydbsuperuser", "eks_users"]
+  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
 
   depends_on = [var.alloydb_cluster_ready]
+  lifecycle {
+    ignore_changes = [database_roles]
+  }
+}
+
+resource "terraform_data" "dbrole_deployment_trigger2" {
+  # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on schema_setup_user (flaky)
+  input            = google_alloydb_user.schema_setup_user
+  triggers_replace = google_alloydb_user.schema_setup_user.database_roles
 }

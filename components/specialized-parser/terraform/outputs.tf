@@ -37,5 +37,5 @@ output "specialized_parser_db_user" {
 
 output "db_role_content_hash" {
   description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
-  value       = sha512(join("", [for k, v in terraform_data.dbrole_deployment_trigger.output : "${k}=${v}"]))
+  value       = sha512(terraform_data.dbrole_deployment_trigger.id)
 }
