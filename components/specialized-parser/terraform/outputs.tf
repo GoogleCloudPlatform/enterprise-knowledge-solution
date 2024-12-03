@@ -34,3 +34,8 @@ output "specialized_parser_db_user" {
   description = "The AlloyDB db role associated with the service account identity of the specializer parser Cloud Run job"
   value       = google_alloydb_user.specialized_parser_user.user_id
 }
+
+output "db_role_content_hash" {
+  description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
+  value       = sha512(join("", [for k, v in terraform_data.dbrole_deployment_trigger.output : "${k}=${v}"]))
+}

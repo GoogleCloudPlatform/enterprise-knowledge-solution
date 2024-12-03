@@ -91,7 +91,3 @@ resource "time_sleep" "wait_for_alloydb_ready_state" {
     module.docs_results
   ]
 }
-
-
-
-

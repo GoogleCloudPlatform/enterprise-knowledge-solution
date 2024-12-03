@@ -203,6 +203,7 @@ module "post-setup-config" {
   alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   specialized_parser_db_user        = module.specialized_parser_job.specialized_parser_db_user
+  db_role_content_hash              = module.specialized_parser_job.db_role_content_hash
   serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
