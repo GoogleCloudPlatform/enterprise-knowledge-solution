@@ -67,7 +67,7 @@ users = [
 
 logger.info("Setting up for eks.")
 # Create role if not exists
-with Connector() as connector:
+with Connector(refresh_strategy="lazy") as connector:
     pool = init_connection_pool(connector)
     with pool.connect() as db_conn:
         result = db_conn.execute(
