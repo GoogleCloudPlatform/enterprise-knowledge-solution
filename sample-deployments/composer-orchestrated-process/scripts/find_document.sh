@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # PROJECT_NUM="536170242658"
 # AGENT_BUILDER_LOCATION="global"
 # AGENT_BUILDER_DATA_STORE_ID="dpu-doc-store"
