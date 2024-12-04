@@ -37,10 +37,10 @@ resource "null_resource" "deployment_trigger" {
 }
 
 resource "google_cloud_run_v2_service" "eks_webui" {
-  name     = var.webui_service_name
-  location = var.region
+  name                = var.webui_service_name
+  location            = var.region
   deletion_protection = false
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
+  ingress             = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
   template {
     scaling {
       max_instance_count = 2

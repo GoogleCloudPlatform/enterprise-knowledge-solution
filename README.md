@@ -52,17 +52,18 @@ To deploy this solution, perform the follow steps:
     - Service Account Admin
     - Service Usage Admin
 
-1. Create, train and deploy a custom document classifier  
+1.  Create, train and deploy a custom document classifier
 
-   To classify documents, you must [create a custom document classifier in the Google Cloud console](https://cloud.google.com/document-ai/docs/custom-classifier).
+    To classify documents, you must [create a custom document classifier in the Google Cloud console](https://cloud.google.com/document-ai/docs/custom-classifier).
 
-   - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
+    - You can use the [test documents and forms](sample-deployments/composer-orchestrated-process/documents-for-testing/forms-to-train-docai) to train and evaluate the classifier in your GCP environment.
 
-   - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
+    - We have created an annotated dataset to expedite the training process. Please contact your Google account representative to get access to the annotated dataset.
 
-   - The output labels of the classifier **MUST** match the configured labels in the composer DAG configuration `doc-ai-processors`. Out of the box, the solution supports `form` and `invoice` labels. Any other label would cause the flow to treat the document as a generic document and will process it without extracting structured data from the document.
+    - The output labels of the classifier **MUST** match the configured labels in the composer DAG configuration `doc-ai-processors`. Out of the box, the solution supports `form` and `invoice` labels. Any other label would cause the flow to treat the document as a generic document and will process it without extracting structured data from the document.
 
-   - After training the custom classifier, set the classifier ID to composer as a default argument. Add the following variable to your Terraform variables file and run `terraform apply` again.
+    - After training the custom classifier, set the classifier ID to composer as a default argument. Add the following variable to your Terraform variables file and run `terraform apply` again.
+
     ```bash
     custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
     ```
@@ -129,12 +130,14 @@ To deploy this solution, perform the follow steps:
     webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
     iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])
     ```
+
 1.  (Optional) By default, this repository creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring optional terraform variables.
 
     ```sh
     create_vpc_network = false # default is true
     vpc_name = # The name of your existing vpc, (e.g., "myvpc")
     ```
+
     If using an existing VPC, you should validate that your existing vpc has firewall policies and DNS zones that enable the traffic pathways defined in [vpc.tf](enterprise-knowledge-solution/components/common-infra/terraform/vpc.tf), and grant Compute Network User on your shared VPC to the deployer service account.
 
 1.  Initialize Terraform:
@@ -287,7 +290,7 @@ For more information on the Web UI component, please refer to its [Readme](./com
 1. Execute the bash script to delete a single document:
 
    ```sh
-   scripts/delete_doc.sh [-p <PROJECT_ID>] -l <LOCATION> -u <DOC_URI> -t <BQ_TABLE> -d <DOC_ID> 
+   scripts/delete_doc.sh [-p <PROJECT_ID>] -l <LOCATION> -u <DOC_URI> -t <BQ_TABLE> -d <DOC_ID>
    ```
 
 1. Execute the bash script to delete a batch of documents:
