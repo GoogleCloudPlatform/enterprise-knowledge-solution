@@ -59,8 +59,19 @@ resource "google_alloydb_user" "specialized_parser_user" {
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser"]
-  depends_on     = [var.alloydb_cluster_ready]
+
+  depends_on = [var.alloydb_cluster_ready]
+  lifecycle {
+    ignore_changes = [database_roles]
+  }
 }
+
+resource "terraform_data" "dbrole_deployment_trigger" {
+  # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)
+  input            = google_alloydb_user.specialized_parser_user
+  triggers_replace = google_alloydb_user.specialized_parser_user.database_roles
+}
+
 
 module "specialized_parser_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0

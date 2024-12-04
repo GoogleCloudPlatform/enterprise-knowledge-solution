@@ -74,3 +74,8 @@ variable "specialized_parser_db_user" {
   description = "The AlloyDB db role associated with the service account identity of the specializer parser Cloud Run job"
   type        = string
 }
+
+variable "db_role_content_hash" {
+  description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
+  type        = string
+}
