@@ -12,89 +12,110 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
+import logging.config
+import logging.handlers
 import os
-from dataclasses import dataclass
 
-import pg8000
 import sqlalchemy
 from google.cloud.alloydb.connector import Connector, IPTypes
-from sqlalchemy.engine import Engine
+
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": [
+                "console",
+            ],
+        }
+    },
+}
+
+logging.config.dictConfig(logging_config)
+logging.basicConfig(level="INFO")
+logger = logging.getLogger(__name__)
 
 
-@dataclass
-class AlloyDBConfig:
-    primary_instance: str
-    database: str
-    user: str
-
-
-class DbConfigJobRunner:
-    def __init__(
-        self,
-        alloydb_config: AlloyDBConfig,
-    ):
-        self.alloydb_config = alloydb_config
-        self.alloydb_connection_pool = self.create_connection_pool(alloydb_config)
-
-    def run(self):
-        logging.info("Creating alloydb schema and granular db permissions")
-        self.create_alloydb_schema_and_permissions()
-
-    @staticmethod
-    def create_connection_pool(
-        alloydb_config: AlloyDBConfig, refresh_strategy: str = "lazy"
-    ) -> Engine:
-        connector = Connector(refresh_strategy=refresh_strategy)
-
-        def getconn() -> (
-            pg8000.dbapi.Connection
-        ):  # pyright: ignore [reportAttributeAccessIssue]
-            conn = connector.connect(
-                instance_uri=alloydb_config.primary_instance,
-                driver="pg8000",
-                db=alloydb_config.database,
-                enable_iam_auth=True,
-                user=alloydb_config.user,
-                ip_type=IPTypes.PRIVATE,
-            )
-            return conn
-
-        engine: Engine = (
-            sqlalchemy.create_engine(  # pyright: ignore [reportAssignmentType]
-                "postgresql+pg8000://",
-                creator=getconn,
-            )
-        )
-
-        engine.dialect.description_encoding = None
-        return engine
-
-    def create_alloydb_schema_and_permissions(self) -> None:
-        """
-        Verify AlloyDB table exists to save results from the processor.
-        """
-        users = [os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"], "postgres"]
-        with self.alloydb_connection_pool.connect() as db_conn:
-            db_conn.execute("CREATE SCHEMA IF NOT EXISTS eks")
-            for user in users:
-                db_conn.execute(f'GRANT ALL ON SCHEMA eks TO "{user}"')
-                db_conn.execute(
-                    f'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA eks TO "{user}"'
-                )
-                db_conn.execute(f'GRANT USAGE ON SCHEMA eks TO "{user}"')
-
-
-def run() -> None:
-    runner = DbConfigJobRunner(
-        alloydb_config=AlloyDBConfig(
-            primary_instance=os.environ["ALLOYDB_INSTANCE"],
-            database=os.environ["ALLOYDB_DATABASE"],
+# helper function to return SQLAlchemy connection pool
+def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
+    # function used to generate database connection
+    def getconn():
+        conn = connector.connect(
+            instance_uri=os.environ["ALLOYDB_INSTANCE"],
+            driver="pg8000",
+            db=os.environ["ALLOYDB_DATABASE"],
+            enable_iam_auth=True,
             user=os.environ["ALLOYDB_USER_CONFIG"],
+            ip_type=IPTypes.PRIVATE,
         )
+        return conn
+
+    # create connection pool
+    pool = sqlalchemy.create_engine(
+        "postgresql+pg8000://",
+        creator=getconn,
     )
-    runner.run()
+    return pool
 
 
-if __name__ == "__main__":
-    run()
+users = [
+    os.environ["ALLOYDB_USER_CONFIG"],
+    os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
+    "postgres",
+]
+
+logger.info("Setting up for eks.")
+# Create role if not exists
+with Connector(refresh_strategy="lazy") as connector:
+    pool = init_connection_pool(connector)
+    with pool.connect() as db_conn:
+        result = db_conn.execute(
+            sqlalchemy.text(
+                "SELECT * FROM pg_catalog.pg_roles WHERE rolname = " "'eks_users'"
+            )
+        ).fetchall()  # pyright: ignore [reportOptionalMemberAccess]
+        result = [row for row in result]
+        has_rows = len(result)
+        if not has_rows:
+            logger.info("No eks_users role exists. Creating...")
+            db_conn.execute(sqlalchemy.text("CREATE ROLE eks_users"))
+        for user in users:
+            logger.info(f"Granting eks_users to '{user}'")
+            db_conn.execute(sqlalchemy.text(f'GRANT eks_users to "{user}";'))
+
+# Build query
+sql_commands = ""
+sql_commands += " CREATE EXTENSION IF NOT EXISTS pgaudit;"
+
+sql_commands += " GRANT ALL ON DATABASE postgres TO eks_users;"
+
+sql_commands += " CREATE SCHEMA IF NOT EXISTS eks AUTHORIZATION eks_users;"
+sql_commands += (
+    " ALTER DEFAULT PRIVILEGES IN SCHEMA eks GRANT ALL ON TABLES TO eks_users;"
+)
+for user in users:
+    sql_commands += f' GRANT ALL ON SCHEMA eks TO "{user}";'
+
+# initialize Connector as context manager
+with Connector() as connector:
+    pool = init_connection_pool(connector)
+    # interact with AlloyDB database using connection pool
+    with pool.connect() as db_conn:
+        for cmd in sql_commands.split(";"):
+            logger.info(sqlalchemy.text(cmd.strip()))
+            db_conn.execute(sqlalchemy.text(cmd.strip()))
