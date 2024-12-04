@@ -1,0 +1,40 @@
+---
+name: addlicense
+
+on: # yamllint disable-line rule:truthy
+  pull_request: null
+
+permissions:
+  contents: read
+
+jobs:
+  addlicense:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pull container for addlicense
+        run: docker pull ghcr.io/google/addlicense:latest
+
+      - name: invoke addlicense
+        run: docker run -v ${PWD}:/src ghcr.io/google/addlicense -l "apache" -c "Google LLC" .
+
+      - name: Commit and push linting fixes
+        # Run only on:
+        # - Pull requests
+        # - Not on the default branch
+        if: >
+          github.event_name == 'pull_request' &&
+          github.ref_name != github.event.repository.default_branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          commit_message: "chore: add license headers"
+          commit_user_name: addlicense
+          commit_user_email: no-reply@addlicense.dev
