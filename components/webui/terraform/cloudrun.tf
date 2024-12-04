@@ -39,6 +39,7 @@ resource "null_resource" "deployment_trigger" {
 resource "google_cloud_run_v2_service" "eks_webui" {
   name     = var.webui_service_name
   location = var.region
+  deletion_protection = false
   ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
   template {
     scaling {
@@ -80,7 +81,6 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   depends_on = [
     module.gcloud_build_app.wait
   ]
-  deletion_protection = false
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
