@@ -1,9 +1,7 @@
 # Enterprise Knowledge Solution (EKS) Dataflow
 
-1. **Upload documents and trigger document processing workflow**
-   An employee (IT) manually uploads various document types (Excel, PDF, Word, Text, Outlook) or a scheduled Cron Job triggers the upload. The uploaded files are stored in a designated "input" bucket within Google Cloud Storage.
-
-   The upload to the "input" bucket triggers a Document Processing Workflow managed by Cloud Composer.
+1. **Upload documents and trigger document processing workflow:**
+   The [uploader persona](enterprise-knowledge-solution/docs/access_control.md) uploads documents (Excel, PDF, Word, Text, Outlook) to a designated "input" bucket in Google Cloud Storage. This persona might be an employee responsible for manually curating and uploading the content, or it might be an automated cron job that transfers documents from a source system.
 
 1. **Validate the documents:**
    Documents that fail validation are redirected to a separate "reject" bucket within Google Cloud Storage for further review and handling.
@@ -20,9 +18,9 @@
    Document processsing jobs creates and stores document metadata in a BigQuery table. Document metadata is required by Agent Builder for indexing the documents. Document metadata contains the URI to the documents stored in the "process" bucket in Google Cloud Storage.
 1. **Create and store processed documents in Cloud Storage Bucket for Search and Summarization:**
    The processed documents and document metadata files are also stored in the "process" bucket in Google Cloud Storage for search and summarization.
-1. **Data Serving:**
+1. **Ingest processed data:**
    The processed and stored content from the "process" bucket is imported and indexed in Agent Builder’s BigQuery Data Store.
-1. **Powering Search Applications:**
+1. **Serve data to search application:**
    The extracted data stored in Agent Builder’s BigQuery Data Store is used to power search applications built with Vertex AI Agent Builder.
-1. **Business User Access:**
-   Business Operations (Biz Ops) employees can access and interact with the processed data through a dedicated Web UI deployed in Cloud Run. This UI leverages search and summarization capabilities of the Vertex AI Agent Builder.
+1. **Access the search application:**
+   The [reader persona](enterprise-knowledge-solution/docs/access_control.md) can access and interact with the processed data through a dedicated Web UI deployed in Cloud Run. This UI leverages search and summarization capabilities of the Vertex AI Agent Builder.
