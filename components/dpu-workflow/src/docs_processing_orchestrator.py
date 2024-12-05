@@ -285,19 +285,22 @@ def generate_specialized_process_job_params(**context):
     }
 
     # get the run_id
-    logging.info(f"{context=}")
-    run_id = context["dag_run"].run_id
+    # logging.info(f"{context=}")
+    # run_id = context["dag_run"].run_id
+    process_folder = context["ti"].xcom_pull(
+        task_ids="initial_load_from_input_bucket.create_process_folder",
+        key="process_folder",
+    )
 
     # Build BigQuery table id <project_id>.<dataset_id>.<table_id>
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
 
     process_bucket = os.environ["DPU_PROCESS_BUCKET"]
-    process_folder = context["ti"].xcom_pull(key="process_folder")
     job_name = os.environ.get("SPECIALIZED_PARSER_JOB_NAME", "specialized-parser")
     specialized_parser_job_params_list = cloud_run_utils.specialized_parser_job_params(
         possible_processors=possible_processors,
         job_name=job_name,
-        run_id=run_id,
+        run_id=process_folder,
         bq_table=bq_table,
         process_bucket=process_bucket,
         process_folder=process_folder,
@@ -429,18 +432,14 @@ with DAG(
         )
 
         check_duplicated_files = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"),
-            # pyright: ignore[reportArgumentType]
-            region=os.environ.get("DPU_REGION"),
-            # pyright: ignore[reportArgumentType]
+            project_id=os.environ["GCP_PROJECT"],
+            region=os.environ["DPU_REGION"],
             task_id="check_duplicated_files",
-            job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
-            # pyright: ignore[reportArgumentType]
+            job_name=os.environ["DOC_REGISTRY_JOB_NAME"],
             deferrable=False,
-            overrides="{{ ti.xcom_pull("
+            overrides="{{ ti.xcom_pull("  # pyright: ignore [reportArgumentType]
             "task_ids='initial_load_from_input_bucket.generate_check_duplicated_files_job_params' "
             ", key='return_value') }}",
-            # pyright: ignore[reportArgumentType]
         )
 
         move_duplicated_files_to_rejected_bucket = PythonOperator(
@@ -597,12 +596,12 @@ with DAG(
         )
 
         update_doc_registry = CloudRunExecuteJobOperator(
-            project_id=os.environ.get("GCP_PROJECT"),
-            region=os.environ.get("DPU_REGION"),
+            project_id=os.environ["GCP_PROJECT"],
+            region=os.environ["DPU_REGION"],
             task_id="update_doc_registry",
-            job_name=os.environ.get("DOC_REGISTRY_JOB_NAME"),
+            job_name=os.environ["DOC_REGISTRY_JOB_NAME"],
             deferrable=False,
-            overrides="{{ ti.xcom_pull("
+            overrides="{{ ti.xcom_pull("  # pyright: ignore [reportArgumentType]
             "task_ids='document_registry_update.generate_update_doc_registry_job_params' "
             ", key='return_value') }}",
         )
