@@ -53,8 +53,8 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
           value = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
         }
         env {
-          name  = "ALLOYDB_USER_SPECIALIZED_PARSER"
-          value = replace(var.specialized_parser_db_user, ".gserviceaccount.com", "")
+          name  = "ALLOYDB_USERS"
+          value = join(",", [for user in var.additional_db_users: replace(user, ".gserviceaccount.com", "")])
         }
       }
     }

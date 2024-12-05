@@ -70,9 +70,9 @@ variable "cloud_build_service_account_email" {
   type        = string
 }
 
-variable "specialized_parser_db_user" {
-  description = "The AlloyDB db role associated with the service account identity of the specializer parser Cloud Run job"
-  type        = string
+variable "additional_db_users" {
+  description = "The AlloyDB db roles associated with the service accounts identities that requires access to eks data."
+  type        = list(string)
 }
 
 variable "db_role_content_hash" {
