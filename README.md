@@ -62,7 +62,7 @@ To deploy this solution, perform the follow steps:
 
     - The output labels of the classifier **MUST** match the configured labels in the composer DAG configuration `doc-ai-processors`. Out of the box, the solution supports `form` and `invoice` labels. Any other label would cause the flow to treat the document as a generic document and will process it without extracting structured data from the document.
 
-    - After training the custom classifier, set the classifier ID to composer as a default argument. Add the following variable to your Terraform variables file and run `terraform apply` again.
+    - After training the custom classifier, add the following variable to your terraform variables file to set the classifier ID in composer as a default argument. 
 
     ```bash
     custom_classifier_id = projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
@@ -129,6 +129,7 @@ To deploy this solution, perform the follow steps:
     docai_location = # Sets the location for Document AI service.
     webui_domains = # Your domain name for Web UI access (e.g., ["webui.example.com"])
     iap_access_domains = # List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])
+    custom_classifier_id = # projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>
     ```
 
 1.  (Optional) By default, this repository creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring optional terraform variables.
