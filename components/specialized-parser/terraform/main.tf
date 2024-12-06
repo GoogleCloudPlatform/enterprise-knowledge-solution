@@ -103,7 +103,7 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
           network    = var.network
           subnetwork = var.serverless_connector_subnet
         }
-        egress = "PRIVATE_RANGES_ONLY"
+        egress = "ALL_TRAFFIC"
       }
       containers {
         image = local.image_name_and_tag
