@@ -49,16 +49,6 @@ steps:
       - "GCLOUD_TF_DOWNLOAD=never"
       - "CUSTOM_CLASSIFIER_ID={_CUSTOM_CLASSIFIER_ID}"
 
-  - id: cleanup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    args:
-      - "-x"
-      - "-c"
-      - >-
-        gcloud config unset auth/impersonate_service_account;
-        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
-    entrypoint: /bin/bash
-
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
@@ -86,6 +76,16 @@ steps:
     env:
       - "PROJECT_ID=${PROJECT_ID}"
       - "LOCATION=${_REGION}"
+
+  - id: cleanup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-x"
+      - "-c"
+      - >-
+        gcloud config unset auth/impersonate_service_account;
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+    entrypoint: /bin/bash
 
 tags:
   - "ci"
