@@ -42,5 +42,5 @@ variable "cloud_build_service_account_email" {
 variable "processing_cloud_run_job_name" {
   description = "Doc processor job name"
   type        = string
-  default     = "doc-processor"
+  default     = "ms-office-doc-processor"
 }
