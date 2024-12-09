@@ -1,7 +1,7 @@
 # Enterprise Knowledge Solution Dataflow
 
 1. **Upload documents and trigger document processing workflow:**
-   The [uploader persona](docs/access_control.md) uploads documents (Excel, PDF, Word, Text, Outlook, Zip) to a designated "input" bucket in Google Cloud Storage. This persona might be an employee responsible for manually curating and uploading the content, or it might be an automated cron job that transfers documents from a source system.
+   The [uploader persona](docs/access_control.md) uploads documents (Excel, PDF, Word, Text, Outlook, ZIP) to a designated "input" bucket in Google Cloud Storage. This persona might be an employee responsible for manually curating and uploading the content, or it might be an automated cron job that transfers documents from a source system.
 
 1. **Validate the documents:**
    Documents that fail validation (unsupported file type, duplicate files, or too large) are redirected to a separate "reject" bucket within Google Cloud Storage for further review and handling.

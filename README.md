@@ -115,7 +115,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
       | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                  |
 
 1.  (Optional) By default, the Terraform script creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring the following optional terraform variables.
-      | Terraform variables                 | Description                                    | 
+      | Terraform variables                 | Description                                    |
       |-------------------------------------|------------------------------------------------|
       | create_vpc_network                  | false # default is true                        |
       | vpc_name                            | The name of your existing vpc, (e.g., "myvpc") |
@@ -279,7 +279,8 @@ Once the workflow completes successfully, all documents will be imported into th
    - On the console page, you'll find an input bar. Enter your questions or queries related to the documents you've uploaded.
    - The app will provide summarized answers based on the content of your documents, along with references to the specific source documents.
 
-### Search and Explore from EKS Web UI (Skip this if you have not configured the access to the Web UI Search Application)
+### Search and Explore from EKS Web UI
+_Note: This section only applies if you completed the "configure access to the Web UI search application" step under the deployment guide. 
 
 The Web UI is an example of how you extend the basic functionality of the Agent Builder application into a user interface that employees access to query documents. For more information on the Web UI component, please refer to its [Readme](./components/webui/README.md).
 
