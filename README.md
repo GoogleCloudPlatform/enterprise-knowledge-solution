@@ -280,6 +280,7 @@ Once the workflow completes successfully, all documents will be imported into th
    - The app will provide summarized answers based on the content of your documents, along with references to the specific source documents.
 
 ### Search and Explore from EKS Web UI
+
 _Note: This section only applies if you completed the "configure access to the Web UI search application" step under the deployment guide. 
 
 The Web UI is an example of how you extend the basic functionality of the Agent Builder application into a user interface that employees access to query documents. For more information on the Web UI component, please refer to its [Readme](./components/webui/README.md).
