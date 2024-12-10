@@ -209,6 +209,15 @@ def drop_data_table(bq_client: bigquery.Client, data_table: str):
         raise Exception(res.errors[0]["message"])
 
 
+def delete_gcs_folder(storage_client: storage.Client, run_id: str):
+    bucket = storage_client.bucket(f"dpu-process-{storage_client.project}") # type: storage.Bucket
+    blobs = [b for b in bucket.list_blobs(prefix=f"docs-processing-{run_id.replace( '_', '-')}/")]
+    for blob in blobs:
+        logger.warning(f"blob {blob.name} was detected as leftover - will be deleted")
+    bucket.delete_blobs(blobs=blobs)
+
+
+
 def main(
     data_store_config: DataStoreConfig,
     run_id: str,
@@ -239,6 +248,7 @@ def main(
         delete_doc_from_metadata_table(bq_client, data_table, doc.id)
         delete_doc_from_doc_registry(bq_client, doc.id)
     if mode == "batch":
+        delete_gcs_folder(storage_client, run_id)
         drop_data_table(bq_client, data_table)
 
 if __name__ == "__main__":
