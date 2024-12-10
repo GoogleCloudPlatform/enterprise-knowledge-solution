@@ -54,7 +54,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
         }
         env {
           name  = "ALLOYDB_USERS"
-          value = join(",", [for user in var.additional_db_users: replace(user, ".gserviceaccount.com", "")])
+          value = join(",", [for user in var.additional_db_users : replace(user, ".gserviceaccount.com", "")])
         }
       }
     }

@@ -283,9 +283,9 @@ class SpecializedParserJobRunner:
                 logger.info(f"Text file {txt_file_path} created successfully")
                 output_pairs.append(
                     FilenamesPair(
-                        id=doc_id, 
-                        original_filename=original_file_path, 
-                        txt_filename=txt_file_path
+                        id=doc_id,
+                        original_filename=original_file_path,
+                        txt_filename=txt_file_path,
                     )
                 )
                 if document.entities:
@@ -297,7 +297,7 @@ class SpecializedParserJobRunner:
                     )[  # pyright: ignore [reportIndexIssue]
                         "entities"
                     ]
-                    
+
                     output_documents[blob.name] = ProcessedDocument(
                         id=doc_id,
                         original_filename=original_file_path,

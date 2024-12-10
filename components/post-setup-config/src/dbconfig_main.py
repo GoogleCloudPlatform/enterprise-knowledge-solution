@@ -73,12 +73,12 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
     return pool
 
 
-
-
 users = [
     os.environ["ALLOYDB_USER_CONFIG"],
     "postgres",
-] + os.environ["ALLOYDB_USERS"].split(",")
+] + os.environ[
+    "ALLOYDB_USERS"
+].split(",")
 
 
 logger.info("Setting up for eks.")

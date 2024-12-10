@@ -222,7 +222,7 @@ module "post-setup-config" {
   serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
-  additional_db_users               = [
+  additional_db_users = [
     module.specialized_parser_job.specialized_parser_db_user
   ]
 }

@@ -17,14 +17,16 @@ import logging.handlers
 import os
 import re
 from dataclasses import dataclass
-
-from google.api_core.client_info import ClientInfo as bg_ClientInfo
-from google.api_core.gapic_v1.client_info import ClientInfo
-from typing import Optional, List
+from typing import List, Optional
 
 import sqlalchemy
-from google.cloud import bigquery, storage, discoveryengine, discoveryengine_v1
+from google.api_core.client_info import ClientInfo as bg_ClientInfo
+from google.api_core.gapic_v1.client_info import ClientInfo
+from google.cloud import bigquery
+from google.cloud import discoveryengine_v1alpha as discoveryengine
+from google.cloud import storage
 from google.cloud.alloydb.connector import Connector, IPTypes
+from sqlalchemy.engine import Engine
 
 logging_config = {
     "version": 1,
@@ -59,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 
 # helper function to return SQLAlchemy connection pool
-def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
+def init_connection_pool(connector: Connector) -> Engine:
     # function used to generate database connection
     def getconn():
         conn = connector.connect(
@@ -79,7 +81,9 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
     )
     return pool
 
+
 USER_AGENT = "cloud-solutions/eks-docai-v1"
+
 
 @dataclass
 class DocProcessingRecord:
@@ -87,6 +91,7 @@ class DocProcessingRecord:
     gcs_uris: List[str]
     obj_ids: List[str]
     results_files: List[str]
+
 
 @dataclass
 class DataStoreConfig:
@@ -96,10 +101,9 @@ class DataStoreConfig:
     id: str
     branch: str
 
+
 def get_docs_data_from_bq(
-    bq_client: bigquery.Client,
-    bq_data_table: str,
-    doc_id: Optional[str]
+    bq_client: bigquery.Client, bq_data_table: str, doc_id: Optional[str]
 ) -> List[DocProcessingRecord]:
 
     where_clause = f"WHERE dp.id = '{doc_id}'" if doc_id else ""
@@ -118,33 +122,38 @@ def get_docs_data_from_bq(
     res = bq_client.query(sql)
     if res.errors:
         raise Exception(res.errors[0]["message"])
-    return [DocProcessingRecord(
-        id=row["id"],
-        gcs_uris=row["gcs_uris"],
-        obj_ids=row["obj_ids"],
-        results_files=row["results_files"]) for row in res.result()]
+    return [
+        DocProcessingRecord(
+            id=row["id"],
+            gcs_uris=row["gcs_uris"],
+            obj_ids=row["obj_ids"],
+            results_files=row["results_files"],
+        )
+        for row in res.result()
+    ]
 
 
 def delete_doc_from_agent_build(
     document_service_client: discoveryengine.DocumentServiceClient,
     data_store_config: DataStoreConfig,
-    obj_id: str
+    obj_id: str,
 ):
-    full_doc_id = \
-            f"projects/{data_store_config.project_id}" \
-            f"/locations/{data_store_config.region}" \
-            f"/collections/{data_store_config.collection}" \
-            f"/dataStores/{data_store_config.id}" \
-            f"/branches/{data_store_config.branch}" \
-            f"/documents/{obj_id}"
+    full_doc_id = (
+        f"projects/{data_store_config.project_id}"
+        f"/locations/{data_store_config.region}"
+        f"/collections/{data_store_config.collection}"
+        f"/dataStores/{data_store_config.id}"
+        f"/branches/{data_store_config.branch}"
+        f"/documents/{obj_id}"
+    )
 
     logger.info(f"Deleting document {full_doc_id}")
 
-    request = discoveryengine_v1.DeleteDocumentRequest(
-        name=full_doc_id
-    )
+    request = discoveryengine.DeleteDocumentRequest(name=full_doc_id)
 
-    document_service_client.delete_document(request=request)
+    document_service_client.delete_document(
+        request=request
+    )  # pyright: ignore [reportArgumentType]
 
 
 def delete_doc_from_bq_processed_documents(bq_client: bigquery.Client, doc_id: str):
@@ -159,7 +168,7 @@ def delete_doc_from_alloydb_processed_documents(doc_id: str):
     # Delete data from AlloyDB
     logger.info(f"Deleting document {doc_id} from AlloyDB")
     with Connector(refresh_strategy="lazy") as connector:
-        pool = init_connection_pool(connector)
+        pool: Engine = init_connection_pool(connector)
         with pool.connect() as db_conn:
             db_conn.execute(
                 sqlalchemy.text(
@@ -179,7 +188,9 @@ def delete_doc_from_gcs(storage_client: storage.Client, gcs_uri: str):
     bucket.blob(gcs_path).delete()
 
 
-def delete_doc_from_metadata_table(bq_client: bigquery.Client, data_table: str, doc_id: str):
+def delete_doc_from_metadata_table(
+    bq_client: bigquery.Client, data_table: str, doc_id: str
+):
     sql = f"DELETE FROM `{data_table}` WHERE id='{doc_id}'"
     logger.info(f"Deleting document {doc_id} from {data_table} table")
     res = bq_client.query(sql)
@@ -196,13 +207,17 @@ def delete_doc_from_doc_registry(bq_client: bigquery.Client, doc_id: str):
 
 
 def drop_data_table(bq_client: bigquery.Client, data_table: str):
-    logger.info(f"Dropping table {data_table} due to batch mode. Verifying table is empty.")
+    logger.info(
+        f"Dropping table {data_table} due to batch mode. Verifying table is empty."
+    )
     res = bq_client.query(f"SELECT COUNT(*) AS row_count FROM {data_table}")
     if res.errors:
         raise Exception(res.errors[0]["message"])
     row_count = [row[0]["row_count"] for row in res.result()][0]
     if row_count > 0:
-        raise Exception(f"Something went wrong. Table is not empty. Still contains {row_count} rows")
+        raise Exception(
+            f"Something went wrong. Table is not empty. Still contains {row_count} rows"
+        )
     logger.info(f"Table {data_table} is empty. Proceeding to drop it.")
     res = bq_client.query(f"DROP TABLE {data_table}")
     if res.errors:
@@ -210,12 +225,18 @@ def drop_data_table(bq_client: bigquery.Client, data_table: str):
 
 
 def delete_gcs_folder(storage_client: storage.Client, run_id: str):
-    bucket = storage_client.bucket(f"dpu-process-{storage_client.project}") # type: storage.Bucket
-    blobs = [b for b in bucket.list_blobs(prefix=f"docs-processing-{run_id.replace( '_', '-')}/")]
+    bucket = storage_client.bucket(
+        f"dpu-process-{storage_client.project}"
+    )  # type: storage.Bucket
+    blobs = [
+        b
+        for b in bucket.list_blobs(
+            prefix=f"docs-processing-{run_id.replace( '_', '-')}/"
+        )
+    ]
     for blob in blobs:
         logger.warning(f"blob {blob.name} was detected as leftover - will be deleted")
     bucket.delete_blobs(blobs=blobs)
-
 
 
 def main(
@@ -224,15 +245,16 @@ def main(
     mode: str,
     doc_id: Optional[str] = None,
 ):
-    storage_client = storage.Client(
-        client_info=ClientInfo(user_agent=USER_AGENT)
-    )
-    bq_client = bigquery.Client(
-        client_info=bg_ClientInfo(user_agent=USER_AGENT)
+    storage_client = storage.Client(client_info=ClientInfo(user_agent=USER_AGENT))
+    bq_client = bigquery.Client(client_info=bg_ClientInfo(user_agent=USER_AGENT))
+
+    client_options = (
+        {"api_endpoint": f"{data_store_config.region}-documentai.googleapis.com"}
+        if data_store_config.region and data_store_config.region != "global"
+        else None
     )
     document_service_client = discoveryengine.DocumentServiceClient(
-        client_options={"api_endpoint": f"{data_store_config.region}-documentai.googleapis.com"},
-        client_info=ClientInfo(user_agent=USER_AGENT)
+        client_options=client_options, client_info=ClientInfo(user_agent=USER_AGENT)
     )
     data_table = f"docs_store.docs_processing_{run_id.replace('-', '_')}"
     docs = get_docs_data_from_bq(bq_client, data_table, doc_id)
@@ -240,7 +262,9 @@ def main(
     for doc in docs:
         logger.info(f"Deleting document {doc.id} with URIs: {doc.gcs_uris}")
         for obj_id in doc.obj_ids:
-            delete_doc_from_agent_build(document_service_client, data_store_config, obj_id)
+            delete_doc_from_agent_build(
+                document_service_client, data_store_config, obj_id
+            )
         delete_doc_from_bq_processed_documents(bq_client, doc.id)
         delete_doc_from_alloydb_processed_documents(doc.id)
         for gcs_uri in doc.gcs_uris + doc.results_files:
@@ -250,6 +274,7 @@ def main(
     if mode == "batch":
         delete_gcs_folder(storage_client, run_id)
         drop_data_table(bq_client, data_table)
+
 
 if __name__ == "__main__":
     _data_store_config = DataStoreConfig(
@@ -263,7 +288,8 @@ if __name__ == "__main__":
     _mode = os.environ["MODE"]
     assert _mode in ["single", "batch"], "Mode must be either 'single' or 'batch'"
     _doc_id = os.environ.get("DOC_ID")  # optional, hence `get` method
-    assert (_mode == "batch" and _doc_id is None) or (_mode == "single" and _doc_id is not None), \
-        "Mode and doc_id mismatch"
+    assert (_mode == "batch" and _doc_id is None) or (
+        _mode == "single" and _doc_id is not None
+    ), "Mode and doc_id mismatch"
 
     main(_data_store_config, _run_id, _mode, _doc_id)

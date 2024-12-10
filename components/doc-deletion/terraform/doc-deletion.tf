@@ -99,6 +99,7 @@ module "doc_deletion_account" {
     "${var.project_id}=>roles/bigquery.dataEditor",
     "${var.project_id}=>roles/bigquery.jobUser",
     "${var.project_id}=>roles/storage.admin",
+    "${var.project_id}=>roles/discoveryengine.editor",
   ]
   display_name = "Doc Deletion Job Account"
   description  = "Account used to run doc deletion in Agent Builder, BigQuery, AlloyDB and other storage services"
