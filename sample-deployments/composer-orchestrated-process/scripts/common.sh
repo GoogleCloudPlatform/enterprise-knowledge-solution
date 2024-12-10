@@ -85,7 +85,7 @@ create_custom_role_iap() {
     echo "Custom role projects/$PROJECT_ID/roles/customIAPAdmin has already been created"
   else
     yes | gcloud iam roles create customIAPAdmin --project="${PROJECT_ID}" \
-      --file=custom_iap_brand_admin.yaml
+      --file=$(dirname "$0")/../custom_iap_brand_admin.yaml
   fi
   unset __customIapAdmin
 }
