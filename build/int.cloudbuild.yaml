@@ -18,6 +18,7 @@ steps:
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
+      - "-x"
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         export PROJECT_ID=${_TEST_PROJECT_ID};
@@ -69,6 +70,7 @@ steps:
   - id: cleanup
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
+      - "-e"
       - "-x"
       - "-c"
       - >-
