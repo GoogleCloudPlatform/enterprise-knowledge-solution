@@ -65,6 +65,7 @@ steps:
     entrypoint: /bin/bash
     env:
       - "PROJECT_ID=${PROJECT_ID}"
+      - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
 
   - id: cleanup
