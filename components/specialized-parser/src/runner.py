@@ -56,7 +56,7 @@ logging.basicConfig(level="INFO")
 logger = logging.getLogger(__name__)
 
 
-FilenamesPair = namedtuple("FilenamesPair", "original_filename txt_filename")
+FilenamesPair = namedtuple("FilenamesPair", "id original_filename txt_filename")
 
 
 PROCESSED_DOCUMENTS_TABLE_NAME = "eks.processed_documents"
@@ -271,7 +271,7 @@ class SpecializedParserJobRunner:
                     blob.download_as_bytes(),
                     ignore_unknown_fields=True,
                 )
-
+                doc_id = str(uuid.uuid4())
                 original_filename = (blob.name.rsplit("-", 1)[0]).rsplit("/", 1)[1]
                 original_file_path = (
                     f"{self.job_config.gcs_input_prefix}/{original_filename}.pdf"
@@ -283,7 +283,9 @@ class SpecializedParserJobRunner:
                 logger.info(f"Text file {txt_file_path} created successfully")
                 output_pairs.append(
                     FilenamesPair(
-                        original_filename=original_file_path, txt_filename=txt_file_path
+                        id=doc_id, 
+                        original_filename=original_file_path, 
+                        txt_filename=txt_file_path
                     )
                 )
                 if document.entities:
@@ -295,9 +297,9 @@ class SpecializedParserJobRunner:
                     )[  # pyright: ignore [reportIndexIssue]
                         "entities"
                     ]
-                    id = str(uuid.uuid4())
+                    
                     output_documents[blob.name] = ProcessedDocument(
-                        id=id,
+                        id=doc_id,
                         original_filename=original_file_path,
                         run_id=self.job_config.run_id,
                         results_file=f"gs://{output_bucket}/{blob.name}",
@@ -425,24 +427,21 @@ class SpecializedParserJobRunner:
     def build_bq_metadata_row(self, pair: FilenamesPair) -> dict:
         """Program that builds metadata for each processed file"""
 
-        # generate unique id
-        id = str(uuid.uuid4())
-
         # build row with metadata
         row = {
-            "id": id,
+            "id": pair.id,
             "jsonData": json.dumps(
                 {
                     "objs": [
                         {
                             "uri": pair.txt_filename,
-                            "objid": id,
+                            "objid": pair.id + "-txt",
                             "status": "Indexed",
                             "mimetype": "text/plain",
                         },
                         {
                             "uri": pair.original_filename,
-                            "objid": "",
+                            "objid": pair.id + "-pdf",
                             "status": "",
                             "mimetype": "application/pdf",
                         },
