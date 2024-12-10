@@ -65,15 +65,18 @@ function trigger_dag() {
 }
 EOF
   )
+  echo $json_config
   gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit
 set -o nounset
+set -x
 
 # shellcheck source=/dev/null
 . "$(dirname "$0")/common.sh"
 
 section_open "Trigger DAG"
+echo $(terraform output -json)
 trigger_dag
 section_close
