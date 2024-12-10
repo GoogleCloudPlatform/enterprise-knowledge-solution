@@ -21,7 +21,6 @@ steps:
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        ls;
         sample-deployments/composer-orchestrated-process/scripts/pre_tf_setup.sh;
     env:
       - "REGION=${_REGION}"
@@ -37,7 +36,7 @@ steps:
         export PROJECT_ID=${_TEST_PROJECT_ID};
         export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        go test -v -run build/test/ -timeout 90m --tags=e2e;
+        go test -v -run ./build/test/... -timeout 90m --tags=e2e
         gcloud config unset auth/impersonate_service_account;
     entrypoint: /bin/bash
     env:
@@ -59,7 +58,7 @@ steps:
         build/test/ingest_test_docs.sh;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
-        go test -v -run build/test/ -timeout 60m --tags=functional;
+        go test -v -run ./build/test/... -timeout 60m --tags=functional;
         # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
         # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
     entrypoint: /bin/bash
