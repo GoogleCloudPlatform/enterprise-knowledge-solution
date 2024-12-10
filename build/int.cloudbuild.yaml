@@ -101,7 +101,7 @@ substitutions:
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
   _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
-  _BUILDER_IMAGE_TAG: "1.0.0"
+  _BUILDER_IMAGE_TAG: "1.1.0"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
   # _FOLDER_ID
