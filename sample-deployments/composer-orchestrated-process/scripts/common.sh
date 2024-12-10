@@ -189,9 +189,9 @@ enable_role() {
 # enable all roles bundled into a persona, based on a textfile listing the roles
 enable_persona_roles() {
   local __principal=$1
-  local __arrayfile=(dirname "$0")/../$2
+  local __arrayfile=$2
   local __persona_name=$3
-  readarray -t roles_array <"$__arrayfile"
+  readarray -t roles_array <"$(dirname "$0")/../$__arrayfile"
   for i in "${roles_array[@]}"; do
     if [ "$__persona_name" == "READER" ] && [ "$i" == "roles/storage.objectViewer" ]; then
       #Most roles for most persona are project-level, but READER requires one bucket-level role.
