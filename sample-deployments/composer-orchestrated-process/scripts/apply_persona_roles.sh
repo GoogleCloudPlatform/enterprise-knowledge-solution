@@ -18,7 +18,7 @@ set -o errexit
 set -o nounset
 
 # shellcheck source=/dev/null
-. scripts/common.sh
+. "$(dirname "$0")/common.sh"
 
 section_open "Check that necessary environment variables are set"
 check_mandatory_variable "PROJECT_ID" "set the PROJECT_ID where IAM roles will be applied"

@@ -121,7 +121,7 @@ check_and_set_persona() {
     echo "$__persona_name is not set, skipping the role grants for this persona"
   else
     # pass the principal and and filename of roles
-    enable_persona_roles "$__persona_value" "persona_roles_$__persona_name.txt" "$__persona_name"
+    enable_persona_roles "$__persona_value" "$(dirname "$0")/../persona_roles_$__persona_name.txt" "$__persona_name"
   fi
 }
 
@@ -173,7 +173,7 @@ enable_api() {
 
 # enable all apis in the array
 enable_bootstrap_apis() {
-  readarray -t apis_array <project_apis.txt
+  readarray -t apis_array <$(dirname "$0")/../project_apis.txt
   for i in "${apis_array[@]}"; do
     enable_api "$i"
   done

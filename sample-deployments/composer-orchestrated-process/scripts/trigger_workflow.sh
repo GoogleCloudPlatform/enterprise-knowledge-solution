@@ -72,7 +72,7 @@ set -o errexit
 set -o nounset
 
 # shellcheck source=/dev/null
-. scripts/common.sh
+. "$(dirname "$0")/common.sh"
 
 section_open "Trigger DAG"
 trigger_dag
