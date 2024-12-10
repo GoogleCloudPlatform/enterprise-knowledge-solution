@@ -61,6 +61,7 @@ steps:
         sleep 300;
         go test -v -run build/test/ -timeout 60m --tags=functional;
         # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
+        # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
     entrypoint: /bin/bash
     env:
       - "PROJECT_ID=${PROJECT_ID}"

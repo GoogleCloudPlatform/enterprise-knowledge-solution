@@ -121,7 +121,7 @@ check_and_set_persona() {
     echo "$__persona_name is not set, skipping the role grants for this persona"
   else
     # pass the principal and and filename of roles
-    enable_persona_roles "$__persona_value" "$(dirname "$0")/../persona_roles_$__persona_name.txt" "$__persona_name"
+    enable_persona_roles "$__persona_value" "$persona_roles_$__persona_name.txt" "$__persona_name"
   fi
 }
 
@@ -189,7 +189,7 @@ enable_role() {
 # enable all roles bundled into a persona, based on a textfile listing the roles
 enable_persona_roles() {
   local __principal=$1
-  local __arrayfile=$2
+  local __arrayfile=(dirname "$0")/../$2
   local __persona_name=$3
   readarray -t roles_array <"$__arrayfile"
   for i in "${roles_array[@]}"; do
