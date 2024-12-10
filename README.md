@@ -105,20 +105,22 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
     - Triggers a pop-up dialog box: 'Sign in with Google' prompting you to authenticate the Google Auth Library. Follow the directions to authenticate with your user account, which will then configure Application Default Credentials (ADC) using the impersonated service account credentials to be used by Terraform.
 
 1.  Create a terraform.tfvars file with the following variables:
-      | Terraform variables         | Description                                                                                          |
-      | --------------------------- | -----------------------------------------------------------------------------------------------------|
-      | project_id                  | Your Google Cloud project ID.                                                                        |
-      | region                      | The desired region for deploying single-region resources (e.g., "us-central1", "europe-west1").      |
-      | vertex_ai_data_store_region | The multiregion for your Agent Builder Data Store, the possible values are ("global", "us", or "eu").|
-      | docai_location              | Sets the location for Document AI                                                                    |
-      | webui_domains               | Your domain name for Web UI access (e.g., ["webui.example.com"])                                     |
-      | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                  |
+
+    | Terraform variables         | Description                                                                                           |
+    | --------------------------- | ----------------------------------------------------------------------------------------------------- |
+    | project_id                  | Your Google Cloud project ID.                                                                         |
+    | region                      | The desired region for deploying single-region resources (e.g., "us-central1", "europe-west1").       |
+    | vertex_ai_data_store_region | The multiregion for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). |
+    | docai_location              | Sets the location for Document AI                                                                     |
+    | webui_domains               | Your domain name for Web UI access (e.g., ["webui.example.com"])                                      |
+    | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                   |
 
 1.  (Optional) By default, the Terraform script creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring the following optional terraform variables.
-      | Terraform variables                 | Description                                    |
-      |-------------------------------------|------------------------------------------------|
-      | create_vpc_network                  | false # default is true                        |
-      | vpc_name                            | The name of your existing vpc, (e.g., "myvpc") |
+
+    | Terraform variables | Description                                    |
+    | ------------------- | ---------------------------------------------- |
+    | create_vpc_network  | false # default is true                        |
+    | vpc_name            | The name of your existing vpc, (e.g., "myvpc") |
 
 1.  Initialize Terraform:
 
@@ -170,9 +172,10 @@ Some workflows depend on a [custom classifier](https://cloud.google.com/document
 1. After deployment is complete, click the three dot menu again and choose "set as default".
 
 1. After all steps to train and deploy the customer classifier are complete, add the following variable to your `terraform.tfvars` and run `terraform apply` again.
-   | Terraform variables         | Description                                                                                          |
-   | --------------------------- | -----------------------------------------------------------------------------------------------------|
-   | custom_classifier_id        | projects/<CLASSIFIER_PROJECT>/locations/ <CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>            |
+
+   | Terraform variables  | Description                                                                               |
+   | -------------------- | ----------------------------------------------------------------------------------------- |
+   | custom_classifier_id | projects/<CLASSIFIER_PROJECT>/locations/ <CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID> |
 
 ### (Optional) Configure access to the Web UI search application
 
@@ -281,7 +284,7 @@ Once the workflow completes successfully, all documents will be imported into th
 
 ### Search and Explore from EKS Web UI
 
-_Note: This section only applies if you completed the "configure access to the Web UI search application" step under the deployment guide. 
+\_Note: This section only applies if you completed the "configure access to the Web UI search application" step under the deployment guide.
 
 The Web UI is an example of how you extend the basic functionality of the Agent Builder application into a user interface that employees access to query documents. For more information on the Web UI component, please refer to its [Readme](./components/webui/README.md).
 
