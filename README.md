@@ -48,101 +48,101 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
 
 1. This example code is deployed through Terraform using the identity of a least privilege service account. Your user identity needs the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project to create this service account and validate other requirements with a setup script:
 
-    - Project IAM Admin
-    - Role Admin
-    - Service Account Admin
-    - Service Usage Admin
+   - Project IAM Admin
+   - Role Admin
+   - Service Account Admin
+   - Service Usage Admin
 
 1. To deploy the solution from this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
-    Alternatively, to deploy this repository using a local terminal:
+   Alternatively, to deploy this repository using a local terminal:
 
-    - [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
-    - [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
-    - [install the Git CLI](https://github.com/git-guides/install-git)
+   - [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
+   - [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
+   - [install the Git CLI](https://github.com/git-guides/install-git)
 
 1. In Cloud Shell or your preferred terminal, clone this repository:
 
-    ```sh
-    git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
-    ```
+   ```sh
+   git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
+   ```
 
 1. Navigate to the Sample Directory:
 
-    ```sh
-    cd <YOUR_REPOSITORY>/sample-deployments/composer-orchestrated-process
-    ```
+   ```sh
+   cd <YOUR_REPOSITORY>/sample-deployments/composer-orchestrated-process
+   ```
 
-    Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
+   Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
 1. Set the following environment variables:
 
-    ```sh
-    export PROJECT_ID="<your Google Cloud project id>"
-    export REGION="<Google Cloud Region for deploying the resources>"
-    export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
-    ```
+   ```sh
+   export PROJECT_ID="<your Google Cloud project id>"
+   export REGION="<Google Cloud Region for deploying the resources>"
+   export IAP_ADMIN_ACCOUNT="the email of the group or user identity displayed as the support_email field on Oauth consent screen. This must be either the email of the user running the script, or a group of which they are Owner."
+   ```
 
-    - (Optional) By default, this repository automatically creates and uses a service account `deployer@$PROJECT_ID.iam.gserviceaccount.com` to deploy Terraform resources. The necessary IAM policies and roles are automatically configured in the setup script to ease the deployment. If you have a service account in your existing terraform pipeline that you want to use instead, additionally set the optional environment variables to configure your custom deployer service account with the least privilege IAM roles:
+   - (Optional) By default, this repository automatically creates and uses a service account `deployer@$PROJECT_ID.iam.gserviceaccount.com` to deploy Terraform resources. The necessary IAM policies and roles are automatically configured in the setup script to ease the deployment. If you have a service account in your existing terraform pipeline that you want to use instead, additionally set the optional environment variables to configure your custom deployer service account with the least privilege IAM roles:
 
-      ```sh
-      export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform."
-      ```
+     ```sh
+     export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform."
+     ```
 
 1. Run the following script to set up your GCP project before running Terraform.
 
-    ```sh
-    scripts/pre_tf_setup.sh
-    ```
+   ```sh
+   scripts/pre_tf_setup.sh
+   ```
 
-    This setup script does the following:
+   This setup script does the following:
 
-    - Validate software dependencies
-    - Enable the required APIs defined in `project_apis.txt`
-    - Enable the required IAM roles on the service account you'll use to deploy Terraform resources, defined in `persona_roles_DEPLOYER.txt`
-    - Set up the OAuth consent screen (brand) required for IAP. We recommend you create this resource using a user identity instead of a service account. This approach helps avoid problems related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
-    - Enables the required IAM roles used for underlying Cloud Build processes
-    - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with your service account credentials to be used by Terraform.
-    - Triggers a pop-up dialog box: 'Sign in with Google' prompting you to authenticate the Google Auth Library. Follow the directions to authenticate with your user account, which will then configure Application Default Credentials (ADC) using the impersonated service account credentials to be used by Terraform.
+   - Validate software dependencies
+   - Enable the required APIs defined in `project_apis.txt`
+   - Enable the required IAM roles on the service account you'll use to deploy Terraform resources, defined in `persona_roles_DEPLOYER.txt`
+   - Set up the OAuth consent screen (brand) required for IAP. We recommend you create this resource using a user identity instead of a service account. This approach helps avoid problems related to [support_email ownership](https://cloud.google.com/iap/docs/programmatic-oauth-clients#:~:text=the%20user%20issuing%20the%20request%20must%20be%20an%20owner%20of%20the%20specified%20support%20email%20address) and [destroying a terraform-managed Brand resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand).
+   - Enables the required IAM roles used for underlying Cloud Build processes
+   - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with your service account credentials to be used by Terraform.
+   - Triggers a pop-up dialog box: 'Sign in with Google' prompting you to authenticate the Google Auth Library. Follow the directions to authenticate with your user account, which will then configure Application Default Credentials (ADC) using the impersonated service account credentials to be used by Terraform.
 
 1. Create a terraform.tfvars file with the following variables:
 
-    | Terraform variables         | Description                                                                                           |
-    | --------------------------- | ----------------------------------------------------------------------------------------------------- |
-    | project_id                  | Your Google Cloud project ID.                                                                         |
-    | region                      | The desired region for deploying single-region resources (e.g., "us-central1", "europe-west1").       |
-    | vertex_ai_data_store_region | The multiregion for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). |
-    | docai_location              | Sets the location for Document AI                                                                     |
-    | webui_domains               | Your domain name for Web UI access (e.g., ["webui.example.com"])                                      |
-    | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                   |
+   | Terraform variables         | Description                                                                                           |
+   | --------------------------- | ----------------------------------------------------------------------------------------------------- |
+   | project_id                  | Your Google Cloud project ID.                                                                         |
+   | region                      | The desired region for deploying single-region resources (e.g., "us-central1", "europe-west1").       |
+   | vertex_ai_data_store_region | The multiregion for your Agent Builder Data Store, the possible values are ("global", "us", or "eu"). |
+   | docai_location              | Sets the location for Document AI                                                                     |
+   | webui_domains               | Your domain name for Web UI access (e.g., ["webui.example.com"])                                      |
+   | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                   |
 
 1. (Optional) By default, the Terraform script creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring the following optional terraform variables.
 
-    | Terraform variables | Description                                    |
-    | ------------------- | ---------------------------------------------- |
-    | create_vpc_network  | false # default is true                        |
-    | vpc_name            | The name of your existing vpc, (e.g., "myvpc") |
+   | Terraform variables | Description                                    |
+   | ------------------- | ---------------------------------------------- |
+   | create_vpc_network  | false # default is true                        |
+   | vpc_name            | The name of your existing vpc, (e.g., "myvpc") |
 
 1. Initialize Terraform:
 
-    ```sh
-    terraform init
-    ```
+   ```sh
+   terraform init
+   ```
 
 1. Review the proposed changes and apply them:
 
-    ```sh
-    terraform apply
-    ```
+   ```sh
+   terraform apply
+   ```
 
-    The provisioning process may take approximately an hour to complete.
+   The provisioning process may take approximately an hour to complete.
 
 1. Migrate Terraform state to the remote Cloud Storage backend:
 
-    ```sh
-    terraform init -migrate-state
-    ```
+   ```sh
+   terraform init -migrate-state
+   ```
 
-    Terraform detects that you already have a state file locally and prompts you to migrate the state to the new Cloud Storage bucket. When prompted, enter `yes`.
+   Terraform detects that you already have a state file locally and prompts you to migrate the state to the new Cloud Storage bucket. When prompted, enter `yes`.
 
 ### Train a custom Document AI classifier
 
@@ -186,9 +186,9 @@ You must own a domain name used to access the web application, and be able to co
 
 1. Verify the external IP configured for the load balancer ingress:
 
-    ```sh
-    terraform output webui_dns_config
-    ```
+   ```sh
+   terraform output webui_dns_config
+   ```
 
 1. On your DNS provider, configure the `A` records to map the domain name of your application to the external IP.
 
