@@ -20,8 +20,8 @@ PARENT_DIR="$(dirname "$0")"
 
 function trigger_dag() {
   # read terraform state
-  echo $PARENT_DIR
-  outputs=$(terraform -chdir="$PARENT_DIR/../" output -json )
+  echo "$PARENT_DIR"
+  outputs=$(terraform -chdir="$PARENT_DIR/../" output -json)
   echo "the next line will echo outputs"
   echo "$outputs"
 
