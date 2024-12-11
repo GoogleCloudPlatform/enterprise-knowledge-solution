@@ -52,7 +52,6 @@ resource "google_cloud_run_v2_job" "doc_deletion_job" {
           name  = "ALLOYDB_USER_CONFIG"
           value = local.alloydb_username
         }
-        # projects/{project}/locations/{location}/collections/{collection}/dataStores/{data_store}/branches/{branch}/documents/{document}
         env {
           name  = "DATA_STORE_PROJECT_ID"
           value = var.data_store_project_id
