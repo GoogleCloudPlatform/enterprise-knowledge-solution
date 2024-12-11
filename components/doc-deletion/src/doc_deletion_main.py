@@ -219,7 +219,7 @@ def drop_data_table(bq_client: bigquery.Client, data_table: str):
     res = bq_client.query(f"SELECT COUNT(*) AS row_count FROM {data_table}")
     if res.errors:
         raise Exception(res.errors[0]["message"])
-    row_count = [row[0]["row_count"] for row in res.result()][0]
+    row_count = [row["row_count"] for row in res.result()][0]
     if row_count > 0:
         raise Exception(
             f"Something went wrong. Table is not empty. Still contains {row_count} rows"
