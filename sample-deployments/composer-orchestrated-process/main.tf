@@ -19,7 +19,7 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name = "doc-processor"
+  processing_cloud_run_job_name = "ms-office-doc-processor"
   classifier_cloud_run_job_name = "doc-classifier"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
