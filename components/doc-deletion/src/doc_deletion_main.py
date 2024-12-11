@@ -19,11 +19,12 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional
 
+import google.api_core.exceptions
 import sqlalchemy
 from google.api_core.client_info import ClientInfo as bg_ClientInfo
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import bigquery
-from google.cloud import discoveryengine_v1alpha as discoveryengine
+from google.cloud import discoveryengine_v1 as discoveryengine
 from google.cloud import storage
 from google.cloud.alloydb.connector import Connector, IPTypes
 from sqlalchemy.engine import Engine
@@ -150,10 +151,13 @@ def delete_doc_from_agent_build(
     logger.info(f"Deleting document {full_doc_id}")
 
     request = discoveryengine.DeleteDocumentRequest(name=full_doc_id)
-
-    document_service_client.delete_document(
-        request=request
-    )  # pyright: ignore [reportArgumentType]
+    try:
+        document_service_client.delete_document(
+            request=request
+        )  # pyright: ignore [reportArgumentType]
+    except google.api_core.exceptions.NotFound as not_found_error:
+        logger.warning(f"Document {full_doc_id} was already deleted.")
+        
 
 
 def delete_doc_from_bq_processed_documents(bq_client: bigquery.Client, doc_id: str):
@@ -172,7 +176,7 @@ def delete_doc_from_alloydb_processed_documents(doc_id: str):
         with pool.connect() as db_conn:
             db_conn.execute(
                 sqlalchemy.text(
-                    f"DELETE FROM eks.prcessed_documents WHERE id='{doc_id}'"
+                    f"DELETE FROM eks.processed_documents WHERE id='{doc_id}'"
                 )
             )
 
@@ -231,7 +235,7 @@ def delete_gcs_folder(storage_client: storage.Client, run_id: str):
     blobs = [
         b
         for b in bucket.list_blobs(
-            prefix=f"docs-processing-{run_id.replace( '_', '-')}/"
+            prefix=f"docs-processing-{run_id.replace('_', '-')}/"
         )
     ]
     for blob in blobs:
@@ -249,7 +253,7 @@ def main(
     bq_client = bigquery.Client(client_info=bg_ClientInfo(user_agent=USER_AGENT))
 
     client_options = (
-        {"api_endpoint": f"{data_store_config.region}-documentai.googleapis.com"}
+        {"api_endpoint": f"{data_store_config.region}-discoveryengine.googleapis.com"}
         if data_store_config.region and data_store_config.region != "global"
         else None
     )
@@ -261,10 +265,11 @@ def main(
     logger.info(f"Deleting {len(docs)} documents")
     for doc in docs:
         logger.info(f"Deleting document {doc.id} with URIs: {doc.gcs_uris}")
-        for obj_id in doc.obj_ids:
-            delete_doc_from_agent_build(
-                document_service_client, data_store_config, obj_id
-            )
+        delete_doc_from_agent_build(
+            document_service_client,
+            data_store_config,
+            doc.id,
+        )
         delete_doc_from_bq_processed_documents(bq_client, doc.id)
         delete_doc_from_alloydb_processed_documents(doc.id)
         for gcs_uri in doc.gcs_uris + doc.results_files:

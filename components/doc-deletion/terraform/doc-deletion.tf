@@ -105,7 +105,14 @@ module "doc_deletion_account" {
   description  = "Account used to run doc deletion in Agent Builder, BigQuery, AlloyDB and other storage services"
 }
 
-resource "google_alloydb_user" "schema_setup_user" {
+resource "terraform_data" "dbrole_deployment_trigger" {
+  # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)
+  input            = google_alloydb_user.doc_deletion_db_user
+  triggers_replace = google_alloydb_user.doc_deletion_db_user.database_roles
+}
+
+
+resource "google_alloydb_user" "doc_deletion_db_user" {
   cluster        = var.alloy_db_cluster_id
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"

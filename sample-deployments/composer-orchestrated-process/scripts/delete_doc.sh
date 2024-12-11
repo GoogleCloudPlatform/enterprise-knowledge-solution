@@ -76,7 +76,6 @@ single)
   if [[ -z "${DOC_ID}" ]]; then
     echo "Error: DOC_ID must be specified when MODE is single."
     usage
-    exit 1
   fi
   echo "Mode single selected with DOC_ID: ${DOC_ID}"
   ;;
@@ -84,7 +83,6 @@ batch)
   if [[ -n "${DOC_ID}" ]]; then
     echo "Error: DOC_ID should not be specified when MODE is batch."
     usage
-    exit 1
   fi
   echo "Mode batch selected."
   ;;
@@ -92,7 +90,6 @@ batch)
 *)
   echo "Error: Invalid mode. Must be 'single' or 'batch'."
   usage
-  exit 1
   ;;
 esac
 
