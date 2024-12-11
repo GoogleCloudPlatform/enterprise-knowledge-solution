@@ -44,29 +44,29 @@ This section provides step-by-step instructions for deploying the `Enterprise Kn
 
 To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, perform the follow steps:
 
-1.  [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
+1. [Create or select a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and ensure that [billing is enabled for your Google Cloud project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled#console).
 
-1.  This example code is deployed through Terraform using the identity of a least privilege service account. Your user identity needs the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project to create this service account and validate other requirements with a setup script:
+1. This example code is deployed through Terraform using the identity of a least privilege service account. Your user identity needs the following [IAM Roles](https://cloud.google.com/iam/docs/roles-overview) on your project to create this service account and validate other requirements with a setup script:
 
     - Project IAM Admin
     - Role Admin
     - Service Account Admin
     - Service Usage Admin
 
-1.  To deploy the solution from this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
+1. To deploy the solution from this repository using an online terminal with software and authentication preconfigured, use [Cloud Shell](https://shell.cloud.google.com/?show=ide%2Cterminal).
     Alternatively, to deploy this repository using a local terminal:
 
     - [install](https://cloud.google.com/sdk/docs/install) and [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI
     - [install Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
     - [install the Git CLI](https://github.com/git-guides/install-git)
 
-1.  In Cloud Shell or your preferred terminal, clone this repository:
+1. In Cloud Shell or your preferred terminal, clone this repository:
 
     ```sh
     git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
     ```
 
-1.  Navigate to the Sample Directory:
+1. Navigate to the Sample Directory:
 
     ```sh
     cd <YOUR_REPOSITORY>/sample-deployments/composer-orchestrated-process
@@ -74,7 +74,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
 
     Where `<YOUR_REPOSITORY>` is the path to the directory where you cloned this repository.
 
-1.  Set the following environment variables:
+1. Set the following environment variables:
 
     ```sh
     export PROJECT_ID="<your Google Cloud project id>"
@@ -88,7 +88,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
       export SERVICE_ACCOUNT_ID="your existing service account identity to be used for Terraform."
       ```
 
-1.  Run the following script to set up your GCP project before running Terraform.
+1. Run the following script to set up your GCP project before running Terraform.
 
     ```sh
     scripts/pre_tf_setup.sh
@@ -104,7 +104,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
     - Authenticate [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) with your service account credentials to be used by Terraform.
     - Triggers a pop-up dialog box: 'Sign in with Google' prompting you to authenticate the Google Auth Library. Follow the directions to authenticate with your user account, which will then configure Application Default Credentials (ADC) using the impersonated service account credentials to be used by Terraform.
 
-1.  Create a terraform.tfvars file with the following variables:
+1. Create a terraform.tfvars file with the following variables:
 
     | Terraform variables         | Description                                                                                           |
     | --------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -115,20 +115,20 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
     | webui_domains               | Your domain name for Web UI access (e.g., ["webui.example.com"])                                      |
     | iap_access_domains          | List of domains granted for IAP access to the Web UI (e.g., ["domain:example.com"])                   |
 
-1.  (Optional) By default, the Terraform script creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring the following optional terraform variables.
+1. (Optional) By default, the Terraform script creates a new VPC network in the same project as other resources. You can use an existing VPC network instead by configuring the following optional terraform variables.
 
     | Terraform variables | Description                                    |
     | ------------------- | ---------------------------------------------- |
     | create_vpc_network  | false # default is true                        |
     | vpc_name            | The name of your existing vpc, (e.g., "myvpc") |
 
-1.  Initialize Terraform:
+1. Initialize Terraform:
 
     ```sh
     terraform init
     ```
 
-1.  Review the proposed changes and apply them:
+1. Review the proposed changes and apply them:
 
     ```sh
     terraform apply
@@ -136,7 +136,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
 
     The provisioning process may take approximately an hour to complete.
 
-1.  Migrate Terraform state to the remote Cloud Storage backend:
+1. Migrate Terraform state to the remote Cloud Storage backend:
 
     ```sh
     terraform init -migrate-state
@@ -184,17 +184,17 @@ _Note: This step is optional because you can preview the search results on the [
 This step configures a sample Web UI for a custom search application based on Agent Builder.
 You must own a domain name used to access the web application, and be able to configure DNS records at your domain registratrar. The previous terraform steps have provisioned a load balancer and a managed SSL certificate for your domain to route web traffic securely to the Web-UI application. Authentication to the application is managed by an [Identity-Aware Proxy](https://cloud.google.com/iap/docs/concepts-overview)
 
-1.  Verify the external IP configured for the load balancer ingress:
+1. Verify the external IP configured for the load balancer ingress:
 
     ```sh
     terraform output webui_dns_config
     ```
 
-1.  On your DNS provider, configure the `A` records to map the domain name of your application to the external IP.
+1. On your DNS provider, configure the `A` records to map the domain name of your application to the external IP.
 
-1.  Review the [Oauth Consent screen](https://support.google.com/cloud/answer/10311615?hl=en) that will be displayed to IAP users, and [enable IAP for Cloud Run](https://cloud.google.com/iap/docs/enabling-cloud-run#configuring_to_limit_access).
+1. Review the [Oauth Consent screen](https://support.google.com/cloud/answer/10311615?hl=en) that will be displayed to IAP users, and [enable IAP for Cloud Run](https://cloud.google.com/iap/docs/enabling-cloud-run#configuring_to_limit_access).
 
-1.  Validate that the setup is correct by accessing the domain from your web browser and authenticating to the app with your Google credentials.
+1. Validate that the setup is correct by accessing the domain from your web browser and authenticating to the app with your Google credentials.
 
 ## User Guide
 
@@ -234,6 +234,7 @@ Airflow workflows must be triggered to process the uploaded documents.
 To trigger the workflow using an automatable script:
 
 1. Execute the following bash script:
+
    ```sh
    scripts/trigger_workflow.sh
    ```
@@ -322,10 +323,13 @@ When you need to remove a document from the scope of search and summarization, d
    ```
 
 1. Execute the following command to delete a batch of documents:
+
    ```sh
    scripts/delete_doc.sh [-p <PROJECT_ID>] -l <LOCATION> -b <BATCH_ID>
    ```
+
 1. Execute the following command to delete all documents from the Agent Builder Datastore:
+
    ```sh
    scripts/reset_datastore.sh [-p <PROJECT_ID>] -l <LOCATION>
    ```
