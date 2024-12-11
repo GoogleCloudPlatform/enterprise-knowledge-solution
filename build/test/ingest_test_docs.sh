@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+## remove this after debugging
+export TEST_PROJECT_ID=eks-int-75f65a8
+##
+
 gcloud storage cp gs://"$PROJECT_ID"-testdocs/EKS_Test_Scenarios/GoogleQuarterlyResults/* gs://docs-input-"$TEST_PROJECT_ID"/
 gcloud storage cp gs://"$PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test0_Demo_PDFs/* gs://docs-input-"$TEST_PROJECT_ID"/
 gcloud storage cp gs://"$PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test1_Text_Only_PDFs/* gs://docs-input-"$TEST_PROJECT_ID"/
