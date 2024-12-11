@@ -57,7 +57,9 @@ steps:
       - "-c"
       - >-
         build/test/ingest_test_docs.sh;
-        sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
+        cd sample-deployments/composer-orchestrated-process;
+        terraform init;
+        /sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
         (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
         # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
