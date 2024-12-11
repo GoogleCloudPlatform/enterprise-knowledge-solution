@@ -12,17 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_vpc_access_connector" "vpc_connector" {
-  project = module.project_services.project_id
-  name    = "alloy-db-vpc-connector"
-  region  = var.region
-  subnet {
-    name = google_compute_subnetwork.serverless_connector_subnet.name
-  }
-  min_instances = 2
-  max_instances = 3
-}
-
 resource "google_compute_subnetwork" "serverless_connector_subnet" {
   name                     = var.serverless_connector_subnet
   ip_cidr_range            = var.serverless_connector_subnet_range
