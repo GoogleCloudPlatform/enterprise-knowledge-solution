@@ -16,9 +16,11 @@
 
 # Just a small helper to your developers - a small bash function to trigger the DAG from the command line:
 
+PARENT_DIR="$(dirname "$0")/.."
+
 function trigger_dag() {
   # read terraform state
-  outputs=$(terraform output -json)
+  outputs=$(terraform output -json -chdir="$PARENT_DIR/../")
 
   json_config=$(
     cat <<EOF
@@ -77,6 +79,6 @@ set -x
 . "$(dirname "$0")/common.sh"
 
 section_open "Trigger DAG"
-echo $(terraform output -json)
+echo $(terraform output -json -chdir="$PARENT_DIR/../")
 trigger_dag
 section_close
