@@ -221,7 +221,7 @@ module "post-setup-config" {
   serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
-  db_role_content_hash              = sha512(join("", [
+  db_role_content_hash = sha512(join("", [
     module.specialized_parser_job.db_role_content_hash,
     module.doc-deletion.db_role_content_hash
   ]))

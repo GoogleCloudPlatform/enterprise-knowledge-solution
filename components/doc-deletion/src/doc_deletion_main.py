@@ -155,9 +155,8 @@ def delete_doc_from_agent_build(
         document_service_client.delete_document(
             request=request
         )  # pyright: ignore [reportArgumentType]
-    except google.api_core.exceptions.NotFound as not_found_error:
+    except google.api_core.exceptions.NotFound:
         logger.warning(f"Document {full_doc_id} was already deleted.")
-        
 
 
 def delete_doc_from_bq_processed_documents(bq_client: bigquery.Client, doc_id: str):
@@ -189,7 +188,10 @@ def delete_doc_from_gcs(storage_client: storage.Client, gcs_uri: str):
     gcs_bucket, gcs_path = matches.groups()
     logger.info(f"Deleting document {gcs_path} from GCS bucket {gcs_bucket}")
     bucket = storage_client.bucket(gcs_bucket)
-    bucket.blob(gcs_path).delete()
+    try:
+        bucket.blob(gcs_path).delete()
+    except google.api_core.exceptions.NotFound:
+        logger.warning(f"GCS Object {gcs_path} was already deleted.")
 
 
 def delete_doc_from_metadata_table(
@@ -293,8 +295,8 @@ if __name__ == "__main__":
     _mode = os.environ["MODE"]
     assert _mode in ["single", "batch"], "Mode must be either 'single' or 'batch'"
     _doc_id = os.environ.get("DOC_ID")  # optional, hence `get` method
-    assert (_mode == "batch" and _doc_id is None) or (
-        _mode == "single" and _doc_id is not None
+    assert (_mode == "batch" and not _doc_id) or (
+        _mode == "single" and _doc_id
     ), "Mode and doc_id mismatch"
 
     main(_data_store_config, _run_id, _mode, _doc_id)
