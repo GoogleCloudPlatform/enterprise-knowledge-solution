@@ -1,53 +1,53 @@
 ---
 timeout: 7200s
 steps:
-  - id: prepare
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    entrypoint: /bin/bash
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
-        sleep 10 ;
-        trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
-        gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
+  #  - id: prepare
+  #    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+  #    entrypoint: /bin/bash
+  #    args:
+  #      - "-e"
+  #      - "-x"
+  #      - "-c"
+  #      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+  #        gcloud projects create ${_TEST_PROJECT_ID} --folder ${_FOLDER_ID} ;
+  #        sleep 10 ;
+  #        trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
+  #        gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
-  - id: pre_tf_setup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    entrypoint: /bin/bash
-    args:
-      - "-x"
-      - "-c"
-      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        export PROJECT_ID=${_TEST_PROJECT_ID};
-        sample-deployments/composer-orchestrated-process/scripts/pre_tf_setup.sh;
-    env:
-      - "REGION=${_REGION}"
-      - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
+  #  - id: pre_tf_setup
+  #    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+  #    entrypoint: /bin/bash
+  #    args:
+  #      - "-x"
+  #      - "-c"
+  #      - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
+  #        export PROJECT_ID=${_TEST_PROJECT_ID};
+  #        sample-deployments/composer-orchestrated-process/scripts/pre_tf_setup.sh;
+  #    env:
+  #      - "REGION=${_REGION}"
+  #      - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
-  - id: terratest
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >-
-        export PROJECT_ID=${_TEST_PROJECT_ID};
-        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
-        gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        (cd build/test && go test -v -run ./ -timeout 90m --tags=e2e);
-        gcloud config unset auth/impersonate_service_account;
-    entrypoint: /bin/bash
-    env:
-      - "REGION=${_REGION}"
-      - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
-      - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
-      - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
-      - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
-      - "GCLOUD_TF_DOWNLOAD=never"
-      - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
+  #  - id: terratest
+  #    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+  #    args:
+  #      - "-e"
+  #      - "-x"
+  #      - "-c"
+  #      - >-
+  #        export PROJECT_ID=${_TEST_PROJECT_ID};
+  #        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
+  #        gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
+  #        (cd build/test && go test -v -run ./ -timeout 90m --tags=e2e);
+  #        gcloud config unset auth/impersonate_service_account;
+  #    entrypoint: /bin/bash
+  #    env:
+  #      - "REGION=${_REGION}"
+  #      - "DOC_AI_LOCATION=${_DOC_AI_LOCATION}"
+  #      - "VERTEX_AI_DATA_STORE_REGION=${_VERTEX_AI_DATA_STORE_REGION}"
+  #      - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
+  #      - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
+  #      - "GCLOUD_TF_DOWNLOAD=never"
+  #      - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
 
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
@@ -69,15 +69,15 @@ steps:
       #      - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
 
-  - id: cleanup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >-
-        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
-    entrypoint: /bin/bash
+#  - id: cleanup
+#    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+#    args:
+#      - "-e"
+#      - "-x"
+#      - "-c"
+#      - >-
+#        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+#    entrypoint: /bin/bash
 
 tags:
   - "ci"

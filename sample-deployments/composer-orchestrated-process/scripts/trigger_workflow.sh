@@ -67,7 +67,7 @@ function trigger_dag() {
     ],
     "classifier": "$(echo "$outputs" | jq -r ".classifier_processor_id.value")",
     "doc-ai-processors" : $(echo "$outputs" | jq -r ".specialized_processors_ids_json.value | to_entries | map({label: .key, \"doc-ai-processor-id\": .value})")
-}
+  }
 EOF
   )
   gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
@@ -75,7 +75,7 @@ EOF
 
 set -o errexit
 set -o nounset
-#set -x
+set -x
 
 # shellcheck source=/dev/null
 . "$PARENT_DIR/common.sh"
