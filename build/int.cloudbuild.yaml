@@ -37,7 +37,7 @@ steps:
         export PROJECT_ID=${_TEST_PROJECT_ID};
         export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        cd build/test && go test -v -run ./ -timeout 90m --tags=e2e;
+        (cd build/test && go test -v -run ./ -timeout 90m --tags=e2e);
         gcloud config unset auth/impersonate_service_account;
     entrypoint: /bin/bash
     env:
@@ -57,12 +57,9 @@ steps:
       - "-c"
       - >-
         build/test/ingest_test_docs.sh;
-        cd sample-deployments/composer-orchestrated-process;
-        terraform init;
-        scripts/trigger_workflow.sh;
+        sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
-        cd /workspace/build/test;
-        go test -v -run ./ -timeout 60m --tags=functional;
+        (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
         # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
         # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
     entrypoint: /bin/bash
