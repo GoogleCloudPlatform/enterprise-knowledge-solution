@@ -59,6 +59,7 @@ steps:
         build/test/ingest_test_docs.sh;
         cd sample-deployments/composer-orchestrated-process;
         terraform init;
+        terraform output;
         cd ../..;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
