@@ -59,6 +59,7 @@ steps:
         build/test/ingest_test_docs.sh;
         cd sample-deployments/composer-orchestrated-process && terraform init && terraform output;
         cd ../..;
+        export PROJECT_ID=$TEST_PROJECT_ID;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
         (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
