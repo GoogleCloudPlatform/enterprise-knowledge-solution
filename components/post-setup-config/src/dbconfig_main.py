@@ -75,9 +75,11 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
 
 users = [
     os.environ["ALLOYDB_USER_CONFIG"],
-    os.environ["ALLOYDB_USER_SPECIALIZED_PARSER"],
     "postgres",
-]
+] + os.environ[
+    "ALLOYDB_USERS"
+].split(",")
+
 
 logger.info("Setting up for eks.")
 # Create role if not exists

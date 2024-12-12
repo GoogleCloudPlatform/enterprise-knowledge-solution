@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import logging.config
 import os
 import sys
 from typing import Optional
@@ -31,6 +32,37 @@ from google.cloud import (
     documentai,  # type: ignore # pylint: disable = no-name-in-module # pylint: disable = import-error
 )
 
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": [
+                "console",
+            ],
+        }
+    },
+}
+
+logging.config.dictConfig(logging_config)
+logging.basicConfig(level="INFO")
+logger = logging.getLogger(__name__)
+
 USER_AGENT = "cloud-solutions/eks-docai-v1"
 
 
@@ -42,7 +74,7 @@ def batch_classify_documents(
     gcs_output_uri: str,
     processor_version_id: Optional[str] = None,
     field_mask: Optional[str] = None,
-    timeout: int = 400,
+    timeout: int = 1000,
 ):
     """Function for processing PDF documents in batch"""
     # You must set the `api_endpoint` if you use a location other than "us".
@@ -84,19 +116,19 @@ def batch_classify_documents(
 
     # BatchProcess returns a Long Running Operation (LRO)
     operation = client.batch_process_documents(request)
-    logging.info(f"Started batch process; {operation.metadata=};")
+    logger.info(f"Started batch process; {operation.metadata=};")
 
     # Continually polls the operation until it is complete.
     # This could take some time for larger files
     # Format: projects/{project_id}/locations/{location}/operations/{operation_id}
     try:
-        logging.info(
+        logger.info(
             f"Waiting for operation {operation.operation.name} to " f"complete..."
         )
         operation.result(timeout=timeout)
     # Catch exception when operation doesn't finish before timeout
     except (RetryError, InternalServerError) as e:
-        logging.error(e.message)
+        logger.error(e.message)
 
     # NOTE: Can also use callbacks for asynchronous processing
     #
@@ -134,12 +166,12 @@ if __name__ == "__main__":
             f"{GCS_INPUT_PREFIX=}, "
             f"{GCS_OUTPUT_URI=}"
         )
-        logging.error(message)
+        logger.error(message)
         sys.exit(1)
 
     try:
-        logging.info(f"Starting Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
-        logging.info(
+        logger.info(f"Starting Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
+        logger.info(
             f"{PROCESSOR_ID=}, "
             f"{PROJECT_ID=}, "
             f"{LOCATION=}, "
@@ -153,7 +185,7 @@ if __name__ == "__main__":
             gcs_input_prefix=GCS_INPUT_PREFIX,
             gcs_output_uri=GCS_OUTPUT_URI,
         )
-        logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
+        logger.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:
-        logging.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")
+        logger.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")
         sys.exit(1)

@@ -1,0 +1,6 @@
+google-cloud-storage
+google-cloud-bigquery
+google-cloud-discoveryengine
+google-api-python-client
+sqlalchemy
+google-cloud-alloydb-connector[pg8000]

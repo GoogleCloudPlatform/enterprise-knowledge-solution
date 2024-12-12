@@ -33,10 +33,10 @@ variable "artifact_repo" {
   default     = ""
 }
 
-variable "configure_schema_cloud_run_job_name" {
-  description = "Configure db schemas and permissions in AlloyDB"
+variable "doc_deletion_cloud_run_job_name" {
+  description = "Doc Deletion job name"
   type        = string
-  default     = "configure-db-schema"
+  default     = "delete-docs"
 }
 
 variable "serverless_connector_subnet" {
@@ -70,12 +70,29 @@ variable "cloud_build_service_account_email" {
   type        = string
 }
 
-variable "additional_db_users" {
-  description = "The AlloyDB db roles associated with the service accounts identities that requires access to eks data."
-  type        = list(string)
+variable "data_store_project_id" {
+  description = "The project id for the Vertex AI Data Store"
+  type        = string
 }
 
-variable "db_role_content_hash" {
-  description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
+variable "data_store_region" {
+  description = "The region for the Vertex AI Data Store"
   type        = string
+}
+
+variable "data_store_collection" {
+  description = "The collection for the Vertex AI Data Store"
+  type        = string
+  default     = "default_collection"
+}
+
+variable "data_store_id" {
+  description = "The id for the Vertex AI Data Store"
+  type        = string
+}
+
+variable "data_store_branch" {
+  description = "The branch for the Vertex AI Data Store"
+  type        = string
+  default     = "default_branch"
 }

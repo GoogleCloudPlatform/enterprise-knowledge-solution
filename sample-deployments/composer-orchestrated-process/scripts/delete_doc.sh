@@ -19,38 +19,33 @@ set -o nounset
 
 # Function to print usage instructions
 usage() {
-  echo "Usage: $0 [-d <DOC_ID> -u <DOC_URI> -t <BQ_TABLE> -l <LOCATION> [-p <PROJECT_ID>]] | [-b <BATCH_ID> -l <LOCATION> [-p <PROJECT_ID>]]"
-  echo "  -l LOCATION   Data Store location (global, us, or eu)"
-  echo "  -p PROJECT_ID (Optional) Google Cloud Project ID (defaults to gcloud config)"
-  echo "Single document deletion:"
-  echo "  -d DOC_ID     Document ID from Agent Builder Datastore"
-  echo "  -u DOC_URI    Document URI from Agent Builder Datastore"
-  echo "  -t BQ_TABLE   BigQuery table containing document metadata"
-  echo "Batch deletion:"
-  echo "  -b BATCH_ID   Batch ID to identify BigQuery processing table and GCS folder"
+  echo "Usage: $0  -m <MODE> -r <RUN_ID> [-d <DOC_ID>] [-f]"
+  echo "  -m MODE       Mode of operation - must be 'single' or 'batch'. When 'single' is specified, a DOC_ID must be specified as well."
+  echo "  -r RUN ID     Run ID - the suffix of the data table in bigquery, can be found in the GCS path or from the composer run. Format: dd-mm-yyyy-abcdefgh. hyphens and dashes are interchangable. e.g: 09_12_2024_xc252nz8 or 09-12-2024-xc252nz8"
+  echo "  -d DOC_ID     Optional. Document ID from BigQuery Data table."
+  echo "  -f FORCE      Optional. Skip confirmation prompt."
   exit 1
 }
 
+FORCE=0
+RUN_ID=""
+DOC_ID=""
+MODE=""
+
 # Process command line arguments
-while getopts ":d:u:t:b:p:l:" opt; do
+while getopts ":m:r:d:f" opt; do
   case "${opt}" in
+  m)
+    MODE=${OPTARG}
+    ;;
+  r)
+    RUN_ID=${OPTARG}
+    ;;
   d)
     DOC_ID=${OPTARG}
     ;;
-  u)
-    DOC_URI=${OPTARG}
-    ;;
-  t)
-    BQ_TABLE=${OPTARG}
-    ;;
-  b)
-    BATCH_ID=${OPTARG}
-    ;;
-  p)
-    PROJECT_ID=${OPTARG}
-    ;;
-  l)
-    LOCATION=${OPTARG}
+  f)
+    FORCE=1
     ;;
   \?)
     echo "Invalid option: -${OPTARG}" >&2
@@ -65,140 +60,65 @@ done
 
 shift $((OPTIND - 1))
 
-DOC_ID=${DOC_ID:-}
-DOC_URI=${DOC_URI:-}
-BQ_TABLE=${BQ_TABLE:-}
-LOCATION=${LOCATION:-}
-
-# Determine the deletion mode
-if [ -n "${DOC_ID}" ] || [ -n "${DOC_URI}" ] || [ -n "${BQ_TABLE}" ]; then
-  # Check if required arguments are provided
-  if [ -z "${DOC_ID}" ] || [ -z "${DOC_URI}" ] || [ -z "${BQ_TABLE}" ] || [ -z "${LOCATION}" ]; then
-    echo "Error: Missing required arguments." >&2
-    usage
-  fi
-  MODE="single"
-elif [ -n "${BATCH_ID}" ]; then
-  # Check if required arguments are provided
-  if [ -z "${LOCATION}" ]; then
-    echo "Error: Missing required arguments for batch deletion." >&2
-    usage
-  fi
-  MODE="batch"
-else
-  echo "Error: You must provide arguments for either single document or batch deletion." >&2
+if [[ -z "${MODE}" ]]; then
+  echo "Error: -m MODE is a required argument." >&2
   usage
 fi
 
-# Validate location argument
-if [[ ! "$LOCATION" =~ ^(global|us|eu)$ ]]; then
-  echo "Error: Invalid location. Must be 'global', 'us', or 'eu'." >&2
+if [[ -z "${RUN_ID}" ]]; then
+  echo "Error: -r RUN_ID is a required argument." >&2
   usage
 fi
 
-# Set API endpoint based on location
-if [ "$LOCATION" = "global" ]; then
-  API_ENDPOINT="https://discoveryengine.googleapis.com"
-else
-  API_ENDPOINT="https://${LOCATION}-discoveryengine.googleapis.com"
+# Verify mode is valid
+case "$MODE" in
+single)
+  if [[ -z "${DOC_ID}" ]]; then
+    echo "Error: DOC_ID must be specified when MODE is single."
+    usage
+  fi
+  echo "Mode single selected with DOC_ID: ${DOC_ID}"
+  ;;
+batch)
+  if [[ -n "${DOC_ID}" ]]; then
+    echo "Error: DOC_ID should not be specified when MODE is batch."
+    usage
+  fi
+  echo "Mode batch selected."
+  ;;
+
+*)
+  echo "Error: Invalid mode. Must be 'single' or 'batch'."
+  usage
+  ;;
+esac
+
+# Ask for confirmation
+if [[ $FORCE -eq 0 ]]; then # Check if force mode is disabled
+  case "${MODE}" in
+  single)
+    read -r -p "Retype DOC_ID '${DOC_ID}' to confirm deletion: " typed_doc_id
+    if [[ "${typed_doc_id}" != "$DOC_ID" ]]; then
+      echo "DOC_ID mismatch. Aborting."
+      exit 1
+    fi
+    ;;
+  batch)
+    read -r -p "Retype RUN_ID '${RUN_ID}' to confirm deletion: " typed_run_id
+    if [[ "${typed_run_id}" != "${RUN_ID}" ]]; then
+      echo "RUN_ID mismatch. Aborting."
+      exit 1
+    fi
+    ;;
+  esac
 fi
 
-# Set default project ID if not provided
-if [ -z "$PROJECT_ID" ]; then
-  PROJECT_ID=$(gcloud config get-value project)
+echo "Executing 'gcloud run jobs execute delete-docs --update-env-vars=\"RUN_ID=${RUN_ID},DOC_ID=${DOC_ID},MODE=${MODE}\" --wait'"
+gcloud run jobs execute delete-docs --update-env-vars="RUN_ID=$RUN_ID,DOC_ID=$DOC_ID,MODE=$MODE" --wait
+result=$?
+
+if [[ $result -ne 0 ]]; then
+  read -r -p "Deletion job failed with exit code $result. Press Enter to exit."
+  exit $result # Exit with the same code as the gcloud command
 fi
-
-BQ_DOC_REG_TABLE="docs_registry.docs_registry"
-
-if [ "$MODE" = "single" ]; then
-  # Confirmation prompt
-  read -r -p "You are about to delete document with ID '$DOC_ID' from project '$PROJECT_ID'. Are you sure? [y/N] " response
-  if [[ ! "$response" =~ ^[yY]$ ]]; then
-    echo "Aborting deletion."
-    exit 0
-  fi
-
-  # Construct Agent Builder Datastore deletion URI
-  DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
-
-  # EXECUTE THE FOLLOWING curl COMMAND to Delete document from Agent Builder Datastore
-  curl -X DELETE \
-    -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
-    -H "x-goog-user-project: $PROJECT_ID" \
-    "${DELETE_URI}"
-
-  # EXECUTE THE FOLLOWING bq COMMAND to Delete document meta-data from BigQuery Table
-  bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-    "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
-
-  bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-    "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
-
-  # EXECUTE THE FOLLOWING bq COMMAND to Delete the BigQuery Table containing the document meta-data
-  # BQ_TABLE="${BQ_TABLE/\./:}"
-  # bq rm -t "$BQ_TABLE"
-
-  # EXECUTE THE FOLLOWING gsutil COMMAND to Delete the document and meta-data from Google Cloud Storage Bucket
-  gsutil rm -r "$DOC_URI"
-  # Conditional logic for DocAI form parser output
-  if [[ $DOC_URI == *"pdf-forms"* && $DOC_URI == *.txt ]]; then
-    JSON_URI="${DOC_URI%.txt}.json"
-    gsutil rm -r "$JSON_URI"
-  else
-    gsutil rm -r "$DOC_URI".json
-  fi
-
-  # EXECUTE THE FOLLOWING gsutil COMMAND to Delete the folder containing the document and meta-data from Google Cloud Storage Bucket
-  # DOC_FOLDER=$(cut -d'/' -f1-4 <<< "$DOC_URI")
-  # gsutil rm -r $DOC_FOLDER
-
-  # Print success message
-  echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-
-elif [ "$MODE" = "batch" ]; then
-  # Derive BigQuery table name from batch ID
-  BQ_TABLE="docs_store.docs_processing_${BATCH_ID//-/_}"
-  # Confirmation prompt
-  read -r -p "You are about to delete documents associated with batch ID '$BATCH_ID' from project '$PROJECT_ID'. Are you sure? [y/N] " response
-  if [[ ! "$response" =~ ^[yY]$ ]]; then
-    echo "Aborting deletion."
-    exit 0
-  fi
-  # Fetch document IDs and URIs from BigQuery
-  QUERY="SELECT id, content.uri FROM \`$BQ_TABLE\`;"
-  RESULTS=$(bq query --use_legacy_sql=false --format=sparse --project_id="$PROJECT_ID" "$QUERY" | awk 'NR>2')
-  # Iterate through results and delete documents from Datastore and GCS
-  # Check if any results were returned
-  if [ -z "$RESULTS" ]; then
-    echo "No documents found associated with batch ID '$BATCH_ID'. Skipping document deletion."
-  else
-    while read -r line; do
-      DOC_ID=$(echo "$line" | awk '{print $1}')
-      DOC_URI=$(echo "$line" | awk '{$1 = ""; sub(/^ /, "", $0); print $0}')
-
-      DELETE_URI="${API_ENDPOINT}/v1alpha/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${AGENT_BUILDER_DATA_STORE_ID}/branches/default_branch/documents/${DOC_ID}"
-
-      curl -X DELETE \
-        -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
-        -H "x-goog-user-project: $PROJECT_ID" \
-        "${DELETE_URI}"
-
-      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-        "DELETE FROM \`$BQ_TABLE\` WHERE id = '$DOC_ID'"
-
-      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" \
-        "DELETE FROM \`$BQ_DOC_REG_TABLE\` WHERE id = '$DOC_ID'"
-
-      echo "Document with ID '$DOC_ID' successfully deleted from DP&U."
-    done <<<"$RESULTS"
-  fi
-
-  # Delete the GCS folder associated with the batch ID
-  GCS_FOLDER="gs://dpu-process-${PROJECT_ID}/docs-processing-${BATCH_ID//_/-}"
-  echo "Delete the batch GCS-folder: ${GCS_FOLDER}"
-  gsutil rm -r "$GCS_FOLDER"
-
-  bq rm --project_id="$PROJECT_ID" --headless=true -f -t "$BQ_TABLE"
-
-  echo "Batch deletion for ID '$BATCH_ID' completed."
-fi
+echo "Deletion job finished successfully."
