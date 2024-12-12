@@ -20,10 +20,7 @@ PARENT_DIR="$(dirname "$0")"
 
 function trigger_dag() {
   # read terraform state
-  echo "$PARENT_DIR"
   outputs=$(terraform -chdir="$PARENT_DIR/../" output -json)
-  echo "the next line will echo outputs"
-  echo "$outputs"
 
   json_config=$(
     cat <<EOF
@@ -70,7 +67,7 @@ function trigger_dag() {
   }
 EOF
   )
-  gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing --project=$debug_PROJECT_ID
+  gcloud composer environments run dpu-composer --project=$debug_PROJECT_ID --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit
