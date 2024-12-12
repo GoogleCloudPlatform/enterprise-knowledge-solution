@@ -35,7 +35,6 @@ steps:
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
         (cd build/test && go test -v -run ./ -timeout 90m --tags=e2e);
         gcloud config unset auth/impersonate_service_account;
@@ -48,6 +47,7 @@ steps:
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
       - "GCLOUD_TF_DOWNLOAD=never"
       - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
+      - "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA}"
 
   - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
@@ -56,10 +56,8 @@ steps:
       - "-x"
       - "-c"
       - >-
-        build/test/ingest_test_docs.sh;
-        cd sample-deployments/composer-orchestrated-process && terraform init && terraform output;
-        cd ../..;
         export PROJECT_ID=${_TEST_PROJECT_ID};
+        build/test/ingest_test_docs.sh;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
         (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
@@ -67,7 +65,7 @@ steps:
         # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
     entrypoint: /bin/bash
     env:
-      - "PROJECT_ID=${PROJECT_ID}"
+      - "CICD_PROJECT_ID=${PROJECT_ID}"
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
 
@@ -103,5 +101,5 @@ substitutions:
   # _IAP_SUPPORT_EMAIL
   # _WEB_UI_DOMAINS
   # _CUSTOM_CLASSIFIER_ID
-  # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
-  # PROJECT_ID cannot be overwritten with env substitution, so it requires an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}`
+  # Note that ${PROJECT_ID} is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
+  # ${PROJECT_ID} cannot be overwritten with env substitution, so it requires an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}`
