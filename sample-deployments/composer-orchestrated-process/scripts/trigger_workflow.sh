@@ -67,7 +67,7 @@ function trigger_dag() {
   }
 EOF
   )
-  gcloud composer environments run dpu-composer --project=$PROJECT_ID --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
+  gcloud composer environments run dpu-composer --project="$PROJECT_ID" --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit
