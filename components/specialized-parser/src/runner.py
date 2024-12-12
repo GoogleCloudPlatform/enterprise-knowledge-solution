@@ -1,6 +1,22 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import csv
 import json
 import logging
+import logging.config
+import logging.handlers
 import os
 import re
 import uuid
@@ -22,7 +38,39 @@ from google.cloud.documentai_v1 import BatchProcessMetadata
 from google.cloud.exceptions import InternalServerError
 from sqlalchemy.engine import Engine
 
-FilenamesPair = namedtuple("FilenamesPair", "original_filename txt_filename")
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": [
+                "console",
+            ],
+        }
+    },
+}
+
+logging.config.dictConfig(logging_config)
+logging.basicConfig(level="INFO")
+logger = logging.getLogger(__name__)
+
+
+FilenamesPair = namedtuple("FilenamesPair", "id original_filename txt_filename")
 
 
 PROCESSED_DOCUMENTS_TABLE_NAME = "eks.processed_documents"
@@ -62,31 +110,32 @@ class SpecializedParserJobRunner:
         )
 
     def run(self):
-        logging.info("Verifying AlloyDB output table")
+        logger.info("Verifying AlloyDB output table")
         self.verify_alloydb_table()
-        logging.info("Starting Batch Processor operation")
+        logger.info("Starting Batch Processor operation")
         batch_operation = self.call_batch_processor()
-        logging.info("Waiting for Batch operation to finish")
+        logger.info("Waiting for Batch operation to finish")
         individual_process_statuses = self.wait_for_completion_and_verify_success(
             batch_operation
         )
-        logging.info(f"Parsing results from {self.job_config.gcs_output_uri}")
+        logger.info(f"Parsing results from {self.job_config.gcs_output_uri}")
         parsed_results, filename_pairs = self.read_and_parse_batch_results(
             individual_process_statuses,
         )
 
-        logging.info("Writing metadata to bigquery")
+        logger.info("Writing metadata to bigquery")
         self.write_metadata_to_bigquery(filename_pairs)
         if not parsed_results:
-            logging.info("No parsed results from processor - only metadata")
+            logger.info("No parsed results from processor - only metadata")
         else:
-            logging.info("Writing results to GCS")
+            logger.info("Writing results to GCS")
             bucket_name, csv_blob_name = self.write_results_to_gcs(parsed_results)
-            logging.info("Writing results to AlloyDB")
+            logger.info("Writing results to AlloyDB")
             self.write_results_to_alloydb_with_inserts(parsed_results)
-            logging.info("Writing results to BigQuery")
+            logger.info("Writing results to BigQuery")
             self.write_results_to_bigquery(bucket_name, csv_blob_name)
-        logging.info("Done")
+        self.alloydb_connection_pool.dispose()
+        logger.info("Done")
 
     @staticmethod
     def create_connection_pool(
@@ -125,16 +174,23 @@ class SpecializedParserJobRunner:
         """
         with self.alloydb_connection_pool.connect() as db_conn:
             db_conn.execute(
-                f"""
-            CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
-                id VARCHAR (255) NOT NULL PRIMARY KEY,
-                original_filename VARCHAR (2048) NOT NULL,
-                results_file VARCHAR (2048) NOT NULL,
-                run_id VARCHAR (255) NULL,
-                entities JSONB NULL
+                sqlalchemy.text(
+                    f"""
+                CREATE TABLE IF NOT EXISTS {PROCESSED_DOCUMENTS_TABLE_NAME} (
+                    id VARCHAR (255) NOT NULL PRIMARY KEY,
+                    original_filename VARCHAR (2048) NOT NULL,
+                    results_file VARCHAR (2048) NOT NULL,
+                    run_id VARCHAR (255) NULL,
+                    entities JSONB NULL
+                );"""
+                )
             )
-            """
+            db_conn.execute(
+                sqlalchemy.text(
+                    f"ALTER TABLE {PROCESSED_DOCUMENTS_TABLE_NAME} OWNER TO eks_users;"
+                )
             )
+            db_conn.close()
 
     def call_batch_processor(self) -> Operation:
         opts = ClientOptions(
@@ -168,27 +224,27 @@ class SpecializedParserJobRunner:
             document_output_config=output_config,
         )
         operation: Operation = client.batch_process_documents(request)
-        logging.info("Started batch process")
+        logger.info("Started batch process")
         return operation
 
     def wait_for_completion_and_verify_success(
         self, batch_operation: Operation
     ) -> List[BatchProcessMetadata.IndividualProcessStatus]:
         try:
-            logging.info(
+            logger.info(
                 f"Waiting for operation {batch_operation.operation.name} to complete..."
             )
             batch_operation.result(timeout=self.processor_config.timeout)
         # Catch exception when operation doesn't finish before timeout
         except (RetryError, InternalServerError, GoogleAPICallError) as e:
-            logging.error(e.message)
+            logger.error(e.message)
             raise e
-        logging.info("Batch Process Finished. Checking Status")
+        logger.info("Batch Process Finished. Checking Status")
         metadata = documentai.BatchProcessMetadata(batch_operation.metadata)
 
         if metadata.state != documentai.BatchProcessMetadata.State.SUCCEEDED:
             raise ValueError(f"Batch Process Failed: {metadata.state_message}")
-        logging.info("Batch process has succeeded")
+        logger.info("Batch process has succeeded")
 
         return list(metadata.individual_process_statuses)
 
@@ -201,7 +257,7 @@ class SpecializedParserJobRunner:
         for process in individual_process_statuses:
             matches = re.match(r"gs://(.*?)/(.*)", process.output_gcs_destination)
             if not matches:
-                logging.info(
+                logger.info(
                     "Could not parse output GCS destination: %s",
                     process.output_gcs_destination,
                 )
@@ -216,10 +272,10 @@ class SpecializedParserJobRunner:
             for blob in output_blobs:
                 # Document AI should only output JSON files to GCS
                 if blob.name in output_documents:
-                    logging.info(f"Already parsed {blob.name}. Skipping.")
+                    logger.info(f"Already parsed {blob.name}. Skipping.")
                     continue
                 if blob.content_type != "application/json":
-                    logging.info(
+                    logger.info(
                         f"Skipping non-supported file: {blob.name} - Mimetype: {blob.content_type}"
                     )
                     continue
@@ -229,7 +285,7 @@ class SpecializedParserJobRunner:
                     blob.download_as_bytes(),
                     ignore_unknown_fields=True,
                 )
-
+                doc_id = str(uuid.uuid4())
                 original_filename = (blob.name.rsplit("-", 1)[0]).rsplit("/", 1)[1]
                 original_file_path = (
                     f"{self.job_config.gcs_input_prefix}/{original_filename}.pdf"
@@ -238,22 +294,26 @@ class SpecializedParserJobRunner:
                 txt_blob = txt_bucket.blob(txt_filename)
                 txt_blob.upload_from_string(document.text)
                 txt_file_path = f"gs://{output_bucket}/{txt_filename}"
-                logging.info(f"Text file {txt_file_path} created successfully")
+                logger.info(f"Text file {txt_file_path} created successfully")
                 output_pairs.append(
                     FilenamesPair(
-                        original_filename=original_file_path, txt_filename=txt_file_path
+                        id=doc_id,
+                        original_filename=original_file_path,
+                        txt_filename=txt_file_path,
                     )
                 )
                 if document.entities:
                     # Since json.dumps(document.entities, indent=None) throws an error ("TypeError: Object of type
                     # RepeatedComposite is not JSON serializable")
                     # We will convert the document to dict, and then use the entities key
-                    entities = documentai.Document.to_dict(document)[
+                    entities = documentai.Document.to_dict(
+                        document
+                    )[  # pyright: ignore [reportIndexIssue]
                         "entities"
-                    ]  # pyright: ignore [reportIndexIssue]
-                    id = str(uuid.uuid4())
+                    ]
+
                     output_documents[blob.name] = ProcessedDocument(
-                        id=id,
+                        id=doc_id,
                         original_filename=original_file_path,
                         run_id=self.job_config.run_id,
                         results_file=f"gs://{output_bucket}/{blob.name}",
@@ -292,7 +352,7 @@ class SpecializedParserJobRunner:
             output_folder = match.group(2)
             return bucket_name, output_folder
         else:
-            logging.info("No bucket name found in the given string. %s", gcs_uri)
+            logger.info("No bucket name found in the given string. %s", gcs_uri)
             raise ValueError(f"Could not extract bucket from {gcs_uri}")
 
     def divide_chunks(self, list_to_chunk: list, size_of_chunk: int):
@@ -303,23 +363,24 @@ class SpecializedParserJobRunner:
     def write_results_to_alloydb_with_inserts(
         self, parsed_results: List[ProcessedDocument]
     ):
-        logging.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
+        logger.info(f"Inserting data to AlloyDB; ({len(parsed_results)} rows)")
+        sql = sqlalchemy.text(
+            f"""
+            INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
+            (id, original_filename, results_file, run_id, entities) VALUES
+            (:id, :original_filename, :results_file, :run_id, :entities)
+        """
+        )
         with self.alloydb_connection_pool.connect() as conn:
             for chunk in self.divide_chunks(parsed_results, 50):
-                rows = [
-                    f"('{x.id}', '{x.original_filename}', '{x.results_file}', '{x.run_id}', '{x.entities}')"
-                    for x in chunk
-                ]
+                # convert to tuples
+                rows = [asdict(x) for x in chunk]
 
-                sql = f"""
-                    INSERT INTO {PROCESSED_DOCUMENTS_TABLE_NAME}
-                    VALUES
-                    {",".join(rows)}
-                """
-                conn.execute(sql)
+                conn.execute(sql, *rows)
+                conn.close()
 
     def write_results_to_alloydb(self, local_filename: str):
-        logging.info(f"Copying data to AlloyDB table from CSV {local_filename}")
+        logger.info(f"Copying data to AlloyDB table from CSV {local_filename}")
         with self.alloydb_connection_pool.connect() as conn:
             sql = f"""
                 COPY {PROCESSED_DOCUMENTS_TABLE_NAME}
@@ -329,7 +390,8 @@ class SpecializedParserJobRunner:
                     HEADER true
                 )
             """
-            conn.execute(sql)
+            conn.execute(sqlalchemy.text(sql))
+            conn.close()
 
     def write_results_to_bigquery(self, bucket_name: str, csv_blob_name: str):
         # Construct the full table ID.
@@ -374,29 +436,26 @@ class SpecializedParserJobRunner:
                 f"Encountered errors while inserting rows in BigQuery: {errors}"
             )
 
-        logging.info("New rows have been added in Big Query table.")
+        logger.info("New rows have been added in Big Query table.")
 
     def build_bq_metadata_row(self, pair: FilenamesPair) -> dict:
         """Program that builds metadata for each processed file"""
 
-        # generate unique id
-        id = str(uuid.uuid4())
-
         # build row with metadata
         row = {
-            "id": id,
+            "id": pair.id,
             "jsonData": json.dumps(
                 {
                     "objs": [
                         {
                             "uri": pair.txt_filename,
-                            "objid": id,
+                            "objid": pair.id + "-txt",
                             "status": "Indexed",
                             "mimetype": "text/plain",
                         },
                         {
                             "uri": pair.original_filename,
-                            "objid": "",
+                            "objid": pair.id + "-pdf",
                             "status": "",
                             "mimetype": "application/pdf",
                         },

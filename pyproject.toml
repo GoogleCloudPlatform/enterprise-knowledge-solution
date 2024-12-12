@@ -15,6 +15,8 @@ source-roots = [
     "components/processing/libs/processor-xlsx/src",
     "components/doc-classifier/src",
     "components/specialized-parser/src",
+    "components/post-setup-config/src",
+    "components/doc-deletion/src",
     "components/webui/src",
 ]
 
@@ -37,6 +39,8 @@ include=[
     "components/processing/libs/processor-xlsx/src",
     "components/doc-classifier/src",
     "components/specialized-parser/src",
+    "components/post-setup-config/src",
+    "components/doc-deletion/src",
     "components/webui/src",
 ]
 
@@ -48,6 +52,8 @@ executionEnvironments = [
     "components/processing/libs/processor-msgx/src",
     "components/doc-classifier/src",
     "components/specialized-parser/src",
+    "components/post-setup-config/src",
+    "components/doc-deletion/src",
     "components/webui/src",
     ] }
 ]

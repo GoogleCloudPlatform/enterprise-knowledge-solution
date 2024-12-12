@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,11 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-steps:
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    script: |
-      docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder .
-    automapSubstitutions: true
-images:
-  - "us-central1-docker.pkg.dev/$PROJECT_ID/ci/test-builder"
+terraform {
+  required_version = ">=1.5.7"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.23.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.12.1"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "cloud-solutions/dpu-solution-v1.0.0"
+  }
+}

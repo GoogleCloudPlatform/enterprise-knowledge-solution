@@ -74,7 +74,7 @@ def specialized_parser_job_params(
     bq_table: dict,
     process_bucket: str,
     process_folder: str,
-    timeout: int = 600,
+    timeout: int = 1000,
 ):
     bq_table_id = (
         f"{bq_table['project_id']}.{bq_table['dataset_id']}.{bq_table['table_id']}"
@@ -113,7 +113,7 @@ def get_doc_classifier_job_overrides(
     classifier_processor_id: str,
     process_folder: str,
     process_bucket: str,
-    timeout_in_seconds: int = 3000,
+    timeout_in_seconds: int = 5000,
 ):
     gcs_input_prefix = __build_gcs_path__(
         process_bucket, process_folder, FolderNames.PDF_GENERAL

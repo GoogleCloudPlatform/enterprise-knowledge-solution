@@ -14,16 +14,16 @@
 
 locals {
   # specification of the alloy db docs of removing the .gserviceaccount.com part: https://cloud.google.com/alloydb/docs/manage-iam-authn#create-user
-  alloydb_username     = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
-  service_account_name = var.configure_schema_cloud_run_job_name
+  alloydb_username     = replace(module.doc_deletion_account.email, ".gserviceaccount.com", "")
+  service_account_name = var.doc_deletion_cloud_run_job_name
 }
 
-resource "google_cloud_run_v2_job" "configure_db_schema_job" {
-  name     = var.configure_schema_cloud_run_job_name
+resource "google_cloud_run_v2_job" "doc_deletion_job" {
+  name     = var.doc_deletion_cloud_run_job_name
   location = var.region
   template {
     template {
-      service_account = module.configure_schema_account.email
+      service_account = module.doc_deletion_account.email
       vpc_access {
         network_interfaces {
           network    = var.vpc_network_name
@@ -33,7 +33,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       }
       containers {
         image = local.image_name_and_tag
-        name  = var.configure_schema_cloud_run_job_name
+        name  = var.doc_deletion_cloud_run_job_name
         resources {
           limits = {
             cpu    = "2"
@@ -50,12 +50,29 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
         }
         env {
           name  = "ALLOYDB_USER_CONFIG"
-          value = replace(module.configure_schema_account.email, ".gserviceaccount.com", "")
+          value = local.alloydb_username
         }
         env {
-          name  = "ALLOYDB_USERS"
-          value = join(",", [for user in var.additional_db_users : replace(user, ".gserviceaccount.com", "")])
+          name  = "DATA_STORE_PROJECT_ID"
+          value = var.data_store_project_id
         }
+        env {
+          name  = "DATA_STORE_REGION"
+          value = var.data_store_region
+        }
+        env {
+          name  = "DATA_STORE_COLLECTION"
+          value = var.data_store_collection
+        }
+        env {
+          name  = "DATA_STORE_ID"
+          value = var.data_store_id
+        }
+        env {
+          name  = "DATA_STORE_BRANCH"
+          value = var.data_store_branch
+        }
+
       }
     }
   }
@@ -66,29 +83,10 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
       labels["goog-packaged-solution"]
     ]
   }
-  depends_on          = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
   deletion_protection = false
 }
 
-module "gcloud_trigger_job_to_configure_alloydb_schema" {
-  source                = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
-  create_cmd_entrypoint = "gcloud"
-  create_cmd_body       = <<-EOT
-    run jobs execute ${google_cloud_run_v2_job.configure_db_schema_job.name} \
-      --region ${var.region} \
-      --project ${var.project_id}
-  EOT
-  enabled               = true
-
-  create_cmd_triggers = {
-    source_contents_hash                    = local.cloud_build_content_hash,
-    db_role_content_hash_specialized_parser = var.db_role_content_hash,
-    db_role_content_hash_schema_setup_user  = sha512(terraform_data.dbrole_deployment_trigger2.id)
-  }
-  module_depends_on = [module.gcloud_build_job_to_configure_alloydb_schema.wait]
-}
-
-module "configure_schema_account" {
+module "doc_deletion_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
   prefix     = "eks"
@@ -97,25 +95,30 @@ module "configure_schema_account" {
     "${var.project_id}=>roles/alloydb.databaseUser",
     "${var.project_id}=>roles/alloydb.client",
     "${var.project_id}=>roles/serviceusage.serviceUsageConsumer",
+    "${var.project_id}=>roles/bigquery.dataEditor",
+    "${var.project_id}=>roles/bigquery.jobUser",
+    "${var.project_id}=>roles/storage.admin",
+    "${var.project_id}=>roles/discoveryengine.editor",
   ]
-  display_name = "AlloyDB db configuration Account"
-  description  = "Account used to run configure the schema and db roles in AlloyDB"
+  display_name = "Doc Deletion Job Account"
+  description  = "Account used to run doc deletion in Agent Builder, BigQuery, AlloyDB and other storage services"
 }
 
-resource "google_alloydb_user" "schema_setup_user" {
+resource "terraform_data" "dbrole_deployment_trigger" {
+  # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)
+  input            = google_alloydb_user.doc_deletion_db_user
+  triggers_replace = google_alloydb_user.doc_deletion_db_user.database_roles
+}
+
+
+resource "google_alloydb_user" "doc_deletion_db_user" {
   cluster        = var.alloy_db_cluster_id
   user_id        = local.alloydb_username
   user_type      = "ALLOYDB_IAM_USER"
-  database_roles = ["alloydbiamuser", "alloydbsuperuser"]
+  database_roles = ["alloydbiamuser"]
 
   depends_on = [var.alloydb_cluster_ready]
   lifecycle {
     ignore_changes = [database_roles]
   }
-}
-
-resource "terraform_data" "dbrole_deployment_trigger2" {
-  # workaround to explicitly retrigger module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on schema_setup_user (flaky)
-  input            = google_alloydb_user.schema_setup_user
-  triggers_replace = google_alloydb_user.schema_setup_user.database_roles
 }

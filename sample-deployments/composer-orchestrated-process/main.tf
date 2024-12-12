@@ -19,7 +19,7 @@ provider "google" {
 }
 
 locals {
-  processing_cloud_run_job_name = "doc-processor"
+  processing_cloud_run_job_name = "ms-office-doc-processor"
   classifier_cloud_run_job_name = "doc-classifier"
   dpu_label = {
     goog-packaged-solution : "eks-solution"
@@ -34,6 +34,7 @@ module "common_infra" {
   vpc_name                          = var.vpc_name
   serverless_connector_subnet       = var.serverless_connector_subnet
   serverless_connector_subnet_range = var.serverless_connector_subnet_range
+  psa_reserved_address              = var.psa_reserved_address
   composer_cidr                     = var.composer_cidr
 }
 
@@ -193,6 +194,22 @@ module "doc_registry" {
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
 }
 
+module "doc-deletion" {
+  source                            = "../../components/doc-deletion/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
+  alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  data_store_project_id             = var.project_id
+  data_store_region                 = var.vertex_ai_data_store_region
+  data_store_id                     = google_discovery_engine_data_store.dpu_ds.data_store_id
+}
+
 module "post-setup-config" {
   source                            = "../../components/post-setup-config/terraform"
   project_id                        = var.project_id
@@ -201,8 +218,15 @@ module "post-setup-config" {
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  specialized_parser_db_user        = module.specialized_parser_job.specialized_parser_db_user
   serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
+  db_role_content_hash = sha512(join("", [
+    module.specialized_parser_job.db_role_content_hash,
+    module.doc-deletion.db_role_content_hash
+  ]))
+  additional_db_users = [
+    module.specialized_parser_job.specialized_parser_db_user,
+    module.doc-deletion.doc_deletion_db_user,
+  ]
 }
