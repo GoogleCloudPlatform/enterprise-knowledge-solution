@@ -72,15 +72,15 @@ steps:
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
 
-  - id: cleanup
-    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-    args:
-      - "-e"
-      - "-x"
-      - "-c"
-      - >-
-        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
-    entrypoint: /bin/bash
+#  - id: cleanup
+#    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+#    args:
+#      - "-e"
+#      - "-x"
+#      - "-c"
+#      - >-
+#        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+#    entrypoint: /bin/bash
 
 tags:
   - "ci"
