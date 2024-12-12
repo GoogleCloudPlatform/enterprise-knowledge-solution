@@ -57,8 +57,10 @@ steps:
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
+        gcloud composer environments run dpu-composer --location=us-central1 dags list --project=$PROJECT_ID;
         build/test/ingest_test_docs.sh;
         sleep 300;
+        gcloud composer environments run dpu-composer --location=us-central1 dags list --project=$PROJECT_ID;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         sleep 300;
         (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
