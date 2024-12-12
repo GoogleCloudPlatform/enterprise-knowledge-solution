@@ -58,7 +58,6 @@ steps:
       - >-
         ls;
         ls /workspace;
-        ls sample-deployments/composer-orchestrated-process/backend.tf
         build/test/ingest_test_docs.sh;
         cd sample-deployments/composer-orchestrated-process;
         terraform init;
