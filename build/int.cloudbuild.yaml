@@ -32,11 +32,11 @@ steps:
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
+      - "-x"
       - "-c"
       - >- # folded text - replace newlines with spaces - each command needs to be separated by ';'
-        cd sample-deployments/composer-orchestrated-process;
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        scripts/pre_tf_setup.sh;
+        sample-deployments/composer-orchestrated-process/scripts/pre_tf_setup.sh;
     env:
       - "REGION=${_REGION}"
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
@@ -48,11 +48,10 @@ steps:
       - "-x"
       - "-c"
       - >-
-        cd /workspace/build/test ;
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        go test -v -run ./ -timeout 90m --tags=e2e
+        (cd build/test && go test -v -run ./ -timeout 90m --tags=e2e);
+        gcloud config unset auth/impersonate_service_account;
     entrypoint: /bin/bash
     env:
       - "REGION=${_REGION}"
@@ -61,16 +60,41 @@ steps:
       - "IAP_ACCESS_DOMAINS=${_IAP_ACCESS_DOMAINS}"
       - "WEB_UI_DOMAINS=${_WEB_UI_DOMAINS}"
       - "GCLOUD_TF_DOWNLOAD=never"
+      - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
+      - "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA}"
 
-  - id: cleanup
+  - id: functional
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
+      - "-e"
       - "-x"
       - "-c"
       - >-
-        gcloud config unset auth/impersonate_service_account;
-        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
+        build/test/ingest_test_docs.sh;
+        sleep 300;
+        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
+        sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
+        sleep 300;
+        (cd /workspace/build/test && go test -v -run ./ -timeout 60m --tags=functional);
+        # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
+        # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
     entrypoint: /bin/bash
+    env:
+      - "CICD_PROJECT_ID=${PROJECT_ID}"
+      - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
+      - "LOCATION=${_REGION}"
+
+#  - id: cleanup
+#    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+#    args:
+#      - "-e"
+#      - "-x"
+#      - "-c"
+#      - >-
+#        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+#    entrypoint: /bin/bash
 
 tags:
   - "ci"
@@ -86,12 +110,13 @@ substitutions:
   _DOC_AI_LOCATION: "us"
   _VERTEX_AI_DATA_STORE_REGION: "us"
   _BUILDER_IMAGE_NAME: "us-central1-docker.pkg.dev/${PROJECT_ID}/ci/test-builder"
-  _BUILDER_IMAGE_TAG: "1.0.0"
+  _BUILDER_IMAGE_TAG: "1.1.0"
   # The following subsitutions must be passed by the Cloud Build trigger:
   # _BILLING_ACCOUNT
   # _FOLDER_ID
   # _IAP_ACCESS_DOMAINS
   # _IAP_SUPPORT_EMAIL
   # _WEB_UI_DOMAINS
-  # Note that $PROJECT_ID is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
-  # PROJECT_ID cannot be overwritten with env substitution, so it takes an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}
+  # _CUSTOM_CLASSIFIER_ID
+  # Note that ${PROJECT_ID} is always the project running the build, distinct from _TEST_PROJECT_ID where test resources are deployed
+  # ${PROJECT_ID} cannot be overwritten with env substitution, so it requires an extra command in each step `export PROJECT_ID=${_TEST_PROJECT_ID}`
