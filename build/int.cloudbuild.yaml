@@ -85,16 +85,18 @@ steps:
       - "CICD_PROJECT_ID=${PROJECT_ID}"
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
+      - "COMPOSER_ENV_NAME=dpu-composer"
+      - "DAG_ID=run_docs_processing"
 
-#  - id: cleanup
-#    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
-#    args:
-#      - "-e"
-#      - "-x"
-#      - "-c"
-#      - >-
-#        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
-#    entrypoint: /bin/bash
+  - id: cleanup
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        gcloud projects delete ${_TEST_PROJECT_ID} --quiet
+    entrypoint: /bin/bash
 
 tags:
   - "ci"
