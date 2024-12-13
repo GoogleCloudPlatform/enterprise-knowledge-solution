@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-test-e2e:	## Run the end-to-end test
+e2e-test:	## Run the end-to-end test
 	@echo "Running E2E test..."
 	@go test -v -run ./ -timeout 90m --tags=e2e
 
-functional-workflows: ## upload documents, trigger workflows, and check the results
+functional-test: ## upload documents, trigger workflows, and check the results
 	@echo "running functional test..."
 	@go test -v -run ./ -timeout 60m --tags=functional
 
