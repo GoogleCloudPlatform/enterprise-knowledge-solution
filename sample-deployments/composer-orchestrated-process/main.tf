@@ -71,7 +71,7 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
 resource "google_discovery_engine_data_store" "dpu_entities_ds" {
   project                     = module.project_services.project_id
   location                    = var.vertex_ai_data_store_region
-  data_store_id               = "eks-structured-data-store"
+  data_store_id               = "eks-structured-data-store2"
   display_name                = "Enterprise Knowledge Structured Store"
   industry_vertical           = "GENERIC"
   content_config              = "CONTENT_REQUIRED"
@@ -230,6 +230,7 @@ module "doc-deletion" {
   data_store_project_id             = var.project_id
   data_store_region                 = var.vertex_ai_data_store_region
   data_store_id                     = google_discovery_engine_data_store.dpu_ds.data_store_id
+  bq_processed_documents_table_name = module.specialized_parser_job.processed_documents_bq_table_name
 }
 
 module "post-setup-config" {

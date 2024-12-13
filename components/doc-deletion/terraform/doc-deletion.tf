@@ -72,7 +72,10 @@ resource "google_cloud_run_v2_job" "doc_deletion_job" {
           name  = "DATA_STORE_BRANCH"
           value = var.data_store_branch
         }
-
+        env {
+          name  = "BQ_PROCESSED_DOCUMENTS_TABLE_NAME"
+          value = var.bq_processed_documents_table_name
+        }
       }
     }
   }

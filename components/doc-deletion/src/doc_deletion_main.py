@@ -104,7 +104,10 @@ class DataStoreConfig:
 
 
 def get_docs_data_from_bq(
-    bq_client: bigquery.Client, bq_data_table: str, doc_id: Optional[str]
+    bq_client: bigquery.Client,
+    bq_data_table: str,
+    bq_processed_documents_table_name: str,
+    doc_id: Optional[str]
 ) -> List[DocProcessingRecord]:
 
     where_clause = f"WHERE dp.id = '{doc_id}'" if doc_id else ""
@@ -116,7 +119,7 @@ def get_docs_data_from_bq(
         ARRAY_AGG(DISTINCT pd.results_file IGNORE NULLS) AS results_files
     FROM `{bq_data_table}` AS dp
     CROSS JOIN UNNEST(JSON_EXTRACT_ARRAY(PARSE_JSON(jsonData), "$.objs")) AS objs
-    LEFT JOIN `docs_store.prcessed_documents` AS pd ON dp.id = pd.id
+    LEFT JOIN `docs_store.{bq_processed_documents_table_name}` AS pd ON dp.id = pd.id
     {where_clause}
     GROUP BY dp.id;
     """
@@ -159,8 +162,11 @@ def delete_doc_from_agent_build(
         logger.warning(f"Document {full_doc_id} was already deleted.")
 
 
-def delete_doc_from_bq_processed_documents(bq_client: bigquery.Client, doc_id: str):
-    sql = f"DELETE FROM docs_store.prcessed_documents WHERE id='{doc_id}'"
+def delete_doc_from_bq_processed_documents(
+    bq_client: bigquery.Client,
+    bq_processed_documents_table_name,
+    doc_id: str):
+    sql = f"DELETE FROM docs_store.{bq_processed_documents_table_name} WHERE id='{doc_id}'"
     logger.info(f"Deleting document {doc_id} from processed documents table")
     res = bq_client.query(sql)
     if res.errors:
@@ -247,6 +253,7 @@ def delete_gcs_folder(storage_client: storage.Client, run_id: str):
 
 def main(
     data_store_config: DataStoreConfig,
+    bq_processed_documents_table_name: str,
     run_id: str,
     mode: str,
     doc_id: Optional[str] = None,
@@ -263,7 +270,7 @@ def main(
         client_options=client_options, client_info=ClientInfo(user_agent=USER_AGENT)
     )
     data_table = f"docs_store.docs_processing_{run_id.replace('-', '_')}"
-    docs = get_docs_data_from_bq(bq_client, data_table, doc_id)
+    docs = get_docs_data_from_bq(bq_client, data_table, bq_processed_documents_table_name, doc_id)
     logger.info(f"Deleting {len(docs)} documents")
     for doc in docs:
         logger.info(f"Deleting document {doc.id} with URIs: {doc.gcs_uris}")
@@ -272,7 +279,7 @@ def main(
             data_store_config,
             doc.id,
         )
-        delete_doc_from_bq_processed_documents(bq_client, doc.id)
+        delete_doc_from_bq_processed_documents(bq_client, bq_processed_documents_table_name, doc.id)
         delete_doc_from_alloydb_processed_documents(doc.id)
         for gcs_uri in doc.gcs_uris + doc.results_files:
             delete_doc_from_gcs(storage_client, gcs_uri)
@@ -291,6 +298,7 @@ if __name__ == "__main__":
         id=os.environ["DATA_STORE_ID"],
         branch=os.environ["DATA_STORE_BRANCH"],
     )
+    _bq_processed_documents_table_name = os.environ["BQ_PROCESSED_DOCUMENTS_TABLE_NAME"]
     _run_id = os.environ["RUN_ID"]
     _mode = os.environ["MODE"]
     assert _mode in ["single", "batch"], "Mode must be either 'single' or 'batch'"
@@ -299,4 +307,4 @@ if __name__ == "__main__":
         _mode == "single" and _doc_id
     ), "Mode and doc_id mismatch"
 
-    main(_data_store_config, _run_id, _mode, _doc_id)
+    main(_data_store_config, _bq_processed_documents_table_name, _run_id, _mode, _doc_id)

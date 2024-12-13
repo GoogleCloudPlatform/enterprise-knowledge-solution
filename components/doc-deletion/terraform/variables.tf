@@ -96,3 +96,8 @@ variable "data_store_branch" {
   type        = string
   default     = "default_branch"
 }
+
+variable "bq_processed_documents_table_name" {
+  type = string
+  description = "The BigQuery table name for the processed documents"
+}
