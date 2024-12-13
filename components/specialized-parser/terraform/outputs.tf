@@ -39,3 +39,18 @@ output "db_role_content_hash" {
   description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
   value       = sha512(terraform_data.dbrole_deployment_trigger.id)
 }
+
+output "processed_documents_bq_table_name" {
+  description = "The BigQuery table that holds the extracted entities from the processed_documents"
+  value = google_bigquery_table.processed_documents.table_id
+}
+
+output "processed_documents_bq_table_project_id" {
+  description = "The BigQuery table project that holds the extracted entities from the processed_documents"
+  value = google_bigquery_table.processed_documents.project
+}
+
+output "processed_documents_bq_table_dataset" {
+  description = "The BigQuery table dataset that holds the extracted entities from the processed_documents"
+  value = google_bigquery_table.processed_documents.dataset_id
+}

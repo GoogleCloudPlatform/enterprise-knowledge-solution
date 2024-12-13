@@ -20,7 +20,7 @@ from google.cloud import discoveryengine
 USER_AGENT = "cloud-solutions/eks-agent-builder-v1"
 
 
-def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
+def __generic_import__(bq_table, data_store_region, datastore_id, data_schema):
     client_options = (
         ClientOptions(
             api_endpoint=f"{data_store_region}-discoveryengine.googleapis.com"
@@ -44,7 +44,7 @@ def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
             project_id=bq_table["project_id"],
             dataset_id=bq_table["dataset_id"],
             table_id=bq_table["table_id"],
-            data_schema="document",
+            data_schema=data_schema,
         ),
         reconciliation_mode=discoveryengine.ImportDocumentsRequest.ReconciliationMode.INCREMENTAL,
     )
@@ -54,3 +54,11 @@ def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
     print(response)
     print(metadata)
     return operation.operation.name
+
+
+def import_docs_to_datastore(bq_table, data_store_region, datastore_id):
+    return __generic_import__(bq_table, data_store_region, datastore_id, "document")
+
+
+def import_entities_to_datastore(bq_table, data_store_region, datastore_id):
+    __generic_import__(bq_table, data_store_region, datastore_id, "custom")

@@ -227,6 +227,20 @@ def data_store_import_docs(**context):
     return operation_name
 
 
+def data_store_import_structured_data(**context):
+    data_store_region = os.environ["DPU_DATA_STORE_REGION"]
+    bq_table = os.environ["PROCESSED_DOCUMENTS_BQ_TABLE"]
+    if type(bq_table) == type("str"):
+        print(f"Converting {bq_table} to dict")
+        bq_table = json.loads(bq_table)
+    operation_name = datastore_utils.import_entities_to_datastore(
+        bq_table,
+        data_store_region,
+        os.environ.get("DPU_DATA_STRUCTURED_STORE_ID"),
+    )
+    return operation_name
+
+
 def generate_update_doc_registry_job_params_fn(**context):
     bq_table = context["ti"].xcom_pull(key="bigquery_table")
     input_bq_table = (
@@ -585,6 +599,13 @@ with DAG(
             execution_timeout=timedelta(seconds=3600),
             provide_context=True,
         )
+        
+        import_structured_to_data_store = PythonOperator(
+            task_id="import_structured_to_data_store",
+            python_callable=data_store_import_structured_data,
+            execution_timeout=timedelta(seconds=3600),
+            provide_context=True,
+        )
 
     with TaskGroup(group_id="document_registry_update") as document_registry_update:
         generate_update_doc_registry_job_params = PythonOperator(
@@ -651,7 +672,7 @@ with DAG(
         parse_doc_classifier_results_and_move_files
         >> create_specialized_process_job_params
         >> execute_specialized_parser
-        >> import_specialized_to_data_store
+        >> [import_specialized_to_data_store, import_structured_to_data_store]
     )
     (  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
         # General document processing has to wait for the specialized to

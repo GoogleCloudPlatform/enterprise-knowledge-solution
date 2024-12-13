@@ -68,6 +68,18 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   }
 }
 
+resource "google_discovery_engine_data_store" "dpu_entities_ds" {
+  project                     = module.project_services.project_id
+  location                    = var.vertex_ai_data_store_region
+  data_store_id               = "eks-structured-data-store"
+  display_name                = "Enterprise Knowledge Structured Store"
+  industry_vertical           = "GENERIC"
+  content_config              = "CONTENT_REQUIRED"
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
+}
+
+
 resource "google_discovery_engine_search_engine" "basic" {
   project = module.project_services.project_id
   # TODO: Change this
@@ -75,7 +87,11 @@ resource "google_discovery_engine_search_engine" "basic" {
   collection_id  = "default_collection"
   location       = var.vertex_ai_data_store_region
   display_name   = "Enterprise Search Agent"
-  data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
+  # data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
+  data_store_ids = [
+    google_discovery_engine_data_store.dpu_ds.data_store_id,
+    google_discovery_engine_data_store.dpu_entities_ds.data_store_id
+  ]
   search_engine_config {
     search_tier    = "SEARCH_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
@@ -137,6 +153,12 @@ module "dpu_workflow" {
     SPECIALIZED_PARSER_JOB_NAME     = module.specialized_parser_job.specialized_parser_cloud_run_job_name
     SPECIALIZED_PROCESSORS_IDS_JSON = module.specialized_parser_job.specialized_processors_ids_json
     CUSTOM_CLASSIFIER_ID            = var.custom_classifier_id
+    PROCESSED_DOCUMENTS_BQ_TABLE    = jsonencode({
+      "table_id" = module.specialized_parser_job.processed_documents_bq_table_name
+      "dataset_id" = module.specialized_parser_job.processed_documents_bq_table_dataset
+      "project_id" = module.specialized_parser_job.processed_documents_bq_table_project_id
+    })
+    DPU_DATA_STRUCTURED_STORE_ID    = google_discovery_engine_data_store.dpu_entities_ds.data_store_id
   }
 }
 
