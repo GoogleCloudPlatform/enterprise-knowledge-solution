@@ -68,17 +68,29 @@ resource "google_discovery_engine_data_store" "dpu_ds" {
   }
 }
 
+resource "google_discovery_engine_schema" "basic" {
+  location                    = google_discovery_engine_data_store.dpu_entities_ds.location
+  data_store_id               = google_discovery_engine_data_store.dpu_entities_ds.data_store_id
+  schema_id                   = "schema-id"
+  json_schema                 = file("${path.module}/schema.json")
+}
+
 resource "google_discovery_engine_data_store" "dpu_entities_ds" {
   project                     = module.project_services.project_id
   location                    = var.vertex_ai_data_store_region
-  data_store_id               = "eks-structured-data-store2"
+  data_store_id               = "eks-structured-data-store5"
   display_name                = "Enterprise Knowledge Structured Store"
   industry_vertical           = "GENERIC"
-  content_config              = "CONTENT_REQUIRED"
+  content_config              = "NO_CONTENT"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+  skip_default_schema_creation = true
+  document_processing_config {
+    default_parsing_config {
+      layout_parsing_config {}
+    }
+  }
 }
-
 
 resource "google_discovery_engine_search_engine" "basic" {
   project = module.project_services.project_id
@@ -87,11 +99,11 @@ resource "google_discovery_engine_search_engine" "basic" {
   collection_id  = "default_collection"
   location       = var.vertex_ai_data_store_region
   display_name   = "Enterprise Search Agent"
-  # data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
-  data_store_ids = [
-    google_discovery_engine_data_store.dpu_ds.data_store_id,
-    google_discovery_engine_data_store.dpu_entities_ds.data_store_id
-  ]
+  data_store_ids = [google_discovery_engine_data_store.dpu_ds.data_store_id]
+  # data_store_ids = [
+  #   google_discovery_engine_data_store.dpu_ds.data_store_id,
+  #   google_discovery_engine_data_store.dpu_entities_ds.data_store_id
+  # ]
   search_engine_config {
     search_tier    = "SEARCH_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]

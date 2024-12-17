@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "redacted": {
+            "indexable": true,
+            "type": "boolean",
+            "dynamicFacetable": true
+          },
+          "type_": {
+            "indexable": true,
+            "type": "string",
+            "searchable": true,
+            "dynamicFacetable": true,
+            "retrievable": true
+          },
+          "id": {
+            "indexable": true,
+            "type": "string",
+            "searchable": true,
+            "dynamicFacetable": true,
+            "retrievable": true
+          },
+          "page_anchor": {
+            "type": "object",
+            "properties": {
+              "page_refs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bounding_poly": {
+                      "type": "object",
+                      "properties": {
+                        "normalized_vertices": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "y": {
+                                "indexable": true,
+                                "type": "number",
+                                "dynamicFacetable": true,
+                                "retrievable": true
+                              },
+                              "x": {
+                                "indexable": true,
+                                "type": "number",
+                                "dynamicFacetable": true,
+                                "retrievable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    },
+                    "layout_id": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    },
+                    "confidence": {
+                      "indexable": true,
+                      "type": "number",
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    },
+                    "layout_type": {
+                      "indexable": true,
+                      "type": "number",
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "text_anchor": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "indexable": true,
+                "type": "string",
+                "searchable": true,
+                "dynamicFacetable": true,
+                "retrievable": true
+              },
+              "text_segments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "end_index": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    },
+                    "start_index": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "redacted": {
+                  "indexable": true,
+                  "type": "boolean",
+                  "dynamicFacetable": true
+                },
+                "type_": {
+                  "indexable": true,
+                  "type": "string",
+                  "searchable": true,
+                  "dynamicFacetable": true,
+                  "retrievable": true
+                },
+                "id": {
+                  "indexable": true,
+                  "type": "string",
+                  "searchable": true,
+                  "dynamicFacetable": true,
+                  "retrievable": true
+                },
+                "page_anchor": {
+                  "type": "object",
+                  "properties": {
+                    "page_refs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bounding_poly": {
+                            "type": "object",
+                            "properties": {
+                              "normalized_vertices": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "y": {
+                                      "indexable": true,
+                                      "type": "number",
+                                      "dynamicFacetable": true,
+                                      "retrievable": true
+                                    },
+                                    "x": {
+                                      "indexable": true,
+                                      "type": "number",
+                                      "dynamicFacetable": true,
+                                      "retrievable": true
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "page": {
+                            "indexable": true,
+                            "type": "string",
+                            "searchable": true,
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          },
+                          "layout_id": {
+                            "indexable": true,
+                            "type": "string",
+                            "searchable": true,
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          },
+                          "confidence": {
+                            "indexable": true,
+                            "type": "number",
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          },
+                          "layout_type": {
+                            "indexable": true,
+                            "type": "number",
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "text_anchor": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    },
+                    "text_segments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "end_index": {
+                            "indexable": true,
+                            "type": "string",
+                            "searchable": true,
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          },
+                          "start_index": {
+                            "indexable": true,
+                            "type": "string",
+                            "searchable": true,
+                            "dynamicFacetable": true,
+                            "retrievable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "normalized_value": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "indexable": true,
+                      "type": "string",
+                      "searchable": true,
+                      "dynamicFacetable": true,
+                      "retrievable": true
+                    }
+                  }
+                },
+                "confidence": {
+                  "indexable": true,
+                  "type": "number",
+                  "dynamicFacetable": true,
+                  "retrievable": true
+                },
+                "mention_text": {
+                  "indexable": true,
+                  "type": "string",
+                  "searchable": true,
+                  "dynamicFacetable": true,
+                  "retrievable": true
+                },
+                "mention_id": {
+                  "indexable": true,
+                  "type": "string",
+                  "searchable": true,
+                  "dynamicFacetable": true,
+                  "retrievable": true
+                }
+              }
+            }
+          },
+          "normalized_value": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "indexable": true,
+                "type": "string",
+                "searchable": true,
+                "dynamicFacetable": true,
+                "retrievable": true
+              },
+              "date_value": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "indexable": true,
+                    "type": "number",
+                    "dynamicFacetable": true,
+                    "retrievable": true
+                  },
+                  "day": {
+                    "indexable": true,
+                    "type": "number",
+                    "dynamicFacetable": true,
+                    "retrievable": true
+                  },
+                  "month": {
+                    "indexable": true,
+                    "type": "number",
+                    "dynamicFacetable": true,
+                    "retrievable": true
+                  }
+                }
+              }
+            }
+          },
+          "confidence": {
+            "indexable": true,
+            "type": "number",
+            "dynamicFacetable": true,
+            "retrievable": true
+          },
+          "mention_text": {
+            "indexable": true,
+            "type": "string",
+            "searchable": true,
+            "dynamicFacetable": true,
+            "retrievable": true
+          },
+          "mention_id": {
+            "indexable": true,
+            "type": "string",
+            "searchable": true,
+            "dynamicFacetable": true,
+            "retrievable": true
+          }
+        }
+      }
+    },
+    "original_filename": {
+      "indexable": true,
+      "type": "string",
+      "searchable": true,
+      "dynamicFacetable": true,
+      "retrievable": true
+    },
+    "id": {
+      "indexable": true,
+      "type": "string",
+      "searchable": true,
+      "dynamicFacetable": true,
+      "retrievable": true
+    },
+    "run_id": {
+      "indexable": true,
+      "type": "string",
+      "searchable": true,
+      "dynamicFacetable": true,
+      "retrievable": true
+    },
+    "results_file": {
+      "indexable": true,
+      "type": "string",
+      "searchable": true,
+      "dynamicFacetable": true,
+      "retrievable": true
+    }
+  }
+}
