@@ -15,6 +15,7 @@
 import base64
 import json
 import logging
+import logging.config
 import os
 import sys
 from typing import Optional, Sequence
@@ -26,6 +27,37 @@ from google.cloud import bigquery_storage_v1  # type: ignore[import-untyped]
 from google.cloud import bigquery, storage
 from google.cloud.bigquery_storage_v1 import types
 from google.protobuf import descriptor_pb2
+
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": [
+                "console",
+            ],
+        }
+    },
+}
+
+logging.config.dictConfig(logging_config)
+logging.basicConfig(level="INFO")
+logger = logging.getLogger(__name__)
 
 
 class DocumentInfo(proto.Message):
@@ -172,12 +204,19 @@ def add_new_documents_to_registry(
     """Given a document processing table,
     for each entry insert corresponding entry to document registry table
     including internal id, gcsUri and crc32"""
-    query = f"SELECT id, content.uri FROM {input_table}"
+    query = " ".join(
+        [
+            'SELECT JSON_EXTRACT_SCALAR(objs, "$.objid") AS id,',
+            'JSON_EXTRACT_SCALAR(objs, "$.uri") AS uri',
+            f'FROM {input_table}',
+            'CROSS JOIN UNNEST(JSON_EXTRACT_ARRAY(PARSE_JSON(jsonData), "$.objs")) AS objs',
+        ]
+    )
     rows = GoogleCloudClients.get_bq_client().query(query)
     if rows.result().total_rows == 0:
         return
     input_folder = GCSFolder(
-        extract_common_gcs_folder_from_processing_table(input_table)
+        extract_common_gcs_folder_from_query_result([row.uri for row in rows])
     )
     results = input_rows_to_document_info(rows, input_folder)
     ref = bigquery.TableReference.from_string(registry_table)
@@ -206,13 +245,10 @@ def extract_folder_including_bucket_from_blob_uri(blob_uri: str):
     return "/".join(parts[:-1])
 
 
-def extract_common_gcs_folder_from_processing_table(processing_table: str):
-    """Extrct the common path share by all the document uri:s in the input table"""
-    query = f"select max(content.uri) max_uri, min(content.uri) min_uri from {processing_table}"
-    rows = GoogleCloudClients.get_bq_client().query(query)
-    row = next(rows.result())
-    max_uri = extract_folder_including_bucket_from_blob_uri(row.max_uri)
-    min_uri = extract_folder_including_bucket_from_blob_uri(row.min_uri)
+def extract_common_gcs_folder_from_query_result(uris: list[str]):
+    """Extrct the common path share by the list of document uri:s"""
+    max_uri = max(uris, key=len)
+    min_uri = min(uris, key=len)
     i = 0
     while i < len(min_uri) and i < len(max_uri) and max_uri[i] == min_uri[i]:
         i += 1
@@ -322,29 +358,29 @@ if __name__ == "__main__":
             f"{BQ_DOC_REGISTRY_TABLE=}, "
             f"{GCS_IO_URI=}, "
         )
-        logging.error(message)
+        logger.error(message)
         sys.exit(1)
     if not ADD_DOCS and not GCS_INPUT_FILE_BUCKET:
         message = f"Environment variables missing; " f"{GCS_INPUT_FILE_BUCKET=}, "
-        logging.error(message)
+        logger.error(message)
         sys.exit(1)
     if ADD_DOCS and not BQ_INGESTED_DOC_TABLE:
         message = f"Environment variables missing; " f"{BQ_INGESTED_DOC_TABLE=}, "
-        logging.error(message)
+        logger.error(message)
         sys.exit(1)
     try:
-        logging.info(f"Starting Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
+        logger.info(f"Starting Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
         if not ADD_DOCS:
-            logging.info(f"{GCS_INPUT_FILE_BUCKET=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
+            logger.info(f"{GCS_INPUT_FILE_BUCKET=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
             run_detect_duplicates(
                 GCS_INPUT_FILE_BUCKET, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI
             )
         else:
-            logging.info(f"{BQ_INGESTED_DOC_TABLE=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
+            logger.info(f"{BQ_INGESTED_DOC_TABLE=}, " f"{BQ_DOC_REGISTRY_TABLE=}, ")
             add_new_documents_to_registry(
                 BQ_INGESTED_DOC_TABLE, BQ_DOC_REGISTRY_TABLE, GCS_IO_URI  # type: ignore
             )
-        logging.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
+        logger.info(f"Completed Task #{TASK_INDEX} (att. {TASK_ATTEMPT}.")
     except Exception as e:
-        logging.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")
+        logger.error(f"Task Index {TASK_INDEX} (att. {TASK_ATTEMPT} failed!" f"{e}")
         sys.exit(1)
