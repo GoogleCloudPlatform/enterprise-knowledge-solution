@@ -208,7 +208,7 @@ def add_new_documents_to_registry(
         [
             'SELECT JSON_EXTRACT_SCALAR(objs, "$.objid") AS id,',
             'JSON_EXTRACT_SCALAR(objs, "$.uri") AS uri',
-            f'FROM {input_table}',
+            f"FROM {input_table}",
             'CROSS JOIN UNNEST(JSON_EXTRACT_ARRAY(PARSE_JSON(jsonData), "$.objs")) AS objs',
         ]
     )
