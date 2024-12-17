@@ -27,6 +27,8 @@ DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
 
 # DISPLAY HELPERS
 
+PARENT_DIR="$(dirname "$0")"
+
 section_open() {
   section_description=$1
   printf '%s' "$DIVIDER"
@@ -85,7 +87,7 @@ create_custom_role_iap() {
     echo "Custom role projects/$PROJECT_ID/roles/customIAPAdmin has already been created"
   else
     yes | gcloud iam roles create customIAPAdmin --project="${PROJECT_ID}" \
-      --file=custom_iap_brand_admin.yaml
+      --file="$PARENT_DIR"/../custom_iap_brand_admin.yaml
   fi
   unset __customIapAdmin
 }
@@ -173,7 +175,7 @@ enable_api() {
 
 # enable all apis in the array
 enable_bootstrap_apis() {
-  readarray -t apis_array <project_apis.txt
+  readarray -t apis_array <"$PARENT_DIR"/../project_apis.txt
   for i in "${apis_array[@]}"; do
     enable_api "$i"
   done
@@ -191,7 +193,7 @@ enable_persona_roles() {
   local __principal=$1
   local __arrayfile=$2
   local __persona_name=$3
-  readarray -t roles_array <"$__arrayfile"
+  readarray -t roles_array <"$PARENT_DIR/../$__arrayfile"
   for i in "${roles_array[@]}"; do
     if [ "$__persona_name" == "READER" ] && [ "$i" == "roles/storage.objectViewer" ]; then
       #Most roles for most persona are project-level, but READER requires one bucket-level role.
