@@ -1,0 +1,60 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: update-python
+
+on:
+  push:
+    branches:
+      - "dependabot/pip/*"
+      - "renovate-bot/pypi*"
+  pull_request:
+    branches:
+      - "dependabot/pip/*"
+      - "renovate-bot/pypi*"
+
+permissions:
+  contents: read
+
+jobs:
+  update-python:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: invoke python updates
+        run: ./invoke.sh lock --upgrade
+
+      - name: Commit and push updated dependencies
+        if: >
+          github.event_name == 'pull_request' &&
+          github.ref_name != github.event.repository.default_branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          commit_message: "chore: update python dependencies"
+          commit_user_name: update-python
+          commit_user_email: no-reply@update-python.dev
