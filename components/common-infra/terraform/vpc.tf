@@ -70,7 +70,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.4/30"]
+    dest_ip_ranges = ["199.36.153.8/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -78,72 +78,55 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic within the composer subnet"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1001
-  rule_name       = "allow-subnet-internal"
+#resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
+#  count           = var.create_vpc_network ? 1 : 0
+#  description     = "Allow internal traffic within the composer subnet"
+#  action          = "allow"
+#  direction       = "EGRESS"
+#  enable_logging  = true
+#  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+#  priority        = 1001
+#  rule_name       = "allow-subnet-internal"#
 
-  match {
-    dest_ip_ranges = [var.composer_cidr.subnet_primary]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
+#  match {
+#    dest_ip_ranges = [var.composer_cidr.subnet_primary]
+#    layer4_configs {
+#      ip_protocol = "all"
+#    }
+#  }
+#}
 
-resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
+resource "google_compute_network_firewall_policy_rule" "allow-psc-alloydb" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
+  description     = "Allow internal traffic to reach AlloyDB"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1002
-  rule_name       = "allow-composer-cluster-secondary-range"
+  rule_name       = "allow-psc-alloydb"
 
   match {
-    dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
+    ## TODO: change this, how can I reference the psc endpoint of alloydb?
+    dest_ip_ranges = [var.psa_reserved_address]
     layer4_configs {
       ip_protocol = "all"
     }
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
+resource "google_compute_network_firewall_policy_rule" "deny-all-egress" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach services on the secondary subnet range"
-  action          = "allow"
+  description     = "Deny all egress traffic not explicitly allowed by other firewall rules"
+  action          = "deny"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1003
-  rule_name       = "allow-composer-services-secondary-range"
+  priority        = 65000
+  rule_name       = "deny-all-egress"
 
   match {
-    dest_ip_ranges = [var.composer_cidr.services_secondary_range]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach the composer control plane"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1004
-  rule_name       = "allow-composer-control-plane"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.control_plane]
+    dest_ip_ranges = ["0.0.0.0/0"]
     layer4_configs {
       ip_protocol = "all"
     }
@@ -166,7 +149,7 @@ module "dns-private-zone-googleapis" {
       type = "A"
       ttl  = 300
       records = [
-        "199.36.153.4", "199.36.153.5", "199.36.153.6", "199.36.153.7",
+        "199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11",
       ]
     },
     {

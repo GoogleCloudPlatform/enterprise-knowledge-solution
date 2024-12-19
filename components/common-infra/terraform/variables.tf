@@ -48,11 +48,7 @@ variable "alloy_db_cluster_id" {
 variable "composer_cidr" {
   description = "CIDR ranges for configuring Cloud Composer"
   type = object({
-    subnet_primary           = string
-    cluster_secondary_range  = string
-    services_secondary_range = string
-    control_plane            = string
-    sql                      = string
+    subnet_primary = string
   })
 }
 
@@ -70,5 +66,4 @@ variable "serverless_connector_subnet_range" {
 variable "psa_reserved_address" {
   description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
   type        = string
-  default     = "10.240.0.0"
 }
