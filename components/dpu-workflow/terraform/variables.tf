@@ -41,7 +41,7 @@ variable "region" {
 variable "composer_version" {
   description = "Version of Cloud Composer"
   type        = string
-  default     = "composer-2.9.9-airflow-2.9.3"
+  default     = "composer-3-airflow-2.9.3-build.11"
 }
 
 variable "composer_env_variables" {

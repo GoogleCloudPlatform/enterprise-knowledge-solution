@@ -61,13 +61,13 @@ resource "google_compute_network_firewall_policy_association" "association" {
 
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow private HTTPS access to google apis on the private VIP"
+  description     = "Allow private HTTPS access to google apis on the restricted VIP"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1000
-  rule_name       = "allow-google-apis-private-vip"
+  rule_name       = "allow-google-apis-restricted-vip"
 
   match {
     dest_ip_ranges = ["199.36.153.4/30"]
@@ -96,54 +96,37 @@ resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
+#resource "google_compute_network_firewall_policy_rule" "allow-psc-alloydb" {
+#  count           = var.create_vpc_network ? 1 : 0
+#  description     = "Allow internal traffic to reach AlloyDB"
+#  action          = "allow"
+#  direction       = "EGRESS"
+#  enable_logging  = true
+#  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+#  priority        = 1002
+#  rule_name       = "allow-psc-alloydb"
+
+#  match {
+#    ## TODO: change this, how can I reference the psc endpoint of alloydb?
+#    dest_ip_ranges = [module.docs_results.primary_psc_attachment_link]
+#    layer4_configs {
+#      ip_protocol = "all"
+#    }
+#  }
+#}
+
+resource "google_compute_network_firewall_policy_rule" "deny-all-egress" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
-  action          = "allow"
+  description     = "Deny all egress traffic not explicitly allowed by other firewall rules"
+  action          = "deny"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1002
-  rule_name       = "allow-composer-cluster-secondary-range"
+  priority        = 65000
+  rule_name       = "deny-all-egress"
 
   match {
-    dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach services on the secondary subnet range"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1003
-  rule_name       = "allow-composer-services-secondary-range"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.services_secondary_range]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach the composer control plane"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1004
-  rule_name       = "allow-composer-control-plane"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.control_plane]
+    dest_ip_ranges = ["0.0.0.0/0"]
     layer4_configs {
       ip_protocol = "all"
     }
@@ -162,7 +145,7 @@ module "dns-private-zone-googleapis" {
 
   recordsets = [
     {
-      name = "private"
+      name = "restricted"
       type = "A"
       ttl  = 300
       records = [
@@ -174,7 +157,7 @@ module "dns-private-zone-googleapis" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]
@@ -196,7 +179,7 @@ module "dns-private-zone-composer1" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]
@@ -218,7 +201,7 @@ module "dns-private-zone-composer2" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]
@@ -240,7 +223,7 @@ module "dns-private-zone-pkg-dev" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]
@@ -262,7 +245,7 @@ module "dns-private-zone-gcr-io" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]

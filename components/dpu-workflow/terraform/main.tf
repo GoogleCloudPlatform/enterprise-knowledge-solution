@@ -66,19 +66,6 @@ module "dpu-subnet" {
     subnet_private_access = "true"
     subnet_flow_logs      = "true"
   }]
-
-  secondary_ranges = {
-    composer-subnet = [
-      {
-        range_name    = local.cluster_secondary_range_name
-        ip_cidr_range = var.composer_cidr.cluster_secondary_range
-      },
-      {
-        range_name    = local.services_secondary_range_name
-        ip_cidr_range = var.composer_cidr.services_secondary_range
-      },
-    ]
-  }
 }
 
 resource "google_composer_environment" "composer_env" {
@@ -88,12 +75,7 @@ resource "google_composer_environment" "composer_env" {
   labels  = local.dpu_label
 
   config {
-    private_environment_config {
-      connection_type                      = var.enable_private_ip ? "PRIVATE_SERVICE_CONNECT" : null
-      enable_private_endpoint              = var.enable_private_ip
-      cloud_composer_connection_subnetwork = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
-
-    }
+    enable_private_environment = true
     software_config {
       image_version = var.composer_version
       env_variables = var.composer_env_variables
@@ -124,10 +106,6 @@ resource "google_composer_environment" "composer_env" {
       network         = var.vpc_network_id
       subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
       service_account = module.composer_service_account.email
-      ip_allocation_policy {
-        cluster_secondary_range_name  = local.cluster_secondary_range_name
-        services_secondary_range_name = local.services_secondary_range_name
-      }
     }
   }
 }
