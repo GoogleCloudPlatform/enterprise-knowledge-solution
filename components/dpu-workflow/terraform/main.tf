@@ -13,10 +13,10 @@
 # limitations under the License.
 
 locals {
-  env_name                      = "dpu-composer"
-  cluster_secondary_range_name  = "composer-subnet-cluster"
-  services_secondary_range_name = "composer-subnet-services"
-  composer_sa_roles             = [for role in var.composer_sa_roles : "${module.project_services.project_id}=>${role}"]
+  env_name = "dpu-composer"
+  #cluster_secondary_range_name  = "composer-subnet-cluster"
+  #services_secondary_range_name = "composer-subnet-services"
+  composer_sa_roles = [for role in var.composer_sa_roles : "${module.project_services.project_id}=>${role}"]
   dpu_label = {
     goog-packaged-solution : "eks-solution"
   }

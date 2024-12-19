@@ -64,18 +64,18 @@ variable "custom_classifier_id" {
 variable "composer_cidr" {
   description = "CIDR ranges for configuring Cloud Composer"
   type = object({
-    subnet_primary           = string
-    cluster_secondary_range  = string
-    services_secondary_range = string
-    control_plane            = string
-    sql                      = string
+    subnet_primary = string
+    #cluster_secondary_range  = string
+    #services_secondary_range = string
+    #control_plane            = string
+    #sql                      = string
   })
   default = {
-    subnet_primary           = "10.10.10.0/24"
-    cluster_secondary_range  = "10.154.0.0/17"
-    services_secondary_range = "10.154.128.0/22"
-    control_plane            = "172.31.245.0/24"
-    sql                      = "10.0.0.0/12"
+    subnet_primary = "10.10.10.0/24"
+    #cluster_secondary_range  = "10.154.0.0/17"
+    #services_secondary_range = "10.154.128.0/22"
+    #control_plane            = "172.31.245.0/24"
+    #sql                      = "10.0.0.0/12"
   }
 }
 
@@ -91,8 +91,8 @@ variable "serverless_connector_subnet_range" {
   default     = "10.2.0.0/24"
 }
 
-variable "psa_reserved_address" {
-  description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
-  type        = string
-  default     = "10.11.0.0"
-}
+#variable "psa_reserved_address" {
+#  description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
+#  type        = string
+#  default     = "10.11.0.0"
+#}

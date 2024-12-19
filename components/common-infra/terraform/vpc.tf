@@ -61,16 +61,16 @@ resource "google_compute_network_firewall_policy_association" "association" {
 
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow private HTTPS access to google apis on the restricted VIP"
+  description     = "Allow private HTTPS access to google apis on the private VIP"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
   priority        = 1000
-  rule_name       = "allow-google-apis-restricted-vip"
+  rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.4/30"]
+    dest_ip_ranges = ["199.36.153.8/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -145,7 +145,7 @@ module "dns-private-zone-googleapis" {
 
   recordsets = [
     {
-      name = "restricted"
+      name = "private"
       type = "A"
       ttl  = 300
       records = [
@@ -157,7 +157,7 @@ module "dns-private-zone-googleapis" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -179,7 +179,7 @@ module "dns-private-zone-composer1" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -201,7 +201,7 @@ module "dns-private-zone-composer2" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -223,7 +223,7 @@ module "dns-private-zone-pkg-dev" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
@@ -245,7 +245,7 @@ module "dns-private-zone-gcr-io" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
