@@ -15,7 +15,7 @@
 ---
 name: update-python
 
-on:
+on: # yamllint disable-line rule:truthy
   push:
     branches:
       - "dependabot/pip/*"
@@ -39,17 +39,14 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: invoke python updates
         run: ./invoke.sh lock --upgrade
 
       - name: Commit and push updated dependencies
-        if: >
-          github.event_name == 'pull_request' &&
-          github.ref_name != github.event.repository.default_branch
         uses: stefanzweifel/git-auto-commit-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
