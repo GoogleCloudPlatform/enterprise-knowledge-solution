@@ -34,8 +34,8 @@ module "common_infra" {
   vpc_name                          = var.vpc_name
   serverless_connector_subnet       = var.serverless_connector_subnet
   serverless_connector_subnet_range = var.serverless_connector_subnet_range
-  #psa_reserved_address              = var.psa_reserved_address
-  composer_cidr = var.composer_cidr
+  psa_reserved_address              = var.psa_reserved_address
+  composer_cidr                     = var.composer_cidr
 }
 
 module "project_services" {

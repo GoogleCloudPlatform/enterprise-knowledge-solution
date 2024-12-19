@@ -78,42 +78,42 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic within the composer subnet"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1001
-  rule_name       = "allow-subnet-internal"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.subnet_primary]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-#resource "google_compute_network_firewall_policy_rule" "allow-psc-alloydb" {
+#resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
 #  count           = var.create_vpc_network ? 1 : 0
-#  description     = "Allow internal traffic to reach AlloyDB"
+#  description     = "Allow internal traffic within the composer subnet"
 #  action          = "allow"
 #  direction       = "EGRESS"
 #  enable_logging  = true
 #  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-#  priority        = 1002
-#  rule_name       = "allow-psc-alloydb"
+#  priority        = 1001
+#  rule_name       = "allow-subnet-internal"#
 
 #  match {
-#    ## TODO: change this, how can I reference the psc endpoint of alloydb?
-#    dest_ip_ranges = [module.docs_results.primary_psc_attachment_link]
+#    dest_ip_ranges = [var.composer_cidr.subnet_primary]
 #    layer4_configs {
 #      ip_protocol = "all"
 #    }
 #  }
 #}
+
+resource "google_compute_network_firewall_policy_rule" "allow-psc-alloydb" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow internal traffic to reach AlloyDB"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1002
+  rule_name       = "allow-psc-alloydb"
+
+  match {
+    ## TODO: change this, how can I reference the psc endpoint of alloydb?
+    dest_ip_ranges = [var.psa_reserved_address]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
 
 resource "google_compute_network_firewall_policy_rule" "deny-all-egress" {
   count           = var.create_vpc_network ? 1 : 0

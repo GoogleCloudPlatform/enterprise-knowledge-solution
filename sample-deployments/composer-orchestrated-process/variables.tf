@@ -91,8 +91,8 @@ variable "serverless_connector_subnet_range" {
   default     = "10.2.0.0/24"
 }
 
-#variable "psa_reserved_address" {
-#  description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
-#  type        = string
-#  default     = "10.11.0.0"
-#}
+variable "psa_reserved_address" {
+  description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
+  type        = string
+  default     = "10.11.0.0"
+}
