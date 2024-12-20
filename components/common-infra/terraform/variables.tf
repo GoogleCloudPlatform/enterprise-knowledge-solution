@@ -45,12 +45,12 @@ variable "alloy_db_cluster_id" {
   default     = "eks-docs-results"
 }
 
-variable "composer_cidr" {
-  description = "CIDR ranges for configuring Cloud Composer"
-  type = object({
-    subnet_primary = string
-  })
-}
+#variable "composer_cidr" {
+#  description = "CIDR ranges for configuring Cloud Composer"
+#  type = object({
+#    subnet_primary = string
+#  })
+#}
 
 variable "serverless_connector_subnet" {
   description = "Name of the VPC subnet to create"
