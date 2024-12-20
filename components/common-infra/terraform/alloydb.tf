@@ -53,11 +53,11 @@ module "docs_results" {
 
   project_id = module.project_services.project_id
 
-  cluster_id       = var.alloy_db_cluster_id
-  cluster_location = var.region
-  cluster_labels   = {}
-  psc_enabled      = true
-  # network_self_link = replace(local.vpc_network_self_link, "https://www.googleapis.com/compute/v1/", "")
+  cluster_id        = var.alloy_db_cluster_id
+  cluster_location  = var.region
+  cluster_labels    = {}
+  psc_enabled       = false
+  network_self_link = replace(local.vpc_network_self_link, "https://www.googleapis.com/compute/v1/", "")
 
 
   primary_instance = {
@@ -71,7 +71,7 @@ module "docs_results" {
     }
   }
 
-  # depends_on = [google_service_networking_connection.default]
+  depends_on = [google_service_networking_connection.default]
 }
 
 resource "time_sleep" "wait_for_alloydb_ready_state" {

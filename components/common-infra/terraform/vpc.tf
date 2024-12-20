@@ -59,7 +59,7 @@ resource "google_compute_network_firewall_policy_association" "association" {
   firewall_policy   = google_compute_network_firewall_policy.policy[0].name
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-google-apis1" {
+resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   count           = var.create_vpc_network ? 1 : 0
   description     = "Allow private HTTPS access to google apis on the private VIP"
   action          = "allow"
@@ -77,44 +77,6 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis1" {
     }
   }
 }
-
-#resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
-#  count           = var.create_vpc_network ? 1 : 0
-#  description     = "Allow internal traffic within the composer subnet"
-#  action          = "allow"
-#  direction       = "EGRESS"
-#  enable_logging  = true
-#  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-#  priority        = 1001
-#  rule_name       = "allow-subnet-internal"#
-
-#  match {
-#    dest_ip_ranges = [var.composer_cidr.subnet_primary]
-#    layer4_configs {
-#      ip_protocol = "all"
-#    }
-#  }
-#}
-
-resource "google_compute_network_firewall_policy_rule" "allow-psc-alloydb" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach AlloyDB"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1002
-  rule_name       = "allow-psc-alloydb"
-
-  match {
-    ## TODO: change this, how can I reference the psc endpoint of alloydb?
-    dest_ip_ranges = [var.psa_reserved_address]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
 
 module "dns-private-zone-googleapis" {
   count      = var.create_vpc_network ? 1 : 0
@@ -135,50 +97,6 @@ module "dns-private-zone-googleapis" {
         "199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11",
       ]
     },
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-pkg-dev" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "pkg-dev"
-  domain     = "pkg.dev."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-gcr-io" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "gcr-io"
-  domain     = "gcr.io."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
     {
       name = "*"
       type = "CNAME"

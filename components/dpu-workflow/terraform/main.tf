@@ -13,9 +13,7 @@
 # limitations under the License.
 
 locals {
-  env_name = "dpu-composer"
-  #cluster_secondary_range_name  = "composer-subnet-cluster"
-  #services_secondary_range_name = "composer-subnet-services"
+  env_name          = "dpu-composer"
   composer_sa_roles = [for role in var.composer_sa_roles : "${module.project_services.project_id}=>${role}"]
   dpu_label = {
     goog-packaged-solution : "eks-solution"
@@ -76,6 +74,7 @@ resource "google_composer_environment" "composer_env" {
 
   config {
     enable_private_environment = true
+    enable_private_builds_only = false
     software_config {
       image_version = var.composer_version
       env_variables = var.composer_env_variables
