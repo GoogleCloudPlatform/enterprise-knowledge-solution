@@ -12,17 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-/*
- * Activate required service API:s
- */
-module "project_services" {
-  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
-  project_id                  = var.project_id
-  disable_services_on_destroy = false
-  disable_dependent_services  = false
-  activate_apis = [
-    "compute.googleapis.com",
-    "iap.googleapis.com",
-    "aiplatform.googleapis.com"
-  ]
+output "dns_configuration" {
+  value = "${join(",", var.lb_ssl_certificate_domains)} => ${module.eks_adpui_lb.external_ip}"
 }

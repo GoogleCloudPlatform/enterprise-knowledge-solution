@@ -72,3 +72,8 @@ variable "psa_reserved_address" {
   type        = string
   default     = "10.240.0.0"
 }
+
+variable "iap_access_domains" {
+  description = "List of domains granted for IAP access to the APP"
+  type        = list(string)
+}

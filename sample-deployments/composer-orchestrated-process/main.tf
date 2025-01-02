@@ -36,6 +36,7 @@ module "common_infra" {
   serverless_connector_subnet_range = var.serverless_connector_subnet_range
   psa_reserved_address              = var.psa_reserved_address
   composer_cidr                     = var.composer_cidr
+  iap_access_domains                = var.iap_access_domains
 }
 
 module "project_services" {
@@ -151,6 +152,23 @@ module "dpu_ui" {
   agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
   lb_ssl_certificate_domains        = var.webui_domains
+  iap_client_id                     = module.common_infra.iap_client_id
+  iap_secret                        = module.common_infra.iap_secret
+  iap_member                        = module.common_infra.iap_member
+}
+
+module "adp_ui" {
+  source                            = "../../components/adpui/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  iap_access_domains                = var.iap_access_domains
+  lb_ssl_certificate_domains        = var.webui_domains
+  iap_client_id                     = module.common_infra.iap_client_id
+  iap_secret                        = module.common_infra.iap_secret
+  iap_member                        = module.common_infra.iap_member
+  htil_api_endpoint                 = "foobar"
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account

@@ -12,17 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-/*
- * Activate required service API:s
- */
-module "project_services" {
-  source                      = "github.com/terraform-google-modules/terraform-google-project-factory.git//modules/project_services?ref=ff00ab5032e7f520eb3961f133966c6ced4fd5ee" # commit hash of version 17.0.0
-  project_id                  = var.project_id
-  disable_services_on_destroy = false
-  disable_dependent_services  = false
-  activate_apis = [
-    "compute.googleapis.com",
-    "iap.googleapis.com",
-    "aiplatform.googleapis.com"
-  ]
+terraform {
+  required_version = ">=1.5.7"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.23.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.23.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.12.1"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.3"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.2"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "cloud-solutions/dpu-solution-v1.0.0"
+  }
 }

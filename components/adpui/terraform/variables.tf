@@ -36,30 +36,19 @@ variable "iap_access_domains" {
   description = "List of domains granted for IAP access to the APP"
   type        = list(string)
 }
-
-variable "vertex_ai_data_store_region" {
-  description = "The geographic location where the data store should reside. The value can only be one of 'global', 'us' and 'eu'"
-  type        = string
+variable "htil_api_endpoint" {
+  type = string
+  description = "The API endpoint to access the HTIL api"
 }
 
-variable "agent_builder_data_store_id" {
-  description = "Data store used"
+variable "adpui_service_name" {
   type        = string
-}
-
-variable "agent_builder_search_id" {
-  description = "Agent builder search engine id"
-  type        = string
-}
-
-variable "webui_service_name" {
-  type        = string
-  description = "The service name for the webui"
-  default     = "eks-ui"
+  description = "The service name for the adpui"
+  default     = "eks-adp-ui"
 }
 
 variable "lb_ssl_certificate_domains" {
-  description = "Custom domain pointing to the WebUI app, DNS configured"
+  description = "Custom domain pointing to the ADP UI app, DNS configured"
   type        = list(string)
 }
 
@@ -78,3 +67,4 @@ variable "iap_member" {
   type = string
   description = "The IAP member"
 }
+

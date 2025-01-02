@@ -17,17 +17,15 @@ locals {
   }
 }
 
-module "cloud_run_web_account" {
+module "cloud_run_adp_account" {
   source     = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=a11d4127eab9b51ec9c9afdaf51b902cd2c240d9" #commit hash of version 4.0.0
   project_id = var.project_id
-  names      = ["cloud-run-web"]
+  names      = ["cloud-run-adp"]
   project_roles = [
-    "${var.project_id}=>roles/aiplatform.user",
-    "${var.project_id}=>roles/discoveryengine.viewer",
     "${var.project_id}=>roles/storage.objectUser",
   ]
-  display_name = "EKS Cloud Run WebUI Service Account"
-  description  = "specific custom service account for Web APP"
+  display_name = "EKS Cloud Run ADP UI Service Account"
+  description  = "specific custom service account for ADP Web App"
 }
 
 resource "null_resource" "deployment_trigger" {
@@ -36,8 +34,8 @@ resource "null_resource" "deployment_trigger" {
   }
 }
 
-resource "google_cloud_run_v2_service" "eks_webui" {
-  name                = var.webui_service_name
+resource "google_cloud_run_v2_service" "eks_adpui" {
+  name                = var.adpui_service_name
   location            = var.region
   deletion_protection = false
   ingress             = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
@@ -46,25 +44,9 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       max_instance_count = 2
     }
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.webui_service_name}:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_repo}/${var.adpui_service_name}:latest"
       ports {
         container_port = 8080
-      }
-      env {
-        name  = "PROJECT_ID"
-        value = module.project_services.project_id
-      }
-      env {
-        name  = "AGENT_BUILDER_LOCATION"
-        value = var.vertex_ai_data_store_region
-      }
-      env {
-        name  = "AGENT_BUILDER_DATA_STORE_ID"
-        value = var.agent_builder_data_store_id
-      }
-      env {
-        name  = "AGENT_BUILDER_SEARCH_ID"
-        value = var.agent_builder_search_id
       }
       resources {
         limits = {
@@ -73,7 +55,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
         }
       }
     }
-    service_account = module.cloud_run_web_account.email
+    service_account = module.cloud_run_adp_account.email
   }
   lifecycle {
     replace_triggered_by = [null_resource.deployment_trigger]
@@ -83,27 +65,27 @@ resource "google_cloud_run_v2_service" "eks_webui" {
   ]
 }
 
-resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
-  name                  = "${var.webui_service_name}-neg"
+resource "google_compute_region_network_endpoint_group" "eks_adpui_neg" {
+  name                  = "${var.adpui_service_name}-neg"
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = google_cloud_run_v2_service.eks_webui.name
+    service = google_cloud_run_v2_service.eks_adpui.name
   }
   lifecycle {
-    replace_triggered_by = [google_cloud_run_v2_service.eks_webui]
+    replace_triggered_by = [google_cloud_run_v2_service.eks_adpui]
   }
 }
 
 resource "google_compute_ssl_policy" "ssl-policy" {
-  name            = "ssl-policy"
+  name            = "ssl-policy-adp"
   profile         = "MODERN"
   min_tls_version = "TLS_1_2"
 }
 
-module "eks_webui_lb" {
+module "eks_adpui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
-  name                            = "${var.webui_service_name}-lb"
+  name                            = "${var.adpui_service_name}-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
@@ -116,7 +98,7 @@ module "eks_webui_lb" {
       description = null
       groups = [
         {
-          group = google_compute_region_network_endpoint_group.eks_webui_neg.id
+          group = google_compute_region_network_endpoint_group.eks_adpui_neg.id
         }
       ]
       enable_cdn = false
@@ -133,7 +115,7 @@ module "eks_webui_lb" {
   }
 }
 
-data "google_iam_policy" "webui_policy" {
+data "google_iam_policy" "adpui_policy" {
   binding {
     role    = "roles/run.invoker"
     members = setunion(var.iap_access_domains, [var.iap_member])
@@ -141,8 +123,8 @@ data "google_iam_policy" "webui_policy" {
 }
 
 resource "google_cloud_run_v2_service_iam_policy" "policy" {
-  project     = google_cloud_run_v2_service.eks_webui.project
-  location    = google_cloud_run_v2_service.eks_webui.location
-  name        = google_cloud_run_v2_service.eks_webui.name
-  policy_data = data.google_iam_policy.webui_policy.policy_data
+  project     = google_cloud_run_v2_service.eks_adpui.project
+  location    = google_cloud_run_v2_service.eks_adpui.location
+  name        = google_cloud_run_v2_service.eks_adpui.name
+  policy_data = data.google_iam_policy.adpui_policy.policy_data
 }

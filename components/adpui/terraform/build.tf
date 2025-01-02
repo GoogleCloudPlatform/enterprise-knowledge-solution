@@ -13,9 +13,17 @@
 # limitations under the License.
 
 locals {
-  cloud_build_fileset = setunion(fileset(path.module, "../src/**"), fileset(path.module, "build/Dockerfile"), fileset(path.module, "../requirements.txt"), fileset(path.module, "build/cloudbuild.yaml"))
-  cloud_build_content_hash = sha512(join(",", [
-  for f in local.cloud_build_fileset : fileexists("${path.module}/${f}") ? filesha512("${path.module}/${f}") : sha512("file-not-found")]))
+  cloud_build_fileset = setunion(
+    fileset(path.module, "../src/**"),
+    fileset(path.module, "../package.json"),
+    fileset(path.module, "../package-lock.json"),
+    fileset(path.module, "build/Dockerfile"),
+    fileset(path.module, "build/cloudbuild.yaml"),
+    fileset(path.module, "build/nginx.yaml")
+  )
+  cloud_build_content_hash = sha512(
+    join(",", [for f in local.cloud_build_fileset : filesha512("${path.module}/${f}")])
+  )
 }
 
 resource "local_file" "cloudbuild_config" {
@@ -23,7 +31,8 @@ resource "local_file" "cloudbuild_config" {
   content = templatefile("${path.module}/build/cloudbuild.yaml.template", {
     project_id            = var.project_id,
     build_service_account = var.cloud_build_service_account_email,
-    image_tag             = "${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${var.webui_service_name}"
+    image_tag             = "${var.region}-docker.pkg.dev/${module.project_services.project_id}/${var.artifact_repo}/${var.adpui_service_name}"
+    hitl_api_endpoint     = var.htil_api_endpoint
   })
 }
 

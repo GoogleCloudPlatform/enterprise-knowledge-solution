@@ -1,0 +1,259 @@
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+*,
+body,
+html {
+  font-family: sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+}
+
+body {
+  background-color: #eeeeee !important;
+  overflow: scroll;
+}
+
+.nav .nav-link.active {
+  background-color: #4885ed;
+  color: #fff
+}
+
+
+.nav {
+  background-color: #3c4043;
+}
+
+.nav-link {
+  color: white;
+}
+
+/*NavBar CSS*/
+
+/*Upload Page CSS*/
+.dropzone {
+  flex: 1;
+  display: 'flex';
+  flex-direction: 'column';
+  align-items: 'center';
+  padding: '20px';
+  border-width: 2;
+  border-radius: 2;
+  border-color: '#eeeeee';
+  border-style: 'dashed';
+  background-color: '#fafafa';
+  color: '#bdbdbd';
+  outline: 'none';
+  transition: 'border .24s ease-in-out';
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #2196F3;
+  border-color: #2196F3;
+}
+
+.dzu-dropzone {
+  overflow: hidden !important;
+}
+
+.dragdropuploadclass {
+  /* background-color: red; */
+  padding: 5vh 5vh;
+  width: 100%;
+  width: 100%;
+}
+
+/*Upload Page CSS*/
+
+
+.btn .btn-outline-secondary {
+  border: none;
+}
+
+.logindiv {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100vh;
+  background: url('../src/images/bg.jpg') no-repeat center/cover;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+input[type="text"],
+input[type="password"] {
+  height: 25px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+input[type="submit"] {
+  margin-right: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  background: #4285F4;
+  border: 1px solid #4285F4;
+  color: #fff;
+  padding: 10px 20px;
+  width: 205px;
+}
+
+input[type="submit"]:hover {
+  background: #296bd9;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.loginTitle {
+  text-align: center;
+  font-size: 18px;
+  margin: 15px 0 20px 0
+}
+
+.loginInput {
+  height: 5vh !important;
+  background-color: #F0F0F0;
+  border-radius: 10px !important;
+}
+
+.googleImg {
+  font-size: 45px;
+  border: 1px solid #4285F4;
+  background-color: #fff;
+  padding: 10px;
+}
+
+.signInGoogle {
+  background-color: #4285F4 !important;
+  border-radius: 0 !important;
+  margin-left: -8px !important;
+  line-height: 20px;
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  background-color: white;
+  padding: 1.5rem;
+  /* box-shadow: 0 0 0px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 19%); */
+  border-top: 0.5px solid #D0D0D0;
+  width: 374px;
+}
+
+.login-form {
+  background-color: white;
+  padding: 2rem 2rem 0 2rem;
+  width: 374px;
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+}
+
+.list-container {
+  display: flex;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+}
+
+.title {
+  font-size: 15px;
+  /* margin-bottom: 20px; */
+  font-weight: bolder;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 9px;
+}
+
+/*Login CSS*/
+
+
+.rectangle {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  border: 2px solid black;
+}
+
+/***Document Search Page*/
+.searchDocTable {
+  overflow: auto;
+}
+
+.searchDocTable thead tr th {
+  position: sticky;
+  top: 0;
+}
+
+.searchDocTable th {
+  background: #34A853;
+  padding-top: 16px;
+  color: #fff;
+  box-shadow: 0px 0px 0 2px #e8e8e8;
+}
+
+.searchDocTable .ButtonGroup__root btn-group {
+  float: right !important;
+}
+
+/***Document Search Page*/
+
+.searchContainer {
+  padding: 0px;
+  border-radius: 15px;
+  border: 0px;
+}
+
+.searchCard {
+  border: 0px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+input,
+select,
+.dzu-submitButton,
+.labels {
+  font-size: 18px !important;
+}
+
+.app-title {
+  font-size: 24px !important;
+}
+
+.overviewLabel img {
+  margin-bottom: 10px;
+}
+
+button {
+  font-size: 18px !important;
+  border-radius: 100px !important;
+}
+
+.largeScore {
+  font-size: 30px !important;
+}

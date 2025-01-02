@@ -76,3 +76,19 @@ output "serverless_connector_subnet" {
   description = "the subnet used by Cloud Run for private access to alloydb"
   value       = google_compute_subnetwork.serverless_connector_subnet.name
 }
+
+output "iap_client_id" {
+  description = "The IAP Oauth Client ID"
+  value       = google_iap_client.project_client.client_id
+}
+
+output "iap_secret" {
+  description = "The IAP Oauth Secret"
+  value = google_iap_client.project_client.secret
+  sensitive = true
+}
+
+output "iap_member" {
+  value = google_project_service_identity.iap_sa.member
+  description = "The IAP member"
+}
