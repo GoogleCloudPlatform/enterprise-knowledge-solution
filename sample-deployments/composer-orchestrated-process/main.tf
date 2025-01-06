@@ -164,7 +164,7 @@ module "adp_ui" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   iap_access_domains                = var.iap_access_domains
-  lb_ssl_certificate_domains        = var.webui_domains
+  lb_ssl_certificate_domains        = var.adpui_domains
   iap_client_id                     = module.common_infra.iap_client_id
   iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member

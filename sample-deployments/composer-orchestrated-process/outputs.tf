@@ -42,6 +42,11 @@ output "webui_dns_config" {
   value       = module.dpu_ui.dns_configuration
 }
 
+output "adpui_dns_config" {
+  description = "DNS Record for APDUI"
+  value       = module.adp_ui.dns_configuration
+}
+
 output "classifier_processor_id" {
   description = "The DocAI Custom Classifier processor id"
   value       = var.custom_classifier_id
