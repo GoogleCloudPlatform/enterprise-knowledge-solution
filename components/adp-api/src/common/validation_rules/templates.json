@@ -1,0 +1,9 @@
+
+    {
+    	"Template1": "Select JSON_QUERY(entities,'$.{{key}}') as {{key}} from {{BQ_Table}} where  date_add(current_date,interval {{value_before}}  month) < DATE(JSON_VALUE(entities,'$.{{key}}')) and DATE(JSON_VALUE(entities,'$.{{key}}')) < date_add(current_date,interval {{value_after}}  month) and doc_type={{doc_type}}",
+    	"Template2": "select JSON_QUERY(entities,'$.{{ key[0] | sqlsafe }}') as {{key[0]}} {% for dim in key[1:] %},JSON_QUERY(entities,'$.{{ dim| sqlsafe }}') as {{dim}} {% endfor %} from {{BQ_Table}} where cast(JSON_VALUE(entities,'$.{{key[0]}}') as STRING) {{operator[0]}} cast({{value[0]}} as STRING) {% for dim in (key[1:]) %} {% if loop.index > 0 %} and {% endif %} cast(JSON_VALUE(entities,'$.{{key[loop.index]}}') as STRING) {{operator[loop.index]}} cast({{value[loop.index]}} as STRING)  {% endfor %}",
+    	"Template3": "Select JSON_QUERY(entities,'$.{{key}}') as {{key}} from {{BQ_Table}} where DATE(JSON_VALUE(entities,'$.{{key}}')) {{operator}} date_add(current_date,interval {{value}}  month) and doc_type={{doc_type}}",
+    	"Template4": "Select JSON_QUERY(entities,'$.{{key}}') as {{key}} from {{BQ_Table}} where cast(JSON_VALUE(entities,'$.{{key}}') as STRING) {{operator}} cast({{value}} as STRING) and doc_type={{doc_type}}",
+    	"Template5": "Select JSON_QUERY(entities,'$.{{key}}') as {{key}} from {{BQ_Table}} where REGEXP_CONTAINS(JSON_VALUE(entities,'$.{{key}}'), r{{value}})and doc_type={{doc_type}}"
+
+    }

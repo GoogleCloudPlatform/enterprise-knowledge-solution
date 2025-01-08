@@ -155,6 +155,22 @@ module "dpu_ui" {
   iap_client_id                     = module.common_infra.iap_client_id
   iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member
+  ssl_policy_link = module.common_infra.ssl_policy_link
+}
+
+module "adp_api" {
+  source                            = "../../components/adp-api/terraform"
+  project_id                        = var.project_id
+  region                            = var.region
+  artifact_repo                     = module.common_infra.artifact_repo.name
+  cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  iap_access_domains                = var.iap_access_domains
+  lb_ssl_certificate_domains        = var.adpapi_domains
+  iap_client_id                     = module.common_infra.iap_client_id
+  iap_secret                        = module.common_infra.iap_secret
+  iap_member                        = module.common_infra.iap_member
+  ssl_policy_link = module.common_infra.ssl_policy_link
+  adp_ui_url = var.adpui_domains[0]
 }
 
 module "adp_ui" {
@@ -168,7 +184,8 @@ module "adp_ui" {
   iap_client_id                     = module.common_infra.iap_client_id
   iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member
-  htil_api_endpoint                 = "foobar"
+  htil_api_endpoint                 = var.adpapi_domains[0]
+  ssl_policy_link = module.common_infra.ssl_policy_link
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account

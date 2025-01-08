@@ -92,3 +92,8 @@ output "iap_member" {
   value = google_project_service_identity.iap_sa.member
   description = "The IAP member"
 }
+
+output "ssl_policy_link" {
+  value = google_compute_ssl_policy.ssl-policy.self_link
+  description = "SSL Policy Self Link for LBs"
+}

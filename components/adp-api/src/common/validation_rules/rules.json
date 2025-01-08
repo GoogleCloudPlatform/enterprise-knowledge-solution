@@ -1,0 +1,20 @@
+{
+  "utility_bill": {
+    "Rule_1": "Select JSON_QUERY(entities,'$.due_date') as due_date from `project_table` where DATE(JSON_VALUE(entities,'$.due_date')) < date_add(current_date,interval -2  month)",
+    "Rule_2": "Select JSON_QUERY(entities,'$.date_statement') as date_statement from `project_table` where  date_add(current_date,interval -2  month) < DATE(JSON_VALUE(entities,'$.date_statement')) and DATE(JSON_VALUE(entities,'$.date_statement')) < date_add(current_date,interval 3  month)",
+    "Rule_3": "Select JSON_QUERY(entities,'$.invoice_date') as invoice_date from `project_table` where DATE(JSON_VALUE(entities,'$.invoice_date')) < date_add(current_date,interval 0  month)"
+  },
+  "pay_stub": {
+    "Rule_1": "Select JSON_QUERY(entities,'$.hours') as hours from `project_table` where cast(JSON_VALUE(entities,'$.hours') as STRING) > cast(100 as STRING)",
+    "Rule_2": "Select JSON_QUERY(entities,'$.pay_period_to') as pay_period_to from `project_table` where DATE(JSON_VALUE(entities,'$.pay_period_to')) > date_add(current_date,interval -1  month)",
+    "Rule_3": "select JSON_QUERY(entities,'$.hours') as hours ,JSON_QUERY(entities,'$.rate') as rate  from `project_table` where cast(JSON_VALUE(entities,'$.hours') as STRING) < cast(150 as STRING)   and  cast(JSON_VALUE(entities,'$.rate') as STRING) < cast(40 as STRING)"
+  },
+  "driver_license": {
+    "Rule_1": "Select JSON_QUERY(entities,'$.dob') as dob from `project_table` where DATE(JSON_VALUE(entities,'$.dob')) < date_add(current_date,interval 0  month)",
+    "Rule_2": "Select JSON_QUERY(entities,'$.exp_date') as exp_date from `project_table` where DATE(JSON_VALUE(entities,'$.exp_date')) > date_add(current_date,interval 0  month)",
+    "Rule_3": "Select JSON_QUERY(entities,'$.dl_no') as dl_no from `project_table` where REGEXP_CONTAINS(JSON_VALUE(entities,'$.dl_no'), r'[A-Z]{1}-[0-9]{8}')"
+  },
+  "claims_form": {
+    "Rule_1": "Select JSON_QUERY(entities,'$.work_end_date') as work_end_date from `project_table` where DATE(JSON_VALUE(entities,'$.work_end_date')) < date_add(current_date,interval 0  month)"
+  }
+}

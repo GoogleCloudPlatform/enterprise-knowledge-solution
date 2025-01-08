@@ -1,0 +1,21 @@
+{
+  "generic_form": {
+    "doc_type": {
+      "default": "Non-Urgent",
+      "rules": [
+        {
+          "ocr_text": "urgent",
+          "name": "Urgent"
+        }
+      ]
+    },
+    "display_name": "Generic Form",
+    "parser": "claims_form_parser",
+    "classifier_label": "Generic"
+  },
+  "prior_auth_form": {
+    "display_name": "Prior-Authorization Form",
+    "classifier_label": "Prior_Auth",
+    "parser": "prior_auth_form_parser"
+  }
+}

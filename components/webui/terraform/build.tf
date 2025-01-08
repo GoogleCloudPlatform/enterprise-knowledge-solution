@@ -28,7 +28,7 @@ resource "local_file" "cloudbuild_config" {
 }
 
 # Build and upload the app container
-module "gcloud_build_app" {
+module "gcloud_build_web_ui_app" {
   source = "github.com/terraform-google-modules/terraform-google-gcloud?ref=db25ab9c0e9f2034e45b0034f8edb473dde3e4ff" # commit hash of version 3.5.0
 
   create_cmd_entrypoint = "gcloud"

@@ -18,6 +18,7 @@ source-roots = [
     "components/post-setup-config/src",
     "components/doc-deletion/src",
     "components/webui/src",
+    "components/adp-api/src",
 ]
 
 [tool.pylint."MESSAGE_CONTROL"]
@@ -42,6 +43,7 @@ include=[
     "components/post-setup-config/src",
     "components/doc-deletion/src",
     "components/webui/src",
+    "components/adp-api/src",
 ]
 
 # Paths of modules for dependencies
@@ -55,6 +57,7 @@ executionEnvironments = [
     "components/post-setup-config/src",
     "components/doc-deletion/src",
     "components/webui/src",
+    "components/adp-api/src",
     ] }
 ]
 

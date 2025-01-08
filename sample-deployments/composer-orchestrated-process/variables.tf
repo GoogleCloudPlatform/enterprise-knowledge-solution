@@ -60,6 +60,11 @@ variable "adpui_domains" {
   type        = list(string)
 }
 
+variable "adpapi_domains" {
+  description = "Custom domain pointing to the ADP API app, DNS configured"
+  type        = list(string)
+}
+
 variable "custom_classifier_id" {
   description = "The Custom DocAI classifier to classify PDFs. If no classifier is specified, no specialized processors will be triggered. Format: `projects/PROJECT_ID/locations/LOCATION/processors/PROCSESOR_ID"
   type        = string

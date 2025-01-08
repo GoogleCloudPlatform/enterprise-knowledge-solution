@@ -1,0 +1,9 @@
+[project]
+name = "processor-web-ui"
+version = "0.0.1.dev"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "google-api-core",
+    "google-cloud-storage",
+]

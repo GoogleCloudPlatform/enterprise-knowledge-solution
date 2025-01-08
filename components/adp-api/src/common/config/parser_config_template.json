@@ -1,0 +1,38 @@
+{
+    "claims_form": {
+        "location": "us",
+        "parser_name": "claims_form",
+        "parser_type": "FORM_PARSER_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/79b2c1fa8b5b2e8a"
+    },
+    "prior_auth_form": {
+        "location": "us",
+        "parser_name": "pa_form_processor",
+        "parser_type": "CUSTOM_EXTRACTION_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/be1305fceadf0d94"
+    },
+    "generic_form": {
+        "location": "us",
+        "parser_name": "Generic Form",
+        "parser_type": "FORM_PARSER_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/79b2c1fa8b5b2e8a"
+    },
+    "bsc_pa_form": {
+        "location": "us",
+        "parser_name": "BSC_PA_Processor",
+        "parser_type": "CUSTOM_EXTRACTION_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/3a0cfcd91c6dfe3c"
+    },
+    "bsc_package_form": {
+        "location": "us",
+        "parser_name": "BSC_PA_Package_Processor",
+        "parser_type": "FORM_PARSER_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/79b2c1fa8b5b2e8a"
+    },
+    "classifier": {
+        "location": "us",
+        "parser_name": "Classifier",
+        "parser_type": "CUSTOM_CLASSIFICATION_PROCESSOR",
+        "processor_id": "projects/prior-auth-poc/locations/us/processors/3a77fb3cb9dd3de1"
+    }
+}

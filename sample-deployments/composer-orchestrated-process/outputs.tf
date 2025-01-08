@@ -43,7 +43,12 @@ output "webui_dns_config" {
 }
 
 output "adpui_dns_config" {
-  description = "DNS Record for APDUI"
+  description = "DNS Record for ADP UI"
+  value       = module.adp_ui.dns_configuration
+}
+
+output "adpapi_dns_config" {
+  description = "DNS Record for ADP API"
   value       = module.adp_ui.dns_configuration
 }
 

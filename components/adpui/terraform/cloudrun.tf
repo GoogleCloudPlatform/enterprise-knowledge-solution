@@ -61,7 +61,7 @@ resource "google_cloud_run_v2_service" "eks_adpui" {
     replace_triggered_by = [null_resource.deployment_trigger]
   }
   depends_on = [
-    module.gcloud_build_app.wait
+    module.gcloud_build_adp_ui_app.wait
   ]
 }
 
@@ -77,19 +77,13 @@ resource "google_compute_region_network_endpoint_group" "eks_adpui_neg" {
   }
 }
 
-resource "google_compute_ssl_policy" "ssl-policy" {
-  name            = "ssl-policy-adp"
-  profile         = "MODERN"
-  min_tls_version = "TLS_1_2"
-}
-
 module "eks_adpui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
   name                            = "${var.adpui_service_name}-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
   ssl                             = true
-  ssl_policy                      = google_compute_ssl_policy.ssl-policy.self_link
+  ssl_policy                      = var.ssl_policy_link
   https_redirect                  = true
   labels                          = local.eks_label
 

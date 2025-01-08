@@ -1,0 +1,97 @@
+{
+  "parser_config": {
+    "claims_form": {
+      "processor_id": "projects/prior-auth-poc/locations/us/processors/7a076c1e2d462cce"
+    },
+    "prior_auth_form": {
+      "processor_id": "projects/prior-auth-poc/locations/us/processors/be1305fceadf0d94"
+    },
+    "bsc_pa_form": {
+      "processor_id": "projects/prior-auth-poc/locations/us/processors/3a0cfcd91c6dfe3c"
+    },
+    "bsc_package_form": {
+      "processor_id": "projects/prior-auth-poc/locations/us/processors/7a076c1e2d462cce"
+    },
+    "classifier": {
+      "processor_id": "projects/prior-auth-poc/locations/us/processors/646be590edf17498"
+    }
+  },
+  "settings_config": {
+    "extraction_confidence_threshold": 0.85,
+    "classification_confidence_threshold": 0.85,
+    "field_extraction_confidence_threshold": -1,
+    "classification_default_class": "generic_form"
+  },
+  "document_types_config": {
+    "driving_license": {
+      "parser": "driving_license_processor",
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgen"
+          }
+        ]
+      },
+      "display_name": "Driving License",
+      "classifier_label": "driving_license"
+    },
+    "generic_form": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent"
+          }
+        ]
+      },
+      "display_name": "Generic Form",
+      "parser": "claims_form",
+      "classifier_label": "Generic"
+    },
+    "prior_auth_form": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgen"
+          }
+        ]
+      },
+      "display_name": "Prior-Authorization Form",
+      "classifier_label": "Prior_Auth",
+      "parser": "prior_auth_form"
+    },
+    "bsc_pa_form": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent"
+          }
+        ]
+      },
+      "display_name": "BSC Prior-Auth Form",
+      "classifier_label": "bsc_pa_form",
+      "parser": "bsc_pa_form"
+    },
+    "bsc_package_form": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent"
+          }
+        ]
+      },
+      "display_name": "BSC Cover Page",
+      "classifier_label": "bsc_package_form",
+      "parser": "bsc_package_form"
+    }
+  }
+}

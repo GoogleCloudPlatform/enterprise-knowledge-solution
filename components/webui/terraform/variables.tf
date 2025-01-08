@@ -78,3 +78,8 @@ variable "iap_member" {
   type = string
   description = "The IAP member"
 }
+
+variable "ssl_policy_link" {
+  type = string
+  description = "SSL Policy Self Link for LB"
+}
