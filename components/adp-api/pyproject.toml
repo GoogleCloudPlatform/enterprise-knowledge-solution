@@ -4,6 +4,9 @@ version = "0.0.1.dev"
 dependencies = [
     "fastapi",
     "uvicorn",
+    "fireo",
     "google-api-core",
     "google-cloud-storage",
+    "google-cloud-logging",
+    "google-cloud-bigquery",
 ]

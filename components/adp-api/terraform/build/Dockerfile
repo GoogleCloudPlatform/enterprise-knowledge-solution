@@ -27,7 +27,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install the dependencies into venv
-RUN --mount=from=libs,target=/libs pip install --no-cache-dir --require-hashes -r /libs/requirements.txt
+RUN --mount=from=libs,target=/libs /opt/venv/bin/pip install --no-cache-dir --require-hashes -r /libs/requirements.txt
 
 # Final stage
 FROM python:3.12-slim
@@ -40,6 +40,7 @@ USER app
 
 # Copy venv from builder
 COPY --from=builder --chown=app /opt/venv /opt/venv
+
 # Copy app source filed from named context: libs
 # hadolint ignore=DL3022
 COPY --from=libs --chown=app /src $HOME/
