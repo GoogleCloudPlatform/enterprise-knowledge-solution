@@ -84,7 +84,7 @@ resource "google_cloud_run_v2_service" "eks_webui" {
 }
 
 resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
-  name                  = "${var.webui_service_name}-neg"
+  name                  = "${var.webui_service_name}-query-neg"
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
@@ -95,22 +95,54 @@ resource "google_compute_region_network_endpoint_group" "eks_webui_neg" {
   }
 }
 
+resource "google_compute_region_network_endpoint_group" "stub" {
+  name                  = "${var.webui_service_name}-stub-neg"
+  network_endpoint_type = "SERVERLESS"
+  region                = var.region
+  project               = var.project_id
+  cloud_run {
+    service = google_cloud_run_v2_service.cloudrunservice2.name
+  }
+}
+
 module "eks_webui_lb" {
   source                          = "github.com/terraform-google-modules/terraform-google-lb-http.git//modules/serverless_negs?ref=99d56bea9a7f561102d2e449852eaf725e8b8d0c" # version 12.0.0
   name                            = "${var.webui_service_name}-lb"
   project                         = var.project_id
   managed_ssl_certificate_domains = var.lb_ssl_certificate_domains
+  load_balancing_scheme           = "EXTERNAL_MANAGED"
   ssl                             = true
   ssl_policy                      = var.ssl_policy_link
   https_redirect                  = true
+  create_url_map                  = false
+  url_map                         = google_compute_url_map.urlmap.id
   labels                          = local.eks_label
 
   backends = {
-    default = {
-      description = null
+    backend1 = {
+      description = "backend for query user interface"
       groups = [
         {
           group = google_compute_region_network_endpoint_group.eks_webui_neg.id
+        }
+      ]
+      enable_cdn = false
+
+      iap_config = {
+        enable               = true
+        oauth2_client_id     = var.iap_client_id
+        oauth2_client_secret = var.iap_secret
+      }
+      log_config = {
+        enable = true
+      }
+    },
+
+    backend2 = {
+      description = "backend for HITL user interface"
+      groups = [
+        {
+          group = google_compute_region_network_endpoint_group.stub.id
         }
       ]
       enable_cdn = false
@@ -127,6 +159,35 @@ module "eks_webui_lb" {
   }
 }
 
+resource "google_compute_url_map" "urlmap" {
+  name        = "${var.webui_service_name}-urlmap"
+  description = "Load balancer in front of various Cloud Run Services that act as different UI components of EKS"
+  project     = var.project_id
+
+  default_service = module.eks_webui_lb.backend_services["backend1"].id
+
+  host_rule {
+    hosts        = [var.lb_ssl_certificate_domains[0]]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = module.eks_webui_lb.backend_services["backend1"].id
+
+    path_rule {
+      paths   = ["/"]
+      service = module.eks_webui_lb.backend_services["backend1"].id
+    }
+
+    path_rule {
+      paths   = ["/hitl"]
+      service = module.eks_webui_lb.backend_services["backend2"].id
+    }
+  }
+
+}
+
 data "google_iam_policy" "webui_policy" {
   binding {
     role    = "roles/run.invoker"
@@ -134,9 +195,39 @@ data "google_iam_policy" "webui_policy" {
   }
 }
 
-resource "google_cloud_run_v2_service_iam_policy" "policy" {
+resource "google_cloud_run_v2_service_iam_policy" "policy1" {
   project     = google_cloud_run_v2_service.eks_webui.project
   location    = google_cloud_run_v2_service.eks_webui.location
   name        = google_cloud_run_v2_service.eks_webui.name
   policy_data = data.google_iam_policy.webui_policy.policy_data
+}
+
+resource "google_cloud_run_v2_service_iam_policy" "policy2" {
+  project     = google_cloud_run_v2_service.cloudrunservice2.project
+  location    = google_cloud_run_v2_service.cloudrunservice2.location
+  name        = google_cloud_run_v2_service.cloudrunservice2.name
+  policy_data = data.google_iam_policy.webui_policy.policy_data
+}
+
+resource "google_cloud_run_v2_service" "cloudrunservice2" {
+  name                = "stub-for-hitl"
+  location            = var.region
+  deletion_protection = false
+  project             = var.project_id
+  ingress             = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      resources {
+        limits = {
+          cpu    = "2"
+          memory = "1024Mi"
+        }
+      }
+    }
+    service_account = module.cloud_run_web_account.email
+  }
 }
