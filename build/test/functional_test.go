@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os/exec"
 	"regexp"
@@ -44,9 +45,12 @@ func TestDAGState(t *testing.T) {
 	cmd := exec.Command(
 		"gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME,
 		"--location", c.LOCATION,
+		"--project", c.PROJECT_ID,
 		"dags", "list-runs",
 		"--", "-d", c.DAG_ID,
 	)
+
+	fmt.Println("Executing command:", cmd.String())
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -54,7 +58,9 @@ func TestDAGState(t *testing.T) {
 	}
 
 	output := string(out)
-	matched, err := regexp.MatchString(`| success |`, output)
+	fmt.Println("gcloud output: \n", output)
+
+	matched, err := regexp.MatchString(`\| success \|`, output)
 	if err != nil {
 		t.Fatalf("Failed to match regex: %v", err)
 	}
