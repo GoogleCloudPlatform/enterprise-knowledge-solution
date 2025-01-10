@@ -67,15 +67,17 @@ steps:
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
-      - "-x"
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
         gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
         build/test/ingest_test_docs.sh;
+        echo "sleep to allow DAGs to fully propagate to Composer...";
         sleep 180;
+        echo "validate that DAGs have fully propaged to Composer...";
         gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
+        echo "sleep to allow Workflow to complete...";
         sleep 1800;
         (cd /workspace/build/test && make functional-test);
         # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
