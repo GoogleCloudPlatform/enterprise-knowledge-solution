@@ -38,3 +38,7 @@ variable "cloud_build_service_account_email" {
   description = "the user-managed service account configured for Cloud Build"
   type        = string
 }
+
+variable "vpc_access_connector_id" {
+  type = string
+}

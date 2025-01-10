@@ -84,6 +84,10 @@ resource "google_cloud_run_v2_job" "doc-registry-service-job" {
           value = "${var.project_id}.${module.docs_registry_dataset.bigquery_dataset.dataset_id}.${module.docs_registry_dataset.table_ids[0]}"
         }
       }
+      vpc_access{
+        connector = var.vpc_access_connector_id
+        egress = "ALL_TRAFFIC"
+      }
     }
   }
   lifecycle {

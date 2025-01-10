@@ -12,18 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "composer_dag_gcs_bucket" {
-  description = "Stores the DAGs for the Cloud Composer environment."
-  value       = google_composer_environment.composer_env.storage_config[0].bucket
-}
 
-output "composer_uri" {
-  description = "Cloud Composer Airflow URI"
-  value       = google_composer_environment.composer_env.config[0].airflow_uri
-}
-
-output "composer_location" {
-  description = "Cloud Composer Location"
-  value       = google_composer_environment.composer_env.region
-}
 

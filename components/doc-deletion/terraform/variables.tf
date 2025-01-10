@@ -39,11 +39,6 @@ variable "doc_deletion_cloud_run_job_name" {
   default     = "delete-docs"
 }
 
-variable "serverless_connector_subnet" {
-  description = "Name of the VPC subnet to create"
-  type        = string
-}
-
 variable "alloydb_database" {
   description = "AlloyDB Database"
   type        = string
@@ -95,4 +90,8 @@ variable "data_store_branch" {
   description = "The branch for the Vertex AI Data Store"
   type        = string
   default     = "default_branch"
+}
+
+variable "vpc_access_connector_id" {
+  type = string
 }

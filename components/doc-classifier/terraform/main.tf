@@ -79,6 +79,10 @@ resource "google_cloud_run_v2_job" "docai-form-processor-job" {
       containers {
         image = local.image_name_and_tag
       }
+      vpc_access{
+        connector = var.vpc_access_connector_id
+        egress = "ALL_TRAFFIC"
+      }
     }
   }
   lifecycle {

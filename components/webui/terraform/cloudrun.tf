@@ -73,6 +73,10 @@ resource "google_cloud_run_v2_service" "eks_webui" {
         }
       }
     }
+    vpc_access{
+      connector = var.vpc_access_connector_id
+      egress = "ALL_TRAFFIC"
+    }
     service_account = module.cloud_run_web_account.email
   }
   lifecycle {

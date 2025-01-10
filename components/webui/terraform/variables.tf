@@ -62,3 +62,7 @@ variable "lb_ssl_certificate_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)
 }
+
+variable "vpc_access_connector_id" {
+  type = string
+}

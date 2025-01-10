@@ -53,89 +53,38 @@ module "composer_service_account" {
   project_roles = local.composer_sa_roles
 }
 
-module "dpu-subnet" {
-  source = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
+# module "dpu-subnet" {
+#   source = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
 
-  project_id   = module.project_services.project_id
-  network_name = var.vpc_network_name
+#   project_id   = module.project_services.project_id
+#   network_name = var.vpc_network_name
 
-  subnets = [{
-    subnet_name           = "composer-subnet"
-    subnet_ip             = var.composer_cidr.subnet_primary
-    subnet_region         = var.region
-    subnet_private_access = "true"
-    subnet_flow_logs      = "true"
-  }]
+#   subnets = [{
+#     subnet_name           = "composer-subnet"
+#     subnet_ip             = var.composer_cidr.subnet_primary
+#     subnet_region         = var.region
+#     subnet_private_access = "true"
+#     subnet_flow_logs      = "true"
+#   }]
 
-  secondary_ranges = {
-    composer-subnet = [
-      {
-        range_name    = local.cluster_secondary_range_name
-        ip_cidr_range = var.composer_cidr.cluster_secondary_range
-      },
-      {
-        range_name    = local.services_secondary_range_name
-        ip_cidr_range = var.composer_cidr.services_secondary_range
-      },
-    ]
-  }
-}
-
-resource "google_composer_environment" "composer_env" {
-  project = module.project_services.project_id
-  name    = local.env_name
-  region  = var.region
-  labels  = local.dpu_label
-
-  config {
-    private_environment_config {
-      connection_type                      = var.enable_private_ip ? "PRIVATE_SERVICE_CONNECT" : null
-      enable_private_endpoint              = var.enable_private_ip
-      cloud_composer_connection_subnetwork = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
-
-    }
-    software_config {
-      image_version = var.composer_version
-      env_variables = var.composer_env_variables
-      pypi_packages = var.composer_additional_pypi_packages
-    }
-    workloads_config {
-      scheduler {
-        cpu        = var.composer_scheduler_cpu
-        memory_gb  = var.composer_scheduler_memory
-        storage_gb = var.composer_scheduler_storage
-        count      = var.composer_scheduler_count
-      }
-      web_server {
-        cpu        = var.composer_web_server_cpu
-        memory_gb  = var.composer_web_server_memory
-        storage_gb = var.composer_web_server_storage
-      }
-      worker {
-        cpu        = var.composer_worker_cpu
-        memory_gb  = var.composer_worker_memory
-        storage_gb = var.composer_worker_storage
-        min_count  = var.composer_worker_min_count
-        max_count  = var.composer_worker_max_count
-      }
-    }
-    environment_size = var.composer_environment_size
-    node_config {
-      network         = var.vpc_network_id
-      subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
-      service_account = module.composer_service_account.email
-      ip_allocation_policy {
-        cluster_secondary_range_name  = local.cluster_secondary_range_name
-        services_secondary_range_name = local.services_secondary_range_name
-      }
-    }
-  }
-}
+#   secondary_ranges = {
+#     composer-subnet = [
+#       {
+#         range_name    = local.cluster_secondary_range_name
+#         ip_cidr_range = var.composer_cidr.cluster_secondary_range
+#       },
+#       {
+#         range_name    = local.services_secondary_range_name
+#         ip_cidr_range = var.composer_cidr.services_secondary_range
+#       },
+#     ]
+#   }
+# }
 
 resource "google_storage_bucket_object" "workflow_orchestrator_dag" {
   for_each       = fileset("${path.module}/../src", "**/*.py")
   name           = "dags/${each.value}"
-  bucket         = google_composer_environment.composer_env.storage_config[0].bucket
+  bucket         = var.composer_storage_bucket
   source         = "${path.module}/../src/${each.value}"
   detect_md5hash = "true"
 }

@@ -39,11 +39,6 @@ variable "configure_schema_cloud_run_job_name" {
   default     = "configure-db-schema"
 }
 
-variable "serverless_connector_subnet" {
-  description = "Name of the VPC subnet to create"
-  type        = string
-}
-
 variable "alloydb_database" {
   description = "AlloyDB Database"
   type        = string
@@ -78,4 +73,8 @@ variable "additional_db_users" {
 variable "db_role_content_hash" {
   description = "Additional deployment trigger to force rerun module.gcloud_build_job_to_configure_alloydb_schema if terraform reverts the db roles on specialized_parser_role (flaky)"
   type        = string
+}
+
+variable "vpc_access_connector_id" {
+  type = string
 }

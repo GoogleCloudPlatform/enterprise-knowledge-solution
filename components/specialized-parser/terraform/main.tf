@@ -98,11 +98,8 @@ resource "google_cloud_run_v2_job" "specialized_parser_processor_job" {
   template {
     template {
       service_account = module.specialized_parser_account.email
-      vpc_access {
-        network_interfaces {
-          network    = var.network
-          subnetwork = var.serverless_connector_subnet
-        }
+      vpc_access{
+        connector = var.vpc_access_connector_id
         egress = "ALL_TRAFFIC"
       }
       containers {

@@ -163,3 +163,7 @@ variable "composer_cidr" {
     sql                      = string
   })
 }
+
+variable "composer_storage_bucket" {
+  type = string
+}

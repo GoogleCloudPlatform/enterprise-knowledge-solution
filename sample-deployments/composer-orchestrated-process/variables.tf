@@ -50,6 +50,11 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
+variable "vpc_project_id" {
+  type        = string
+  description = "name of vpc network"
+}
+
 variable "webui_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)
@@ -95,4 +100,28 @@ variable "psa_reserved_address" {
   description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
   type        = string
   default     = "10.11.0.0"
+}
+
+variable "composer_project_id" {
+  type = string
+}
+
+variable "composer_region" {
+  type = string
+}
+
+variable "composer_name" {
+  type = string
+}
+
+variable "vpc_access_project_id" {
+  type = string
+}
+
+variable "vpc_access_region" {
+  type = string
+}
+
+variable "vpc_access_name" {
+  type = string
 }

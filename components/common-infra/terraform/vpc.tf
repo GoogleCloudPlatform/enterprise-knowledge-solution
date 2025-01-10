@@ -27,6 +27,7 @@ module "vpc" {
 
 data "google_compute_network" "provided_vpc" {
   count = var.create_vpc_network ? 0 : 1
+  project = var.vpc_project_id
   name  = var.vpc_name
 }
 

@@ -29,7 +29,7 @@ output "gcs_reject_bucket_name" {
 
 output "composer_uri" {
   description = "Cloud Composer Airflow URI"
-  value       = module.dpu_workflow.composer_uri
+  value       = data.google_composer_environment.composer_env.config[0].airflow_uri
 }
 
 output "agent_app_uri" {
@@ -54,5 +54,10 @@ output "specialized_processors_ids_json" {
 
 output "composer_location" {
   description = "Location of Cloud Composer"
-  value       = module.dpu_workflow.composer_location
+  value       = data.google_composer_environment.composer_env.region
+}
+
+output "composer_dag_gcs_bucket" {
+  description = "Stores the DAGs for the Cloud Composer environment."
+  value       = data.google_composer_environment.composer_env.storage_config[0].bucket
 }

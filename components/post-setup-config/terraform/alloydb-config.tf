@@ -24,12 +24,9 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
   template {
     template {
       service_account = module.configure_schema_account.email
-      vpc_access {
-        network_interfaces {
-          network    = var.vpc_network_name
-          subnetwork = var.serverless_connector_subnet
-        }
-        egress = "PRIVATE_RANGES_ONLY"
+      vpc_access{
+        connector = var.vpc_access_connector_id
+        egress = "ALL_TRAFFIC"
       }
       containers {
         image = local.image_name_and_tag

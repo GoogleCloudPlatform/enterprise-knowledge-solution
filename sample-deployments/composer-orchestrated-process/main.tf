@@ -32,6 +32,7 @@ module "common_infra" {
   region                            = var.region
   create_vpc_network                = var.create_vpc_network
   vpc_name                          = var.vpc_name
+  vpc_project_id                    = var.vpc_project_id
   serverless_connector_subnet       = var.serverless_connector_subnet
   serverless_connector_subnet_range = var.serverless_connector_subnet_range
   psa_reserved_address              = var.psa_reserved_address
@@ -99,6 +100,7 @@ module "doc_classifier_job" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
 }
 
 module "specialized_parser_job" {
@@ -111,9 +113,9 @@ module "specialized_parser_job" {
   alloydb_instance                  = module.common_infra.alloydb_primary_instance
   alloydb_cluster                   = module.common_infra.alloydb_cluster_name
   network                           = module.common_infra.vpc_network_name
-  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
 }
 
 module "dpu_workflow" {
@@ -138,6 +140,7 @@ module "dpu_workflow" {
     SPECIALIZED_PROCESSORS_IDS_JSON = module.specialized_parser_job.specialized_processors_ids_json
     CUSTOM_CLASSIFIER_ID            = var.custom_classifier_id
   }
+  composer_storage_bucket = data.google_composer_environment.composer_env.storage_config[0].bucket
 }
 
 module "dpu_ui" {
@@ -151,6 +154,7 @@ module "dpu_ui" {
   agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
   lb_ssl_certificate_domains        = var.webui_domains
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account
@@ -192,6 +196,7 @@ module "doc_registry" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
 }
 
 module "doc-deletion" {
@@ -202,12 +207,12 @@ module "doc-deletion" {
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
   data_store_project_id             = var.project_id
   data_store_region                 = var.vertex_ai_data_store_region
   data_store_id                     = google_discovery_engine_data_store.dpu_ds.data_store_id
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
 }
 
 module "post-setup-config" {
@@ -218,7 +223,6 @@ module "post-setup-config" {
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   alloy_db_cluster_id               = module.common_infra.alloydb_cluster_name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_primary_instance          = module.common_infra.alloydb_primary_instance
   vpc_network_name                  = module.common_infra.vpc_network_name
   db_role_content_hash = sha512(join("", [
@@ -229,4 +233,17 @@ module "post-setup-config" {
     module.specialized_parser_job.specialized_parser_db_user,
     module.doc-deletion.doc_deletion_db_user,
   ]
+  vpc_access_connector_id           = data.google_vpc_access_connector.connector.id
+}
+
+data "google_composer_environment" "composer_env" {
+    project = var.composer_project_id
+    region = var.composer_region
+    name = var.composer_name
+}
+
+data "google_vpc_access_connector" "connector" {
+  project = var.vpc_access_project_id
+  region  = var.vpc_access_region
+  name    = var.vpc_access_name
 }

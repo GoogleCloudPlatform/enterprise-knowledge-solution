@@ -39,6 +39,10 @@ variable "vpc_name" {
   default     = "dpu-network"
 }
 
+variable "vpc_project_id" {
+  type        = string
+}
+
 variable "alloy_db_cluster_id" {
   description = "AlloyDB Cluster ID"
   type        = string
