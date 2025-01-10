@@ -26,7 +26,3 @@ module "project_services" {
     "aiplatform.googleapis.com"
   ]
 }
-
-data "google_project" "project" {
-  project_id = module.project_services.project_id
-}

@@ -32,44 +32,43 @@ variable "cloud_build_service_account_email" {
   type        = string
 }
 
-variable "iap_access_domains" {
-  description = "List of domains granted for IAP access to the APP"
-  type        = list(string)
-}
-
 variable "adpapi_service_name" {
   type        = string
   description = "The service name for the adpapi"
   default     = "adp-api"
 }
 
-variable "lb_ssl_certificate_domains" {
-  description = "Custom domain pointing to the adpapi app, DNS configured"
-  type        = list(string)
-}
-
-variable "iap_client_id" {
-  type = string
-  description = "The IAP Oauth Client ID"
-}
-
-variable "iap_secret" {
-  type = string
-  sensitive = true
-  description = "The IAP Oauth Client secret"
-}
-
 variable "iap_member" {
-  type = string
+  type        = string
   description = "The IAP member"
 }
 
-variable "ssl_policy_link" {
-  type = string
-  description = "SSL Policy Self Link for LB"
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+}
+
+variable "vpc_network_name" {
+  type        = string
+  description = "The name of the network where subnets will be created"
 }
 
 variable "adp_ui_url" {
-  type = string
+  type        = string
   description = "The URL for the UI that calls this API"
+}
+
+variable "lb_backend_services" {
+  type        = map(any)
+  description = "Backend services for the common land balancer, used to apply granular access controls for each Cloud Run Service through IAP"
+}
+
+variable "iap_access_groups" {
+  description = "Google Groups that will grant persona access to the relevant web UIs, in the string format 'group:foo@example.com' or 'user:foo@example.com'."
+  type = object({
+    domain   = string
+    reader   = string
+    uploader = string
+    operator = string
+  })
 }

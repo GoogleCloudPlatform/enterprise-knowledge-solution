@@ -39,17 +39,7 @@ output "agent_app_uri" {
 
 output "webui_dns_config" {
   description = "DNS Record for WebUI"
-  value       = module.dpu_ui.dns_configuration
-}
-
-output "adpui_dns_config" {
-  description = "DNS Record for ADP UI"
-  value       = module.adp_ui.dns_configuration
-}
-
-output "adpapi_dns_config" {
-  description = "DNS Record for ADP API"
-  value       = module.adp_ui.dns_configuration
+  value       = module.common_infra.dns_configuration
 }
 
 output "classifier_processor_id" {

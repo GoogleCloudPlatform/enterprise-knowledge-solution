@@ -36,7 +36,10 @@ module "common_infra" {
   serverless_connector_subnet_range = var.serverless_connector_subnet_range
   psa_reserved_address              = var.psa_reserved_address
   composer_cidr                     = var.composer_cidr
-  iap_access_domains                = var.iap_access_domains
+  webui_domains                     = var.webui_domains
+  neg_id_query                      = module.dpu_ui.neg_id_query
+  neg_id_hitl                       = module.adp_ui.neg_id_hitl
+  neg_id_hitl_api                   = module.adp_api.neg_id_hitl_api
 }
 
 module "project_services" {
@@ -100,6 +103,8 @@ module "doc_classifier_job" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
 }
 
 module "specialized_parser_job" {
@@ -147,15 +152,14 @@ module "dpu_ui" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  iap_access_domains                = var.iap_access_domains
   vertex_ai_data_store_region       = var.vertex_ai_data_store_region
   agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
-  lb_ssl_certificate_domains        = var.webui_domains
-  iap_client_id                     = module.common_infra.iap_client_id
-  iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member
-  ssl_policy_link = module.common_infra.ssl_policy_link
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  lb_backend_services               = module.common_infra.lb_backend_services
+  iap_access_groups                 = var.iap_access_groups
 }
 
 module "adp_api" {
@@ -164,13 +168,12 @@ module "adp_api" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  iap_access_domains                = var.iap_access_domains
-  lb_ssl_certificate_domains        = var.adpapi_domains
-  iap_client_id                     = module.common_infra.iap_client_id
-  iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member
-  ssl_policy_link = module.common_infra.ssl_policy_link
-  adp_ui_url = var.adpui_domains[0]
+  adp_ui_url                        = var.webui_domains[0]
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  lb_backend_services               = module.common_infra.lb_backend_services
+  iap_access_groups                 = var.iap_access_groups
 }
 
 module "adp_ui" {
@@ -179,13 +182,12 @@ module "adp_ui" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
-  iap_access_domains                = var.iap_access_domains
-  lb_ssl_certificate_domains        = var.adpui_domains
-  iap_client_id                     = module.common_infra.iap_client_id
-  iap_secret                        = module.common_infra.iap_secret
   iap_member                        = module.common_infra.iap_member
-  htil_api_endpoint                 = var.adpapi_domains[0]
-  ssl_policy_link = module.common_infra.ssl_policy_link
+  htil_api_endpoint                 = var.webui_domains[0]
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+  lb_backend_services               = module.common_infra.lb_backend_services
+  iap_access_groups                 = var.iap_access_groups
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account
@@ -227,6 +229,8 @@ module "doc_registry" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
 }
 
 module "doc-deletion" {

@@ -27,11 +27,6 @@ variable "vertex_ai_data_store_region" {
   type        = string
 }
 
-variable "iap_access_domains" {
-  description = "List of domains granted for IAP access to the APP"
-  type        = list(string)
-}
-
 variable "docai_location" {
   description = "Google Cloud region where compute services are located."
   type        = string
@@ -51,17 +46,7 @@ variable "vpc_name" {
 }
 
 variable "webui_domains" {
-  description = "Custom domain pointing to the WebUI app, DNS configured"
-  type        = list(string)
-}
-
-variable "adpui_domains" {
-  description = "Custom domain pointing to the ADPUI app, DNS configured"
-  type        = list(string)
-}
-
-variable "adpapi_domains" {
-  description = "Custom domain pointing to the ADP API app, DNS configured"
+  description = "Custom domain pointing to the WebUI app. DNS zones must be configured outside of terraform, so that the A record for this domain points to the IPv4 address used by the loadbalancer."
   type        = list(string)
 }
 
@@ -105,4 +90,14 @@ variable "psa_reserved_address" {
   description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
   type        = string
   default     = "10.11.0.0"
+}
+
+variable "iap_access_groups" {
+  description = "Google Groups that will grant persona access to the relevant web UIs, in the string format 'group:foo@example.com' or 'user:foo@example.com'."
+  type = object({
+    domain   = string
+    reader   = string
+    uploader = string
+    operator = string
+  })
 }

@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-/*
- * IAP Configuration
- */
-
-
-
-# OAuth Client
-resource "google_iap_client" "project_client" {
-  display_name = "Enterprise Knowledge ADP client"
-  brand        = "projects/${data.google_project.project.number}/brands/${data.google_project.project.number}"
+data "google_iam_policy" "uploader" {
+  binding {
+    role = "roles/iap.httpsResourceAccessor"
+    members = [
+      var.iap_access_groups["uploader"],
+      var.iap_access_groups["operator"],
+    ]
+  }
 }
 
-resource "google_project_service_identity" "iap_sa" {
-  provider = google-beta
-  project  = module.project_services.project_id
-  service  = "iap.googleapis.com"
+resource "google_iap_web_backend_service_iam_policy" "policy" {
+  project             = var.project_id
+  web_backend_service = var.lb_backend_services["backend-hitl"].name
+  policy_data         = data.google_iam_policy.uploader.policy_data
+
 }

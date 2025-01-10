@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "dns_configuration" {
-  value = "${join(",", var.lb_ssl_certificate_domains)} => ${module.eks_adpapi_lb.external_ip}"
+output "neg_id_hitl_api" {
+  value = google_compute_region_network_endpoint_group.eks_adpapi_neg.id
 }

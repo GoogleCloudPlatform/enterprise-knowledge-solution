@@ -84,16 +84,24 @@ output "iap_client_id" {
 
 output "iap_secret" {
   description = "The IAP Oauth Secret"
-  value = google_iap_client.project_client.secret
-  sensitive = true
+  value       = google_iap_client.project_client.secret
+  sensitive   = true
 }
 
 output "iap_member" {
-  value = google_project_service_identity.iap_sa.member
+  value       = google_project_service_identity.iap_sa.member
   description = "The IAP member"
 }
 
 output "ssl_policy_link" {
-  value = google_compute_ssl_policy.ssl-policy.self_link
+  value       = google_compute_ssl_policy.ssl-policy.self_link
   description = "SSL Policy Self Link for LBs"
+}
+
+output "dns_configuration" {
+  value = "${join(",", var.webui_domains)} => ${module.eks_webui_lb.external_ip}"
+}
+
+output "lb_backend_services" {
+  value = module.eks_webui_lb.backend_services
 }
