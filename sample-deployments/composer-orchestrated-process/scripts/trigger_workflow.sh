@@ -16,9 +16,11 @@
 
 # Just a small helper to your developers - a small bash function to trigger the DAG from the command line:
 
+PARENT_DIR="$(dirname "$0")"
+
 function trigger_dag() {
   # read terraform state
-  outputs=$(terraform output -json)
+  outputs=$(terraform -chdir="$PARENT_DIR/../" output -json)
 
   json_config=$(
     cat <<EOF
@@ -62,17 +64,18 @@ function trigger_dag() {
     ],
     "classifier": "$(echo "$outputs" | jq -r ".classifier_processor_id.value")",
     "doc-ai-processors" : $(echo "$outputs" | jq -r ".specialized_processors_ids_json.value | to_entries | map({label: .key, \"doc-ai-processor-id\": .value})")
-}
+  }
 EOF
   )
-  gcloud composer environments run dpu-composer --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
+  gcloud composer environments run dpu-composer --project="$PROJECT_ID" --location "$(echo "$outputs" | jq -r ".composer_location.value")" dags trigger -- -c "${json_config}" run_docs_processing
 }
 
 set -o errexit
 set -o nounset
+set -x
 
 # shellcheck source=/dev/null
-. scripts/common.sh
+. "$PARENT_DIR/common.sh"
 
 section_open "Trigger DAG"
 trigger_dag

@@ -18,7 +18,7 @@ set -o errexit
 set -o nounset
 
 # shellcheck source=/dev/null
-. scripts/common.sh
+. "$(dirname "$0")/common.sh"
 
 section_open "Check if the necessary dependencies are available: gcloud, terraform"
 check_exec_dependency "gcloud"

@@ -89,8 +89,10 @@ resource "google_composer_environment" "composer_env" {
 
   config {
     private_environment_config {
-      connection_type         = var.enable_private_ip ? "PRIVATE_SERVICE_CONNECT" : null
-      enable_private_endpoint = var.enable_private_ip
+      connection_type                      = var.enable_private_ip ? "PRIVATE_SERVICE_CONNECT" : null
+      enable_private_endpoint              = var.enable_private_ip
+      cloud_composer_connection_subnetwork = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
+
     }
     software_config {
       image_version = var.composer_version
