@@ -71,7 +71,6 @@ steps:
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
         build/test/ingest_test_docs.sh;
         sleep 180;
         gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
