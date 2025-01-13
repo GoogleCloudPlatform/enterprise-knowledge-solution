@@ -190,7 +190,7 @@ def look_up_document(registry_table: str, crc32s: list[str]):
     query = " ".join(
         [
             f"WITH {crc32_table_alias} AS ({crc32_table})",
-            f"SELECT id, fileName, gcsUri, a.crc32 FROM {registry_table} AS a",
+            f"SELECT id, fileName, gcsUri, a.crc32 FROM `{registry_table}` AS a",
             f"INNER JOIN {crc32_table_alias} AS b",
             "ON a.crc32 = b.crc32",
         ]
@@ -208,7 +208,7 @@ def add_new_documents_to_registry(
         [
             'SELECT JSON_EXTRACT_SCALAR(objs, "$.objid") AS id,',
             'JSON_EXTRACT_SCALAR(objs, "$.uri") AS uri',
-            f"FROM {input_table}",
+            f"FROM `{input_table}`",
             'CROSS JOIN UNNEST(JSON_EXTRACT_ARRAY(PARSE_JSON(jsonData), "$.objs")) AS objs',
         ]
     )
