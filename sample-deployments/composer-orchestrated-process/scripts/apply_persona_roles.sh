@@ -17,8 +17,10 @@
 set -o errexit
 set -o nounset
 
+PARENT_DIR="$(dirname "$0")"
+
 # shellcheck source=/dev/null
-. scripts/common.sh
+. "$PARENT_DIR/common.sh"
 
 section_open "Check that necessary environment variables are set"
 check_mandatory_variable "PROJECT_ID" "set the PROJECT_ID where IAM roles will be applied"
