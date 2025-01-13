@@ -99,3 +99,17 @@ variable "neg_id_hitl_api" {
   description = "The serverless network endpoint group for the human-in-the-loop API"
   type        = string
 }
+
+variable "lb_path_matcher_paths" {
+  description = "the URL paths used for matching traffic to different Cloud Run Service backends from the load balancer"
+  type = object({
+    query    = string
+    hitl     = string
+    hitl-api = string
+  })
+  default = {
+    query    = "/query"
+    hitl     = "/hitl"
+    hitl-api = "/hitl-api"
+  }
+}

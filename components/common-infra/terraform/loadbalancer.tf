@@ -101,15 +101,15 @@ resource "google_compute_url_map" "urlmap" {
     name            = "eks-webui"
     default_service = module.eks_webui_lb.backend_services["backend-query"].id
     path_rule {
-      paths   = ["/query"]
+      paths   = [var.lb_path_matcher_paths.query]
       service = module.eks_webui_lb.backend_services["backend-query"].id
     }
     path_rule {
-      paths   = ["/hitl"]
+      paths   = [var.lb_path_matcher_paths.hitl]
       service = module.eks_webui_lb.backend_services["backend-hitl"].id
     }
     path_rule {
-      paths   = ["/hitl-api"]
+      paths   = [var.lb_path_matcher_paths.hitl-api]
       service = module.eks_webui_lb.backend_services["backend-hitl-api"].id
     }
   }
