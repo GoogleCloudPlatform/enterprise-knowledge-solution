@@ -63,29 +63,38 @@ steps:
       - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
       - "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA}"
 
-  - id: functional
+  - id: prepare_functional_tests
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-x"
+      - "-c"
+      - >-
+        echo "ingest test documents...";
+        build/test/ingest_test_docs.sh;
+        echo "grant IAM role for pretrained classifier in different project..." ;
+        gcloud projects add-iam-policy-binding ${_CICD_PROJECT_ID} --member='serviceAccount:eks-doc-classifier@${_TEST_PROJECT_ID}.iam.gserviceaccount.com' --role='roles/documentai.apiUser' --condition=None;
+    entrypoint: /bin/bash
+    env:
+      - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
+      - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
+
+  - id: do_functional_tests
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        echo "ingest test documents...";
-        build/test/ingest_test_docs.sh;
-        echo "grant IAM role for pretrained classifier in different project..." ;
-        gcloud projects add-iam-policy-binding ${_CICD_PROJECT_ID} --member='serviceAccount:eks-doc-classifier@${_TEST_PROJECT_ID}.iam.gserviceaccount.com' --role='roles/documentai.apiUser';
         echo "sleep to allow DAGs to fully propagate to Composer...";
         sleep 180;
-        echo "validate that DAGs have fully propagated to Composer...";
-        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=$LOCATION dags list;
+        echo "trigger the Composer workflow to process documents...";
         sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
         echo "sleep to allow Workflow to complete...";
         sleep 1800;
         (cd /workspace/build/test && make functional-test);
     entrypoint: /bin/bash
     env:
-      - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
-      - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
       - "COMPOSER_ENV_NAME=dpu-composer"
       - "DAG_ID=run_docs_processing"

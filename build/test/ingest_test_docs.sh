@@ -14,12 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/GoogleQuarterlyResults/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test0_Demo_PDFs/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test1_Text_Only_PDFs/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test2_PDFs_With_Forms/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test3_XLS/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test4_MSG/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/TEST5_DOCX_Files/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Test6_EDI_TXT/* gs://docs-input-"$TEST_PROJECT_ID"/
-gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/Zebra/* gs://docs-input-"$TEST_PROJECT_ID"/
+gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/* gs://docs-input-"$TEST_PROJECT_ID"/
