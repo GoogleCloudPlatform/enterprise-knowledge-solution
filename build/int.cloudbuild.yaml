@@ -73,7 +73,7 @@ steps:
         echo "ingest test documents...";
         build/test/ingest_test_docs.sh;
         echo "grant IAM role for pretrained classifier in different project..." ;
-        gcloud projects add-iam-policy-binding ${_CICD_PROJECT_ID} --member='serviceAccount:eks-doc-classifier@$TEST_PROJECT_ID.iam.gserviceaccount.com' --role='roles/documentai.apiUser';
+        gcloud projects add-iam-policy-binding ${_CICD_PROJECT_ID} --member='serviceAccount:eks-doc-classifier@${_TEST_PROJECT_ID}.iam.gserviceaccount.com' --role='roles/documentai.apiUser';
         echo "sleep to allow DAGs to fully propagate to Composer...";
         sleep 180;
         echo "validate that DAGs have fully propagated to Composer...";
