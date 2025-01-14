@@ -84,7 +84,7 @@ steps:
         (cd /workspace/build/test && make functional-test);
     entrypoint: /bin/bash
     env:
-      - "CICD_PROJECT_ID=${PROJECT_ID}"
+      - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
       - "LOCATION=${_REGION}"
       - "COMPOSER_ENV_NAME=dpu-composer"
@@ -109,6 +109,7 @@ options:
 
 substitutions:
   _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
+  _CICD_PROJECT_ID: ${PROJECT_ID}
   _DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
   _REGION: "us-central1"
   _DOC_AI_LOCATION: "us"
