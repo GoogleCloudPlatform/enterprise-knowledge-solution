@@ -23,8 +23,9 @@ import (
 	"os/exec"
 	"regexp"
 	"testing"
+	"time"
 
-	"github.com/sethvargo/go-envconfig"
+	envconfig "github.com/sethvargo/go-envconfig"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,35 +36,68 @@ type CLIConfig struct {
 	DAG_ID            string `env:"DAG_ID"`
 }
 
-func TestDAGState(t *testing.T) {
+var c CLIConfig
+
+func init() {
 	ctx := context.Background()
-	var c CLIConfig
 	if err := envconfig.Process(ctx, &c); err != nil {
 		log.Fatal(err)
 	}
+}
 
-	cmd := exec.Command(
-		"gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME,
-		"--location", c.LOCATION,
-		"--project", c.PROJECT_ID,
-		"dags", "list-runs",
-		"--", "-d", c.DAG_ID,
-	)
+// retryFunc defines the type of function that will be used for the assertion
+type retryFunc func(t *testing.T, output string) bool
 
-	fmt.Println("Executing command:", cmd.String())
+// runCommandWithRetry executes the given command and performs the assertion with retry logic
+func runCommandWithRetry(t *testing.T, cmd *exec.Cmd, assertion retryFunc, retries int, retryInterval time.Duration) {
+	for i := 0; i < retries; i++ {
+		fmt.Printf("Executing command: `%s`", cmd)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	out, err := cmd.Output()
-	if err != nil {
-		t.Fatalf("Failed to execute gcloud command: %v", err)
+		if assertion(t, string(output)) {
+			break
+		}
+
+		if i < retries-1 {
+			log.Printf("Retry %d failed. Waiting %s before retrying...", i+1, retryInterval)
+			time.Sleep(retryInterval)
+		}
+	}
+}
+
+func TestDAGIsAvailable(t *testing.T) {
+	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
+
+	assertion := func(t *testing.T, output string) bool {
+		return assert.Contains(t, output, c.DAG_ID, fmt.Sprintf("DAG '%s' is not recognized by Composer, it might take a few minutes to propagate", c.DAG_ID))
 	}
 
-	output := string(out)
-	fmt.Println("gcloud output: \n", output)
+	runCommandWithRetry(t, cmd, assertion, 3, time.Minute)
+}
 
-	matched, err := regexp.MatchString(`\| success \|`, output)
-	if err != nil {
-		t.Fatalf("Failed to match regex: %v", err)
+func TestDAGIsTriggered(t *testing.T) {
+	cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
+
+	assertion := func(t *testing.T, output string) bool {
+		// Strip ANSI escape codes from the output, otherwise the formatting characters obscure the status messages from the script
+		re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
+		strippedOutput := re.ReplaceAllString(output, "")
+
+		return assert.Contains(t, strippedOutput, "Trigger DAG - done", "script to trigger workflow did not complete successfully")
 	}
 
-	assert.True(t, matched, "DAG run with state 'success' not found in gcloud output")
+	runCommandWithRetry(t, cmd, assertion, 1, 0)
+}
+
+func TestDAGIsSuccess(t *testing.T) {
+	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
+
+	assertion := func(t *testing.T, output string) bool {
+		return assert.Contains(t, output, "| success |", fmt.Sprintf("DAG '%s' has not completed with status 'success'", c.DAG_ID))
+	}
+
+	runCommandWithRetry(t, cmd, assertion, 10, 3*time.Minute)
 }

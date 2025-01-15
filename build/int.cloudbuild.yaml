@@ -71,9 +71,9 @@ steps:
       - "-c"
       - >-
         echo "ingest test documents...";
-        build/test/ingest_test_docs.sh;
+        build/test/helpers/ingest_test_docs.sh;
         echo "grant IAM role for pretrained classifier in different project..." ;
-        gcloud projects add-iam-policy-binding ${_CICD_PROJECT_ID} --member='serviceAccount:eks-doc-classifier@${_TEST_PROJECT_ID}.iam.gserviceaccount.com' --role='roles/documentai.apiUser' --condition=None;
+        build/test/helpers/enable_docai_p4sa.sh;
     entrypoint: /bin/bash
     env:
       - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
@@ -86,12 +86,6 @@ steps:
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        echo "sleep to allow DAGs to fully propagate to Composer...";
-        sleep 180;
-        echo "trigger the Composer workflow to process documents...";
-        sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
-        echo "sleep to allow Workflow to complete...";
-        sleep 1800;
         (cd /workspace/build/test && make functional-test);
     entrypoint: /bin/bash
     env:
