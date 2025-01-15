@@ -20,7 +20,7 @@ outputs=$(terraform -chdir="$PARENT_DIR/../../../sample-deployments/composer-orc
 
 CLASSIFIER_SA=$(echo "$outputs" | jq -r ".classifier_service_account.value")
 
-cloud projects add-iam-policy-binding "$CICD_PROJECT_ID" \
+gcloud projects add-iam-policy-binding "$CICD_PROJECT_ID" \
   --member="serviceAccount:${CLASSIFIER_SA}" \
   --role="roles/documentai.apiUser" \
   1>/dev/null
