@@ -80,12 +80,12 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
 
 resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow private HTTPS access to google apis on the private VIP"
+  description     = "Allow egress to PSA reserved range used for AlloyDB"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1000
+  priority        = 1001
   rule_name       = "allow-psa-to-alloydb"
 
   match {
@@ -122,7 +122,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1001
+  priority        = 1002
   rule_name       = "allow-subnet-internal"
 
   match {
@@ -140,7 +140,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-s
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1002
+  priority        = 1003
   rule_name       = "allow-composer-cluster-secondary-range"
 
   match {
@@ -158,7 +158,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-services-
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1003
+  priority        = 1004
   rule_name       = "allow-composer-services-secondary-range"
 
   match {
@@ -176,7 +176,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-composer-control-p
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1004
+  priority        = 1005
   rule_name       = "allow-composer-control-plane"
 
   match {
