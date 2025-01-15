@@ -78,6 +78,43 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
+resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow private HTTPS access to google apis on the private VIP"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1000
+  rule_name       = "allow-psa-to-alloydb"
+
+  match {
+    dest_ip_ranges = ["${var.psa_reserved_address}/24"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = ["5433"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "default-deny" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Low priority rule to deny all egress not explicitly matched by other rules"
+  action          = "deny"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 65535
+  rule_name       = "default-deny-all"
+
+  match {
+    dest_ip_ranges = ["0.0.0.0/0"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
 resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
   count           = var.create_vpc_network ? 1 : 0
   description     = "Allow internal traffic within the composer subnet"
