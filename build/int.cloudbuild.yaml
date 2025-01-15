@@ -73,7 +73,7 @@ steps:
         echo "ingest test documents...";
         build/test/helpers/ingest_test_docs.sh;
         echo "grant IAM role for pretrained classifier in different project..." ;
-        build/test/helpers/enable_docai_p4sa.sh;
+        build/test/helpers/enable_docai_sa.sh;
     entrypoint: /bin/bash
     env:
       - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
