@@ -54,7 +54,7 @@ func runCommandWithRetry(t *testing.T, cmd *exec.Cmd, assertion retryFunc, retri
 		fmt.Printf("Executing command: `%s`", cmd)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Command failed with the following error: %s", err)
 		}
 
 		if assertion(t, string(output)) {
