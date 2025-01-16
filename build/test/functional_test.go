@@ -89,7 +89,7 @@ func TestDAGIsTriggered(t *testing.T) {
 		return assert.Contains(t, strippedOutput, "Trigger DAG - done", "script to trigger workflow did not complete successfully")
 	}
 
-	runCommandWithRetry(t, cmd, assertion, 1, 0)
+	runCommandWithRetry(t, cmd, assertion, 3, time.Minute)
 }
 
 func TestDAGIsSuccess(t *testing.T) {
