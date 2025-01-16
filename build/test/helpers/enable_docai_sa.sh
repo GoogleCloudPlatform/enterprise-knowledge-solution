@@ -17,10 +17,10 @@
 PARENT_DIR="$(dirname "$0")"
 
 outputs=$(terraform -chdir="$PARENT_DIR/../../../sample-deployments/composer-orchestrated-process/" output -json)
-
 CLASSIFIER_SA=$(echo "$outputs" | jq -r ".classifier_service_account.value")
 
 gcloud projects add-iam-policy-binding "$CICD_PROJECT_ID" \
   --member="serviceAccount:${CLASSIFIER_SA}" \
   --role="roles/documentai.apiUser" \
+  --condition=None \
   1>/dev/null
