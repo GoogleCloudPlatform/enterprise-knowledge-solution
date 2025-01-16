@@ -93,15 +93,25 @@ func TestDAGIsTriggered(t *testing.T) {
 		return assert.Contains(t, strippedOutput, "Trigger DAG - done", "script to trigger workflow did not complete successfully\n")
 	}
 
-	runCommandWithRetry(t, cmd, assertion, 3, time.Minute)
+	runCommandWithRetry(t, cmd, assertion, 3, 2*time.Minute)
+}
+
+func TestDAGIsComplete(t *testing.T) {
+	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
+
+	assertion := func(t *testing.T, output string) bool {
+		return assert.NotContains(t, output, "| running |", fmt.Sprintf("DAG '%s' is not yet complete, still has status 'running'\n", c.DAG_ID))
+	}
+
+	runCommandWithRetry(t, cmd, assertion, 12, 5*time.Minute)
 }
 
 func TestDAGIsSuccess(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
 
 	assertion := func(t *testing.T, output string) bool {
-		return assert.Contains(t, output, "| success |", fmt.Sprintf("DAG '%s' has not completed with status 'success'", c.DAG_ID))
+		return assert.Contains(t, output, "| success |", fmt.Sprintf("DAG '%s' does not have the expected status 'success'\n", c.DAG_ID))
 	}
 
-	runCommandWithRetry(t, cmd, assertion, 10, 3*time.Minute)
+	runCommandWithRetry(t, cmd, assertion, 1, time.Minute)
 }
