@@ -50,11 +50,15 @@ type retryFunc func(t *testing.T, output string) bool
 
 // runCommandWithRetry executes the given command and performs the assertion with retry logic
 func runCommandWithRetry(t *testing.T, cmd *exec.Cmd, assertion retryFunc, retries int, retryInterval time.Duration) {
+	originalArgs := cmd.Args
+
 	for i := 0; i < retries; i++ {
-		fmt.Printf("Executing command: `%s`", cmd)
+		// Create a new Cmd instance for each retry with the original arguments (excluding cmd.Path)
+		cmd := exec.Command(originalArgs[0], originalArgs[1:]...)
+		fmt.Printf("Executing command: `%s`\n", cmd)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Printf("Command failed with the following error: %s", err)
+			log.Printf("Command failed with the following error: %s\n", err)
 		}
 
 		if assertion(t, string(output)) {
@@ -62,7 +66,7 @@ func runCommandWithRetry(t *testing.T, cmd *exec.Cmd, assertion retryFunc, retri
 		}
 
 		if i < retries-1 {
-			log.Printf("Retry %d failed. Waiting %s before retrying...", i+1, retryInterval)
+			log.Printf("Retry %d failed. Waiting %s before retrying...\n", i+1, retryInterval)
 			time.Sleep(retryInterval)
 		}
 	}
@@ -72,10 +76,10 @@ func TestDAGIsAvailable(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
 
 	assertion := func(t *testing.T, output string) bool {
-		return assert.Contains(t, output, c.DAG_ID, fmt.Sprintf("DAG '%s' is not recognized by Composer, it might take a few minutes to propagate", c.DAG_ID))
+		return assert.Contains(t, output, c.DAG_ID, fmt.Sprintf("DAG '%s' is not recognized by Composer, it might take a few minutes to propagate\n", c.DAG_ID))
 	}
 
-	runCommandWithRetry(t, cmd, assertion, 3, time.Minute)
+	runCommandWithRetry(t, cmd, assertion, 5, 2*time.Minute)
 }
 
 func TestDAGIsTriggered(t *testing.T) {
@@ -86,7 +90,7 @@ func TestDAGIsTriggered(t *testing.T) {
 		re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
 		strippedOutput := re.ReplaceAllString(output, "")
 
-		return assert.Contains(t, strippedOutput, "Trigger DAG - done", "script to trigger workflow did not complete successfully")
+		return assert.Contains(t, strippedOutput, "Trigger DAG - done", "script to trigger workflow did not complete successfully\n")
 	}
 
 	runCommandWithRetry(t, cmd, assertion, 3, time.Minute)
