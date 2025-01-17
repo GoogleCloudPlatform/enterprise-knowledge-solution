@@ -30,9 +30,8 @@ import {
   LineElement,
   Title,
 } from 'chart.js';
-import { Container, Row, Col, Spinner, Card, Button } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import Headers from './Headers';
-import { Doughnut, Line } from 'react-chartjs-2';
 import 'react-toastify/dist/ReactToastify.css';
 import moment from 'moment';
 import { toast } from "react-toastify";
@@ -45,7 +44,6 @@ import '../App.css'
 import '../css/Dashboard.css'
 import DataTables from './DataTables';
 import ErrorComponent from './ErrorComponent';
-import Accordion from 'react-bootstrap/Accordion';
 
 
 function Dashboard() {
@@ -481,9 +479,6 @@ function Dashboard() {
   }, [])
 
 
-  let customLabels = Object.keys(chart).map((label, index) => `${label}  ${Object.values(chart)[index]}`)
-
-
   //let customLabelsTrends = Object.keys(chart).map((label,index) =>`${label}: ${ Object.values(chart)[index]}`)
   function enumerateDaysBetweenDates(startDate, lastDate) {
     let date = []
@@ -495,72 +490,6 @@ function Dashboard() {
     return date;
   }
 
-  const dailyDocumentData = {
-    // labels: Object.keys(chart),
-    labels: customLabels,
-    datasets: [
-      {
-        label: '# of Votes',
-        data: Object.values(chart),
-        backgroundColor: [
-          'rgba(244,180,0)',
-          'rgba(219,68,55)',
-          'rgba(147, 196, 125)',
-          'rgba(169,169,169)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)',
-        ],
-        borderColor: [
-          'rgba(244,180,0)',
-          'rgba(219,68,55)',
-          'rgba(147, 196, 125)',
-          'rgba(169,169,169)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-        ],
-        borderWidth: 0,
-      },
-    ],
-  };
-  console.log("******************************", dateArr)
-
-  const documentDataTrends = {
-    labels: dateArr,
-    datasets: [
-      {
-        label: rejectedLabel,
-        data: rejectedChartTrends,
-        lineTension: 0.5,
-        fill: true,
-        borderColor: 'rgba(219,68,55)',
-        backgroundColor: 'rgba(219,68,55)',
-      },
-      {
-        label: pendingLabel,
-        data: pendingChartTrends,
-        lineTension: 0.5,
-        fill: true,
-        borderColor: 'rgba(244,180,0)',
-        backgroundColor: 'rgba(244,180,0)',
-      },
-      {
-        label: approvedLabel,
-        data: approvedChartTrends,
-        lineTension: 0.5,
-        fill: true,
-        borderColor: 'rgba(147, 196, 125)',
-        backgroundColor: 'rgba(147, 196, 125)',
-      },
-      {
-        label: unclassifiedLabel,
-        data: unclassifiedChartTrends,
-        lineTension: 0.5,
-        borderColor: 'rgba(169,169,169)',
-        backgroundColor: 'rgba(169,169,169)',
-      },
-
-    ]
-  }
 
   return (
     <div>
@@ -588,108 +517,6 @@ function Dashboard() {
 
       <DataTables />
 
-      <br />
-
-      {/*<Container className="overviewTrendsContainer">*/}
-      {/*  <Accordion defaultActiveKey="0">*/}
-      {/*    <Accordion.Item eventKey="0">*/}
-      {/*      <Accordion.Header><label className="overviewTrends">Overview Trends</label></Accordion.Header>*/}
-      {/*      <Accordion.Body>*/}
-
-      {/*        <Row className="chart1">*/}
-      {/*          <Col className='col-6'>*/}
-      {/*            {isChartLoading ? <Spinner animation="border" variant="primary" /> :*/}
-      {/*              <div>*/}
-      {/*                <Card className="docTrends">*/}
-      {/*                  <Card.Body>*/}
-      {/*                    <Card.Title>Document Trends (Weekly Trends)</Card.Title>*/}
-      {/*                    <br />*/}
-      {/*                    <Card.Text as='div'>*/}
-      {/*                      <Line data={documentDataTrends}*/}
-      {/*                        options={{*/}
-      {/*                          responsive: true,*/}
-      {/*                          maintainAspectRatio: false,*/}
-      {/*                          plugins: {*/}
-      {/*                            legend: { display: true, position: "left", align: "start", maxWidth: 200, labels: { font: { weight: 'bold' }, color: 'black' } },*/}
-      {/*                            tooltip: {*/}
-      {/*                              callbacks: {*/}
-      {/*                                label: function (context) {*/}
-      {/*                                  let label = (context.dataset.label).split(" ")[0] || '';*/}
-
-      {/*                                  if (label) {*/}
-      {/*                                    label += ': ';*/}
-      {/*                                  }*/}
-      {/*                                  if (context.parsed.y !== null) {*/}
-      {/*                                    label += context.formattedValue;*/}
-      {/*                                  }*/}
-      {/*                                  return label;*/}
-      {/*                                }*/}
-      {/*                              }*/}
-      {/*                            }*/}
-      {/*                          }*/}
-      {/*                        }} />*/}
-      {/*                    </Card.Text>*/}
-      {/*                  </Card.Body>*/}
-      {/*                </Card>*/}
-      {/*              </div>*/}
-      {/*            }*/}
-      {/*          </Col>*/}
-      {/*          <Col className='col-6'>*/}
-      {/*            {isChartLoading ? <Spinner animation="border" variant="primary" /> :*/}
-      {/*              <div>*/}
-      {/*                <Card className="dailyDoc">*/}
-      {/*                  <Card.Body>*/}
-      {/*                    <Card.Title>Daily Document (Previous Day)</Card.Title>*/}
-      {/*                    <Card.Text as='div'>*/}
-      {/*                      <Doughnut*/}
-      {/*                        data={dailyDocumentData}*/}
-
-      {/*                        options={{*/}
-      {/*                          responsive: true,*/}
-      {/*                          maintainAspectRatio: false,*/}
-      {/*                          plugins: {*/}
-      {/*                            legend: { display: true, position: "left", align: "start", labels: { font: { weight: 'bold' }, color: 'black' } },*/}
-
-      {/*                            datalabels: {*/}
-      {/*                              display: true,*/}
-      {/*                              color: "black",*/}
-      {/*                            },*/}
-
-      {/*                            tooltip: {*/}
-      {/*                              callbacks: {*/}
-      {/*                                label: function (context) {*/}
-      {/*                                  console.log("CONTEXTT", context)*/}
-      {/*                                  let label = (context.label).split(" ")[0] || '';*/}
-
-      {/*                                  if (label) {*/}
-      {/*                                    label += ': ';*/}
-      {/*                                  }*/}
-      {/*                                  if (context.parsed.y !== null) {*/}
-      {/*                                    label += context.formattedValue;*/}
-      {/*                                  }*/}
-      {/*                                  return label;*/}
-      {/*                                }*/}
-      {/*                              }*/}
-      {/*                            }*/}
-      {/*                          }*/}
-      {/*                        }}*/}
-      {/*                      />*/}
-      {/*                    </Card.Text>*/}
-      {/*                  </Card.Body>*/}
-      {/*                </Card>*/}
-
-      {/*              </div>*/}
-
-
-      {/*            }*/}
-      {/*          </Col>*/}
-      {/*        </Row>*/}
-      {/*      </Accordion.Body>*/}
-      {/*    </Accordion.Item>*/}
-      {/*  </Accordion>*/}
-      {/*</Container>*/}
-      {' '}
-      {/* Table data render on the UI */}
 
     </div>
 

@@ -475,71 +475,7 @@ function DocumentReview() {
                 </FloatingLabel>
               </div>
 
-              <Row className="drHistoryContainer">
-                {comments.length !== 0 ? <label className="labelBold">Change History</label> : ''}
 
-                {comments.map((x, i) => {
-                  return (
-
-                    <Card className="changeHistory">
-                      <Card.Body>
-                        <Card.Text as='div'>
-                          <Row className="commentRow">
-                            <Col className="col-3">
-                              <label>Timestamp</label>
-                            </Col>
-                            <Col>
-                              <label className="labelBold">{moment(x['timestamp']).fromNow()} ({moment(x['timestamp']).format("YYYY-MM-DD HH:mm")})</label>
-                            </Col>
-                          </Row>
-
-                          <Row className="commentRow">
-                            <Col className="col-3">
-                              <label>Updated By</label>
-                            </Col>
-                            <Col>
-                              <label className="labelBold">{x['user'] ? x['user'] : 'System'}</label>
-                            </Col>
-                          </Row>
-
-                          {x['stage'] &&
-                            <Row className="commentRow">
-                              <Col className="col-3">
-                                <label>Process Stage</label>
-                              </Col>
-                              <Col>
-                                <label className="labelBold">{x['stage']}</label>
-                              </Col>
-                            </Row>
-                          }
-
-                          <Row className="commentRow">
-                            <Col className="col-3">
-                              <label>{x['stage'] ? 'System Status' : 'Approval Status'}</label>
-                            </Col>
-                            <Col>
-                              <label className="labelBold">{x['status']}</label>
-                            </Col>
-                          </Row>
-
-                          <Row className="commentRow">
-                            <Col className="col-3">
-                              <label>Comment</label>
-                            </Col>
-
-                            <Col>
-                              <label className="labelBold">{x['comment'] === '' ? 'N/A' : x['comment']}</label>
-                            </Col>
-
-                          </Row>
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-
-                  )
-
-                })}
-              </Row>
 
             </Container>
           </Col>
