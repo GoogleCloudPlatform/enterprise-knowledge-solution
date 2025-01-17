@@ -66,7 +66,7 @@ func runCommandWithRetry(t *testing.T, cmd *exec.Cmd, assertion retryFunc, retri
 		}
 
 		if i < retries-1 {
-			log.Printf("Retry %d failed. Waiting %s before retrying...\n", i+1, retryInterval)
+			log.Printf("Attempt %d of %d failed. Waiting %s before retrying...\n", i+1, retries, retryInterval)
 			time.Sleep(retryInterval)
 		}
 	}
