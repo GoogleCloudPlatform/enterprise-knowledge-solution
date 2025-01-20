@@ -84,7 +84,20 @@ func TestDAGIsSuccess(t *testing.T) {
 		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
 		result := runCommand(cmd)
 
+		assert.NotContains(t, result, "| running |", fmt.Sprintf("DAG '%s' is not yet complete, still has status 'running'\n", c.DAG_ID))
 		assert.Contains(t, result, "| success |", fmt.Sprintf("DAG '%s' does not have the expected status 'success'\n", c.DAG_ID))
 	}, 60*time.Minute, 1*time.Minute, "external state has not changed to 'true'; still false")
 
 }
+
+/*
+func TestDAGIsSuccess(t *testing.T) {
+	assert.EventuallyWithT(t, func(collect *assert.CollectT) {
+		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
+		result := runCommand(cmd)
+
+		assert.Contains(t, result, "| success |", fmt.Sprintf("DAG '%s' does not have the expected status 'success'\n", c.DAG_ID))
+	}, 5*time.Minute, 1*time.Minute, "external state has not changed to 'true'; still false")
+
+}
+*/
