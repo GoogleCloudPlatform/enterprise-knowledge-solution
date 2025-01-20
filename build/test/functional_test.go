@@ -22,6 +22,7 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,31 +58,46 @@ func runCommand(cmd *exec.Cmd) string {
 	return string(output)
 }
 
-func TestDagIsAvailable(t *testing.T) {
-	assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
+func runCommandWithPolling(cmd *exec.Cmd, stringToMatch string, retryAttempts int, retryInterval time.Duration) string {
+	for i := 0; i < retryAttempts; i++ {
+		fmt.Println("Attempt", i+1, "of", retryAttempts)
 		result := runCommand(cmd)
 
-		assert.Contains(t, result, c.DAG_ID)
-	}, 5*time.Minute, 30*time.Second, "DAG run_docs_processing is not yet available in Composer")
+		if strings.Contains(result, stringToMatch) {
+			return result
+		}
+		fmt.Println("Output string does not include the expected value, sleeping for", retryInterval, "before trying again")
+		time.Sleep(retryInterval)
+	}
+	return "condition not met"
+}
+
+func TestDagIsAvailable(t *testing.T) {
+	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
+	stringToMatch := c.DAG_ID
+
+	result := runCommandWithPolling(cmd, stringToMatch, 5, 30*time.Second) // typically completes in 2-3 minutes
+
+	assert.Contains(t, result, stringToMatch)
 }
 
 func TestDAGIsTriggered(t *testing.T) {
 	cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
-	result := runCommand(cmd)
+	stringToMatch := "Trigger DAG - done"
 
+	result := runCommand(cmd) // 1 attempt only, no polling and retry
 	// trigger_workflow.sh returns ANSI escaped characters for formatting, remove these for testing string results
 	re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
 	result = re.ReplaceAllString(result, "")
 
-	assert.Contains(t, result, "Trigger DAG - done ")
+	assert.Contains(t, result, stringToMatch)
 }
 
-func TestDAGIsSuccess(t *testing.T) {
-	assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
-		result := runCommand(cmd)
+func TestDagIsSuccess(t *testing.T) {
+	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
+	stringToMatch := "| success |"
 
-		assert.Contains(t, result, "| success |")
-	}, 60*time.Minute, 5*time.Minute, "DAG run_docs_processing did not complete with status 'success'")
+	result := runCommandWithPolling(cmd, stringToMatch, 10, 5*time.Minute) // workflow might be in "running" state for 25+ minutes, can be much greater depending on volume of test docs
+
+	assert.Contains(t, result, stringToMatch)
 }
