@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcloud storage cp -r gs://"$CICD_PROJECT_ID"-testdocs/EKS_Test_Scenarios/* gs://docs-input-"$TEST_PROJECT_ID"/
+gcloud storage cp gs://"$CICD_PROJECT_ID"-testdocs/* gs://docs-input-"$TEST_PROJECT_ID"/
