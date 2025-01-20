@@ -63,20 +63,26 @@ func runCommandWithPolling(cmd *exec.Cmd, stringToMatch string, retryAttempts in
 		fmt.Println("Attempt", i+1, "of", retryAttempts)
 		result := runCommand(cmd)
 
+		// trigger_workflow.sh returns ANSI escaped characters for formatting, remove these for testing string results
+		re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
+		result = re.ReplaceAllString(result, "")
+
 		if strings.Contains(result, stringToMatch) {
 			return result
 		}
 		fmt.Println("Output string does not include the expected value, sleeping for", retryInterval, "before trying again")
 		time.Sleep(retryInterval)
 	}
-	return "condition not met"
+	log.Fatal("Fatal error: initial stage failed, so not proceeding to later dependent tests")
+	return "terminating without running later dependent stages"
+
 }
 
 func TestDagIsAvailable(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
 	stringToMatch := c.DAG_ID
 
-	result := runCommandWithPolling(cmd, stringToMatch, 5, 30*time.Second) // typically completes in 2-3 minutes
+	result := runCommandWithPolling(cmd, stringToMatch, 5, 30*time.Second) // typically completes after 2-3 minutes delay propagation
 
 	assert.Contains(t, result, stringToMatch)
 }
@@ -85,10 +91,7 @@ func TestDAGIsTriggered(t *testing.T) {
 	cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
 	stringToMatch := "Trigger DAG - done"
 
-	result := runCommand(cmd) // 1 attempt only, no polling and retry
-	// trigger_workflow.sh returns ANSI escaped characters for formatting, remove these for testing string results
-	re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
-	result = re.ReplaceAllString(result, "")
+	result := runCommandWithPolling(cmd, stringToMatch, 5, 1*time.Minute) // flaky propagation delay, might require retry even after TestDagIsAvailable
 
 	assert.Contains(t, result, stringToMatch)
 }
