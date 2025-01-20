@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build stub
+//go:build functional
 
 package main
 
@@ -49,10 +49,10 @@ func runCommand(cmd *exec.Cmd) string {
 	originalArgs := cmd.Args
 	// Create a new Cmd instance for each retry with the original arguments (excluding cmd.Path)
 	cmd = exec.Command(originalArgs[0], originalArgs[1:]...)
-	fmt.Printf("Executing command: `%s`\n", cmd)
+	fmt.Println("Executing command: `", cmd, "`")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Command failed with the following error: %s\n", err)
+		fmt.Println("Command failed with the following error: ", err)
 	}
 	return string(output)
 }
@@ -62,21 +62,19 @@ func TestDagIsAvailable(t *testing.T) {
 		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
 		result := runCommand(cmd)
 
-		assert.Contains(t, result, c.DAG_ID, fmt.Sprintf("DAG '%s' is not recognized by Composer, it might take a few minutes to propagate\n", c.DAG_ID))
-	}, 5*time.Minute, 30*time.Second, "external state has not changed to 'true'; still false")
+		assert.Contains(t, result, c.DAG_ID)
+	}, 5*time.Minute, 30*time.Second, "DAG run_docs_processing is not yet available in Composer")
 }
 
 func TestDAGIsTriggered(t *testing.T) {
-	assert.EventuallyWithT(t, func(collect *assert.CollectT) {
-		cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
-		result := runCommand(cmd)
+	cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
+	result := runCommand(cmd)
 
-		// trigger_workflow.sh returns ANSI escaped characters for formatting, remove these for testing string results
-		re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
-		result = re.ReplaceAllString(result, "")
+	// trigger_workflow.sh returns ANSI escaped characters for formatting, remove these for testing string results
+	re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
+	result = re.ReplaceAllString(result, "")
 
-		assert.Contains(t, result, c.DAG_ID, fmt.Sprintf("DAG '%s' is not recognized by Composer, it might take a few minutes to propagate\n", c.DAG_ID))
-	}, 5*time.Minute, 30*time.Second, "external state has not changed to 'true'; still false")
+	assert.Contains(t, result, "Trigger DAG - done ")
 }
 
 func TestDAGIsSuccess(t *testing.T) {
@@ -84,7 +82,6 @@ func TestDAGIsSuccess(t *testing.T) {
 		cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
 		result := runCommand(cmd)
 
-		assert.Contains(t, result, "| success |", fmt.Sprintf("DAG '%s' does not have the expected status 'success'\n", c.DAG_ID))
-	}, 60*time.Minute, 1*time.Minute, "external state has not changed to 'true'; still false")
-
+		assert.Contains(t, result, "| success |")
+	}, 60*time.Minute, 5*time.Minute, "DAG run_docs_processing did not complete with status 'success'")
 }
