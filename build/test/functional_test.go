@@ -111,7 +111,7 @@ func TestDAGIsCompleteAndSuccess(t *testing.T) {
 
 	result := runCommandWithPolling(cmd, func(tmp string) bool {
 		return !strings.Contains(tmp, stringToMatch)
-	}, 5, 8*time.Minute) // Workflow takes 25+ minutes to complete, might be greater depending on input documents
+	}, 6, 10*time.Minute) // Workflow takes 35+ minutes to complete, might be greater depending on input documents
 
 	assert.NotContains(t, result, stringToMatch)
 	assert.Contains(t, result, "| success |")
