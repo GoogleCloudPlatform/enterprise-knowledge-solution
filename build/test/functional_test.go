@@ -75,7 +75,7 @@ func runCommandWithPolling(cmd *exec.Cmd, f AssertionFunc, retryAttempts int, re
 			return result
 		}
 
-		fmt.Println("Output string does not meet test critieria, sleeping for", retryInterval, "before trying again")
+		fmt.Println("Assertion failed, sleeping for", retryInterval, "before trying again")
 		time.Sleep(retryInterval)
 	}
 	log.Fatal("Fatal error: initial stage failed, so not proceeding to later dependent tests")
