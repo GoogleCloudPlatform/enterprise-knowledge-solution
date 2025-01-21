@@ -111,7 +111,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _TEST_PROJECT_ID: "eks-int-${BUILD_ID:0:7}"
+  _TEST_PROJECT_ID: "eks-int-${BUILD_ID:0:8}"
   _CICD_PROJECT_ID: ${PROJECT_ID}
   _DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
   _REGION: "us-central1"

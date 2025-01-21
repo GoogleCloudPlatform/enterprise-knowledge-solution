@@ -46,6 +46,9 @@ func init() {
 	}
 }
 
+// Define a generic function type that takes any number of arguments and returns a string
+type AssertionFunc func(string) bool // Takes the command output (string) and returns a bool
+
 func runCommand(cmd *exec.Cmd) string {
 	originalArgs := cmd.Args
 	// Create a new Cmd instance for each retry with the original arguments (excluding cmd.Path)
@@ -58,7 +61,7 @@ func runCommand(cmd *exec.Cmd) string {
 	return string(output)
 }
 
-func runCommandWithPolling(cmd *exec.Cmd, stringToMatch string, retryAttempts int, retryInterval time.Duration) string {
+func runCommandWithPolling(cmd *exec.Cmd, f AssertionFunc, retryAttempts int, retryInterval time.Duration) string {
 	for i := 0; i < retryAttempts; i++ {
 		fmt.Println("Attempt", i+1, "of", retryAttempts)
 		result := runCommand(cmd)
@@ -67,10 +70,12 @@ func runCommandWithPolling(cmd *exec.Cmd, stringToMatch string, retryAttempts in
 		re := regexp.MustCompile(`\x1b\[[0-9;]*[mG]`)
 		result = re.ReplaceAllString(result, "")
 
-		if strings.Contains(result, stringToMatch) {
+		fmt.Println("Output:", result)
+		if f(result) {
 			return result
 		}
-		fmt.Println("Output string does not include the expected value, sleeping for", retryInterval, "before trying again")
+
+		fmt.Println("Output string does not meet test critieria, sleeping for", retryInterval, "before trying again")
 		time.Sleep(retryInterval)
 	}
 	log.Fatal("Fatal error: initial stage failed, so not proceeding to later dependent tests")
@@ -82,7 +87,9 @@ func TestDagIsAvailable(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
 	stringToMatch := c.DAG_ID
 
-	result := runCommandWithPolling(cmd, stringToMatch, 5, 30*time.Second) // typically completes after 2-3 minutes delay propagation
+	result := runCommandWithPolling(cmd, func(tmp string) bool {
+		return strings.Contains(tmp, stringToMatch)
+	}, 5, 30*time.Second)
 
 	assert.Contains(t, result, stringToMatch)
 }
@@ -91,16 +98,21 @@ func TestDAGIsTriggered(t *testing.T) {
 	cmd := exec.Command("../../sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh")
 	stringToMatch := "Trigger DAG - done"
 
-	result := runCommandWithPolling(cmd, stringToMatch, 5, 1*time.Minute) // flaky propagation delay, might require retry even after TestDagIsAvailable
+	result := runCommandWithPolling(cmd, func(tmp string) bool {
+		return strings.Contains(tmp, stringToMatch)
+	}, 5, 1*time.Minute) // flaky propagation delay, might require retry even after TestDagIsAvailable
 
 	assert.Contains(t, result, stringToMatch)
 }
 
-func TestDagIsSuccess(t *testing.T) {
+func TestDAGIsCompleteAndSuccess(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list-runs", "--", "-d", c.DAG_ID)
-	stringToMatch := "| success |"
+	stringToMatch := "| running |"
 
-	result := runCommandWithPolling(cmd, stringToMatch, 10, 5*time.Minute) // workflow might be in "running" state for 25+ minutes, can be much greater depending on volume of test docs
+	result := runCommandWithPolling(cmd, func(tmp string) bool {
+		return !strings.Contains(tmp, stringToMatch)
+	}, 5, 8*time.Minute) // Workflow takes 25+ minutes to complete, might be greater depending on input documents
 
-	assert.Contains(t, result, stringToMatch)
+	assert.NotContains(t, result, stringToMatch)
+	assert.Contains(t, result, "| success |")
 }
