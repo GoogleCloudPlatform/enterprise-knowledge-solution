@@ -1,0 +1,130 @@
+{
+  "parser_config": {
+    "claims_form_parser": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/183c7e6473e82d0c"
+    },
+    "cda_extractor": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/db85935ed1fac73b"
+    },
+    "pa_extractor": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/705b2dcda22343e6"
+    },
+    "classifier": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/f766254c70453b9f"
+    },
+    "splitter_": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/f766254c70453b9f"
+    },
+    "classifier_": {
+      "processor_id": "projects/cda-001-processors/locations/us/processors/51c14c4b6e610ceb"
+    }
+  },
+  "settings_config": {
+    "extraction_confidence_threshold": 0.85,
+    "classification_confidence_threshold": 0.50,
+    "field_extraction_confidence_threshold": 0.4,
+    "classification_default_class": "generic_form"
+  },
+  "document_types_config": {
+    "generic_form": {
+      "display_name": "Generic Form",
+      "parser": "claims_form_parser",
+      "classifier_label": "Generic",
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent-Generic"
+          }
+        ]
+      },
+      "document_ai_warehouse": {
+        "project_number": "35407211402",
+        "folder_id": "5vbacjupjhi4g",
+        "document_schema_id": "1dlvfb4c51b30",
+        "api_location": "us"
+      }
+    },
+    "pa_form_cda": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent-BsC"
+          }
+        ]
+      },
+      "display_name": "Prior Auth Form BsC",
+      "classifier_label": "pa_form_cda",
+      "parser": "cda_extractor",
+      "document_ai_warehouse": {
+        "project_number": "35407211402",
+        "folder_id": "310uv5tmjpuqo",
+        "document_schema_id": "1dlvfb4c51b30",
+        "api_location": "us"
+      }
+    },
+    "pa_form_texas": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent-PA"
+          }
+        ]
+      },
+      "display_name": "Prior Auth Form Texas",
+      "classifier_label": "pa_form_texas",
+      "parser": "pa_extractor",
+      "document_ai_warehouse": {
+        "project_number": "35407211402",
+        "folder_id": "2om58moct5ni0",
+        "document_schema_id": "1dlvfb4c51b30",
+        "api_location": "us"
+      }
+    },
+    "fax_cover_page": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent-Fax"
+          }
+        ]
+      },
+      "display_name": "Fax Cover Page",
+      "classifier_label": "fax_cover_page",
+      "parser": "claims_form_parser",
+      "document_ai_warehouse": {
+        "project_number": "35407211402",
+        "folder_id": "1m36oe1fkk3tg",
+        "document_schema_id": "1dlvfb4c51b30",
+        "api_location": "us"
+      }
+    },
+    "health_intake_form": {
+      "doc_type": {
+        "default": "Non-urgent",
+        "rules": [
+          {
+            "ocr_text": "urgent",
+            "name": "Urgent-Intake"
+          }
+        ]
+      },
+      "display_name": "Health Intake Form",
+      "classifier_label": "health_intake_form",
+      "parser": "claims_form_parser",
+      "document_ai_warehouse": {
+        "project_number": "35407211402",
+        "folder_id": "0u1e2ndoo9igg",
+        "document_schema_id": "1dlvfb4c51b30",
+        "api_location": "us"
+      }
+    }
+  }
+}

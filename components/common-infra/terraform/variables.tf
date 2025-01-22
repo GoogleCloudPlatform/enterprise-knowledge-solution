@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 variable "project_id" {
   type        = string
   description = "project id required"
@@ -71,4 +72,44 @@ variable "psa_reserved_address" {
   description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
   type        = string
   default     = "10.240.0.0"
+}
+
+variable "webui_service_name" {
+  type        = string
+  description = "The service name for the webui"
+  default     = "eks-ui"
+}
+
+variable "webui_domains" {
+  description = "Custom domain pointing to the WebUI app. DNS zones must be configured outside of terraform, so that the A record for this domain points to the IPv4 address used by the loadbalancer."
+  type        = list(string)
+}
+
+variable "neg_id_query" {
+  description = "The serverless network endpoint group for the query user interface"
+  type        = string
+}
+
+variable "neg_id_hitl" {
+  description = "The serverless network endpoint group for the human-in-the-loop user interface"
+  type        = string
+}
+
+variable "neg_id_hitl_api" {
+  description = "The serverless network endpoint group for the human-in-the-loop API"
+  type        = string
+}
+
+variable "lb_path_matcher_paths" {
+  description = "the URL paths used for matching traffic to different Cloud Run Service backends from the load balancer"
+  type = object({
+    query    = string
+    hitl     = string
+    hitl-api = string
+  })
+  default = {
+    query    = "/query"
+    hitl     = "/hitl"
+    hitl-api = "/hitl-api"
+  }
 }

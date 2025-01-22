@@ -33,6 +33,10 @@ module "project_services" {
   ]
 }
 
+data "google_project" "project" {
+  project_id = module.project_services.project_id
+}
+
 resource "google_artifact_registry_repository" "docker-repo" {
   project       = module.project_services.project_id
   format        = "DOCKER"

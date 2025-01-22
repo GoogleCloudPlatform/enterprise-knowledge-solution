@@ -1,0 +1,26 @@
+{
+  "generic_form": {
+    "doc_type":"supporting_documents",
+    "display_name": "Supporting Documents > Generic Form",
+    "parser": "claims_form",
+    "classifier_label": "Generic"
+  },
+  "prior_auth_form": {
+    "doc_type":"supporting_documents",
+    "display_name": "Supporting Documents > Prior-Authorization Form",
+    "classifier_label": "Prior_Auth",
+    "parser": "prior_auth_form"
+  },
+  "bsc_pa_form": {
+    "doc_type":"supporting_documents",
+    "display_name": "Supporting Documents > BSC Prior-Auth Form",
+    "classifier_label": "bsc_pa_form",
+    "parser": "bsc_pa_form"
+  },
+  "bsc_package_form": {
+    "doc_type":"application_form",
+    "display_name": "Application Form > BSC Package Form",
+    "classifier_label": "bsc_package_form",
+    "parser": "bsc_package_form"
+  }
+}

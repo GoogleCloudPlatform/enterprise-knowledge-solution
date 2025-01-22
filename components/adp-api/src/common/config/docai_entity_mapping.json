@@ -1,0 +1,42 @@
+{
+    "all": {
+        "prior_auth_form": {
+            "default_entities": {
+                "rpName": ["rpName"],
+                "rpDate": ["rpDate"],
+                "rpPhone": ["rpPhone"],
+                "rpFax": ["rpFax"],
+                "rpNPI": ["rpNPI"],
+                "rpSpecialty": ["rpSpecialty"],
+                "rpContactName": ["rpContactName"],
+                "rpContactPhone": ["rpContactPhone"],
+                "requestTypeExtension": ["requestTypeExtension"],
+                "requestTypeInitial": ["requestTypeInitial"],
+                "prevAuthNumber": ["prevAuthNumber"],
+                "reviewTypeUrgent": ["reviewTypeUrgent"],
+                "reviewTypeNonUrgent": ["reviewTypeNonUrgent"],
+                "clinicalReasonForUrgency": ["clinicalReasonForUrgency"],
+                "pcpPhone": ["pcpPhone"],
+                "pcpFax": ["pcpFax"],
+                "pcpName": ["pcpName"],
+                "spPhone": ["spPhone"],
+                "spFax": ["spFax"],
+                "spNPI": ["spNPI"],
+                "spSpecialty": ["spSpecialty"],
+                "genderOther": ["genderOther"],
+                "genderUnknown": ["genderUnknown"],
+                "patientName": ["patientName"],
+                "patientPhone": ["patientPhone"],
+                "patientDoB": ["patientDoB"],
+                "subscriberName": ["subscriberName"],
+                "memberID": ["memberID"],
+                "groupNumber": ["groupNumber"],
+                "genderFemale": ["genderFemale"],
+                "genderMale": ["genderMale"],
+                "issuerPhone": ["issuerPhone"],
+                "issuerFax": ["issuerFax"],
+                "issuerDate": ["issuerDate"]
+            }
+        }
+    }
+}

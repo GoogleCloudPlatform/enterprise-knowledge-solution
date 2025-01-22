@@ -267,3 +267,9 @@ module "dns-private-zone-gcr-io" {
     },
   ]
 }
+
+resource "google_compute_ssl_policy" "ssl-policy" {
+  name            = "ssl-policy"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_2"
+}

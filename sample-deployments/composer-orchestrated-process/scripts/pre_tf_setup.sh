@@ -55,3 +55,7 @@ section_close
 section_open "Set Application Default Credentials to be used by Terraform"
 set_adc
 section_close
+
+section_open "Configure Docker"
+gcloud auth configure-docker "${REGION}-docker.pkg.dev"
+section_close

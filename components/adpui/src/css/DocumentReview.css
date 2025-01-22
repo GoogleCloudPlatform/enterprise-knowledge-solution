@@ -1,0 +1,186 @@
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+/* .custom-container{
+    width: fit-content !important;
+    margin: 44px;
+    border: 1px solid dimgrey;
+    border-radius: 7px;
+}  */
+
+.changeHistory {
+    background-color: #F0F0F0 !important;
+    margin-bottom: 2px;
+    margin-top: 3px;
+    border: none;
+    border-radius: 0;
+    margin-left: 11px;
+    width: 96%;
+}
+
+.drHistoryContainer {
+    margin: 8px 0 0 0;
+    background-color: #fff;
+    padding-bottom: 10px;
+}
+
+.labelNote {
+    background-color: gray;
+    width: 100%;
+    color: white;
+    padding: 10px;
+}
+
+.buttonStyles {
+    border-radius: 30px;
+    padding: 3px 15px;
+    border: none;
+    box-shadow: none;
+    margin: 10px 3px;
+}
+
+.verticaline {
+    border-left: 1px solid #D0D0D0;
+    height: 36px;
+    float: left;
+}
+
+.labelBold {
+    font-weight: bolder;
+}
+
+.extractedInputBox {
+    background-color: #F0F0F0;
+}
+
+.applicationLabel {
+    color: #aaa;
+    margin-right: 1rem
+}
+
+.subTitle {
+    text-transform: capitalize !important;
+    font-weight: bolder;
+    font-size: 18px;
+    padding-left: 0px;
+    margin-left: -10px;
+}
+
+.subHeaderReview {
+    background-color: #fff;
+    height: 4.5rem;
+    padding: 5px;
+    padding-left: 5px;
+    margin-top: -1px;
+    margin-bottom: 1px;
+    border-bottom: 2px solid #eee;
+}
+
+.classifyDocLabel {
+    text-transform: capitalize;
+    font-weight: bolder;
+}
+
+.commentRow {
+    line-height: 0.5rem;
+    text-transform: capitalize;
+}
+
+.progress {
+    border-radius: 15px;
+    height: 2rem !important;
+    border: 0.5px solid #BEBEBE;
+
+}
+
+.progress-bar.bg-success {
+    margin: 5px;
+    border-radius: 15px;
+    background-color: #93c47d !important;
+}
+
+.progress-bar.bg-warning {
+    margin: 5px;
+    border-radius: 15px;
+    background-color: #F4B400 !important;
+}
+
+.progress-bar.bg-danger {
+    margin: 5px;
+    border-radius: 15px;
+    background-color: #DB4437 !important;
+}
+
+.docOverallScores {
+    font-weight: bolder;
+    border-bottom: 1px solid #D3D3D3;
+    padding: 10px;
+}
+
+.labelVerticalLine {
+    text-align: center;
+    border-bottom: 1px solid #D3D3D3;
+}
+
+.verticalLines {
+    border-right: 1px solid #D3D3D3;
+}
+
+.verticalLinesLeft {
+    border-left: 1px solid #D3D3D3;
+    height: 30px;
+}
+
+.verticalLinesButton {
+    border-left: 1px solid #D3D3D3;
+    height: 48px;
+    text-align: start;
+    position: relative;
+    /* bottom:9px; */
+}
+
+.verticalLinesButton a {
+    font-size: 18px !important;
+    border-radius: 100px !important;
+}
+
+.applicationVerticalLine {
+    border-left: 1px solid #D3D3D3;
+    height: 43px;
+    position: relative;
+    left: 36px;
+    bottom: 11px
+}
+
+.approveLeftVerticalLine {
+    border-left: 1px solid #D3D3D3;
+    height: 45px;
+    position: relative;
+    bottom: 10px;
+}
+
+.drBack {
+    text-decoration: none;
+    color: #4285F4;
+    margin-left: 20px
+}
+
+.score>label {
+    /* background-color: palegreen; */
+    width: max-content;
+    padding-left: 0px;
+}
