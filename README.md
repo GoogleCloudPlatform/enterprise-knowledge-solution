@@ -63,7 +63,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
 1. In Cloud Shell or your preferred terminal, clone this repository:
 
    ```sh
-   git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
+   git clone https://github.com/GoogleCloudPlatform/enterprise-knowledge-solution.git
    ```
 
 1. Navigate to the Sample Directory:
