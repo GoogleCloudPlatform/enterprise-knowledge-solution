@@ -48,7 +48,6 @@ variable "alloy_db_cluster_id" {
 variable "serverless_connector_subnet" {
   description = "Name of the VPC subnet to create"
   type        = string
-  default     = "cloudrun-to-alloydb-connector-subnet"
 }
 
 variable "serverless_connector_subnet_range" {
