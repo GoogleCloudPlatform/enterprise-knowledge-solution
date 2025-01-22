@@ -101,8 +101,6 @@ class SpecializedParserJobRunner:
         self.alloydb_config = alloydb_config
         self.bigquery_config = bigquery_config
 
-        self.processor_config.timeout = 1800
-
         self.alloydb_connection_pool = self.create_connection_pool(alloydb_config)
         self.storage_client = storage.Client(
             client_info=ClientInfo(user_agent=USER_AGENT)
