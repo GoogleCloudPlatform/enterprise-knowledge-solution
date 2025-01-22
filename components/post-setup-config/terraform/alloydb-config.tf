@@ -29,7 +29,7 @@ resource "google_cloud_run_v2_job" "configure_db_schema_job" {
           network    = var.vpc_network_name
           subnetwork = var.serverless_connector_subnet
         }
-        egress = "PRIVATE_RANGES_ONLY"
+        egress = "ALL_TRAFFIC"
       }
       containers {
         image = local.image_name_and_tag

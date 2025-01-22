@@ -74,6 +74,13 @@ resource "google_cloud_run_v2_service" "eks_webui" {
       }
     }
     service_account = module.cloud_run_web_account.email
+    vpc_access {
+      network_interfaces {
+        network    = var.vpc_network_name
+        subnetwork = var.serverless_connector_subnet
+      }
+      egress = "ALL_TRAFFIC"
+    }
   }
   lifecycle {
     replace_triggered_by = [null_resource.deployment_trigger]
