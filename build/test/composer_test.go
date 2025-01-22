@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build functional
+//go:build dag
 
 package main
 
@@ -46,12 +46,11 @@ func init() {
 	}
 }
 
-// Define a generic function type that takes any number of arguments and returns a string
-type AssertionFunc func(string) bool // Takes the command output (string) and returns a bool
+type AssertionFunc func(string) bool
 
 func runCommand(cmd *exec.Cmd) string {
 	originalArgs := cmd.Args
-	// Create a new Cmd instance for each retry with the original arguments (excluding cmd.Path)
+	// Create a new Cmd instance for each retry with the original arguments (excluding cmd.Path), otherwise fails on second attempt
 	cmd = exec.Command(originalArgs[0], originalArgs[1:]...)
 	fmt.Println("Executing command: `", cmd, "`")
 	output, err := cmd.CombinedOutput()
@@ -78,7 +77,7 @@ func runCommandWithPolling(cmd *exec.Cmd, f AssertionFunc, retryAttempts int, re
 		fmt.Println("Assertion failed, sleeping for", retryInterval, "before trying again")
 		time.Sleep(retryInterval)
 	}
-	log.Fatal("Fatal error: initial stage failed, so not proceeding to later dependent tests")
+	log.Fatal("Fatal error: initial stage failed, terminating without proceeding to later stages which depend on initial stages")
 	return "terminating without running later dependent stages"
 
 }
@@ -111,7 +110,7 @@ func TestDAGIsCompleteAndSuccess(t *testing.T) {
 
 	result := runCommandWithPolling(cmd, func(tmp string) bool {
 		return !strings.Contains(tmp, stringToMatch)
-	}, 6, 10*time.Minute) // Workflow takes 35+ minutes to complete, might be greater depending on input documents
+	}, 6, 10*time.Minute) // Workflow takes 35~50 minutes to complete, might be greater depending on input documents
 
 	assert.NotContains(t, result, stringToMatch)
 	assert.Contains(t, result, "| success |")

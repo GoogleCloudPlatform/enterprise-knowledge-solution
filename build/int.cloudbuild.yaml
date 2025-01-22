@@ -13,9 +13,9 @@
 # limitations under the License.
 
 ---
-timeout: 7200s
+timeout: 9000s
 steps:
-  - id: prepare
+  - id: create_ephemeral_test_project
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
@@ -28,7 +28,7 @@ steps:
         trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
         gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
-  - id: pre_tf_setup
+  - id: run_script_pre_tf_setup
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
@@ -41,7 +41,7 @@ steps:
       - "REGION=${_REGION}"
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
-  - id: terratest
+  - id: deploy_infrastructure_
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
@@ -50,7 +50,7 @@ steps:
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        (cd build/test && make e2e-test);
+        (cd build/test && make infra-test);
         gcloud config unset auth/impersonate_service_account;
     entrypoint: /bin/bash
     env:
@@ -79,14 +79,14 @@ steps:
       - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
 
-  - id: do_functional_tests
+  - id: do_functional_tests_on_dag
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
       - "-c"
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
-        (cd /workspace/build/test && make functional-test);
+        (cd /workspace/build/test && make dag-test);
     entrypoint: /bin/bash
     env:
       - "LOCATION=${_REGION}"
