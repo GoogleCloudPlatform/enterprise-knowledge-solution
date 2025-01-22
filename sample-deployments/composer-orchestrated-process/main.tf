@@ -98,6 +98,8 @@ module "doc_classifier_job" {
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
   classifier_cloud_run_job_name     = local.classifier_cloud_run_job_name
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
 }
 
 module "specialized_parser_job" {
@@ -109,7 +111,7 @@ module "specialized_parser_job" {
   bigquery_dataset_id               = module.common_infra.bq_store_dataset_id
   alloydb_instance                  = module.common_infra.alloydb_primary_instance
   alloydb_cluster                   = module.common_infra.alloydb_cluster_name
-  network                           = module.common_infra.vpc_network_name
+  vpc_network_name                  = module.common_infra.vpc_network_name
   serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
   alloydb_cluster_ready             = module.common_infra.alloydb_cluster_ready
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
@@ -150,6 +152,9 @@ module "dpu_ui" {
   agent_builder_data_store_id       = google_discovery_engine_data_store.dpu_ds.data_store_id
   agent_builder_search_id           = google_discovery_engine_search_engine.basic.engine_id
   lb_ssl_certificate_domains        = var.webui_domains
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
+
 }
 
 # Depends on: input bucket, artefactory (registury_url), and docprocessor service account
@@ -191,6 +196,8 @@ module "doc_registry" {
   region                            = var.region
   artifact_repo                     = module.common_infra.artifact_repo.name
   cloud_build_service_account_email = module.common_infra.cloud_build_service_account.email
+  vpc_network_name                  = module.common_infra.vpc_network_name
+  serverless_connector_subnet       = module.common_infra.serverless_connector_subnet
 }
 
 module "doc-deletion" {

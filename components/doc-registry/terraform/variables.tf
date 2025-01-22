@@ -50,3 +50,13 @@ variable "cloud_build_service_account_email" {
   description = "the user-managed service account configured for Cloud Build"
   type        = string
 }
+
+variable "vpc_network_name" {
+  type        = string
+  description = "The name of the network where subnets will be created"
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+}

@@ -78,6 +78,115 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
+resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow egress to PSA reserved range used for AlloyDB"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1010
+  rule_name       = "allow-psa-to-alloydb"
+
+  match {
+    dest_ip_ranges = ["${var.psa_reserved_address}/24"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = ["5433"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "default-deny" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Low priority rule to deny all egress not explicitly matched by other rules"
+  action          = "deny"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 65535
+  rule_name       = "default-deny-all"
+
+  match {
+    dest_ip_ranges = ["0.0.0.0/0"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow internal traffic within the composer subnet"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1001
+  rule_name       = "allow-subnet-internal"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.subnet_primary]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1002
+  rule_name       = "allow-composer-cluster-secondary-range"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow internal traffic to reach services on the secondary subnet range"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1003
+  rule_name       = "allow-composer-services-secondary-range"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.services_secondary_range]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow internal traffic to reach the composer control plane"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1004
+  rule_name       = "allow-composer-control-plane"
+
+  match {
+    dest_ip_ranges = [var.composer_cidr.control_plane]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
 module "dns-private-zone-googleapis" {
   count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
