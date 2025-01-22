@@ -1,4 +1,4 @@
-module github.com/eeaton/document-processing-and-understanding/build/test
+module github.com/GoogleCloudPlatform/enterprise-knowledge-solution/build/test
 
 go 1.22.7
 

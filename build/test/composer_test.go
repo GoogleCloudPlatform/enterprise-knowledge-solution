@@ -14,7 +14,7 @@
 
 //go:build dag
 
-package main
+package test
 
 import (
 	"context"
