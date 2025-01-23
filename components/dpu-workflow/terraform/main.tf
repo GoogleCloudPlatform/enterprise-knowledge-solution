@@ -51,19 +51,17 @@ module "composer_service_account" {
   project_roles = local.composer_sa_roles
 }
 
-module "dpu-subnet" {
-  source = "github.com/terraform-google-modules/terraform-google-network.git//modules/subnets?ref=2477e469c9734638c9ed83e69fe8822452dacbc6" #commit hash of version 9.2.0
-
-  project_id   = module.project_services.project_id
-  network_name = var.vpc_network_name
-
-  subnets = [{
-    subnet_name           = "composer-subnet"
-    subnet_ip             = var.composer_cidr.subnet_primary
-    subnet_region         = var.region
-    subnet_private_access = "true"
-    subnet_flow_logs      = "true"
-  }]
+resource "google_compute_subnetwork" "composer_connector_subnet" {
+  name                     = var.composer_connector_subnet
+  ip_cidr_range            = var.composer_cidr.subnet_primary
+  region                   = var.region
+  network                  = var.vpc_network_name
+  private_ip_google_access = true
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_composer_environment" "composer_env" {
@@ -103,7 +101,7 @@ resource "google_composer_environment" "composer_env" {
     environment_size = var.composer_environment_size
     node_config {
       network         = var.vpc_network_id
-      subnetwork      = module.dpu-subnet.subnets["${var.region}/composer-subnet"].id
+      subnetwork      = google_compute_subnetwork.composer_connector_subnet.id
       service_account = module.composer_service_account.email
     }
   }

@@ -153,3 +153,9 @@ variable "composer_cidr" {
     subnet_primary = string
   })
 }
+
+variable "composer_connector_subnet" {
+  description = "Name of the VPC subnet used for VPC connectivity to Composer 3 in a service producer project"
+  type        = string
+  default     = "composer-subnet"
+}
