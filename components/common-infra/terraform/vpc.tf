@@ -70,7 +70,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.8/30"]
+    dest_ip_ranges = ["199.36.153.4/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -93,6 +93,24 @@ resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["5433"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-google-apis-directpath" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow private HTTPS access to google services that bypass GFE (Composer 3)"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1020
+  rule_name       = "allow-google-apis-directpath"
+
+  match {
+    dest_ip_ranges = ["34.126.0.0/18"]
+    layer4_configs {
+      ip_protocol = "tcp"
     }
   }
 }
@@ -127,11 +145,11 @@ module "dns-private-zone-googleapis" {
 
   recordsets = [
     {
-      name = "private"
+      name = "restricted"
       type = "A"
       ttl  = 300
       records = [
-        "199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11",
+        "199.36.153.4", "199.36.153.5", "199.36.153.6", "199.36.153.7",
       ]
     },
     {
@@ -139,7 +157,7 @@ module "dns-private-zone-googleapis" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "private.googleapis.com.",
+        "restricted.googleapis.com.",
       ]
     },
   ]
