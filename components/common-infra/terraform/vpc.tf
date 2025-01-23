@@ -70,7 +70,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.4/30"]
+    dest_ip_ranges = ["199.36.153.8/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -145,11 +145,11 @@ module "dns-private-zone-googleapis" {
 
   recordsets = [
     {
-      name = "restricted"
+      name = "private"
       type = "A"
       ttl  = 300
       records = [
-        "199.36.153.4", "199.36.153.5", "199.36.153.6", "199.36.153.7",
+        "199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11",
       ]
     },
     {
@@ -157,7 +157,7 @@ module "dns-private-zone-googleapis" {
       type = "CNAME"
       ttl  = 300
       records = [
-        "restricted.googleapis.com.",
+        "private.googleapis.com.",
       ]
     },
   ]
