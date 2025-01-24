@@ -78,6 +78,26 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
+resource "google_compute_network_firewall_policy_rule" "allow-psc-to-alloydb" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow egress to PSC endpoint used for AlloyDB"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1011
+  rule_name       = "allow-psc-to-alloydb"
+
+  match {
+    dest_ip_ranges = ["${google_compute_address.alloydb_psc_endpoint.address}/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = ["5433"]
+    }
+  }
+}
+
+
 resource "google_compute_network_firewall_policy_rule" "allow-google-apis-directpath" {
   count           = var.create_vpc_network ? 1 : 0
   description     = "Allow private HTTPS access to google services that bypass GFE (Composer 3)"
