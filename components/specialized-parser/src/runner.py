@@ -152,7 +152,7 @@ class SpecializedParserJobRunner:
                 db=alloydb_config.database,
                 enable_iam_auth=True,
                 user=alloydb_config.user,
-                ip_type=IPTypes.PRIVATE,
+                ip_type=IPTypes.PSC,
             )
             return conn
 

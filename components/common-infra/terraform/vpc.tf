@@ -78,21 +78,20 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
+resource "google_compute_network_firewall_policy_rule" "allow-google-apis-directpath" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow egress to PSA reserved range used for AlloyDB"
+  description     = "Allow private HTTPS access to google services that bypass GFE (Composer 3)"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1010
-  rule_name       = "allow-psa-to-alloydb"
+  priority        = 1020
+  rule_name       = "allow-google-apis-directpath"
 
   match {
-    dest_ip_ranges = ["${var.psa_reserved_address}/24"]
+    dest_ip_ranges = ["34.126.0.0/18"]
     layer4_configs {
       ip_protocol = "tcp"
-      ports       = ["5433"]
     }
   }
 }
