@@ -176,8 +176,8 @@ enable_api() {
 # enable all apis in the array
 enable_bootstrap_apis() {
   apis_array=()
-  while read project_api; do
-    apis_array+=($project_api)
+  while read -r project_api; do
+    apis_array+=("$project_api")
   done <"$PARENT_DIR/../project_apis.txt"
 
   for i in "${apis_array[@]}"; do
@@ -199,8 +199,8 @@ enable_persona_roles() {
   local __persona_name=$3
 
   roles_array=()
-  while read role; do
-    roles_array+=($role)
+  while read -r role; do
+    roles_array+=("$role")
   done <"$PARENT_DIR/../$__arrayfile"
 
   for i in "${roles_array[@]}"; do
