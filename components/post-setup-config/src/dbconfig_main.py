@@ -61,7 +61,7 @@ def init_connection_pool(connector: Connector) -> sqlalchemy.engine.Engine:
             db=os.environ["ALLOYDB_DATABASE"],
             enable_iam_auth=True,
             user=os.environ["ALLOYDB_USER_CONFIG"],
-            ip_type=IPTypes.PRIVATE,
+            ip_type=IPTypes.PSC,
         )
         return conn
 
