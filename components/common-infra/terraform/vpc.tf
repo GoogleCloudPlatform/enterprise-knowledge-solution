@@ -70,7 +70,7 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   rule_name       = "allow-google-apis-private-vip"
 
   match {
-    dest_ip_ranges = ["199.36.153.4/30"]
+    dest_ip_ranges = ["199.36.153.8/30"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["443"]
@@ -78,21 +78,39 @@ resource "google_compute_network_firewall_policy_rule" "allow-google-apis" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-psa-to-alloydb" {
+resource "google_compute_network_firewall_policy_rule" "allow-psc-to-alloydb" {
   count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow egress to PSA reserved range used for AlloyDB"
+  description     = "Allow egress to PSC endpoint used for AlloyDB"
   action          = "allow"
   direction       = "EGRESS"
   enable_logging  = true
   firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1010
-  rule_name       = "allow-psa-to-alloydb"
+  priority        = 1011
+  rule_name       = "allow-psc-to-alloydb"
 
   match {
-    dest_ip_ranges = ["${var.psa_reserved_address}/24"]
+    dest_ip_ranges = ["${google_compute_address.alloydb_psc_endpoint.address}/32"]
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["5433"]
+    }
+  }
+}
+
+resource "google_compute_network_firewall_policy_rule" "allow-google-apis-directpath" {
+  count           = var.create_vpc_network ? 1 : 0
+  description     = "Allow private HTTPS access to google services that bypass GFE (Composer 3)"
+  action          = "allow"
+  direction       = "EGRESS"
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.policy[0].name
+  priority        = 1020
+  rule_name       = "allow-google-apis-directpath"
+
+  match {
+    dest_ip_ranges = ["34.126.0.0/18"]
+    layer4_configs {
+      ip_protocol = "tcp"
     }
   }
 }
@@ -115,78 +133,6 @@ resource "google_compute_network_firewall_policy_rule" "default-deny" {
   }
 }
 
-resource "google_compute_network_firewall_policy_rule" "allow-subnet-internal" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic within the composer subnet"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1001
-  rule_name       = "allow-subnet-internal"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.subnet_primary]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-cluster-secondary-range" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach Composer's cluster pods on the secondary subnet range"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1002
-  rule_name       = "allow-composer-cluster-secondary-range"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.cluster_secondary_range]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-services-secondary-range" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach services on the secondary subnet range"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1003
-  rule_name       = "allow-composer-services-secondary-range"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.services_secondary_range]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
-resource "google_compute_network_firewall_policy_rule" "allow-composer-control-plane" {
-  count           = var.create_vpc_network ? 1 : 0
-  description     = "Allow internal traffic to reach the composer control plane"
-  action          = "allow"
-  direction       = "EGRESS"
-  enable_logging  = true
-  firewall_policy = google_compute_network_firewall_policy.policy[0].name
-  priority        = 1004
-  rule_name       = "allow-composer-control-plane"
-
-  match {
-    dest_ip_ranges = [var.composer_cidr.control_plane]
-    layer4_configs {
-      ip_protocol = "all"
-    }
-  }
-}
-
 module "dns-private-zone-googleapis" {
   count      = var.create_vpc_network ? 1 : 0
   source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
@@ -203,97 +149,9 @@ module "dns-private-zone-googleapis" {
       type = "A"
       ttl  = 300
       records = [
-        "199.36.153.4", "199.36.153.5", "199.36.153.6", "199.36.153.7",
+        "199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11",
       ]
     },
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-composer1" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "composer-cloud-google-com"
-  domain     = "composer.cloud.google.com."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-composer2" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "composer-googleusercontent-com"
-  domain     = "composer.googleusercontent.com."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-pkg-dev" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "pkg-dev"
-  domain     = "pkg.dev."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
-    {
-      name = "*"
-      type = "CNAME"
-      ttl  = 300
-      records = [
-        "private.googleapis.com.",
-      ]
-    },
-  ]
-}
-
-module "dns-private-zone-gcr-io" {
-  count      = var.create_vpc_network ? 1 : 0
-  source     = "github.com/terraform-google-modules/terraform-google-cloud-dns?ref=92bd8140d059388c6c22742ffcb5f4ab2c24cee9" #commit hash of version 5.3.0
-  project_id = var.project_id
-  type       = "private"
-  name       = "gcr-io"
-  domain     = "gcr.io."
-
-  private_visibility_config_networks = [local.vpc_network_self_link]
-
-  recordsets = [
     {
       name = "*"
       type = "CNAME"

@@ -82,6 +82,21 @@ func runCommandWithPolling(cmd *exec.Cmd, f AssertionFunc, retryAttempts int, re
 
 }
 
+func TestNoDenyFirewallsAreTriggeredBeforeWorkflow(t *testing.T) {
+	cmd := exec.Command("gcloud", "logging", "read",
+		"resource.type=gce_subnetwork AND log_id(\"compute.googleapis.com%2Ffirewall\") AND jsonPayload.disposition=\"DENIED\"",
+		"--limit=1",
+	)
+
+	stringToMatch := ""
+
+	result := runCommandWithPolling(cmd, func(tmp string) bool {
+		return tmp == stringToMatch
+	}, 1, 0*time.Second)
+
+	assert.Empty(t, result)
+}
+
 func TestDagIsAvailable(t *testing.T) {
 	cmd := exec.Command("gcloud", "composer", "environments", "run", c.COMPOSER_ENV_NAME, "--project", c.PROJECT_ID, "--location", c.LOCATION, "dags", "list")
 	stringToMatch := c.DAG_ID
@@ -114,4 +129,19 @@ func TestDAGIsCompleteAndSuccess(t *testing.T) {
 
 	assert.NotContains(t, result, stringToMatch)
 	assert.Contains(t, result, "| success |")
+}
+
+func TestNoDenyFirewallsAreTriggeredAfterWorkflow(t *testing.T) {
+	cmd := exec.Command("gcloud", "logging", "read",
+		"resource.type=gce_subnetwork AND log_id(\"compute.googleapis.com%2Ffirewall\") AND jsonPayload.disposition=\"DENIED\"",
+		"--limit=1",
+	)
+
+	stringToMatch := ""
+
+	result := runCommandWithPolling(cmd, func(tmp string) bool {
+		return tmp == stringToMatch
+	}, 1, 0*time.Second)
+
+	assert.Empty(t, result)
 }

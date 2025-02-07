@@ -41,7 +41,7 @@ variable "region" {
 variable "composer_version" {
   description = "Version of Cloud Composer"
   type        = string
-  default     = "composer-2.9.9-airflow-2.9.3"
+  default     = "composer-3-airflow-2.9.3-build.11"
 }
 
 variable "composer_env_variables" {
@@ -135,12 +135,6 @@ variable "composer_environment_size" {
   default     = "ENVIRONMENT_SIZE_SMALL"
 }
 
-variable "enable_private_ip" {
-  description = "Enable private IP for composer environment"
-  type        = bool
-  default     = true
-}
-
 variable "composer_sa_roles" {
   type        = list(any)
   description = "list of required roles for the Composer service account"
@@ -156,10 +150,12 @@ variable "composer_sa_roles" {
 variable "composer_cidr" {
   description = "CIDR ranges for configuring Cloud Composer"
   type = object({
-    subnet_primary           = string
-    cluster_secondary_range  = string
-    services_secondary_range = string
-    control_plane            = string
-    sql                      = string
+    subnet_primary = string
   })
+}
+
+variable "composer_connector_subnet" {
+  description = "Name of the VPC subnet used for VPC connectivity to Composer 3 in a service producer project"
+  type        = string
+  default     = "composer-subnet"
 }
