@@ -70,8 +70,8 @@ resource "google_compute_forwarding_rule" "alloydb_psc_fwd_rule" {
   ip_address              = google_compute_address.alloydb_psc_endpoint.id
   allow_psc_global_access = true
 }
-resource "google_dns_managed_zone" "alloydb_dns" {
-  name        = var.alloydb_dns
+resource "google_dns_managed_zone" "alloydb_psc_dns" {
+  name        = var.alloydb_psc_dns
   dns_name    = module.docs_results.primary_psc_dns_name
   description = "DNS Zone for EKS AlloyDB instance"
   visibility  = "private"
@@ -85,7 +85,7 @@ resource "google_dns_record_set" "alloy_psc" {
   name         = module.docs_results.primary_psc_dns_name
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.alloydb_dns.name
+  managed_zone = google_dns_managed_zone.alloydb_psc_dns.name
   rrdatas      = [google_compute_address.alloydb_psc_endpoint.address]
 }
 

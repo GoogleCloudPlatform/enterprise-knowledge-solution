@@ -45,21 +45,9 @@ variable "alloy_db_cluster_id" {
   default     = "eks-docs-results"
 }
 
-variable "composer_cidr" {
-  description = "CIDR ranges for configuring Cloud Composer"
-  type = object({
-    subnet_primary           = string
-    cluster_secondary_range  = string
-    services_secondary_range = string
-    control_plane            = string
-    sql                      = string
-  })
-}
-
 variable "serverless_connector_subnet" {
   description = "Name of the VPC subnet to create"
   type        = string
-  default     = "cloudrun-to-alloydb-connector-subnet"
 }
 
 variable "serverless_connector_subnet_range" {
@@ -79,9 +67,9 @@ variable "alloydb_psc_fwd_rule" {
   default     = "alloydb-psc-fwd-rule"
 }
 
-variable "alloydb_dns" {
+variable "alloydb_psc_dns" {
   description = "Name of the DNS zone associated with AlloyDB PSC access"
   type        = string
-  default     = "alloydb-dns"
+  default     = "alloydb-psc-dns"
 }
 
