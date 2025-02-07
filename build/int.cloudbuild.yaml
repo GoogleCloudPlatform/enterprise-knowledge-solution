@@ -13,9 +13,9 @@
 # limitations under the License.
 
 ---
-timeout: 7200s
+timeout: 9000s
 steps:
-  - id: prepare
+  - id: create_ephemeral_test_project
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
@@ -28,7 +28,7 @@ steps:
         trap "gcloud projects delete ${_TEST_PROJECT_ID} --quiet " ERR ;
         gcloud billing projects link ${_TEST_PROJECT_ID} --billing-account=${_BILLING_ACCOUNT} ;
 
-  - id: pre_tf_setup
+  - id: run_script_pre_tf_setup
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     entrypoint: /bin/bash
     args:
@@ -41,7 +41,7 @@ steps:
       - "REGION=${_REGION}"
       - "IAP_ADMIN_ACCOUNT=${_IAP_SUPPORT_EMAIL}"
 
-  - id: terratest
+  - id: deploy_infrastructure_
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
@@ -50,7 +50,7 @@ steps:
       - >-
         export PROJECT_ID=${_TEST_PROJECT_ID};
         gcloud config set auth/impersonate_service_account ${_DEPLOYER_SA};
-        (cd build/test && make e2e-test);
+        (cd build/test && make infra-test);
         gcloud config unset auth/impersonate_service_account;
     entrypoint: /bin/bash
     env:
@@ -63,27 +63,32 @@ steps:
       - "CUSTOM_CLASSIFIER_ID=${_CUSTOM_CLASSIFIER_ID}"
       - "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=${_DEPLOYER_SA}"
 
-  - id: functional
+  - id: prepare_functional_tests
     name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
     args:
       - "-e"
       - "-x"
       - "-c"
       - >-
-        export PROJECT_ID=${_TEST_PROJECT_ID};
-        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
-        build/test/ingest_test_docs.sh;
-        sleep 180;
-        gcloud composer environments run dpu-composer --project=${_TEST_PROJECT_ID} --location=us-central1 dags list;
-        sample-deployments/composer-orchestrated-process/scripts/trigger_workflow.sh;
-        sleep 1800;
-        (cd /workspace/build/test && make functional-test);
-        # sample-deployments/composer-orchestrated-process/scripts/delete_doc.sh;
-        # sample-deployments/composer-orchestrated-process/scripts/reset_datastore.sh;
+        echo "ingest test documents...";
+        build/test/helpers/ingest_test_docs.sh;
+        echo "grant IAM role for pretrained classifier in different project..." ;
+        build/test/helpers/enable_docai_sa.sh;
     entrypoint: /bin/bash
     env:
-      - "CICD_PROJECT_ID=${PROJECT_ID}"
+      - "CICD_PROJECT_ID=${_CICD_PROJECT_ID}"
       - "TEST_PROJECT_ID=${_TEST_PROJECT_ID}"
+
+  - id: do_functional_tests_on_dag
+    name: "${_BUILDER_IMAGE_NAME}:${_BUILDER_IMAGE_TAG}"
+    args:
+      - "-e"
+      - "-c"
+      - >-
+        export PROJECT_ID=${_TEST_PROJECT_ID};
+        (cd /workspace/build/test && make dag-test);
+    entrypoint: /bin/bash
+    env:
       - "LOCATION=${_REGION}"
       - "COMPOSER_ENV_NAME=dpu-composer"
       - "DAG_ID=run_docs_processing"
@@ -106,7 +111,8 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _TEST_PROJECT_ID: "eks-int-${SHORT_SHA}"
+  _TEST_PROJECT_ID: "eks-int-${BUILD_ID:0:8}"
+  _CICD_PROJECT_ID: ${PROJECT_ID}
   _DEPLOYER_SA: "deployer@${_TEST_PROJECT_ID}.iam.gserviceaccount.com"
   _REGION: "us-central1"
   _DOC_AI_LOCATION: "us"

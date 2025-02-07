@@ -72,7 +72,6 @@ EOF
 
 set -o errexit
 set -o nounset
-set -x
 
 # shellcheck source=/dev/null
 . "$PARENT_DIR/common.sh"

@@ -1,4 +1,4 @@
-//go:build e2e
+//go:build infra
 
 /**
  * Copyright 2023 Google LLC
