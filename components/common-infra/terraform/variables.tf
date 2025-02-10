@@ -45,21 +45,9 @@ variable "alloy_db_cluster_id" {
   default     = "eks-docs-results"
 }
 
-variable "composer_cidr" {
-  description = "CIDR ranges for configuring Cloud Composer"
-  type = object({
-    subnet_primary           = string
-    cluster_secondary_range  = string
-    services_secondary_range = string
-    control_plane            = string
-    sql                      = string
-  })
-}
-
 variable "serverless_connector_subnet" {
   description = "Name of the VPC subnet to create"
   type        = string
-  default     = "cloudrun-to-alloydb-connector-subnet"
 }
 
 variable "serverless_connector_subnet_range" {
@@ -67,8 +55,21 @@ variable "serverless_connector_subnet_range" {
   type        = string
 }
 
-variable "psa_reserved_address" {
-  description = "First address of CIDR range to reserve for the Private Services Access connection used by AlloyDB. The prefix_length is configured separately in terraform."
+variable "alloydb_psc_endpoint" {
+  description = "Name of Private Service Connect endpoint used for access to AlloyDB from your VPC"
   type        = string
-  default     = "10.240.0.0"
+  default     = "alloydb-psc-endpoint"
 }
+
+variable "alloydb_psc_fwd_rule" {
+  description = "Name of the forwarding rule associated with the alloydb PSC endpoint"
+  type        = string
+  default     = "alloydb-psc-fwd-rule"
+}
+
+variable "alloydb_psc_dns" {
+  description = "Name of the DNS zone associated with AlloyDB PSC access"
+  type        = string
+  default     = "alloydb-psc-dns"
+}
+

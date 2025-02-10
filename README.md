@@ -63,7 +63,7 @@ To deploy the Infrastructure-as-Code (IaC) resources needed for this solution, p
 1. In Cloud Shell or your preferred terminal, clone this repository:
 
    ```sh
-   git clone https://github.com/GoogleCloudPlatform/document-processing-and-understanding.git
+   git clone https://github.com/GoogleCloudPlatform/enterprise-knowledge-solution.git
    ```
 
 1. Navigate to the Sample Directory:
@@ -173,9 +173,9 @@ Some workflows depend on a [custom classifier](https://cloud.google.com/document
 
 1. After all steps to train and deploy the customer classifier are complete, add the following variable to your `terraform.tfvars` and run `terraform apply` again.
 
-   | Terraform variables  | Description                                                                               |
-   | -------------------- | ----------------------------------------------------------------------------------------- |
-   | custom_classifier_id | projects/<CLASSIFIER_PROJECT>/locations/ <CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID> |
+   | Terraform variables  | Description                                                                                                                                                                     |
+   | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | custom_classifier_id | projects/<CLASSIFIER_PROJECT>/locations/<CLASSIFIER_LOCATION>/processors/<CLASSIFIER_ID>. The value of <CLASSIFIER_ID> must be the alphanumeric ID, not the user-friendly name. |
 
 ### (Optional) Configure access to the Web UI search application
 

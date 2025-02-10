@@ -47,6 +47,11 @@ output "classifier_processor_id" {
   value       = var.custom_classifier_id
 }
 
+output "classifier_service_account" {
+  description = "the service account used by Cloud Run Job that does doc-classifier"
+  value       = module.doc_classifier_job.classifier_service_account
+}
+
 output "specialized_processors_ids_json" {
   description = "JSON encoded string of all supported labels as keys and the corresponding processor id for each as values."
   value       = jsondecode(module.specialized_parser_job.specialized_processors_ids_json)

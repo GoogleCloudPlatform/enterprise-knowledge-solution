@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-e2e-test:	## Run the end-to-end test
-	@echo "Running E2E test..."
-	@go test -v -run ./ -timeout 90m --tags=e2e
+infra-test:	## Deploy infrastructure
+	@echo "Running infrastructure deployment test..."
+	@go test -v -run ./ -timeout 90m --tags=infra
 
-functional-test: ## upload documents, trigger workflows, and check the results
-	@echo "running functional test..."
-	@go test -v -run ./ -timeout 60m --tags=functional
+dag-test: ## upload documents, trigger workflows, and check the results
+	@echo "running functional test against Composer workflows..."
+	@go test -v -run ./ -timeout 90m --tags=dag
 
 .PHONY: help
 .DEFAULT_GOAL := help

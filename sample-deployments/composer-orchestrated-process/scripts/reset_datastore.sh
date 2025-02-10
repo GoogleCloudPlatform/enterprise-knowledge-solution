@@ -89,10 +89,8 @@ document_names=$(echo "$response" | jq -r '.documents[].name' | awk -F '/' '{pri
 printf "%s\n" "${document_names}"
 
 # Create an array from the extracted information
-readarray -t document_list <<<"$document_names"
-
-# Print the list (optional)
-printf "%s\n" "${document_list[@]}"
+document_list=()
+printf "%s\0" "$document_names" | xargs -0 -n1 bash -c 'document_list+=("$@")' _
 
 # Confirmation prompt
 read -r -p "You are about to delete all documents from project '$PROJECT_ID'. Are you sure? [y/N] " response

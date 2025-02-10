@@ -62,3 +62,13 @@ variable "lb_ssl_certificate_domains" {
   description = "Custom domain pointing to the WebUI app, DNS configured"
   type        = list(string)
 }
+
+variable "vpc_network_name" {
+  type        = string
+  description = "The name of the network where subnets will be created"
+}
+
+variable "serverless_connector_subnet" {
+  description = "Name of the VPC subnet to create"
+  type        = string
+}
