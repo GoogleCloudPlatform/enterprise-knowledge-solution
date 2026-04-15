@@ -19,7 +19,7 @@ aiofiles==23.2.1
     #   google-cloud-alloydb-connector
 aiohappyeyeballs==2.4.3
     # via aiohttp
-aiohttp==3.10.11
+aiohttp==3.13.3
     # via
     #   apache-airflow-providers-http
     #   gcloud-aio-auth
