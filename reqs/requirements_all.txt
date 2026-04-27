@@ -815,7 +815,7 @@ pcodedmp==1.2.6
     # via oletools
 pendulum==3.0.0
     # via apache-airflow
-pg8000==1.31.2
+pg8000==1.31.5
     # via google-cloud-alloydb-connector
 pillow==11.0.0
     # via streamlit
