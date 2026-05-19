@@ -3,15 +3,9 @@
 cachetools==5.5.0 \
     --hash=sha256:02134e8439cdc2ffb62023ce1debca2944c3f289d66bb17ead3ab3dede74b292 \
     --hash=sha256:2cc24fb4cbe39633fb7badd9db9ca6295d766d9c2995f245725a46715d050f2a
-    # via
-    #   -c reqs/constraints.txt
-    #   google-auth
 certifi==2024.8.30 \
     --hash=sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8 \
     --hash=sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9
-    # via
-    #   -c reqs/constraints.txt
-    #   requests
 charset-normalizer==3.4.0 \
     --hash=sha256:0099d79bdfcf5c1f0c2c72f91516702ebf8b0b8ddd8905f97a8aecf49712c621 \
     --hash=sha256:0713f3adb9d03d49d365b70b84775d0a0d18e4ab08d12bc46baa6132ba78aaf6 \
@@ -118,35 +112,18 @@ charset-normalizer==3.4.0 \
     --hash=sha256:f606a1881d2663630ea5b8ce2efe2111740df4b687bd78b34a8131baa007f79b \
     --hash=sha256:fe9f97feb71aa9896b81973a7bbada8c49501dc73e58a10fcef6663af95e5079 \
     --hash=sha256:ffc519621dce0c767e96b9c53f09c5d215578e10b02c285809f76509a3931482
-    # via
-    #   -c reqs/constraints.txt
-    #   requests
-google-api-core==2.23.0 \
+google-api-core[grpc]==2.23.0 \
     --hash=sha256:2ceb087315e6af43f256704b871d99326b1f12a9d6ce99beaedec99ba26a0ace \
     --hash=sha256:c20100d4c4c41070cf365f1d8ddf5365915291b5eb11b83829fbd1c999b5122f
-    # via
-    #   -c reqs/constraints.txt
-    #   google-cloud-documentai
 google-auth==2.36.0 \
     --hash=sha256:51a15d47028b66fd36e5c64a82d2d57480075bccc7da37cde257fc94177a61fb \
     --hash=sha256:545e9618f2df0bcbb7dcbc45a546485b1212624716975a1ea5ae8149ce769ab1
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-    #   google-cloud-documentai
 google-cloud-documentai==3.0.1 \
     --hash=sha256:176bfe945caabafa69cf569f7f3921ad9fcc1b9fa9362e1f6e9776f8d3cd34cc \
     --hash=sha256:8322428a1764476ba29a621ef18a5aaa8423b1acc3cbf4c6434f80de1f98d769
-    # via
-    #   -c reqs/constraints.txt
-    #   -r components/doc-classifier/src/requirements.in
 googleapis-common-protos==1.66.0 \
     --hash=sha256:c3e7b33d15fdca5374cc0a7346dd92ffa847425cc4ea941d970f13680052ec8c \
     --hash=sha256:d7abcd75fabb2e0ec9f74466401f6c119a0b498e27370e9be4c94cb7e382b8ed
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-    #   grpcio-status
 grpcio==1.68.0 \
     --hash=sha256:0d230852ba97654453d290e98d6aa61cb48fa5fafb474fb4c4298d8721809354 \
     --hash=sha256:0efbbd849867e0e569af09e165363ade75cf84f5229b2698d53cf22c7a4f9e21 \
@@ -203,29 +180,15 @@ grpcio==1.68.0 \
     --hash=sha256:f8f695d9576ce836eab27ba7401c60acaf9ef6cf2f70dfe5462055ba3df02cc3 \
     --hash=sha256:fc05759ffbd7875e0ff2bd877be1438dfe97c9312bbc558c8284a9afa1d0f40e \
     --hash=sha256:fd2c2d47969daa0e27eadaf15c13b5e92605c5e5953d23c06d0b5239a2f176d3
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-    #   grpcio-status
 grpcio-status==1.68.0 \
     --hash=sha256:0a71b15d989f02df803b4ba85c5bf1f43aeaa58ac021e5f9974b8cadc41f784d \
     --hash=sha256:8369823de22ab6a2cddb3804669c149ae7a71819e127c2dca7c2322028d52bea
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-idna==3.10 \
-    --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
-    --hash=sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
-    # via
-    #   -c reqs/constraints.txt
-    #   requests
+idna==3.15 \
+    --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 \
+    --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc
 proto-plus==1.25.0 \
     --hash=sha256:c91fc4a65074ade8e458e95ef8bac34d4008daa7cce4a12d6707066fca648961 \
     --hash=sha256:fbb17f57f7bd05a68b7707e745e26528b0b3c34e378db91eef93912c54982d91
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-    #   google-cloud-documentai
 protobuf==5.28.3 \
     --hash=sha256:0c4eec6f987338617072592b97943fdbe30d019c56126493111cf24344c1cc24 \
     --hash=sha256:135658402f71bbd49500322c0f736145731b16fc79dc8f367ab544a17eab4535 \
@@ -238,41 +201,18 @@ protobuf==5.28.3 \
     --hash=sha256:91fba8f445723fcf400fdbe9ca796b19d3b1242cd873907979b9ed71e4afe868 \
     --hash=sha256:a3f6857551e53ce35e60b403b8a27b0295f7d6eb63d10484f12bc6879c715687 \
     --hash=sha256:cee1757663fa32a1ee673434fcf3bf24dd54763c79690201208bafec62f19eed
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
-    #   google-cloud-documentai
-    #   googleapis-common-protos
-    #   grpcio-status
-    #   proto-plus
 pyasn1==0.6.1 \
     --hash=sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629 \
     --hash=sha256:6f580d2bdd84365380830acf45550f2511469f673cb4a5ae3857a3170128b034
-    # via
-    #   -c reqs/constraints.txt
-    #   pyasn1-modules
-    #   rsa
 pyasn1-modules==0.4.0 \
     --hash=sha256:831dbcea1b177b28c9baddf4c6d1013c24c3accd14a1873fffaa6a2e905f17b6 \
     --hash=sha256:be04f15b66c206eed667e0bb5ab27e2b1855ea54a842e5037738099e8ca4ae0b
-    # via
-    #   -c reqs/constraints.txt
-    #   google-auth
 requests==2.32.3 \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
-    # via
-    #   -c reqs/constraints.txt
-    #   google-api-core
 rsa==4.9 \
     --hash=sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7 \
     --hash=sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21
-    # via
-    #   -c reqs/constraints.txt
-    #   google-auth
 urllib3==2.2.3 \
     --hash=sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac \
     --hash=sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9
-    # via
-    #   -c reqs/constraints.txt
-    #   requests
