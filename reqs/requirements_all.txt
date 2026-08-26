@@ -978,7 +978,7 @@ pyexcel-text==0.2.7.1
     # via processor-xlsx
 pyexcel-xlsx==0.6.0
     # via processor-xlsx
-pygments==2.18.0
+pygments==2.20.0
     # via
     #   apache-airflow
     #   rich
