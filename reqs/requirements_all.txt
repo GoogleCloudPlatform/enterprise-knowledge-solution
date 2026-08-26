@@ -1138,7 +1138,7 @@ sqlparse==0.5.2
     # via
     #   apache-airflow-providers-common-sql
     #   google-cloud-spanner
-streamlit==1.40.1
+streamlit==1.54.0
     # via
     #   processor-web-ui
     #   streamlit-aggrid
