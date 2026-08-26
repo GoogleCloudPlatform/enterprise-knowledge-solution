@@ -603,7 +603,7 @@ h11==0.14.0
     # via httpcore
 httpcore==1.0.7
     # via httpx
-httplib2==0.22.0
+httplib2==0.32.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
