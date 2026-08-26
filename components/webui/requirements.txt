@@ -340,9 +340,9 @@ google-auth-httplib2==0.2.0 \
     # via
     #   -c reqs/constraints.txt
     #   google-api-python-client
-google-cloud-aiplatform==1.73.0 \
-    --hash=sha256:687d4d6dd26439db42d38b835ea0da7ebb75c20ca8e17666669536b253637e74 \
-    --hash=sha256:6f9aebc1cb2277048093f17214c5f4ec9129fa347b8b22d784f780b12b8865a9
+google-cloud-aiplatform==1.133.0 \
+    --hash=sha256:3a6540711956dd178daaab3c2c05db476e46d94ac25912b8cf4f59b00b058ae0 \
+    --hash=sha256:dfc81228e987ca10d1c32c7204e2131b3c8d6b7c8e0b4e23bf7c56816bc4c566
     # via
     #   -c reqs/constraints.txt
     #   processor-web-ui (components/webui/pyproject.toml)
