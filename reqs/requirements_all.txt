@@ -982,7 +982,7 @@ pygments==2.18.0
     # via
     #   apache-airflow
     #   rich
-pyjwt==2.10.0
+pyjwt==2.13.0
     # via
     #   apache-airflow
     #   firebase-admin
