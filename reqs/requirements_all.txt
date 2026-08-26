@@ -209,7 +209,7 @@ faker==33.0.0
     # via
     #   processor-msg
     #   processor-xlsx
-filelock==3.16.1
+filelock==3.20.3
     # via virtualenv
 firebase-admin==6.6.0
     # via processor-web-ui
