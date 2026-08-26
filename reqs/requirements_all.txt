@@ -1014,7 +1014,7 @@ python-dateutil==2.9.0.post0
     #   time-machine
 python-decouple==3.8
     # via streamlit-aggrid
-python-dotenv==1.0.1
+python-dotenv==1.2.2
     # via
     #   -r reqs/requirements_bootstrap.in
     #   pydantic-settings
