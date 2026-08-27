@@ -70,7 +70,7 @@ apache-airflow-providers-ftp==3.11.1
     # via apache-airflow
 apache-airflow-providers-google==10.26.0
     # via -r reqs/../components/dpu-workflow/requirements.in
-apache-airflow-providers-http==4.13.3
+apache-airflow-providers-http==6.0.0
     # via apache-airflow
 apache-airflow-providers-imap==3.7.0
     # via apache-airflow
