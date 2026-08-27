@@ -991,7 +991,7 @@ pyjwt==2.10.0
     #   gcloud-aio-auth
 pylint==3.3.1
     # via -r reqs/requirements_dev.in
-pyopenssl==24.2.1
+pyopenssl==26.0.0
     # via apache-airflow-providers-google
 pyparsing==3.2.0
     # via
