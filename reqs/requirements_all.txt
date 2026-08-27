@@ -64,7 +64,7 @@ apache-airflow-providers-common-sql==1.20.0
     #   apache-airflow
     #   apache-airflow-providers-google
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-fab==1.5.1
+apache-airflow-providers-fab==3.6.4
     # via apache-airflow
 apache-airflow-providers-ftp==3.11.1
     # via apache-airflow
