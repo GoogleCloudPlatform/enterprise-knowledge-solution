@@ -1173,7 +1173,7 @@ tomlkit==0.13.2
     # via pylint
 toolz==1.0.0
     # via altair
-tornado==6.4.2
+tornado==6.5.8
     # via streamlit
 types-protobuf==5.28.3.20241030
     # via -r reqs/requirements_dev.in
