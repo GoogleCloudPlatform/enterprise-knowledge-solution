@@ -68,7 +68,7 @@ apache-airflow-providers-fab==1.5.1
     # via apache-airflow
 apache-airflow-providers-ftp==3.11.1
     # via apache-airflow
-apache-airflow-providers-google==10.26.0
+apache-airflow-providers-google==22.2.1
     # via -r reqs/../components/dpu-workflow/requirements.in
 apache-airflow-providers-http==4.13.3
     # via apache-airflow
