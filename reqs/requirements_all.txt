@@ -713,7 +713,7 @@ methodtools==0.4.7
     # via apache-airflow
 more-itertools==10.5.0
     # via apache-airflow-providers-common-sql
-msgpack==1.1.0
+msgpack==1.2.1
     # via cachecontrol
 msoffcrypto-tool==5.4.2
     # via oletools
