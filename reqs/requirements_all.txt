@@ -121,7 +121,7 @@ cachetools==5.5.0
     #   streamlit
 cattrs==24.1.2
     # via looker-sdk
-certifi==2024.8.30
+certifi==2026.10.19
     # via
     #   httpcore
     #   httpx
