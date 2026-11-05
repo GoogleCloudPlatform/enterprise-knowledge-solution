@@ -1045,7 +1045,7 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.33.0
     # via
     #   apache-airflow
     #   apache-airflow-providers-http
