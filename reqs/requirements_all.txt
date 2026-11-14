@@ -189,7 +189,7 @@ dill==0.3.9
     #   pylint
 distlib==0.3.9
     # via virtualenv
-dnspython==2.7.0
+dnspython==2.9.2
     # via email-validator
 docstring-parser==0.16
     # via google-cloud-aiplatform
