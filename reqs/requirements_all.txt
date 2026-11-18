@@ -880,7 +880,7 @@ proto-plus==1.25.0
     #   google-cloud-vision
     #   google-cloud-workflows
     #   processor-base
-protobuf==5.28.3
+protobuf==5.29.6
     # via
     #   google-ads
     #   google-analytics-admin
