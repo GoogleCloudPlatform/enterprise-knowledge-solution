@@ -59,7 +59,7 @@ apache-airflow-providers-common-compat==1.2.2
     #   apache-airflow-providers-google
 apache-airflow-providers-common-io==1.4.2
     # via apache-airflow
-apache-airflow-providers-common-sql==1.20.0
+apache-airflow-providers-common-sql==1.24.1
     # via
     #   apache-airflow
     #   apache-airflow-providers-google
