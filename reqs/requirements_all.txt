@@ -937,7 +937,7 @@ protobuf==5.28.3
     #   streamlit
 psutil==6.1.0
     # via apache-airflow
-pyarrow==18.0.0
+pyarrow==23.0.1
     # via
     #   apache-airflow-providers-google
     #   db-dtypes
